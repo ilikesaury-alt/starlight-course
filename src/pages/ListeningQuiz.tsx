@@ -2,12 +2,38 @@ import { useMemo, useState, useEffect } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import SpeakButton from '../components/SpeakButton'
 import SafeBoundary from '../components/SafeBoundary'
-import { getModule } from '../data/starlight'
+import { getModule, type QuizQuestion } from '../data/starlight'
 import { useCourseStore } from '../store/useCourseStore'
 
 interface QState {
   picked: number | null
   answered: boolean
+}
+
+// 从单元所有 lesson 的单词动态生成测验题(每课抽 1 题,最多 16 题)
+function buildQuiz(mod: ReturnType<typeof getModule>): QuizQuestion[] {
+  if (!mod) return []
+  const allWords = mod.lessons.flatMap((l) => l.words)
+  const questions: QuizQuestion[] = []
+
+  for (const lesson of mod.lessons) {
+    if (questions.length >= 16) break
+    // 每课取第一个单词作为题干,从全单元抽 3 个干扰项
+    const target = lesson.words[0]
+    if (!target) continue
+    const distractPool = allWords.filter((w) => w.en !== target.en)
+    // 简单洗牌取 3 个
+    const distract = [...distractPool].sort(() => Math.random() - 0.5).slice(0, 3)
+    const options = [target, ...distract].sort(() => Math.random() - 0.5)
+    const answer = options.findIndex((o) => o.en === target.en)
+    questions.push({
+      q: `Lesson ${lesson.id}: 哪个是 ${target.zh}？ ${target.emoji}`,
+      options: options.map((o) => o.en),
+      answer,
+      explain: `${target.en} 意思是"${target.zh}"。`,
+    })
+  }
+  return questions
 }
 
 export default function ListeningQuiz() {
@@ -21,22 +47,28 @@ export default function ListeningQuiz() {
   const addStars = useCourseStore((s) => s.addStars)
   const markQuizDone = useCourseStore((s) => s.markQuizDone)
 
-  const quiz = useMemo(() => mod?.quiz ?? [], [mod])
+  // 动态生成测验题(每课 1 题,比原来固定 5 题更全面)
+  const quiz = useMemo(() => {
+    const generated = buildQuiz(mod)
+    // 合并原有的手写题目(取前 3 题作为补充)
+    const manual = (mod?.quiz ?? []).slice(0, 3)
+    return [...generated, ...manual]
+  }, [mod])
 
   // 结果提交：统计错题加入错题本、加星
   useEffect(() => {
     if (!done || !mod) return
+    const allWords = mod.lessons.flatMap((l) => l.words)
     let correct = 0
     quiz.forEach((q, i) => {
       const st = states[i]
       if (st?.answered && st.picked === q.answer) {
         correct++
       } else if (st?.answered && st.picked !== q.answer) {
-        // 找到对应单词加入错题本
         const wrongOpt = q.options[st.picked ?? 0]
         const correctOpt = q.options[q.answer]
-        // 尝试从模块单词中匹配正确的词
-        const word = mod.words.find((w) =>
+        // 从全单元单词中匹配正确的词
+        const word = allWords.find((w) =>
           w.en === correctOpt || w.en === wrongOpt
         )
         addWrongWord({

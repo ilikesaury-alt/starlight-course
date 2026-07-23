@@ -17,14 +17,16 @@ export default function ReviewEntry() {
     )
   }
 
-  const masteredCount = mod.words.filter((w) =>
+  // 汇总所有 lesson 的单词用于统计掌握情况
+  const allWords = mod.lessons.flatMap((l) => l.words)
+  const masteredCount = allWords.filter((w) =>
     masteredWords.includes(w.en)
   ).length
-  const total = mod.words.length
+  const total = allWords.length
   const quizDone = completedQuizzes.includes(unitId)
 
   const features = [
-    { to: 'vocab', emoji: '🎴', name: '单词复习', desc: `掌握 ${masteredCount}/${total}，标记生熟` },
+    { to: 'vocab', emoji: '🎴', name: '单词复习', desc: `${mod.lessons.length} 课 · 掌握 ${masteredCount}/${total}` },
     { to: 'quiz', emoji: '🎯', name: '听力测验', desc: `${mod.quiz.length} 道题${quizDone ? ' · 已完成 ✅' : ''}` },
   ]
 
