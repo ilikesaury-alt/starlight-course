@@ -70,6 +70,19 @@ export default function PreviewEntry() {
           <p className="tip-text">{preview.tip}</p>
         </section>
 
+        <h2 className="section-title">📚 本单元 8 课内容</h2>
+        <div className="feature-grid">
+          {mod.lessons.map((lesson) => (
+            <div key={lesson.id} className="feature-card">
+              <div className="feature-emoji">📖</div>
+              <div className="feature-body">
+                <div className="feature-name">Lesson {lesson.id} · {lesson.title} · {lesson.titleZh}</div>
+                <div className="feature-desc">{lesson.words.length} 词 · {lesson.sentences.length} 句</div>
+              </div>
+            </div>
+          ))}
+        </div>
+
         <h2 className="section-title">预习内容</h2>
         <div className="feature-grid">
           {features.map((f) => (

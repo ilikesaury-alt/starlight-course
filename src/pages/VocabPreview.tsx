@@ -7,6 +7,7 @@ import { getModule } from '../data/starlight'
 export default function VocabPreview() {
   const { unitId = '' } = useParams()
   const mod = getModule(unitId)
+  const [lessonIdx, setLessonIdx] = useState(0)
   const [idx, setIdx] = useState(0)
   const [showZh, setShowZh] = useState(true)
 
@@ -19,10 +20,17 @@ export default function VocabPreview() {
     )
   }
 
-  const words = mod.words
+  const lessons = mod.lessons ?? []
+  const lesson = lessons[lessonIdx]
+  const words = lesson?.words ?? []
   const w = words[idx]
   const prev = () => { setIdx((i) => (i - 1 + words.length) % words.length) }
   const next = () => { setIdx((i) => (i + 1) % words.length) }
+
+  const selectLesson = (i: number) => {
+    setLessonIdx(i)
+    setIdx(0)
+  }
 
   return (
     <div className="page vocab-preview">
@@ -35,6 +43,30 @@ export default function VocabPreview() {
       </div>
 
       <SafeBoundary label="单词卡">
+        <div
+          className="lesson-tabs"
+          style={{ display: 'flex', gap: 8, overflowX: 'auto', padding: '4px 0 12px', WebkitOverflowScrolling: 'touch' }}
+        >
+          {lessons.map((l, i) => (
+            <button
+              key={l.id}
+              type="button"
+              className={i === lessonIdx ? 'btn' : 'btn btn-soft'}
+              onClick={() => selectLesson(i)}
+              style={{ flexShrink: 0, whiteSpace: 'nowrap', padding: '8px 14px', fontSize: 14 }}
+            >
+              L{l.id}
+            </button>
+          ))}
+        </div>
+
+        {lesson && (
+          <div className="lesson-title" style={{ marginBottom: 12 }}>
+            <strong>Lesson {lesson.id}: {lesson.title}</strong>
+            {lesson.titleZh && <span style={{ color: 'var(--ink-soft)', fontWeight: 400 }}> · {lesson.titleZh}</span>}
+          </div>
+        )}
+
         <div className="flashcard" style={{ '--mc': mod.color } as React.CSSProperties}>
           <div className="fc-emoji">{w.emoji}</div>
           <div className="fc-word-row">

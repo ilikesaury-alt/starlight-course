@@ -30,6 +30,15 @@ export interface ModulePreview {
   tip: string
 }
 
+// 一节课的内容:每个单元有 8 课,每课有独立的单词和句型
+export interface Lesson {
+  id: number
+  title: string
+  titleZh: string
+  words: Word[]
+  sentences: Sentence[]
+}
+
 export interface Module {
   id: number
   slug: string
@@ -38,10 +47,16 @@ export interface Module {
   emoji: string
   color: string
   preview: ModulePreview
+  // 按 lesson 细分的学习内容(8 课)
+  lessons: Lesson[]
+  // 聚合字段:汇总所有 lesson 的单词和句型,供旧的单元级页面使用
   words: Word[]
   sentences: Sentence[]
   quiz: QuizQuestion[]
 }
+
+// 导入按 lesson 细分的课程数据
+import { lessonsByUnit } from './lessons'
 
 export const modules: Module[] = [
   {
@@ -61,6 +76,7 @@ export const modules: Module[] = [
       keySentences: "Hello! How are you? What's your name? My name is Abby. What color is it? It's red.",
       tip: '预习时和孩子互相打招呼问名字，再找出家里的彩色物品指着说颜色，最后练习颜色混合小游戏。'
     },
+    lessons: lessonsByUnit[1],
     words: [
       { en: 'hello', zh: '你好', emoji: '👋', ipa: '/həˈləʊ/' },
       { en: 'red', zh: '红色', emoji: '🔴', ipa: '/red/' },
@@ -103,6 +119,7 @@ export const modules: Module[] = [
       keySentences: "What's this animal? This is a cow. What animal do you see? I see a panda. What does the cow say? Moo, moo.",
       tip: '预习时看动物图片或视频，模仿动物叫声和动作，并用英语说出名字，再数一数动物数量。'
     },
+    lessons: lessonsByUnit[2],
     words: [
       { en: 'dog', zh: '狗', emoji: '🐶', ipa: '/dɒɡ/' },
       { en: 'cat', zh: '猫', emoji: '🐱', ipa: '/kæt/' },
@@ -146,6 +163,7 @@ export const modules: Module[] = [
       keySentences: "What's this? This is milk. Do you like vegetables? Yes, I do. What do you want? I want popcorn.",
       tip: '预习时打开冰箱，让孩子用英语说出水果蔬菜和饮料的名字，并练习表达喜欢和不喜欢。'
     },
+    lessons: lessonsByUnit[3],
     words: [
       { en: 'apple', zh: '苹果', emoji: '🍎', ipa: '/ˈæpl/' },
       { en: 'banana', zh: '香蕉', emoji: '🍌', ipa: '/bəˈnɑːnə/' },
@@ -189,6 +207,7 @@ export const modules: Module[] = [
       keySentences: "Which toy do you want? I want a car. Here you are. Thank you. Can you play the piano? Yes, I can.",
       tip: '预习时拿出孩子的玩具和乐器图片，边玩边说英语，并练习礼貌用语和角色扮演。'
     },
+    lessons: lessonsByUnit[4],
     words: [
       { en: 'doll', zh: '洋娃娃', emoji: '🪆', ipa: '/dɒl/' },
       { en: 'car', zh: '小汽车', emoji: '🚗', ipa: '/kɑː/' },
@@ -232,6 +251,7 @@ export const modules: Module[] = [
       keySentences: "It's big. Is it good? Yes, it is. No, it isn't. I'm happy.",
       tip: '预习时和孩子玩"反义词"游戏：你说 big，孩子说 small；用家里的物品练习 It\'s big / small。'
     },
+    lessons: lessonsByUnit[5],
     words: [
       { en: 'big', zh: '大的', emoji: '🐘', ipa: '/bɪɡ/' },
       { en: 'small', zh: '小的', emoji: '🐜', ipa: '/smɔːl/' },
@@ -275,6 +295,7 @@ export const modules: Module[] = [
       keySentences: 'Touch your nose. I have two eyes. What can you do? I can run.',
       tip: '预习时和孩子玩"Simon Says"游戏：用英语下指令摸身体部位，边做边说。'
     },
+    lessons: lessonsByUnit[6],
     words: [
       { en: 'eyes', zh: '眼睛', emoji: '👀', ipa: '/aɪz/' },
       { en: 'nose', zh: '鼻子', emoji: '👃', ipa: '/nəʊz/' },
@@ -318,6 +339,7 @@ export const modules: Module[] = [
       keySentences: 'There is a bed. Is there a sofa? This is my bedroom.',
       tip: '预习时带孩子在家走一圈，用英语说出每个房间和里面家具的名字。'
     },
+    lessons: lessonsByUnit[7],
     words: [
       { en: 'bedroom', zh: '卧室', emoji: '🛏️', ipa: '/ˈbedruːm/' },
       { en: 'living room', zh: '客厅', emoji: '🛋️', ipa: '/ˈlɪvɪŋ ruːm/' },
@@ -361,6 +383,7 @@ export const modules: Module[] = [
       keySentences: "Do you like fruit? Yes, I do. What would you like? I'd like rice.",
       tip: '预习时和孩子一起去超市，把食物按水果、蔬菜、海鲜、肉类分类说英语。'
     },
+    lessons: lessonsByUnit[8],
     words: [
       { en: 'fruit', zh: '水果', emoji: '🍎', ipa: '/fruːt/' },
       { en: 'vegetables', zh: '蔬菜', emoji: '🥕', ipa: '/ˈvedʒtəblz/' },
@@ -404,6 +427,7 @@ export const modules: Module[] = [
       keySentences: 'It is a towel. I like bread for breakfast. This is a swing. It\'s time to go to bed.',
       tip: '家长可以带孩子一起做早晨起床、刷牙洗脸的动作，边做边说英语，让孩子在真实情境中学习日常用语。'
     },
+    lessons: lessonsByUnit[9],
     words: [
       { en: 'towel', zh: '毛巾', emoji: '🧖', ipa: '/ˈtaʊəl/' },
       { en: 'toothbrush', zh: '牙刷', emoji: '🪥', ipa: '/ˈtuːθbrʌʃ/' },
@@ -446,6 +470,7 @@ export const modules: Module[] = [
       keySentences: 'I need some balloons. He is my friend. Here is a gift for you. It\'s time to clean up.',
       tip: '家长可以在孩子生日或家人朋友生日时，和孩子一起准备派对，用英语说出气球、彩带等物品，让学习更有趣。'
     },
+    lessons: lessonsByUnit[10],
     words: [
       { en: 'balloon', zh: '气球', emoji: '🎈', ipa: '/bəˈluːn/' },
       { en: 'ribbon', zh: '彩带', emoji: '🎀', ipa: '/ˈrɪbən/' },
@@ -489,6 +514,7 @@ export const modules: Module[] = [
       keySentences: 'Where do you want to go? I want to go to the zoo. I see a shark in the water. I like playing basketball.',
       tip: '家长可以周末带孩子去动物园或公园玩，看到动物或景物时引导孩子用 I see... 的句型描述，让英语学习融入生活。'
     },
+    lessons: lessonsByUnit[11],
     words: [
       { en: 'zoo', zh: '动物园', emoji: '🦁', ipa: '/zuː/' },
       { en: 'beach', zh: '海滩', emoji: '🏖️', ipa: '/biːtʃ/' },
@@ -531,6 +557,7 @@ export const modules: Module[] = [
       keySentences: 'How do you go to school? I go to school by bus. The red says stop. Turn left! This is a police car.',
       tip: '家长接送孩子上学路上，可以和孩子一起用英语说出看到的交通工具和交通标志，练习 How do you go...? 句型，让出行变成英语课堂。'
     },
+    lessons: lessonsByUnit[12],
     words: [
       { en: 'school', zh: '学校', emoji: '🏫', ipa: '/skuːl/' },
       { en: 'hospital', zh: '医院', emoji: '🏥', ipa: '/ˈhɑːspɪtl/' },

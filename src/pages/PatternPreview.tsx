@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import SpeakButton from '../components/SpeakButton'
 import SafeBoundary from '../components/SafeBoundary'
@@ -6,6 +7,7 @@ import { getModule } from '../data/starlight'
 export default function PatternPreview() {
   const { unitId = '' } = useParams()
   const mod = getModule(unitId)
+  const [lessonIdx, setLessonIdx] = useState(0)
 
   if (!mod) {
     return (
@@ -15,6 +17,10 @@ export default function PatternPreview() {
       </div>
     )
   }
+
+  const lessons = mod.lessons
+  const lesson = lessons[lessonIdx]
+  const sentences = lesson ? lesson.sentences : []
 
   return (
     <div className="page pattern-preview">
@@ -29,8 +35,49 @@ export default function PatternPreview() {
       <SafeBoundary label="句型">
         <p className="lead">点击 🔊 听整句，再跟读。括号里的内容可以替换练习。</p>
 
+        <div
+          className="lesson-tabs"
+          style={{
+            display: 'flex',
+            gap: 8,
+            overflowX: 'auto',
+            padding: '4px 2px 10px',
+            WebkitOverflowScrolling: 'touch',
+          }}
+        >
+          {lessons.map((l, i) => {
+            const active = i === lessonIdx
+            return (
+              <button
+                key={l.id}
+                type="button"
+                onClick={() => setLessonIdx(i)}
+                style={{
+                  flex: '0 0 auto',
+                  padding: '8px 14px',
+                  borderRadius: 999,
+                  border: `1px solid ${active ? mod.color : 'var(--line)'}`,
+                  background: active ? mod.color : 'var(--card)',
+                  color: active ? '#fff' : 'var(--brand)',
+                  fontSize: 13,
+                  fontWeight: 600,
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                L{l.id} · {l.title}
+              </button>
+            )
+          })}
+        </div>
+
+        {lesson && (
+          <div style={{ fontSize: 15, fontWeight: 700, margin: '4px 2px 0' }}>
+            Lesson {lesson.id}: {lesson.title} · {lesson.titleZh}
+          </div>
+        )}
+
         <div className="sent-list">
-          {mod.sentences.map((s, i) => (
+          {sentences.map((s, i) => (
             <div key={i} className="sent-card">
               <div className="sent-en-row">
                 <span className="sent-en">{s.en}</span>
@@ -49,7 +96,7 @@ export default function PatternPreview() {
             家长和孩子轮流读句子，一方读问句，一方读答句。例如：
           </p>
           <div className="role-demo">
-            {mod.sentences.slice(0, 2).map((s, i) => (
+            {sentences.slice(0, 2).map((s, i) => (
               <div key={i}>
                 <b>{i === 0 ? '家长' : '孩子'}：</b>{s.en} <SpeakButton text={s.en} />
               </div>
