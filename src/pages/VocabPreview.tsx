@@ -67,59 +67,67 @@ export default function VocabPreview() {
           </div>
         )}
 
-        <div className="flashcard" style={{ '--mc': mod.color } as React.CSSProperties}>
-          <div className="fc-emoji">{w.emoji}</div>
-          <div className="fc-word-row">
-            <span className="fc-word">{w.en}</span>
-            <SpeakButton text={w.en} label={w.en} />
-            <SpeakButton text={w.en} label={`${w.en} 慢速`} slow />
+        {words.length === 0 ? (
+          <div className="empty">
+            <p>这一课还没有单词内容。</p>
           </div>
-          {w.ipa && <div className="fc-ipa">{w.ipa}</div>}
-          {showZh ? (
-            <div className="fc-zh" onClick={() => setShowZh(false)} title="点击隐藏中文">
-              {w.zh}
+        ) : (
+          <>
+            <div className="flashcard" style={{ '--mc': mod.color } as React.CSSProperties}>
+              <div className="fc-emoji">{w.emoji}</div>
+              <div className="fc-word-row">
+                <span className="fc-word">{w.en}</span>
+                <SpeakButton text={w.en} label={w.en} />
+                <SpeakButton text={w.en} label={`${w.en} 慢速`} slow />
+              </div>
+              {w.ipa && <div className="fc-ipa">{w.ipa}</div>}
+              {showZh ? (
+                <div className="fc-zh" onClick={() => setShowZh(false)} title="点击隐藏中文">
+                  {w.zh}
+                </div>
+              ) : (
+                <button type="button" className="fc-reveal" onClick={() => setShowZh(true)}>
+                  👀 显示中文
+                </button>
+              )}
             </div>
-          ) : (
-            <button type="button" className="fc-reveal" onClick={() => setShowZh(true)}>
-              👀 显示中文
-            </button>
-          )}
-        </div>
 
-        <div className="fc-progress">
-          {idx + 1} / {words.length}
-        </div>
-        <div className="fc-dots">
-          {words.map((_, i) => (
-            <button
-              key={i}
-              type="button"
-              className={'fc-dot' + (i === idx ? ' on' : '')}
-              onClick={() => setIdx(i)}
-              aria-label={`第 ${i + 1} 个单词`}
-            />
-          ))}
-        </div>
+            <div className="fc-progress">
+              {idx + 1} / {words.length}
+            </div>
+            <div className="fc-dots">
+              {words.map((_, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  className={'fc-dot' + (i === idx ? ' on' : '')}
+                  onClick={() => setIdx(i)}
+                  aria-label={`第 ${i + 1} 个单词`}
+                />
+              ))}
+            </div>
 
-        <div className="fc-controls">
-          <button type="button" className="btn btn-soft" onClick={prev}>← 上一个</button>
-          <button type="button" className="btn" onClick={next}>下一个 →</button>
-        </div>
+            <div className="fc-controls">
+              <button type="button" className="btn btn-soft" onClick={prev}>← 上一个</button>
+              <button type="button" className="btn" onClick={next}>下一个 →</button>
+            </div>
 
-        <div className="word-list-mini">
-          {words.map((ww, i) => (
-            <button
-              key={ww.en}
-              type="button"
-              className={'word-chip' + (i === idx ? ' on' : '')}
-              onClick={() => setIdx(i)}
-            >
-              <span>{ww.emoji}</span>
-              <span>{ww.en}</span>
-              <SpeakButton text={ww.en} label={ww.en} />
-            </button>
-          ))}
-        </div>
+            <div className="word-list-mini">
+              {words.map((ww, i) => (
+                <button
+                  key={ww.en}
+                  type="button"
+                  className={'word-chip' + (i === idx ? ' on' : '')}
+                  onClick={() => setIdx(i)}
+                >
+                  <span>{ww.emoji}</span>
+                  <span>{ww.en}</span>
+                  <SpeakButton text={ww.en} label={ww.en} />
+                </button>
+              ))}
+            </div>
+          </>
+        )}
       </SafeBoundary>
 
       <div className="page-nav">

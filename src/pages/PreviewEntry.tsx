@@ -21,9 +21,11 @@ export default function PreviewEntry() {
 
   const { preview } = mod
 
+  const totalWords = mod.lessons.reduce((s, l) => s + l.words.length, 0)
+  const totalSentences = mod.lessons.reduce((s, l) => s + l.sentences.length, 0)
   const features = [
-    { to: 'vocab', emoji: '🎴', name: '单词卡 + 发音', desc: `${mod.words.length} 个单词，点读跟读` },
-    { to: 'patterns', emoji: '💬', name: '句型练习', desc: `${mod.sentences.length} 个核心句型` },
+    { to: 'vocab', emoji: '🎴', name: '单词卡 + 发音', desc: `${mod.lessons.length} 课 · 共 ${totalWords} 个单词` },
+    { to: 'patterns', emoji: '💬', name: '句型练习', desc: `${mod.lessons.length} 课 · 共 ${totalSentences} 个句型` },
     { to: 'dialogue', emoji: '🎭', name: '对话练习', desc: '问答对话，角色扮演' },
   ]
 
