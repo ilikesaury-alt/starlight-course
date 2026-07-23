@@ -130,7 +130,7 @@ export default function ListeningQuiz() {
   }
 
   return (
-    <div className="page listening-quiz">
+    <div className="page listening-quiz" style={mcStyle}>
       <div className="page-head" style={mcStyle}>
         <span className="page-emoji">{mod.emoji}</span>
         <div>
@@ -150,7 +150,7 @@ export default function ListeningQuiz() {
               答对 <b>{correct}</b> / {quiz.length} 题
             </div>
             <div className="result-bar">
-              <div className="result-bar-fill" style={{ width: `${(correct / quiz.length) * 100}%`, background: mod.color }} />
+              <div className="result-bar-fill" style={{ width: `${(correct / quiz.length) * 100}%` }} />
             </div>
             <p className="result-tip">
               {correct === quiz.length
@@ -170,7 +170,7 @@ export default function ListeningQuiz() {
               <span>已答对 {correct} 题</span>
             </div>
             <div className="quiz-progress">
-              <div className="quiz-progress-fill" style={{ width: `${(idx / quiz.length) * 100}%`, background: mod.color }} />
+              <div className="quiz-progress-fill" style={{ width: `${(idx / quiz.length) * 100}%` }} />
             </div>
 
             <div className="quiz-q" style={mcStyle}>
@@ -192,7 +192,9 @@ export default function ListeningQuiz() {
                     <div key={i} className={cls} onClick={() => !isAnswered && pick(i)}>
                       <span className="quiz-opt-letter">{String.fromCharCode(65 + i)}</span>
                       <span>{opt}</span>
-                      <SpeakButton text={opt} label={opt} />
+                      <span onClick={(e) => e.stopPropagation()}>
+                        <SpeakButton text={opt} label={opt} />
+                      </span>
                     </div>
                   )
                 })}

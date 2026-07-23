@@ -117,16 +117,17 @@ export default function VocabPreview() {
 
             <div className="word-list-mini" style={mcStyle}>
               {words.map((ww, i) => (
-                <button
+                <div
                   key={ww.en}
-                  type="button"
                   className={'word-chip' + (i === idx ? ' on' : '')}
                   onClick={() => setIdx(i)}
                 >
                   <span>{ww.emoji}</span>
                   <span>{ww.en}</span>
-                  <SpeakButton text={ww.en} label={ww.en} />
-                </button>
+                  <span onClick={(e) => e.stopPropagation()}>
+                    <SpeakButton text={ww.en} label={ww.en} />
+                  </span>
+                </div>
               ))}
             </div>
           </>
