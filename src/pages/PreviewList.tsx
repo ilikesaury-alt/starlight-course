@@ -7,7 +7,7 @@ export default function PreviewList() {
 
   return (
     <div className="page preview-list">
-      <div className="page-head" style={{ '--mc': '#5bc0eb' } as React.CSSProperties}>
+      <div className="page-head" style={{ '--mc': '#5bc0eb', '--mc-soft': '#e0f2fe' } as React.CSSProperties}>
         <span className="page-emoji">📖</span>
         <div>
           <div className="page-kicker">课前预习</div>
@@ -25,7 +25,7 @@ export default function PreviewList() {
               key={m.id}
               to={`/preview/${m.slug}`}
               className="module-card"
-              style={{ '--mc': m.color } as React.CSSProperties}
+              style={{ '--mc': m.color, '--mc-soft': m.colorSoft } as React.CSSProperties}
             >
               <div className="module-emoji">{m.emoji}</div>
               <div className="module-info">
@@ -35,6 +35,7 @@ export default function PreviewList() {
                 <div className="module-title">{m.title}</div>
                 <div className="module-zh">{m.titleZh}</div>
               </div>
+              <div className="module-lessons-badge">{m.lessons.length} 课</div>
               <div className="module-arrow">›</div>
             </Link>
           )

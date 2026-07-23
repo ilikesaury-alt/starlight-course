@@ -1,6 +1,14 @@
 import { Link, NavLink } from 'react-router-dom'
 
 export default function Layout({ children }: { children: React.ReactNode }) {
+  const navItems = [
+    { to: '/', label: '首页', emoji: '🏠', end: true },
+    { to: '/preview', label: '预习', emoji: '📖', end: false },
+    { to: '/review', label: '复习', emoji: '🔁', end: false },
+    { to: '/alphabet', label: '字母', emoji: '🔤', end: false },
+    { to: '/progress', label: '进度', emoji: '📊', end: false },
+  ]
+
   return (
     <div className="app">
       <header className="app-header">
@@ -11,31 +19,23 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <span className="brand-sub">预备级 · 一对一菲教</span>
       </header>
 
-      <nav className="topnav">
-        <NavLink to="/" end className={({ isActive }) => 'nav-item' + (isActive ? ' active' : '')}>
-          首页
-        </NavLink>
-        <NavLink to="/preview" className={({ isActive }) => 'nav-item' + (isActive ? ' active' : '')}>
-          预习
-        </NavLink>
-        <NavLink to="/review" className={({ isActive }) => 'nav-item' + (isActive ? ' active' : '')}>
-          复习
-        </NavLink>
-        <NavLink to="/alphabet" className={({ isActive }) => 'nav-item' + (isActive ? ' active' : '')}>
-          字母
-        </NavLink>
-        <NavLink to="/progress" className={({ isActive }) => 'nav-item' + (isActive ? ' active' : '')}>
-          进度
-        </NavLink>
+      <main className="app-main">{children}</main>
+
+      <nav className="bottom-nav">
+        {navItems.map((item) => (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            end={item.end}
+            className={({ isActive }) =>
+              'bottom-nav-item' + (isActive ? ' active' : '')
+            }
+          >
+            <span className="nav-emoji">{item.emoji}</span>
+            <span>{item.label}</span>
+          </NavLink>
+        ))}
       </nav>
-
-      <main className="app-main">
-        {children}
-      </main>
-
-      <footer className="app-footer">
-        <span>Starlight Starter · 预习 + 复习 · 点击 🔊 听发音</span>
-      </footer>
     </div>
   )
 }

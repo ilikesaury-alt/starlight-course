@@ -11,7 +11,7 @@ export default function WrongBook() {
 
   return (
     <div className="page wrong-book">
-      <div className="page-head" style={{ '--mc': '#ff6b6b' } as React.CSSProperties}>
+      <div className="page-head" style={{ '--mc': '#ff6b6b', '--mc-soft': '#fee2e2' } as React.CSSProperties}>
         <span className="page-emoji">📋</span>
         <div>
           <div className="page-kicker">错题本</div>

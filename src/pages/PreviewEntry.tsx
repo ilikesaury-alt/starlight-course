@@ -20,18 +20,19 @@ export default function PreviewEntry() {
   }
 
   const { preview } = mod
+  const mcStyle = { '--mc': mod.color, '--mc-soft': mod.colorSoft } as React.CSSProperties
 
   const totalWords = mod.lessons.reduce((s, l) => s + l.words.length, 0)
   const totalSentences = mod.lessons.reduce((s, l) => s + l.sentences.length, 0)
   const features = [
-    { to: 'vocab', emoji: '🎴', name: '单词卡 + 发音', desc: `${mod.lessons.length} 课 · 共 ${totalWords} 个单词` },
-    { to: 'patterns', emoji: '💬', name: '句型练习', desc: `${mod.lessons.length} 课 · 共 ${totalSentences} 个句型` },
-    { to: 'dialogue', emoji: '🎭', name: '对话练习', desc: '问答对话，角色扮演' },
+    { step: 1, to: 'vocab', emoji: '🎴', name: '单词卡 + 发音', desc: `${mod.lessons.length} 课 · 共 ${totalWords} 个单词` },
+    { step: 2, to: 'patterns', emoji: '💬', name: '句型练习', desc: `${mod.lessons.length} 课 · 共 ${totalSentences} 个句型` },
+    { step: 3, to: 'dialogue', emoji: '🎭', name: '对话练习', desc: '问答对话，角色扮演' },
   ]
 
   return (
     <div className="page preview-entry">
-      <div className="page-head" style={{ '--mc': mod.color } as React.CSSProperties}>
+      <div className="page-head" style={mcStyle}>
         <span className="page-emoji">{mod.emoji}</span>
         <div>
           <div className="page-kicker">Module {mod.id} · 预习导学</div>
@@ -40,6 +41,8 @@ export default function PreviewEntry() {
       </div>
 
       <SafeBoundary label="预习">
+        <div className="mode-badge mode-preview">📖 预习模式 · 上课前先学一遍</div>
+
         <section className="card">
           <h2 className="card-title">🎯 本课学习目标</h2>
           <ul className="goal-list">
@@ -72,23 +75,25 @@ export default function PreviewEntry() {
           <p className="tip-text">{preview.tip}</p>
         </section>
 
-        <h2 className="section-title">📚 本单元 8 课内容</h2>
-        <div className="feature-grid">
+        <h2 className="section-title">📚 本单元 {mod.lessons.length} 课内容</h2>
+        <div className="lessons-overview" style={mcStyle}>
           {mod.lessons.map((lesson) => (
-            <div key={lesson.id} className="feature-card">
-              <div className="feature-emoji">📖</div>
-              <div className="feature-body">
-                <div className="feature-name">Lesson {lesson.id} · {lesson.title} · {lesson.titleZh}</div>
-                <div className="feature-desc">{lesson.words.length} 词 · {lesson.sentences.length} 句</div>
+            <div key={lesson.id} className="lesson-row">
+              <div className="lesson-row-num">{lesson.id}</div>
+              <div className="lesson-row-title">
+                {lesson.title}
+                <span className="lr-zh">{lesson.titleZh}</span>
               </div>
+              <div className="lesson-row-count">{lesson.words.length} 词 · {lesson.sentences.length} 句</div>
             </div>
           ))}
         </div>
 
-        <h2 className="section-title">预习内容</h2>
+        <h2 className="section-title">🚀 开始预习</h2>
         <div className="feature-grid">
           {features.map((f) => (
-            <Link key={f.to} to={`/preview/${unitId}/${f.to}`} className="feature-card">
+            <Link key={f.to} to={`/preview/${unitId}/${f.to}`} className="feature-card" style={mcStyle}>
+              <div className="feature-step">{f.step}</div>
               <div className="feature-emoji">{f.emoji}</div>
               <div className="feature-body">
                 <div className="feature-name">{f.name}</div>
@@ -103,7 +108,7 @@ export default function PreviewEntry() {
           <div style={{ textAlign: 'center', marginTop: '22px' }}>
             <button
               type="button"
-              className="btn"
+              className="btn btn-sun btn-lg"
               onClick={() => markPreviewDone(unitId)}
             >
               ✅ 标记预习完成

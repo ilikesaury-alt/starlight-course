@@ -6,7 +6,7 @@ import { alphabet } from '../data/starlight'
 export default function AlphabetPage() {
   return (
     <div className="page alphabet">
-      <div className="page-head" style={{ '--mc': '#7c3aed' } as React.CSSProperties}>
+      <div className="page-head" style={{ '--mc': '#7c3aed', '--mc-soft': '#ede9fe' } as React.CSSProperties}>
         <span className="page-emoji">🔤</span>
         <div>
           <div className="page-kicker">My Alphabet</div>

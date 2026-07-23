@@ -24,10 +24,11 @@ export default function DialoguePreview() {
     side: i % 2 === 0 ? ('left' as const) : ('right' as const),
     speaker: i % 2 === 0 ? '👤 A' : '👨‍👩‍👧 B',
   }))
+  const mcStyle = { '--mc': mod.color, '--mc-soft': mod.colorSoft } as React.CSSProperties
 
   return (
     <div className="page dialogue-preview">
-      <div className="page-head" style={{ '--mc': mod.color } as React.CSSProperties}>
+      <div className="page-head" style={mcStyle}>
         <span className="page-emoji">{mod.emoji}</span>
         <div>
           <div className="page-kicker">Module {mod.id} · 对话练习</div>
@@ -36,9 +37,10 @@ export default function DialoguePreview() {
       </div>
 
       <SafeBoundary label="对话">
+        <div className="mode-badge mode-preview">📖 预习模式</div>
         <p className="lead">跟着对话练习说英语，点击 🔊 听一句读一句，和家长轮流扮演 A 和 B。</p>
 
-        <div className="dialogue-list" style={{ display: 'flex', flexDirection: 'column' }}>
+        <div className="dialogue-list" style={{ ...mcStyle, display: 'flex', flexDirection: 'column' }}>
           {lines.map((l, i) => (
             <div key={i} style={{ display: 'flex', flexDirection: 'column' }}>
               <div className={`dialogue-bubble ${l.side}`}>

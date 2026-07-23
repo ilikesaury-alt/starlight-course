@@ -5,38 +5,61 @@ export default function Home() {
   return (
     <div className="home">
       <section className="hero">
+        <div className="hero-emoji">🌟</div>
         <h1 className="hero-title">课前预习 · 课后复习</h1>
         <p className="hero-sub">
           配合一对一菲教课，每单元都有 <b>预习导学</b>、<b>单词卡</b>、<b>句型对话</b>、<b>互动测验</b>。
         </p>
         <div className="hero-tags">
-          <span>👂 听</span>
-          <span>👄 说</span>
-          <span>📖 读</span>
-          <span>✍️ 写</span>
+          <span className="hero-tag">👂 听</span>
+          <span className="hero-tag">👄 说</span>
+          <span className="hero-tag">📖 读</span>
+          <span className="hero-tag">✍️ 写</span>
         </div>
       </section>
 
-      <h2 className="section-title">快速入口</h2>
+      <h2 className="section-title">⚡ 快速入口</h2>
       <div className="quick-row">
-        <Link to="/preview" className="quick-card">📖 课前预习</Link>
-        <Link to="/review" className="quick-card">🔁 课后复习</Link>
+        <Link to="/preview" className="quick-card quick-preview">
+          <span className="qc-emoji">📖</span>
+          <span>课前预习</span>
+          <span className="qc-sub">先学一遍，上课更自信</span>
+        </Link>
+        <Link to="/review" className="quick-card quick-review">
+          <span className="qc-emoji">🔁</span>
+          <span>课后复习</span>
+          <span className="qc-sub">巩固单词，听力测验</span>
+        </Link>
       </div>
-      <div className="quick-row" style={{ marginTop: '12px' }}>
-        <Link to="/alphabet" className="quick-card">🔤 字母表</Link>
-        <Link to="/progress" className="quick-card">📊 学习进度</Link>
+      <div className="quick-row" style={{ marginTop: '10px' }}>
+        <Link to="/alphabet" className="quick-card quick-alphabet">
+          <span className="qc-emoji">🔤</span>
+          <span>字母表</span>
+          <span className="qc-sub">26 个字母发音</span>
+        </Link>
+        <Link to="/progress" className="quick-card quick-progress">
+          <span className="qc-emoji">📊</span>
+          <span>学习进度</span>
+          <span className="qc-sub">星星与成就</span>
+        </Link>
       </div>
 
-      <h2 className="section-title">12 个学习模块</h2>
+      <h2 className="section-title">📚 12 个学习模块</h2>
       <div className="module-grid">
         {modules.map((m) => (
-          <Link key={m.id} to={`/preview/${m.slug}`} className="module-card" style={{ '--mc': m.color } as React.CSSProperties}>
+          <Link
+            key={m.id}
+            to={`/preview/${m.slug}`}
+            className="module-card"
+            style={{ '--mc': m.color, '--mc-soft': m.colorSoft } as React.CSSProperties}
+          >
             <div className="module-emoji">{m.emoji}</div>
             <div className="module-info">
               <div className="module-num">Module {m.id}</div>
               <div className="module-title">{m.title}</div>
               <div className="module-zh">{m.titleZh}</div>
             </div>
+            <div className="module-lessons-badge">{m.lessons.length} 课</div>
             <div className="module-arrow">›</div>
           </Link>
         ))}

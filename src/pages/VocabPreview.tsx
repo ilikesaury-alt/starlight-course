@@ -20,6 +20,7 @@ export default function VocabPreview() {
     )
   }
 
+  const mcStyle = { '--mc': mod.color, '--mc-soft': mod.colorSoft } as React.CSSProperties
   const lessons = mod.lessons ?? []
   const lesson = lessons[lessonIdx]
   const words = lesson?.words ?? []
@@ -34,7 +35,7 @@ export default function VocabPreview() {
 
   return (
     <div className="page vocab-preview">
-      <div className="page-head" style={{ '--mc': mod.color } as React.CSSProperties}>
+      <div className="page-head" style={mcStyle}>
         <span className="page-emoji">{mod.emoji}</span>
         <div>
           <div className="page-kicker">Module {mod.id} · 单词卡</div>
@@ -43,27 +44,29 @@ export default function VocabPreview() {
       </div>
 
       <SafeBoundary label="单词卡">
-        <div
-          className="lesson-tabs"
-          style={{ display: 'flex', gap: 8, overflowX: 'auto', padding: '4px 0 12px', WebkitOverflowScrolling: 'touch' }}
-        >
+        <div className="mode-badge mode-preview">📖 预习模式</div>
+
+        <div className="lesson-switcher" style={mcStyle}>
           {lessons.map((l, i) => (
             <button
               key={l.id}
               type="button"
-              className={i === lessonIdx ? 'btn' : 'btn btn-soft'}
+              className={'lesson-pill' + (i === lessonIdx ? ' active' : '')}
               onClick={() => selectLesson(i)}
-              style={{ flexShrink: 0, whiteSpace: 'nowrap', padding: '8px 14px', fontSize: 14 }}
             >
-              L{l.id}
+              <span className="lp-num">L{l.id}</span>
+              <span>{l.title}</span>
             </button>
           ))}
         </div>
 
         {lesson && (
-          <div className="lesson-title" style={{ marginBottom: 12 }}>
-            <strong>Lesson {lesson.id}: {lesson.title}</strong>
-            {lesson.titleZh && <span style={{ color: 'var(--ink-soft)', fontWeight: 400 }}> · {lesson.titleZh}</span>}
+          <div className="lesson-current" style={mcStyle}>
+            <div className="lesson-current-num">{lesson.id}</div>
+            <div>
+              <span className="lesson-current-title">Lesson {lesson.id}: {lesson.title}</span>
+              {lesson.titleZh && <span className="lesson-current-zh">{lesson.titleZh}</span>}
+            </div>
           </div>
         )}
 
@@ -73,7 +76,7 @@ export default function VocabPreview() {
           </div>
         ) : (
           <>
-            <div className="flashcard" style={{ '--mc': mod.color } as React.CSSProperties}>
+            <div className="flashcard" style={mcStyle}>
               <div className="fc-emoji">{w.emoji}</div>
               <div className="fc-word-row">
                 <span className="fc-word">{w.en}</span>
@@ -112,7 +115,7 @@ export default function VocabPreview() {
               <button type="button" className="btn" onClick={next}>下一个 →</button>
             </div>
 
-            <div className="word-list-mini">
+            <div className="word-list-mini" style={mcStyle}>
               {words.map((ww, i) => (
                 <button
                   key={ww.en}

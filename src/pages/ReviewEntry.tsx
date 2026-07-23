@@ -17,6 +17,8 @@ export default function ReviewEntry() {
     )
   }
 
+  const mcStyle = { '--mc': mod.color, '--mc-soft': mod.colorSoft } as React.CSSProperties
+
   // 汇总所有 lesson 的单词用于统计掌握情况
   const allWords = mod.lessons.flatMap((l) => l.words)
   const masteredCount = allWords.filter((w) =>
@@ -26,13 +28,13 @@ export default function ReviewEntry() {
   const quizDone = completedQuizzes.includes(unitId)
 
   const features = [
-    { to: 'vocab', emoji: '🎴', name: '单词复习', desc: `${mod.lessons.length} 课 · 掌握 ${masteredCount}/${total}` },
-    { to: 'quiz', emoji: '🎯', name: '听力测验', desc: `${mod.quiz.length} 道题${quizDone ? ' · 已完成 ✅' : ''}` },
+    { step: 1, to: 'vocab', emoji: '🎴', name: '单词复习', desc: `${mod.lessons.length} 课 · 掌握 ${masteredCount}/${total}` },
+    { step: 2, to: 'quiz', emoji: '🎯', name: '听力测验', desc: `共 ${mod.quiz.length} 道题${quizDone ? ' · 已完成 ✅' : ''}` },
   ]
 
   return (
     <div className="page review-entry">
-      <div className="unit-banner" style={{ '--mc': mod.color } as React.CSSProperties}>
+      <div className="unit-banner" style={mcStyle}>
         <span className="unit-emoji">{mod.emoji}</span>
         <div>
           <div className="unit-num">Module {mod.id} · 复习</div>
@@ -41,9 +43,12 @@ export default function ReviewEntry() {
         </div>
       </div>
 
+      <div className="mode-badge mode-review">🔁 复习模式 · 课后巩固一遍</div>
+
       <div className="feature-grid">
         {features.map((f) => (
-          <Link key={f.to} to={`/review/${unitId}/${f.to}`} className="feature-card">
+          <Link key={f.to} to={`/review/${unitId}/${f.to}`} className="feature-card" style={mcStyle}>
+            <div className="feature-step">{f.step}</div>
             <div className="feature-emoji">{f.emoji}</div>
             <div className="feature-body">
               <div className="feature-name">{f.name}</div>

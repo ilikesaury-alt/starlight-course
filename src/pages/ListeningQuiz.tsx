@@ -11,10 +11,10 @@ interface QState {
 }
 
 // 从单元所有 lesson 的单词动态生成测验题(每课抽 1 题,最多 16 题)
-function buildQuiz(mod: ReturnType<typeof getModule>): QuizQuestion[] {
+function buildQuiz(mod: ReturnType<typeof getModule>): (QuizQuestion & { lessonId?: number })[] {
   if (!mod) return []
   const allWords = mod.lessons.flatMap((l) => l.words)
-  const questions: QuizQuestion[] = []
+  const questions: (QuizQuestion & { lessonId?: number })[] = []
 
   for (const lesson of mod.lessons) {
     if (questions.length >= 16) break
@@ -27,10 +27,11 @@ function buildQuiz(mod: ReturnType<typeof getModule>): QuizQuestion[] {
     const options = [target, ...distract].sort(() => Math.random() - 0.5)
     const answer = options.findIndex((o) => o.en === target.en)
     questions.push({
-      q: `Lesson ${lesson.id}: 哪个是 ${target.zh}？ ${target.emoji}`,
+      q: `哪个是 ${target.zh}？ ${target.emoji}`,
       options: options.map((o) => o.en),
       answer,
       explain: `${target.en} 意思是"${target.zh}"。`,
+      lessonId: lesson.id,
     })
   }
   return questions
@@ -48,7 +49,7 @@ export default function ListeningQuiz() {
   const markQuizDone = useCourseStore((s) => s.markQuizDone)
 
   // 动态生成测验题(每课 1 题,比原来固定 5 题更全面)
-  const quiz = useMemo(() => {
+  const quiz = useMemo<(QuizQuestion & { lessonId?: number })[]>(() => {
     const generated = buildQuiz(mod)
     // 合并原有的手写题目(取前 3 题作为补充)
     const manual = (mod?.quiz ?? []).slice(0, 3)
@@ -93,6 +94,8 @@ export default function ListeningQuiz() {
     )
   }
 
+  const mcStyle = { '--mc': mod.color, '--mc-soft': mod.colorSoft } as React.CSSProperties
+
   let correct = 0
   states.forEach((s, i) => {
     if (s.answered && s.picked === quiz[i].answer) correct++
@@ -101,6 +104,7 @@ export default function ListeningQuiz() {
   const cur = quiz[idx]
   const curState = states[idx]
   const isAnswered = !!curState?.answered
+  const isCorrect = isAnswered && curState.picked === cur.answer
 
   const pick = (i: number) => {
     if (isAnswered) return
@@ -127,7 +131,7 @@ export default function ListeningQuiz() {
 
   return (
     <div className="page listening-quiz">
-      <div className="page-head" style={{ '--mc': mod.color } as React.CSSProperties}>
+      <div className="page-head" style={mcStyle}>
         <span className="page-emoji">{mod.emoji}</span>
         <div>
           <div className="page-kicker">Module {mod.id} · 听力测验</div>
@@ -136,6 +140,8 @@ export default function ListeningQuiz() {
       </div>
 
       <SafeBoundary label="测验">
+        <div className="mode-badge mode-review">🎯 复习测验 · 听一听选一选</div>
+
         {done ? (
           <div className="result-card">
             <div className="result-emoji">{correct === quiz.length ? '🌟' : correct >= quiz.length / 2 ? '👍' : '💪'}</div>
@@ -152,7 +158,7 @@ export default function ListeningQuiz() {
                 : '错题已加入错题本，再练练一定行！'}
             </p>
             <div className="result-actions">
-              <button type="button" className="btn" onClick={restart}>🔁 再做一次</button>
+              <button type="button" className="btn btn-sun" onClick={restart}>🔁 再做一次</button>
               <Link to="/wrong" className="btn btn-soft">📋 看错题本</Link>
               <Link to={`/review/${unitId}`} className="btn btn-soft">复习菜单</Link>
             </div>
@@ -167,7 +173,10 @@ export default function ListeningQuiz() {
               <div className="quiz-progress-fill" style={{ width: `${(idx / quiz.length) * 100}%`, background: mod.color }} />
             </div>
 
-            <div className="quiz-q">
+            <div className="quiz-q" style={mcStyle}>
+              {cur.lessonId && (
+                <div className="quiz-lesson-tag">📖 Lesson {cur.lessonId}</div>
+              )}
               <div className="quiz-q-row">
                 <span>{cur.q}</span>
                 <SpeakButton text={cur.q.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, '').trim()} label="题目" />
@@ -191,9 +200,9 @@ export default function ListeningQuiz() {
             </div>
 
             {isAnswered && (
-              <div className={'explain ' + (curState.picked === cur.answer ? 'ok' : 'no')}>
+              <div className={'explain ' + (isCorrect ? 'ok' : 'no')}>
                 <div className="explain-head">
-                  {curState.picked === cur.answer ? '✅ 答对了！' : `❌ 正确答案是 ${String.fromCharCode(65 + cur.answer)}`}
+                  {isCorrect ? '✅ 答对了！' : `❌ 正确答案是 ${String.fromCharCode(65 + cur.answer)}`}
                 </div>
                 <div className="explain-body">{cur.explain}</div>
               </div>
@@ -201,7 +210,7 @@ export default function ListeningQuiz() {
 
             <div className="quiz-controls">
               {isAnswered && (
-                <button type="button" className="btn" onClick={goNext}>
+                <button type="button" className={'btn ' + (isCorrect ? 'btn-sun' : '')} onClick={goNext}>
                   {idx + 1 >= quiz.length ? '查看结果 🏁' : '下一题 →'}
                 </button>
               )}

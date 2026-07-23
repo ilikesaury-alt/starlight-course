@@ -10,7 +10,9 @@ export default function Progress() {
   const completedQuizzes = useCourseStore((s) => s.completedQuizzes)
   const resetAll = useCourseStore((s) => s.resetAll)
 
-  const totalWords = modules.reduce((sum, m) => sum + m.words.length, 0)
+  const totalWords = modules.reduce((sum, m) =>
+    sum + m.lessons.reduce((s, l) => s + l.words.length, 0), 0
+  )
 
   const stats = [
     { emoji: '⭐', value: totalStars, label: '累计星星' },
@@ -21,7 +23,7 @@ export default function Progress() {
 
   return (
     <div className="page progress">
-      <div className="page-head" style={{ '--mc': '#fbbf24' } as React.CSSProperties}>
+      <div className="page-head" style={{ '--mc': '#fbbf24', '--mc-soft': '#fef3c7' } as React.CSSProperties}>
         <span className="page-emoji">📊</span>
         <div>
           <div className="page-kicker">学习进度</div>
@@ -44,7 +46,8 @@ export default function Progress() {
         {modules.map((m) => {
           const previewDone = completedPreviews.includes(m.slug)
           const quizDone = completedQuizzes.includes(m.slug)
-          const masteredCount = m.words.filter((w) =>
+          const allWords = m.lessons.flatMap((l) => l.words)
+          const masteredCount = allWords.filter((w) =>
             masteredWords.includes(w.en)
           ).length
           return (
@@ -55,7 +58,7 @@ export default function Progress() {
                 {previewDone ? '✅ 预习' : '⬜ 预习'} · {quizDone ? '✅ 测验' : '⬜ 测验'}
               </div>
               <div className="unit-progress-status">
-                单词 {masteredCount}/{m.words.length}
+                单词 {masteredCount}/{allWords.length}
               </div>
             </div>
           )

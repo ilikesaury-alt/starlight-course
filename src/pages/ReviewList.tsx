@@ -7,7 +7,7 @@ export default function ReviewList() {
 
   return (
     <div className="page review-list">
-      <div className="page-head" style={{ '--mc': '#9be564' } as React.CSSProperties}>
+      <div className="page-head" style={{ '--mc': '#9be564', '--mc-soft': '#ecfccb' } as React.CSSProperties}>
         <span className="page-emoji">🔁</span>
         <div>
           <div className="page-kicker">课后复习</div>
@@ -19,16 +19,17 @@ export default function ReviewList() {
 
       <div className="module-grid">
         {modules.map((m) => {
-          const masteredCount = m.words.filter((w) =>
+          const allWords = m.lessons.flatMap((l) => l.words)
+          const masteredCount = allWords.filter((w) =>
             masteredWords.includes(w.en)
           ).length
-          const total = m.words.length
+          const total = allWords.length
           return (
             <Link
               key={m.id}
               to={`/review/${m.slug}`}
               className="module-card"
-              style={{ '--mc': m.color } as React.CSSProperties}
+              style={{ '--mc': m.color, '--mc-soft': m.colorSoft } as React.CSSProperties}
             >
               <div className="module-emoji">{m.emoji}</div>
               <div className="module-info">
@@ -38,6 +39,7 @@ export default function ReviewList() {
                   {m.titleZh} · 掌握 {masteredCount}/{total}
                 </div>
               </div>
+              <div className="module-lessons-badge">{m.lessons.length} 课</div>
               <div className="module-arrow">›</div>
             </Link>
           )

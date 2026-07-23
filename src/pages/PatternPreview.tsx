@@ -18,13 +18,14 @@ export default function PatternPreview() {
     )
   }
 
+  const mcStyle = { '--mc': mod.color, '--mc-soft': mod.colorSoft } as React.CSSProperties
   const lessons = mod.lessons
   const lesson = lessons[lessonIdx]
   const sentences = lesson ? lesson.sentences : []
 
   return (
     <div className="page pattern-preview">
-      <div className="page-head" style={{ '--mc': mod.color } as React.CSSProperties}>
+      <div className="page-head" style={mcStyle}>
         <span className="page-emoji">{mod.emoji}</span>
         <div>
           <div className="page-kicker">Module {mod.id} · 句型练习</div>
@@ -33,52 +34,36 @@ export default function PatternPreview() {
       </div>
 
       <SafeBoundary label="句型">
+        <div className="mode-badge mode-preview">📖 预习模式</div>
         <p className="lead">点击 🔊 听整句，再跟读。括号里的内容可以替换练习。</p>
 
-        <div
-          className="lesson-tabs"
-          style={{
-            display: 'flex',
-            gap: 8,
-            overflowX: 'auto',
-            padding: '4px 2px 10px',
-            WebkitOverflowScrolling: 'touch',
-          }}
-        >
-          {lessons.map((l, i) => {
-            const active = i === lessonIdx
-            return (
-              <button
-                key={l.id}
-                type="button"
-                onClick={() => setLessonIdx(i)}
-                style={{
-                  flex: '0 0 auto',
-                  padding: '8px 14px',
-                  borderRadius: 999,
-                  border: `1px solid ${active ? mod.color : 'var(--line)'}`,
-                  background: active ? mod.color : 'var(--card)',
-                  color: active ? '#fff' : 'var(--brand)',
-                  fontSize: 13,
-                  fontWeight: 600,
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                L{l.id} · {l.title}
-              </button>
-            )
-          })}
+        <div className="lesson-switcher" style={mcStyle}>
+          {lessons.map((l, i) => (
+            <button
+              key={l.id}
+              type="button"
+              className={'lesson-pill' + (i === lessonIdx ? ' active' : '')}
+              onClick={() => setLessonIdx(i)}
+            >
+              <span className="lp-num">L{l.id}</span>
+              <span>{l.title}</span>
+            </button>
+          ))}
         </div>
 
         {lesson && (
-          <div style={{ fontSize: 15, fontWeight: 700, margin: '4px 2px 0' }}>
-            Lesson {lesson.id}: {lesson.title} · {lesson.titleZh}
+          <div className="lesson-current" style={mcStyle}>
+            <div className="lesson-current-num">{lesson.id}</div>
+            <div>
+              <span className="lesson-current-title">Lesson {lesson.id}: {lesson.title}</span>
+              {lesson.titleZh && <span className="lesson-current-zh">{lesson.titleZh}</span>}
+            </div>
           </div>
         )}
 
         <div className="sent-list">
           {sentences.map((s, i) => (
-            <div key={i} className="sent-card">
+            <div key={i} className="sent-card" style={mcStyle}>
               <div className="sent-en-row">
                 <span className="sent-en">{s.en}</span>
                 <SpeakButton text={s.en} label={s.en} />
@@ -95,7 +80,7 @@ export default function PatternPreview() {
           <p className="role-text">
             家长和孩子轮流读句子，一方读问句，一方读答句。例如：
           </p>
-          <div className="role-demo">
+          <div className="role-demo" style={mcStyle}>
             {sentences.slice(0, 2).map((s, i) => (
               <div key={i}>
                 <b>{i === 0 ? '家长' : '孩子'}：</b>{s.en} <SpeakButton text={s.en} />

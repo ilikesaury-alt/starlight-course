@@ -46,6 +46,7 @@ export interface Module {
   titleZh: string
   emoji: string
   color: string
+  colorSoft: string
   preview: ModulePreview
   // 按 lesson 细分的学习内容(8 课)
   lessons: Lesson[]
@@ -66,6 +67,7 @@ export const modules: Module[] = [
     titleZh: '打招呼与颜色',
     emoji: '👋',
     color: '#ef4444',
+    colorSoft: '#fee2e2',
     preview: {
       goals: [
         '学会用 Hello 打招呼、用 I\'m... / My name is... 自我介绍',
@@ -109,6 +111,7 @@ export const modules: Module[] = [
     titleZh: '动物',
     emoji: '🐾',
     color: '#3b82f6',
+    colorSoft: '#dbeafe',
     preview: {
       goals: [
         '认识宠物、农场、动物园、海洋和昆虫动物',
@@ -153,6 +156,7 @@ export const modules: Module[] = [
     titleZh: '食物与饮料',
     emoji: '🍎',
     color: '#10b981',
+    colorSoft: '#d1fae5',
     preview: {
       goals: [
         '认识水果、蔬菜、饮料和零食的名称',
@@ -197,6 +201,7 @@ export const modules: Module[] = [
     titleZh: '玩具与乐趣',
     emoji: '🧸',
     color: '#f59e0b',
+    colorSoft: '#fef3c7',
     preview: {
       goals: [
         '认识玩具、乐器和角色名称',
@@ -241,6 +246,7 @@ export const modules: Module[] = [
     titleZh: '反义词',
     emoji: '⚖️',
     color: '#ec4899',
+    colorSoft: '#fce7f3',
     preview: {
       goals: [
         '学会 8 个常用反义词（big / small 等）',
@@ -285,6 +291,7 @@ export const modules: Module[] = [
     titleZh: '我的身体',
     emoji: '🕺',
     color: '#84cc16',
+    colorSoft: '#ecfccb',
     preview: {
       goals: [
         '认识五官和身体部位的英文名称',
@@ -329,6 +336,7 @@ export const modules: Module[] = [
     titleZh: '我的家',
     emoji: '🏠',
     color: '#06b6d4',
+    colorSoft: '#cffafe',
     preview: {
       goals: [
         '认识家中房间的英文名称',
@@ -373,6 +381,7 @@ export const modules: Module[] = [
     titleZh: '食物分类',
     emoji: '🍽️',
     color: '#8b5cf6',
+    colorSoft: '#ede9fe',
     preview: {
       goals: [
         '认识食物的五大分类（水果、蔬菜、海鲜、零食、肉类）',
@@ -417,6 +426,7 @@ export const modules: Module[] = [
     titleZh: '我的一天',
     emoji: '⏰',
     color: '#f97316',
+    colorSoft: '#ffedd5',
     preview: {
       goals: [
         '学会用英语说出日常洗漱用品和早餐食物',
@@ -460,6 +470,7 @@ export const modules: Module[] = [
     titleZh: '生日派对',
     emoji: '🎂',
     color: '#e11d48',
+    colorSoft: '#ffe4e6',
     preview: {
       goals: [
         '学会生日派对相关的物品和动作词汇',
@@ -504,6 +515,7 @@ export const modules: Module[] = [
     titleZh: '去哪里玩',
     emoji: '🏖️',
     color: '#0ea5e9',
+    colorSoft: '#e0f2fe',
     preview: {
       goals: [
         '学会动物园、海滩、游乐场等场所名称',
@@ -547,6 +559,7 @@ export const modules: Module[] = [
     titleZh: '交通出行',
     emoji: '🚦',
     color: '#6366f1',
+    colorSoft: '#e0e7ff',
     preview: {
       goals: [
         '学会常见的建筑和交通工具名称',
