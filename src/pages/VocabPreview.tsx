@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import SpeakButton from '../components/SpeakButton'
 import SafeBoundary from '../components/SafeBoundary'
 import { getModule } from '../data/starlight'
+import { useCourseStore } from '../store/useCourseStore'
 
 export default function VocabPreview() {
   const { unitId = '' } = useParams()
@@ -10,6 +11,14 @@ export default function VocabPreview() {
   const [lessonIdx, setLessonIdx] = useState(0)
   const [idx, setIdx] = useState(0)
   const [showZh, setShowZh] = useState(true)
+  const seedCards = useCourseStore((s) => s.seedCards)
+
+  // 进入某课时,把该课的单词批量种子化进 SRS 调度池
+  const currentWords = mod?.lessons?.[lessonIdx]?.words ?? []
+  useEffect(() => {
+    if (currentWords.length === 0) return
+    seedCards(currentWords.map((w) => w.en))
+  }, [lessonIdx, mod?.slug]) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!mod) {
     return (

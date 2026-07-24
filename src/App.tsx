@@ -15,6 +15,7 @@ import ListeningQuiz from '@/pages/ListeningQuiz'
 import WrongBook from '@/pages/WrongBook'
 import Progress from '@/pages/Progress'
 import AlphabetPage from '@/pages/AlphabetPage'
+import SmartReview from '@/pages/SmartReview'
 
 // 内层:在 Router 内部使用 useLocation,路由变化时重置 SafeBoundary
 function AppRoutes() {
@@ -32,6 +33,7 @@ function AppRoutes() {
         <Route path="/review/:unitId" element={<ReviewEntry />} />
         <Route path="/review/:unitId/vocab" element={<VocabReview />} />
         <Route path="/review/:unitId/quiz" element={<ListeningQuiz />} />
+        <Route path="/smart" element={<SmartReview />} />
         <Route path="/wrong" element={<WrongBook />} />
         <Route path="/progress" element={<Progress />} />
         <Route path="/alphabet" element={<AlphabetPage />} />

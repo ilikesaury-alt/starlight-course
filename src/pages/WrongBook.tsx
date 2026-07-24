@@ -8,6 +8,7 @@ export default function WrongBook() {
   const removeWrongWord = useCourseStore((s) => s.removeWrongWord)
   const markMastered = useCourseStore((s) => s.markMastered)
   const clearWrongWords = useCourseStore((s) => s.clearWrongWords)
+  const recordReview = useCourseStore((s) => s.recordReview)
 
   return (
     <div className="page wrong-book">
@@ -50,6 +51,8 @@ export default function WrongBook() {
                       onClick={() => {
                         markMastered(w.en)
                         removeWrongWord(w.en)
+                        // 同步 SRS:答对一次,升盒,避免今日复习反复考
+                        recordReview(w.en, true)
                       }}
                     >
                       ✅ 掌握

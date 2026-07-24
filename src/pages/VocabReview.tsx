@@ -15,6 +15,8 @@ export default function VocabReview() {
   const masteredWords = useCourseStore((s) => s.masteredWords)
   const markMastered = useCourseStore((s) => s.markMastered)
   const unmarkMastered = useCourseStore((s) => s.unmarkMastered)
+  const recordReview = useCourseStore((s) => s.recordReview)
+  const seedCard = useCourseStore((s) => s.seedCard)
 
   if (!mod) {
     return (
@@ -106,7 +108,10 @@ export default function VocabReview() {
                   <button
                     type="button"
                     className="mastery-btn unfamiliar"
-                    onClick={() => unmarkMastered(w.en)}
+                    onClick={() => {
+                      unmarkMastered(w.en)
+                      recordReview(w.en, false)
+                    }}
                   >
                     😅 标记为生疏
                   </button>
@@ -114,7 +119,11 @@ export default function VocabReview() {
                   <button
                     type="button"
                     className="mastery-btn mastered"
-                    onClick={() => markMastered(w.en)}
+                    onClick={() => {
+                      markMastered(w.en)
+                      seedCard(w.en)
+                      recordReview(w.en, true)
+                    }}
                   >
                     ✅ 已掌握
                   </button>

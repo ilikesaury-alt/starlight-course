@@ -4,6 +4,7 @@ import { useCourseStore } from '../store/useCourseStore'
 
 export default function ReviewList() {
   const masteredWords = useCourseStore((s) => s.masteredWords)
+  const todayDue = useCourseStore((s) => s.getTodayDueCount())
 
   return (
     <div className="page review-list">
@@ -16,6 +17,22 @@ export default function ReviewList() {
       </div>
 
       <p className="lead">上完课后复习单词、做听力测验，错题自动进入错题本。</p>
+
+      <Link to="/smart" className={'smart-list-entry' + (todayDue > 0 ? ' has-due' : '')}>
+        <span className="smart-list-emoji">🎯</span>
+        <div className="smart-list-body">
+          <div className="smart-list-title">智能复习 · 科学编排</div>
+          <div className="smart-list-sub">
+            {todayDue > 0
+              ? <>今天有 <b>{todayDue}</b> 个单词到期，跟着节奏练就好</>
+              : <>暂无到期单词，去看看新内容吧</>}
+          </div>
+        </div>
+        {todayDue > 0 && <span className="smart-list-badge">{todayDue}</span>}
+        <span className="smart-list-arrow">›</span>
+      </Link>
+
+      <h2 className="section-title">📚 按单元自主复习</h2>
 
       <div className="module-grid">
         {modules.map((m) => {

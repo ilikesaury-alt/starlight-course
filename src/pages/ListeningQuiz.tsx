@@ -47,6 +47,9 @@ export default function ListeningQuiz() {
   const addWrongWord = useCourseStore((s) => s.addWrongWord)
   const addStars = useCourseStore((s) => s.addStars)
   const markQuizDone = useCourseStore((s) => s.markQuizDone)
+  const recordReview = useCourseStore((s) => s.recordReview)
+  const seedCard = useCourseStore((s) => s.seedCard)
+  const removeWrongWord = useCourseStore((s) => s.removeWrongWord)
 
   // 动态生成测验题(每课 1 题,比原来固定 5 题更全面)
   const quiz = useMemo<(QuizQuestion & { lessonId?: number })[]>(() => {
@@ -106,6 +109,9 @@ export default function ListeningQuiz() {
   const isAnswered = !!curState?.answered
   const isCorrect = isAnswered && curState.picked === cur.answer
 
+  // 全单元单词索引,供 pick 同步 SRS 使用(此处 mod 必定存在)
+  const allWords = mod.lessons.flatMap((l) => l.words)
+
   const pick = (i: number) => {
     if (isAnswered) return
     setStates((prev) => {
@@ -113,6 +119,28 @@ export default function ListeningQuiz() {
       copy[idx] = { picked: i, answered: true }
       return copy
     })
+    // 同步 SRS:正确选项对应的单词答对升盒,错误则归零
+    const correctOpt = cur.options[cur.answer]
+    const pickedOpt = cur.options[i]
+    // 优先用正确选项的词
+    const targetWord = allWords.find((w) => w.en === correctOpt)
+    if (targetWord) {
+      seedCard(targetWord.en)
+      const correct = i === cur.answer
+      recordReview(targetWord.en, correct)
+      if (correct) {
+        // 答对了顺便从错题本移除
+        removeWrongWord(targetWord.en)
+      }
+    }
+    // 如果选了错的选项,把那个词也记一次错(它会进错题本由下面的 useEffect 处理)
+    if (i !== cur.answer) {
+      const wrongWord = allWords.find((w) => w.en === pickedOpt)
+      if (wrongWord && wrongWord.en !== targetWord?.en) {
+        seedCard(wrongWord.en)
+        recordReview(wrongWord.en, false)
+      }
+    }
   }
 
   const goNext = () => {
