@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import SpeakButton from '../components/SpeakButton'
 import SafeBoundary from '../components/SafeBoundary'
 import { getModule } from '../data/starlight'
 import { useCourseStore } from '../store/useCourseStore'
+import { speakText } from '../utils/speak'
 
 export default function VocabReview() {
   const { unitId = '' } = useParams()
@@ -17,6 +18,13 @@ export default function VocabReview() {
   const unmarkMastered = useCourseStore((s) => s.unmarkMastered)
   const recordReview = useCourseStore((s) => s.recordReview)
   const seedCard = useCourseStore((s) => s.seedCard)
+
+  // 切换单词（上一个/下一个/点圆点/切换课/进入单词卡）时自动发音
+  useEffect(() => {
+    const wd = getModule(unitId)?.lessons?.[lessonIdx]?.words?.[idx]
+    if (wd) speakText(wd.en)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [unitId, lessonIdx, idx])
 
   if (!mod) {
     return (
