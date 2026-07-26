@@ -534,6 +534,13 @@ input, textarea { font-family: inherit; }
   flex-wrap: wrap;
 }
 
+.lesson-nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
 .empty { text-align: center; padding: 50px 20px; }
 .empty p { color: var(--ink-soft); margin-bottom: 16px; }
 

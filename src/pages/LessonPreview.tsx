@@ -86,11 +86,14 @@ export default function LessonPreview() {
 
       <div className="page-nav">
         <Link to={`/preview/${unitId}`} className="back-link">← 课程列表</Link>
-        {nextLesson ? (
-          <Link to={`/preview/${unitId}/${nextLesson.id}`} className="btn">下一课 →</Link>
-        ) : prevLesson ? (
-          <Link to={`/preview/${unitId}/${prevLesson.id}`} className="btn">上一课 →</Link>
-        ) : null}
+        <div className="lesson-nav">
+          {prevLesson && (
+            <Link to={`/preview/${unitId}/${prevLesson.id}`} className="btn btn-soft">← 上一课</Link>
+          )}
+          {nextLesson && (
+            <Link to={`/preview/${unitId}/${nextLesson.id}`} className="btn">下一课 →</Link>
+          )}
+        </div>
       </div>
     </div>
   )
