@@ -4,6 +4,7 @@ import SpeakButton from '../components/SpeakButton'
 import SafeBoundary from '../components/SafeBoundary'
 import { getModule } from '../data/starlight'
 import { useCourseStore } from '../store/useCourseStore'
+import { speakText } from '../utils/speak'
 
 type Tab = 'vocab' | 'patterns' | 'dialogue'
 
@@ -103,6 +104,13 @@ function VocabTab({ words, mcStyle }: { words: { en: string; zh: string; emoji: 
   const [idx, setIdx] = useState(0)
   const [showZh, setShowZh] = useState(true)
   useEffect(() => { setIdx(0); setShowZh(true) }, [words])
+
+  // 切换单词（上一个/下一个/点圆点/进入单词卡）时自动发音
+  useEffect(() => {
+    const cur = words[idx]
+    if (cur) speakText(cur.en)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [idx, words])
 
   if (words.length === 0) {
     return <div className="empty"><p>这一课还没有单词内容。</p></div>
