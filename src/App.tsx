@@ -1,13 +1,11 @@
-import { HashRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
+import { HashRouter as Router, Routes, Route, useLocation, Navigate, useParams } from 'react-router-dom'
 import { useEffect } from 'react'
 import Layout from '@/components/Layout'
 import SafeBoundary from '@/components/SafeBoundary'
 import Home from '@/pages/Home'
 import PreviewList from '@/pages/PreviewList'
-import PreviewEntry from '@/pages/PreviewEntry'
-import VocabPreview from '@/pages/VocabPreview'
-import PatternPreview from '@/pages/PatternPreview'
-import DialoguePreview from '@/pages/DialoguePreview'
+import LessonList from '@/pages/LessonList'
+import LessonPreview from '@/pages/LessonPreview'
 import ReviewList from '@/pages/ReviewList'
 import ReviewEntry from '@/pages/ReviewEntry'
 import VocabReview from '@/pages/VocabReview'
@@ -25,10 +23,12 @@ function AppRoutes() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/preview" element={<PreviewList />} />
-        <Route path="/preview/:unitId" element={<PreviewEntry />} />
-        <Route path="/preview/:unitId/vocab" element={<VocabPreview />} />
-        <Route path="/preview/:unitId/patterns" element={<PatternPreview />} />
-        <Route path="/preview/:unitId/dialogue" element={<DialoguePreview />} />
+        <Route path="/preview/:unitId" element={<LessonList />} />
+        <Route path="/preview/:unitId/:lessonId" element={<LessonPreview />} />
+        {/* 旧路由兜底：重定向到课程列表，兼容已存书签 */}
+        <Route path="/preview/:unitId/vocab" element={<RedirectToLessonList />} />
+        <Route path="/preview/:unitId/patterns" element={<RedirectToLessonList />} />
+        <Route path="/preview/:unitId/dialogue" element={<RedirectToLessonList />} />
         <Route path="/review" element={<ReviewList />} />
         <Route path="/review/:unitId" element={<ReviewEntry />} />
         <Route path="/review/:unitId/vocab" element={<VocabReview />} />
@@ -40,6 +40,12 @@ function AppRoutes() {
       </Routes>
     </SafeBoundary>
   )
+}
+
+// 旧预习子路径(单词/句型/对话)重定向回课程列表,避免书签白屏
+function RedirectToLessonList() {
+  const { unitId = '' } = useParams()
+  return <Navigate to={`/preview/${unitId}`} replace />
 }
 
 export default function App() {

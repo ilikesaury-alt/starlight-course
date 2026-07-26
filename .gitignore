@@ -40,3 +40,9 @@ pnpm-debug.log*
 # 教材 PDF 原件(体积大,不纳入版本控制)
 src/data/starlight0/
 src/data/starlight0_extracted.json
+
+# 本地构建缓存
+.vite/
+
+# 本地 agent 工作数据（非应用源码）
+.workbuddy/
