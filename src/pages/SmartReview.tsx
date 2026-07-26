@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import SpeakButton from '../components/SpeakButton'
 import SafeBoundary from '../components/SafeBoundary'
 import { modules } from '../data/starlight'
 import { useCourseStore } from '../store/useCourseStore'
 import { boxLabel, boxEmoji, type SrsCard } from '../data/srs'
+import { speakText } from '../utils/speak'
 
 // 建一份 en → 单词元信息的索引,供卡片渲染时取 emoji/zh/ipa
 interface WordMeta {
@@ -57,6 +58,12 @@ export default function SmartReview() {
 
   const total = queue.length
   const cur = queue[idx]
+
+  // 切换复习卡（进入/下一题/再复习一轮）时自动朗读英文单词,作为回忆提示
+  useEffect(() => {
+    if (cur) speakText(cur.en)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [idx, queue])
 
   // 重置本次会话,重新拉一次到期队列(答错的词归零后会再次出现)
   const reload = () => {
