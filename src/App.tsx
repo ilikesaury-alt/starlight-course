@@ -14,6 +14,8 @@ import WrongBook from '@/pages/WrongBook'
 import Progress from '@/pages/Progress'
 import AlphabetPage from '@/pages/AlphabetPage'
 import SmartReview from '@/pages/SmartReview'
+import RocketGirlHome from '@/pages/RocketGirlHome'
+import RocketGirlStory from '@/pages/RocketGirlStory'
 
 // 内层:在 Router 内部使用 useLocation,路由变化时重置 SafeBoundary
 function AppRoutes() {
@@ -37,6 +39,8 @@ function AppRoutes() {
         <Route path="/wrong" element={<WrongBook />} />
         <Route path="/progress" element={<Progress />} />
         <Route path="/alphabet" element={<AlphabetPage />} />
+        <Route path="/rocketgirl" element={<RocketGirlHome />} />
+        <Route path="/rocketgirl/:slug" element={<RocketGirlStory />} />
       </Routes>
     </SafeBoundary>
   )

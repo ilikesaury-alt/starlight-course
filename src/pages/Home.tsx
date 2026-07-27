@@ -36,6 +36,14 @@ export default function Home() {
       )}
 
       <h2 className="section-title">⚡ 快速入口</h2>
+      <Link to="/rocketgirl" className="rg-home-entry">
+        <span className="rg-home-emoji">🚀</span>
+        <div className="rg-home-body">
+          <div className="rg-home-title">Rocket Girl 英语闯关</div>
+          <div className="rg-home-sub">宝贝最爱的动画片主题课 · 108 个故事关卡</div>
+        </div>
+        <span className="rg-home-arrow">›</span>
+      </Link>
       <div className="quick-row">
         <Link to="/preview" className="quick-card quick-preview">
           <span className="qc-emoji">📖</span>

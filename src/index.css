@@ -1591,3 +1591,174 @@ input, textarea { font-family: inherit; }
 a.lesson-link { text-decoration: none; transition: transform 0.15s, box-shadow 0.15s; }
 a.lesson-link:active { transform: scale(0.98); }
 
+/* ============================================================
+   Rocket Girl 主题课（首页入口 + 故事列表 + 学习页）
+   ============================================================ */
+
+/* 首页进度胶囊 */
+.rg-progress-pill {
+  text-align: center;
+  background: var(--mc-soft, #ede9fe);
+  color: var(--mc, #7c3aed);
+  font-size: 15px;
+  font-weight: 700;
+  padding: 10px 14px;
+  border-radius: var(--r-pill);
+  margin: 14px 0 4px;
+}
+.rg-progress-pill b { font-size: 17px; }
+
+/* 搜索框 */
+.rg-search-wrap { margin: 10px 0 4px; }
+.rg-search {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 16px;
+  border-radius: var(--r-pill);
+  border: 2px solid var(--line-2);
+  font-size: 15px;
+  background: var(--card);
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.15s;
+}
+.rg-search:focus { border-color: var(--mc, #7c3aed); }
+
+/* 故事卡片标题（允许两行截断，避免长标题撑破） */
+.rg-card .module-info { min-width: 0; }
+.rg-title {
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.rg-empty { grid-column: 1 / -1; text-align: center; color: var(--ink-soft); padding: 24px 0; }
+
+/* 绘本馆 */
+.rg-books {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: 12px 16px;
+  margin-top: 12px;
+  box-shadow: var(--shadow-sm);
+}
+.rg-books > summary {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--mc, #7c3aed);
+  cursor: pointer;
+  list-style: none;
+  padding: 4px 0;
+}
+.rg-books > summary::-webkit-details-marker { display: none; }
+.rg-books-note {
+  font-size: 13px;
+  color: var(--ink-soft);
+  line-height: 1.6;
+  margin: 10px 0;
+  background: var(--bg-3);
+  padding: 10px 12px;
+  border-radius: var(--r-md);
+}
+.rg-books-note code {
+  font-size: 12px;
+  background: var(--line);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+.rg-books-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  max-height: 280px;
+  overflow-y: auto;
+  margin-top: 8px;
+}
+.rg-book-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--ink-soft);
+  background: var(--bg-2);
+  border-radius: var(--r-sm);
+  padding: 6px 8px;
+  overflow: hidden;
+}
+.rg-book-title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 单词卡里的例句条 */
+.rg-sentence {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 12px;
+  background: var(--mc-soft, #ede9fe);
+  border-radius: var(--r-md);
+  padding: 8px 12px;
+}
+.rg-sentence-en {
+  font-size: 14px;
+  font-style: italic;
+  color: var(--ink);
+  line-height: 1.5;
+}
+.sent-example {
+  font-style: italic;
+  color: var(--ink);
+  background: var(--bg-3);
+  padding: 8px 12px;
+  border-radius: var(--r-md);
+  margin-top: 6px;
+}
+
+@media (min-width: 520px) {
+  .rg-books-grid { grid-template-columns: 1fr 1fr 1fr; }
+}
+
+/* 首页 Rocket Girl 醒目入口卡片 */
+.rg-home-entry {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: linear-gradient(135deg, #ede9fe 0%, #fae8ff 100%);
+  border: 2px solid #a78bfa;
+  border-radius: var(--r-lg);
+  padding: 16px 18px;
+  margin: 14px 0 6px;
+  box-shadow: var(--shadow-pop);
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.15s;
+  animation: rg-home-pulse 2.4s ease-in-out infinite;
+}
+.rg-home-entry:active { transform: scale(0.98); }
+@keyframes rg-home-pulse {
+  0%, 100% { box-shadow: 0 4px 16px rgba(167, 139, 250, 0.25); }
+  50% { box-shadow: 0 8px 24px rgba(167, 139, 250, 0.45); }
+}
+.rg-home-emoji { font-size: 40px; flex-shrink: 0; }
+.rg-home-body { flex: 1; min-width: 0; }
+.rg-home-title {
+  font-size: 17px;
+  font-weight: 800;
+  color: #6d28d9;
+  margin-bottom: 2px;
+}
+.rg-home-sub {
+  font-size: 14px;
+  color: #5b21b6;
+  line-height: 1.4;
+}
+.rg-home-arrow { font-size: 26px; color: #a78bfa; font-weight: 700; flex-shrink: 0; }
+
