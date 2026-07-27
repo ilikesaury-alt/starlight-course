@@ -65,7 +65,14 @@ export function speakText(text: string, opts: SpeakOptions = {}) {
       currentAudio = audio
 
       let settled = false
-      const settle = () => {
+      const onSuccess = () => {
+        if (!settled && gen === generation) {
+          settled = true
+          if (currentAudio === audio) currentAudio = null
+          done()
+        }
+      }
+      const onFail = () => {
         if (!settled && gen === generation) {
           settled = true
           if (currentAudio === audio) currentAudio = null
@@ -73,8 +80,8 @@ export function speakText(text: string, opts: SpeakOptions = {}) {
         }
       }
 
-      audio.onended = settle
-      audio.onerror = settle
+      audio.onended = onSuccess
+      audio.onerror = onFail
 
       // 5s 超时：有道服务器挂起时降级到 speechSynthesis
       const timer = setTimeout(() => {
@@ -86,7 +93,7 @@ export function speakText(text: string, opts: SpeakOptions = {}) {
           } catch {
             /* ignore */
           }
-          settle()
+          onFail()
         }
       }, 5000)
 
@@ -95,7 +102,7 @@ export function speakText(text: string, opts: SpeakOptions = {}) {
 
       void audio.play().catch(() => {
         if (!settled) {
-          settle()
+          onFail()
         }
       })
     } catch {
