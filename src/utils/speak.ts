@@ -18,6 +18,8 @@ export interface SpeakOptions {
 
 /** 上一次播放的 Audio 引用，用于取消重叠播放 */
 let currentAudio: HTMLAudioElement | null = null
+/** 递增代次，使旧回调自动失效 */
+let generation = 0
 
 export function speakText(text: string, opts: SpeakOptions = {}) {
   if (!text?.trim()) return
@@ -51,6 +53,9 @@ export function speakText(text: string, opts: SpeakOptions = {}) {
     /* ignore */
   }
 
+  // 递增代次，旧回调检测到代次不匹配时自动跳过
+  const gen = ++generation
+
   // Level 1: 有道词典 TTS
   const youdao = (onComplete?: () => void) => {
     try {
@@ -61,7 +66,7 @@ export function speakText(text: string, opts: SpeakOptions = {}) {
 
       let settled = false
       const settle = () => {
-        if (!settled) {
+        if (!settled && gen === generation) {
           settled = true
           if (currentAudio === audio) currentAudio = null
           onComplete?.()
@@ -100,6 +105,8 @@ export function speakText(text: string, opts: SpeakOptions = {}) {
 
   // Level 2: speechSynthesis 兜底
   const nativeSpeak = () => {
+    if (gen !== generation) return
+
     const synth = window.speechSynthesis
     if (!synth || typeof synth.cancel !== 'function') {
       done()
@@ -111,8 +118,8 @@ export function speakText(text: string, opts: SpeakOptions = {}) {
       utter.lang = 'en-US'
       utter.rate = rate
       utter.pitch = 1
-      utter.onend = () => done()
-      utter.onerror = () => done()
+      utter.onend = () => { if (gen === generation) done() }
+      utter.onerror = () => { if (gen === generation) done() }
       synth.speak(utter)
     } catch {
       done()
