@@ -87,14 +87,22 @@ export default function LessonPreview() {
 
       <div className="page-nav">
         <Link to={`/preview/${unitId}`} className="back-link">← 课程列表</Link>
-        <div className="lesson-nav">
-          {prevLesson && (
-            <Link to={`/preview/${unitId}/${prevLesson.id}`} className="btn btn-soft">← 上一课</Link>
-          )}
-          {nextLesson && (
-            <Link to={`/preview/${unitId}/${nextLesson.id}`} className="btn">下一课 →</Link>
-          )}
-        </div>
+        {tab === 'dialogue' ? (
+          <div className="lesson-nav">
+            {prevLesson && (
+              <Link to={`/preview/${unitId}/${prevLesson.id}`} className="btn btn-soft">← 上一课</Link>
+            )}
+            {nextLesson && (
+              <Link to={`/preview/${unitId}/${nextLesson.id}`} className="btn">下一课 →</Link>
+            )}
+          </div>
+        ) : (
+          <div className="lesson-nav">
+            <button type="button" className="btn" onClick={() => setTab(tab === 'vocab' ? 'patterns' : 'dialogue')}>
+              {tab === 'vocab' ? '💬 句型 →' : '🎭 对话 →'}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )
