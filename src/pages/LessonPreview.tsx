@@ -18,7 +18,7 @@ export default function LessonPreview() {
 
   const lessons = mod?.lessons ?? []
   const lessonIdx = lessons.findIndex((l) => String(l.id) === lessonId)
-  const lesson = lessonIdx >= 0 ? lessons[lessonIdx] : lessons[0]
+  const lesson = lessonIdx >= 0 ? lessons[lessonIdx] : null
 
   const words = lesson?.words ?? []
   const sentences = lesson?.sentences ?? []
@@ -35,6 +35,15 @@ export default function LessonPreview() {
       <div className="empty">
         <p>没有找到这个模块。</p>
         <Link to="/preview" className="btn">返回预习列表</Link>
+      </div>
+    )
+  }
+
+  if (!lesson) {
+    return (
+      <div className="empty">
+        <p>没有找到 Lesson {lessonId}。</p>
+        <Link to={`/preview/${unitId}`} className="btn">返回课程列表</Link>
       </div>
     )
   }

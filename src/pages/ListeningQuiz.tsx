@@ -1,9 +1,14 @@
-import { useMemo, useState, useEffect } from 'react'
+import { useMemo, useState, useEffect, useRef } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import SpeakButton from '../components/SpeakButton'
 import SafeBoundary from '../components/SafeBoundary'
 import { getModule, type QuizQuestion } from '../data/starlight'
 import { useCourseStore } from '../store/useCourseStore'
+
+interface QuizItem extends QuizQuestion {
+  lessonId?: number
+  speakText?: string
+}
 
 interface QState {
   picked: number | null
@@ -11,10 +16,10 @@ interface QState {
 }
 
 // 从单元所有 lesson 的单词动态生成测验题(每课抽 1 题,最多 16 题)
-function buildQuiz(mod: ReturnType<typeof getModule>): (QuizQuestion & { lessonId?: number })[] {
+function buildQuiz(mod: ReturnType<typeof getModule>): QuizItem[] {
   if (!mod) return []
   const allWords = mod.lessons.flatMap((l) => l.words)
-  const questions: (QuizQuestion & { lessonId?: number })[] = []
+  const questions: QuizItem[] = []
 
   for (const lesson of mod.lessons) {
     if (questions.length >= 16) break
@@ -32,6 +37,7 @@ function buildQuiz(mod: ReturnType<typeof getModule>): (QuizQuestion & { lessonI
       answer,
       explain: `${target.en} 意思是"${target.zh}"。`,
       lessonId: lesson.id,
+      speakText: target.en,
     })
   }
   return questions
@@ -50,18 +56,23 @@ export default function ListeningQuiz() {
   const recordReview = useCourseStore((s) => s.recordReview)
   const seedCard = useCourseStore((s) => s.seedCard)
   const removeWrongWord = useCourseStore((s) => s.removeWrongWord)
+  const submittedRef = useRef(false)
 
   // 动态生成测验题(每课 1 题,比原来固定 5 题更全面)
-  const quiz = useMemo<(QuizQuestion & { lessonId?: number })[]>(() => {
+  const quiz = useMemo<QuizItem[]>(() => {
     const generated = buildQuiz(mod)
-    // 合并原有的手写题目(取前 3 题作为补充)
-    const manual = (mod?.quiz ?? []).slice(0, 3)
+    // 合并原有的手写题目(取前 3 题作为补充),手动题用正确选项作为发音文本
+    const manual: QuizItem[] = (mod?.quiz ?? []).slice(0, 3).map((q) => ({
+      ...q,
+      speakText: q.options[q.answer] ?? q.q,
+    }))
     return [...generated, ...manual]
   }, [mod])
 
   // 结果提交：统计错题加入错题本、加星
   useEffect(() => {
-    if (!done || !mod) return
+    if (!done || !mod || submittedRef.current) return
+    submittedRef.current = true
     const allWords = mod.lessons.flatMap((l) => l.words)
     let correct = 0
     quiz.forEach((q, i) => {
@@ -69,12 +80,9 @@ export default function ListeningQuiz() {
       if (st?.answered && st.picked === q.answer) {
         correct++
       } else if (st?.answered && st.picked !== q.answer) {
-        const wrongOpt = q.options[st.picked ?? 0]
         const correctOpt = q.options[q.answer]
         // 从全单元单词中匹配正确的词
-        const word = allWords.find((w) =>
-          w.en === correctOpt || w.en === wrongOpt
-        )
+        const word = allWords.find((w) => w.en === correctOpt)
         addWrongWord({
           en: correctOpt,
           zh: word?.zh ?? '',
@@ -155,6 +163,7 @@ export default function ListeningQuiz() {
     setIdx(0)
     setStates([])
     setDone(false)
+    submittedRef.current = false
   }
 
   return (
@@ -207,7 +216,7 @@ export default function ListeningQuiz() {
               )}
               <div className="quiz-q-row">
                 <span>{cur.q}</span>
-                <SpeakButton text={cur.q.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, '').trim()} label="题目" />
+                <SpeakButton text={cur.speakText ?? cur.q} label="听发音" />
               </div>
               <div className="quiz-opts">
                 {cur.options.map((opt, i) => {
