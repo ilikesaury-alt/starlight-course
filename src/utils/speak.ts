@@ -125,9 +125,18 @@ export function speakText(text: string, opts: SpeakOptions = {}) {
       utter.lang = 'en-US'
       utter.rate = rate
       utter.pitch = 1
-      utter.onend = () => { if (gen === generation) done() }
-      utter.onerror = () => { if (gen === generation) done() }
+      let settled = false
+      const settle = () => {
+        if (!settled && gen === generation) {
+          settled = true
+          done()
+        }
+      }
+      utter.onend = settle
+      utter.onerror = settle
       synth.speak(utter)
+      // Chrome/iOS 可能静默吞掉 speak()，800ms 内无回调则放弃
+      setTimeout(() => { if (!settled) settle() }, 800)
     } catch {
       done()
     }
