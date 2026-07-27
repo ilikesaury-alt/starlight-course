@@ -176,6 +176,7 @@ function VocabTab({ words }: { words: RGWord[] }) {
             <span onClick={(e) => e.stopPropagation()}>
               <SpeakButton text={w.sentence} label="听例句" />
             </span>
+            {w.sentenceZh && <span className="rg-sentence-zh">{w.sentenceZh}</span>}
           </div>
         )}
       </div>
@@ -222,22 +223,44 @@ function SentencesTab({ words }: { words: RGWord[] }) {
   if (withSent.length === 0) return <div className="empty"><p>这一关还没有例句。</p></div>
   return (
     <>
-      <p className="lead">点击 🔊 听例句，跟着 Rocket Girl 一起读。</p>
+      <p className="lead">点击例句里高亮的单词，可以单独听发音。</p>
       <div className="sent-list">
-        {withSent.map((s, i) => (
-          <div key={i} className="sent-card" style={mcStyle}>
-            <div className="sent-en-row">
-              <span className="sent-en">
-                <b>{s.en}</b> · {s.zh}
-              </span>
-              <SpeakButton text={s.sentence!} label="听例句" />
+        {withSent.map((s, i) => {
+          const tokens = s.sentence!.split(/\s+/).filter(Boolean)
+          return (
+            <div key={i} className="sent-card" style={mcStyle}>
+              <div className="sent-en-row">
+                <span className="sent-en">
+                  <b>{s.en}</b> · {s.zh}
+                </span>
+                <SpeakButton text={s.sentence!} label="听例句" />
+              </div>
+              <div className="sent-zh sent-example">
+                “
+                {tokens.map((tk, j) => (
+                  <span
+                    key={j}
+                    className="rg-word-inline"
+                    onClick={() => speakText(cleanForSpeak(tk))}
+                    title="点单词听发音"
+                  >
+                    {tk}
+                  </span>
+                ))}
+                ”
+              </div>
+              {s.sentenceZh && <div className="rg-sentence-zh">（{s.sentenceZh}）</div>}
             </div>
-            <div className="sent-zh sent-example">“{s.sentence}”</div>
-          </div>
-        ))}
+          )
+        })}
       </div>
     </>
   )
+}
+
+// 去掉句末标点,避免 TTS 把 "." 也读出来
+function cleanForSpeak(tok: string): string {
+  return tok.replace(/[.,!?;:]"'`]+$/g, '').trim() || tok
 }
 
 function QuizTab({

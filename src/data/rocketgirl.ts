@@ -10,6 +10,7 @@ export interface RGWord {
   en: string
   zh: string
   sentence?: string
+  sentenceZh?: string
   emoji?: string
 }
 
@@ -84,7 +85,7 @@ function pickWordEmoji(en: string, zh: string, fallback: string): string {
 
 interface RawStory {
   title: string
-  words: { en: string; zh: string; sentence?: string }[]
+  words: { en: string; zh: string; sentence?: string; sentenceZh?: string }[]
 }
 
 const rawStories = (wordsData as { stories: RawStory[] }).stories
@@ -100,6 +101,7 @@ export const rocketGirlStories: RGStory[] = rawStories.map((s, i) => {
       en: w.en,
       zh: w.zh,
       sentence: w.sentence,
+      sentenceZh: w.sentenceZh,
       emoji: pickWordEmoji(w.en, w.zh, storyEmoji),
     })),
   }

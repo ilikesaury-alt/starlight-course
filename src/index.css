@@ -1713,6 +1713,14 @@ a.lesson-link:active { transform: scale(0.98); }
   color: var(--ink);
   line-height: 1.5;
 }
+.rg-sentence-zh {
+  width: 100%;
+  font-size: 13px;
+  font-style: normal;
+  color: var(--mc, #7c3aed);
+  line-height: 1.5;
+  margin-top: 2px;
+}
 .sent-example {
   font-style: italic;
   color: var(--ink);
@@ -1721,6 +1729,20 @@ a.lesson-link:active { transform: scale(0.98); }
   border-radius: var(--r-md);
   margin-top: 6px;
 }
+
+/* 例句标签:句子保持原样,仅把单词高亮为可点击 */
+.rg-word-inline {
+  color: var(--mc, #8b5cf6);
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 0 1px;
+  margin-right: 0.18em;
+  text-decoration: underline dotted var(--mc, #8b5cf6);
+  text-underline-offset: 3px;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+.rg-word-inline:hover { background: var(--mc-soft, #ede9fe); }
+.rg-word-inline:active { background: var(--mc, #8b5cf6); color: #fff; }
 
 @media (min-width: 520px) {
   .rg-books-grid { grid-template-columns: 1fr 1fr 1fr; }
