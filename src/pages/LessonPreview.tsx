@@ -125,7 +125,7 @@ function VocabTab({ words, mcStyle }: { words: { en: string; zh: string; emoji: 
       <div className="flashcard" style={mcStyle}>
         <div className="fc-emoji">{w.emoji}</div>
         <div className="fc-word-row">
-          <span className="fc-word">{w.en}</span>
+          <button type="button" className="fc-word" onClick={() => speakText(w.en)}>{w.en}</button>
           <SpeakButton text={w.en} label={w.en} />
           <SpeakButton text={w.en} label={`${w.en} 慢速`} slow />
         </div>

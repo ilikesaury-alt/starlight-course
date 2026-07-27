@@ -253,7 +253,7 @@ export default function SmartReview() {
             <div className="smart-card-emoji">{remainMeta.emoji}</div>
 
             <div className="fc-word-row">
-              <span className="fc-word">{remainMeta.en}</span>
+              <button type="button" className="fc-word" onClick={() => speakText(remainMeta.en)}>{remainMeta.en}</button>
               <SpeakButton text={remainMeta.en} label={remainMeta.en} />
               <SpeakButton text={remainMeta.en} label={`${remainMeta.en} 慢速`} slow />
             </div>
