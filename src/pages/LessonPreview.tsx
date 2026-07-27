@@ -23,10 +23,13 @@ export default function LessonPreview() {
   const words = lesson?.words ?? []
   const sentences = lesson?.sentences ?? []
 
-  // 进入某课时,把该课的单词批量种子化进 SRS 调度池
+  // 进入某课时,把该课的单词和句型批量种子化进 SRS 调度池
   useEffect(() => {
-    if (words.length === 0) return
-    seedCards(words.map((w) => w.en))
+    if (words.length === 0 && sentences.length === 0) return
+    seedCards([
+      ...words.map((w) => w.en),
+      ...sentences.map((s) => s.en),
+    ])
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lesson?.id, mod?.slug])
 

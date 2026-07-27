@@ -7,16 +7,18 @@ import { useCourseStore } from '../store/useCourseStore'
 import { boxLabel, boxEmoji, type SrsCard } from '../data/srs'
 import { speakText } from '../utils/speak'
 
-// 建一份 en → 单词元信息的索引,供卡片渲染时取 emoji/zh/ipa
-interface WordMeta {
+// 建一份 en → 内容元信息的索引,供卡片渲染时取 emoji/zh/ipa（单词和句型都索引）
+interface ContentMeta {
   en: string
   zh: string
-  emoji: string
+  emoji?: string
   ipa?: string
   from: string
+  type: 'word' | 'sentence'
+  hint?: string
 }
-const WORD_INDEX: Record<string, WordMeta> = (() => {
-  const idx: Record<string, WordMeta> = {}
+const CONTENT_INDEX: Record<string, ContentMeta> = (() => {
+  const idx: Record<string, ContentMeta> = {}
   for (const m of modules) {
     for (const l of m.lessons) {
       for (const w of l.words) {
@@ -27,6 +29,18 @@ const WORD_INDEX: Record<string, WordMeta> = (() => {
             emoji: w.emoji,
             ipa: w.ipa,
             from: `${m.title} · L${l.id}`,
+            type: 'word',
+          }
+        }
+      }
+      for (const s of l.sentences) {
+        if (!idx[s.en]) {
+          idx[s.en] = {
+            en: s.en,
+            zh: s.zh,
+            from: `${m.title} · L${l.id}`,
+            type: 'sentence',
+            hint: s.hint,
           }
         }
       }
@@ -38,7 +52,7 @@ const WORD_INDEX: Record<string, WordMeta> = (() => {
 interface SessionStats {
   correct: number
   wrong: number
-  wrongWords: { en: string; zh: string; emoji: string; from: string }[]
+  wrongWords: { en: string; zh: string; emoji?: string; from: string }[]
 }
 
 export default function SmartReview() {
@@ -156,10 +170,10 @@ export default function SmartReview() {
 
             {session.wrongWords.length > 0 && (
               <div className="smart-wrong-list">
-                <h3 className="smart-wrong-title">📋 这些词需要再练</h3>
+                <h3 className="smart-wrong-title">📋 这些内容需要再练</h3>
                 {session.wrongWords.map((w) => (
                   <div key={w.en} className="smart-wrong-item">
-                    <span className="sw-emoji">{w.emoji}</span>
+                    <span className="sw-emoji">{w.emoji ?? '❓'}</span>
                     <span className="sw-en">{w.en}</span>
                     <span className="sw-zh">{w.zh}</span>
                     <span onClick={(e) => e.stopPropagation()}>
@@ -195,12 +209,12 @@ export default function SmartReview() {
     if (!cur) return
     recordReview(cur.en, correct)
     // 答错自动加入错题本,答对则从错题本移除(已确认掌握)
-    const w = WORD_INDEX[cur.en]
+    const w = CONTENT_INDEX[cur.en]
     const newWrong = !correct && w
-      ? [...session.wrongWords, { en: w.en, zh: w.zh, emoji: w.emoji, from: w.from }]
+      ? [...session.wrongWords, { en: w.en, zh: w.zh, emoji: w.emoji ?? '❓', from: w.from }]
       : session.wrongWords
     if (!correct && w) {
-      addWrongWord({ en: w.en, zh: w.zh, emoji: w.emoji, from: w.from })
+      addWrongWord({ en: w.en, zh: w.zh, emoji: w.emoji ?? '❓', from: w.from })
     } else if (correct) {
       removeWrongWord(cur.en)
     }
@@ -224,7 +238,7 @@ export default function SmartReview() {
   }
 
   const boxInfo = cur ? `${boxEmoji(cur.box)} ${boxLabel(cur.box)} · 盒 ${cur.box}` : ''
-  const remainMeta = cur ? WORD_INDEX[cur.en] : undefined
+  const remainMeta = cur ? CONTENT_INDEX[cur.en] : undefined
 
   return (
     <div className="page smart-review">
@@ -250,7 +264,7 @@ export default function SmartReview() {
         {cur && remainMeta && (
           <div className="smart-card" style={{ '--mc': '#a78bfa', '--mc-soft': '#ede9fe' } as React.CSSProperties}>
             <div className="smart-card-from">📍 {remainMeta.from}</div>
-            <div className="smart-card-emoji">{remainMeta.emoji}</div>
+            {remainMeta.emoji && <div className="smart-card-emoji">{remainMeta.emoji}</div>}
 
             <div className="fc-word-row">
               <button type="button" className="fc-word" onClick={() => speakText(remainMeta.en)}>{remainMeta.en}</button>
@@ -262,10 +276,11 @@ export default function SmartReview() {
             {revealed ? (
               <div className="fc-zh" onClick={() => setRevealed(false)} title="点击隐藏">
                 {remainMeta.zh}
+                {remainMeta.hint && <div className="sent-hint">💡 {remainMeta.hint}</div>}
               </div>
             ) : (
               <button type="button" className="fc-reveal" onClick={() => setRevealed(true)}>
-                👀 想想中文,然后翻面
+                {remainMeta.type === 'sentence' ? '👀 想想这句的意思,然后翻面' : '👀 想想中文,然后翻面'}
               </button>
             )}
 
