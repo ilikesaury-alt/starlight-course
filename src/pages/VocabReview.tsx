@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import SpeakButton from '../components/SpeakButton'
 import SafeBoundary from '../components/SafeBoundary'
-import { getModule } from '../data/starlight'
+import { getModule, STARLIGHT_THEME } from '../data/starlight'
 import { useCourseStore } from '../store/useCourseStore'
 import { speakText } from '../utils/speak'
+import { moduleThemeVars } from '../utils/theme'
 
 export default function VocabReview() {
   const { unitId = '' } = useParams()
@@ -35,7 +36,7 @@ export default function VocabReview() {
     )
   }
 
-  const mcStyle = { '--mc': mod.color, '--mc-soft': mod.colorSoft } as React.CSSProperties
+  const mcStyle = moduleThemeVars(STARLIGHT_THEME)
   const lessons = mod.lessons ?? []
   const lesson = lessons[lessonIdx]
   const words = lesson?.words ?? []
@@ -51,7 +52,7 @@ export default function VocabReview() {
   const next = () => { setIdx((i) => (i + 1) % words.length); setShowZh(false) }
 
   return (
-    <div className="page vocab-review">
+    <div className="page vocab-review" style={mcStyle}>
       <div className="page-head" style={mcStyle}>
         <span className="page-emoji">{mod.emoji}</span>
         <div>

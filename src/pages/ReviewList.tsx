@@ -1,14 +1,16 @@
 import { Link } from 'react-router-dom'
-import { modules } from '../data/starlight'
+import { modules, STARLIGHT_THEME } from '../data/starlight'
 import { useCourseStore } from '../store/useCourseStore'
+import { moduleThemeVars } from '../utils/theme'
 
 export default function ReviewList() {
   const masteredWords = useCourseStore((s) => s.masteredWords)
   const todayDue = useCourseStore((s) => s.getTodayDueCount())
+  const mcStyle = moduleThemeVars(STARLIGHT_THEME)
 
   return (
-    <div className="page review-list">
-      <div className="page-head" style={{ '--mc': '#9be564', '--mc-soft': '#ecfccb' } as React.CSSProperties}>
+    <div className="page review-list" style={mcStyle}>
+      <div className="page-head" style={mcStyle}>
         <span className="page-emoji">🔁</span>
         <div>
           <div className="page-kicker">课后复习</div>

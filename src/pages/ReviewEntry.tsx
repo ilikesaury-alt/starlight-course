@@ -1,6 +1,7 @@
 import { Link, useParams } from 'react-router-dom'
-import { getModule } from '../data/starlight'
+import { getModule, STARLIGHT_THEME } from '../data/starlight'
 import { useCourseStore } from '../store/useCourseStore'
+import { moduleThemeVars } from '../utils/theme'
 
 export default function ReviewEntry() {
   const { unitId = '' } = useParams()
@@ -17,7 +18,7 @@ export default function ReviewEntry() {
     )
   }
 
-  const mcStyle = { '--mc': mod.color, '--mc-soft': mod.colorSoft } as React.CSSProperties
+  const mcStyle = moduleThemeVars(STARLIGHT_THEME)
 
   // 汇总所有 lesson 的单词用于统计掌握情况
   const allWords = mod.lessons.flatMap((l) => l.words)
@@ -33,7 +34,7 @@ export default function ReviewEntry() {
   ]
 
   return (
-    <div className="page review-entry">
+    <div className="page review-entry" style={mcStyle}>
       <div className="unit-banner" style={mcStyle}>
         <span className="unit-emoji">{mod.emoji}</span>
         <div>

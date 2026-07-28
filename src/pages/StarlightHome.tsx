@@ -1,12 +1,11 @@
 import { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { modules } from '@/data/starlight'
+import { modules, STARLIGHT_THEME } from '@/data/starlight'
 import { useCourseStore } from '@/store/useCourseStore'
+import { moduleThemeVars } from '@/utils/theme'
 
-// Starlight 主课采用暖黄「sun」主题
-const SL_COLOR = '#F5B017'
-const SL_SOFT = '#FFF3C4'
-const mcStyle = { '--mc': SL_COLOR, '--mc-soft': SL_SOFT } as React.CSSProperties
+// Starlight 主课采用暖橙模块主题色,统一由 moduleThemeVars 派生
+const mcStyle = moduleThemeVars(STARLIGHT_THEME)
 
 export default function StarlightHome() {
   const [query, setQuery] = useState('')
@@ -31,7 +30,7 @@ export default function StarlightHome() {
   }, [query])
 
   return (
-    <div className="home">
+    <div className="home" style={mcStyle}>
       <section className="hero" style={mcStyle}>
         <div className="hero-emoji">🌟</div>
         <h1 className="hero-title">Starlight 主课</h1>

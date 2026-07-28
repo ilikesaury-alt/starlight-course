@@ -1,12 +1,15 @@
 import { Link } from 'react-router-dom'
 import SpeakButton from '../components/SpeakButton'
 import SafeBoundary from '../components/SafeBoundary'
-import { alphabet } from '../data/starlight'
+import { alphabet, STARLIGHT_THEME } from '../data/starlight'
+import { moduleThemeVars } from '../utils/theme'
+
+const mcStyle = moduleThemeVars(STARLIGHT_THEME)
 
 export default function AlphabetPage() {
   return (
-    <div className="page alphabet">
-      <div className="page-head" style={{ '--mc': '#7c3aed', '--mc-soft': '#ede9fe' } as React.CSSProperties}>
+    <div className="page alphabet" style={mcStyle}>
+      <div className="page-head">
         <span className="page-emoji">🔤</span>
         <div>
           <div className="page-kicker">My Alphabet</div>

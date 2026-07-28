@@ -1,0 +1,144 @@
+// ============================================================
+//  Theme — 主题课（Rocket Girl / Fly Guy / Starlight）与首页入口
+//  三个首页入口卡片结构完全一致，仅主题色不同 → 用 mixin 统一。
+// ============================================================
+@use 'mixins' as *;
+
+// 共享脉冲动画：由元素自身的 --pulse-a / --pulse-b 控制光晕颜色
+@keyframes entry-pulse {
+  0%, 100% { box-shadow: 0 4px 16px var(--pulse-a); }
+  50%      { box-shadow: 0 8px 24px var(--pulse-b); }
+}
+
+// 首页醒目入口卡片（rg / fg / sl 三主题共用同一结构）
+@mixin home-entry($prefix, $g1, $g2, $border, $title, $sub, $arrow, $pa, $pb) {
+  .#{$prefix}-entry {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: linear-gradient(135deg, $g1 0%, $g2 100%);
+    border: 2px solid $border;
+    border-radius: var(--r-lg);
+    padding: 16px 18px;
+    margin: 12px 0 6px;
+    box-shadow: var(--shadow-pop);
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform 0.15s;
+    --pulse-a: #{$pa};
+    --pulse-b: #{$pb};
+    animation: entry-pulse 2.4s ease-in-out infinite;
+    &:active { transform: scale(0.98); }
+    .#{$prefix}-emoji { font-size: 40px; flex-shrink: 0; }
+    .#{$prefix}-body { flex: 1; min-width: 0; }
+    .#{$prefix}-title { font-size: var(--fs-lg); font-weight: 800; color: $title; margin-bottom: 2px; }
+    .#{$prefix}-sub { font-size: var(--fs-base); color: $sub; line-height: 1.4; }
+    .#{$prefix}-arrow { font-size: 26px; color: $arrow; font-weight: 700; flex-shrink: 0; }
+  }
+}
+
+@include home-entry('rg-home', var(--grape-soft), var(--grape-2), var(--grape), var(--grape-deep), var(--grape-deep-2), var(--grape), rgba(167, 139, 250, 0.25), rgba(167, 139, 250, 0.45));
+@include home-entry('fg-home', var(--green-soft), var(--green-tint), var(--green), var(--green-deep), var(--green-deep-2), var(--green), rgba(74, 222, 128, 0.25), rgba(74, 222, 128, 0.45));
+@include home-entry('sl-home', var(--amber-soft), var(--amber-tint), var(--amber), var(--amber-deep), var(--amber-ink), var(--amber), rgba(245, 176, 23, 0.25), rgba(245, 176, 23, 0.45));
+
+// ---------- Rocket Girl / Fly Guy / Starlight 通用主题块 ----------
+.rg-progress-pill {
+  text-align: center;
+  background: var(--mc-soft, var(--grape-soft));
+  color: var(--mc, var(--grape-700));
+  font-size: var(--fs-md);
+  font-weight: 700;
+  padding: 10px 14px;
+  border-radius: var(--r-pill);
+  margin: 14px 0 4px;
+  b { font-size: var(--fs-lg); }
+}
+.rg-search-wrap { margin: 10px 0 4px; }
+.rg-search {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 16px;
+  border-radius: var(--r-pill);
+  border: 2px solid var(--line-2);
+  font-size: var(--fs-md);
+  background: var(--card);
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.15s;
+  &:focus { border-color: var(--mc, var(--grape-700)); }
+}
+.rg-card .module-info { min-width: 0; }
+.rg-title {
+  font-size: var(--fs-md);
+  font-weight: 700;
+  line-height: 1.25;
+  @include clamp(2);
+}
+.rg-empty { grid-column: 1 / -1; text-align: center; color: var(--ink-soft); padding: 24px 0; }
+
+.rg-books {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: 12px 16px;
+  margin-top: 12px;
+  box-shadow: var(--shadow-sm);
+}
+.rg-books > summary {
+  font-size: var(--fs-lg);
+  font-weight: 800;
+  color: var(--mc, var(--grape-700));
+  cursor: pointer;
+  list-style: none;
+  padding: 4px 0;
+}
+.rg-books > summary::-webkit-details-marker { display: none; }
+.rg-books-note {
+  font-size: var(--fs-sm);
+  color: var(--ink-soft);
+  line-height: 1.6;
+  margin: 10px 0;
+  background: var(--bg-3);
+  padding: 10px 12px;
+  border-radius: var(--r-md);
+}
+.rg-books-note code { font-size: 12px; background: var(--line); padding: 1px 6px; border-radius: 4px; }
+.rg-books-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; max-height: 280px; overflow-y: auto; margin-top: 8px; }
+.rg-book-chip {
+  display: flex; align-items: center; gap: 6px;
+  font-size: var(--fs-sm);
+  color: var(--ink-soft);
+  background: var(--bg-2);
+  border-radius: var(--r-sm);
+  padding: 6px 8px;
+  overflow: hidden;
+}
+.rg-book-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.rg-sentence {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: center;
+  margin-top: 12px;
+  background: var(--mc-soft, var(--grape-soft));
+  border-radius: var(--r-md);
+  padding: 8px 12px;
+}
+.rg-sentence-en { font-size: var(--fs-base); font-style: italic; color: var(--ink); line-height: 1.5; }
+.rg-sentence-zh { width: 100%; font-size: var(--fs-sm); font-style: normal; color: var(--mc, var(--grape-700)); line-height: 1.5; margin-top: 2px; }
+.sent-example { font-style: italic; color: var(--ink); background: var(--bg-3); padding: 8px 12px; border-radius: var(--r-md); margin-top: 6px; }
+
+.rg-word-inline {
+  color: var(--mc, var(--grape-500));
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 0 1px;
+  margin-right: 0.18em;
+  text-decoration: underline dotted var(--mc, var(--grape-500));
+  text-underline-offset: 3px;
+  transition: background 0.12s ease, color 0.12s ease;
+  &:hover { background: var(--mc-soft, var(--grape-soft)); }
+  &:active { background: var(--mc, var(--grape-500)); color: #fff; }
+}
+
+@media (min-width: 520px) {
+  .rg-books-grid { grid-template-columns: 1fr 1fr 1fr; }
+}

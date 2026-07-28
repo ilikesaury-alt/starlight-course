@@ -8,6 +8,7 @@ import {
   FG_THEME,
 } from '@/data/flyguy'
 import { useCourseStore } from '@/store/useCourseStore'
+import { moduleThemeVars } from '@/utils/theme'
 
 const mcStyle = { '--mc': FG_THEME.color, '--mc-soft': FG_THEME.colorSoft } as React.CSSProperties
 
@@ -28,7 +29,7 @@ export default function FlyGuyHome() {
   }, [query])
 
   return (
-    <div className="home">
+    <div className="home" style={moduleThemeVars(FG_THEME)}>
       <section className="hero" style={mcStyle}>
         <div className="hero-emoji">🐝</div>
         <h1 className="hero-title">Fly Guy 英语闯关</h1>

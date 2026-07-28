@@ -1,5 +1,8 @@
 /** @type {import('tailwindcss').Config} */
 
+// 主题色与 src/styles/_tokens.scss 完全对齐（SCSS 为唯一真源）。
+// 注：本项目入口样式未使用 @tailwind 指令，此处仅作主题对齐参考，
+// 若日后启用 Tailwind 工具类，可直接复用这些设计令牌。
 export default {
   darkMode: "class",
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
@@ -13,95 +16,36 @@ export default {
     },
     extend: {
       colors: {
-        // 童趣配色
-        sun: {
-          DEFAULT: "#FFC93C",
-          50: "#FFF8E0",
-          100: "#FFEFB3",
-          200: "#FFE080",
-          300: "#FFD14D",
-          400: "#FFC93C",
-          500: "#F5B017",
-          600: "#D49000",
-        },
-        sky2: {
-          DEFAULT: "#5BC0EB",
-          50: "#EAF8FD",
-          100: "#D2EFFB",
-          200: "#A6E0F7",
-          300: "#79D1F3",
-          400: "#5BC0EB",
-          500: "#2A9FD4",
-          600: "#1A7EAB",
-        },
-        mint: {
-          DEFAULT: "#9BE564",
-          50: "#F2FCE6",
-          100: "#E2F8C6",
-          200: "#C8EF97",
-          300: "#9BE564",
-          400: "#7CCB3F",
-          500: "#5FA524",
-        },
-        coral: {
-          DEFAULT: "#FF6B6B",
-          50: "#FFE8E8",
-          100: "#FFCFCF",
-          200: "#FF9E9E",
-          300: "#FF6B6B",
-          400: "#F04848",
-          500: "#C72828",
-        },
+        // 与 src/styles/_tokens.scss 对齐
+        brand: { DEFAULT: "#5bc0eb", 2: "#3ca7e0", soft: "#e0f2fe", deep: "#0284c7" },
+        sun:   { DEFAULT: "#fbbf24", soft: "#fef3c7", deep: "#f59e0b", ink: "#92400e" },
+        leaf:  { DEFAULT: "#34d399", soft: "#d1fae5", deep: "#065f46" },
+        rose:  { DEFAULT: "#f472b6", soft: "#fce7f3" },
+        grape: { DEFAULT: "#a78bfa", soft: "#ede9fe", 500: "#8b5cf6", 700: "#7c3aed", deep: "#6d28d9" },
+        coral: { DEFAULT: "#fb7185", soft: "#ffe4e6" },
+        ok:    { DEFAULT: "#10b981", soft: "#d1fae5" },
+        no:    { DEFAULT: "#ef4444", soft: "#fee2e2" },
+        ink:   { DEFAULT: "#1f2937", soft: "#6b7280", mute: "#9ca3af" },
         paper: "#FFF9F0",
-        ink: "#2D4059",
-        coffee: "#E8D5B7",
+        line:  { DEFAULT: "#f3f4f6", 2: "#e5e7eb" },
       },
       fontFamily: {
         cute: ['"ZCOOL KuaiLe"', '"Noto Sans SC"', "sans-serif"],
         sans: ['"Noto Sans SC"', "system-ui", "sans-serif"],
       },
       borderRadius: {
+        sm: "12px",
+        md: "16px",
+        lg: "20px",
+        xl: "28px",
+        pill: "999px",
         blob: "28px",
       },
       boxShadow: {
-        sticker: "0 4px 0 rgba(45, 64, 89, 0.12), 0 8px 20px rgba(45, 64, 89, 0.08)",
-        pop: "0 6px 0 rgba(45, 64, 89, 0.18), 0 12px 28px rgba(45, 64, 89, 0.12)",
-        soft: "0 8px 24px rgba(45, 64, 89, 0.10)",
-      },
-      keyframes: {
-        wiggle: {
-          "0%, 100%": { transform: "rotate(-3deg)" },
-          "50%": { transform: "rotate(3deg)" },
-        },
-        float: {
-          "0%, 100%": { transform: "translateY(0)" },
-          "50%": { transform: "translateY(-8px)" },
-        },
-        pop: {
-          "0%": { transform: "scale(0.8)", opacity: "0" },
-          "60%": { transform: "scale(1.08)", opacity: "1" },
-          "100%": { transform: "scale(1)", opacity: "1" },
-        },
-        rise: {
-          "0%": { transform: "translateY(20px)", opacity: "0" },
-          "100%": { transform: "translateY(0)", opacity: "1" },
-        },
-        sparkle: {
-          "0%, 100%": { transform: "scale(1) rotate(0)", opacity: "1" },
-          "50%": { transform: "scale(1.2) rotate(15deg)", opacity: "0.8" },
-        },
-        confetti: {
-          "0%": { transform: "translateY(0) rotate(0)", opacity: "1" },
-          "100%": { transform: "translateY(120vh) rotate(720deg)", opacity: "0" },
-        },
-      },
-      animation: {
-        wiggle: "wiggle 1.5s ease-in-out infinite",
-        float: "float 3s ease-in-out infinite",
-        pop: "pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both",
-        rise: "rise 0.5s ease-out both",
-        sparkle: "sparkle 1.2s ease-in-out infinite",
-        confetti: "confetti 2.5s linear forwards",
+        sm: "0 2px 8px rgba(91, 192, 235, 0.08)",
+        DEFAULT: "0 4px 16px rgba(91, 192, 235, 0.12)",
+        lg: "0 8px 24px rgba(91, 192, 235, 0.16)",
+        pop: "0 10px 30px rgba(251, 191, 36, 0.25)",
       },
     },
   },

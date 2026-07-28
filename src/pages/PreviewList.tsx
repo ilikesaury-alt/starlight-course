@@ -1,13 +1,15 @@
 import { Link } from 'react-router-dom'
-import { modules } from '../data/starlight'
+import { modules, STARLIGHT_THEME } from '../data/starlight'
 import { useCourseStore } from '../store/useCourseStore'
+import { moduleThemeVars } from '../utils/theme'
 
 export default function PreviewList() {
   const completedPreviews = useCourseStore((s) => s.completedPreviews)
+  const mcStyle = moduleThemeVars(STARLIGHT_THEME)
 
   return (
-    <div className="page preview-list">
-      <div className="page-head" style={{ '--mc': '#5bc0eb', '--mc-soft': '#e0f2fe' } as React.CSSProperties}>
+    <div className="page preview-list" style={mcStyle}>
+      <div className="page-head" style={mcStyle}>
         <span className="page-emoji">📖</span>
         <div>
           <div className="page-kicker">课前预习</div>

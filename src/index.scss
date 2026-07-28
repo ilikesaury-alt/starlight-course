@@ -1,0 +1,16 @@
+// ============================================================
+//  Starlight 英语小课堂 · 统一设计系统入口
+//  ------------------------------------------------------------
+//  仅在此文件按序 @use 各 partial；:root 设计令牌由 _tokens 生成。
+//  各页面/组件类统一引用 var(--xxx) 令牌，保证全站视觉一致。
+//
+//  说明：本项目不启用 @tailwind 指令（避免 Preflight 重置既有视觉基线），
+//  Tailwind 配置仅作主题对齐参考，样式全部由下方 SCSS 模块产出。
+// ============================================================
+@use 'styles/tokens';
+@use 'styles/base';
+@use 'styles/components';
+@use 'styles/home';
+@use 'styles/study';
+@use 'styles/smart';
+@use 'styles/theme';

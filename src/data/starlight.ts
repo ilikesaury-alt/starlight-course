@@ -59,6 +59,13 @@ export interface Module {
 // 导入按 lesson 细分的课程数据
 import { lessonsByUnit } from './lessons'
 
+// Starlight 模块专属主题色(暖橙 + 柔橙),区别于 Fly Guy 绿与 Rocket Girl 紫罗兰。
+// 全模块页面统一由此派生,保证“模块内所有颜色都基于本模块主题色拓展”。
+export const STARLIGHT_THEME = {
+  color: '#F5B017',
+  colorSoft: '#FFF3C4',
+} as const
+
 export const modules: Module[] = [
   {
     id: 1,

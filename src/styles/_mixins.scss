@@ -1,0 +1,92 @@
+// ============================================================
+//  Mixins — 可复用样式片段
+//  ------------------------------------------------------------
+//  组件样式通过 @include 复用这些片段，避免各页面重复书写相同的
+//  圆角 / 阴影 / 按压反馈 / 多行截断等规则，从而保证视觉一致。
+//  用法（在 partial 顶部）：@use 'mixins' as *;
+// ============================================================
+
+// 通用卡片表面：白底、圆角、细边、轻阴影
+@mixin card($radius: var(--r-lg), $pad: var(--sp-4)) {
+  background: var(--card);
+  border-radius: $radius;
+  padding: $pad;
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-sm);
+}
+
+// 按钮基础：内联弹性、圆角药丸、粗体、过渡
+@mixin btn-base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-weight: 700;
+  border-radius: var(--r-pill);
+  cursor: pointer;
+  transition: var(--ease);
+  border: none;
+  font-family: inherit;
+  line-height: 1;
+  text-decoration: none;
+}
+
+// 按压反馈：缩小 + 阴影变浅（童趣强反馈）
+@mixin press($scale: 0.96) {
+  &:active {
+    transform: scale($scale);
+  }
+}
+
+// 柔和强调底：浅色背景 + 同色深字（badge / chip / 高亮条）
+@mixin soft-bg($bg: var(--brand-soft), $ink: var(--brand-deep)) {
+  background: $bg;
+  color: $ink;
+}
+
+// 多行截断（移动端长标题/描述）
+@mixin clamp($lines: 2) {
+  display: -webkit-box;
+  -webkit-line-clamp: $lines;
+  line-clamp: $lines;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+// 药丸标签（完全圆角小标签）
+@mixin pill {
+  border-radius: var(--r-pill);
+}
+
+// 主题色渐变软底（卡片/横幅左侧条等）
+@mixin grad-soft($from, $to) {
+  background: linear-gradient(135deg, $from, $to);
+}
+
+// 焦点可见环（可访问性，键盘导航）
+@mixin focus-ring($c: var(--brand)) {
+  outline: none;
+  &:focus-visible {
+    outline: 2px solid $c;
+    outline-offset: 2px;
+  }
+}
+
+// 绝对定位的装饰光斑（背景纹理）
+@mixin blob($size: 100px, $color: rgba(255, 255, 255, 0.15)) {
+  content: '';
+  position: absolute;
+  width: $size;
+  height: $size;
+  border-radius: 50%;
+  background: $color;
+}
+
+// 滚动条隐藏（横向滑动选择器）
+@mixin no-scrollbar {
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}

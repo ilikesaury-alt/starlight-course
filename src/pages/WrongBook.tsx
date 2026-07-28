@@ -2,6 +2,10 @@ import { Link } from 'react-router-dom'
 import SpeakButton from '../components/SpeakButton'
 import SafeBoundary from '../components/SafeBoundary'
 import { useCourseStore } from '../store/useCourseStore'
+import { STARLIGHT_THEME } from '../data/starlight'
+import { moduleThemeVars } from '../utils/theme'
+
+const mcStyle = moduleThemeVars(STARLIGHT_THEME)
 
 export default function WrongBook() {
   const wrongWords = useCourseStore((s) => s.wrongWords)
@@ -11,8 +15,8 @@ export default function WrongBook() {
   const recordReview = useCourseStore((s) => s.recordReview)
 
   return (
-    <div className="page wrong-book">
-      <div className="page-head" style={{ '--mc': '#ff6b6b', '--mc-soft': '#fee2e2' } as React.CSSProperties}>
+    <div className="page wrong-book" style={mcStyle}>
+      <div className="page-head">
         <span className="page-emoji">📋</span>
         <div>
           <div className="page-kicker">错题本</div>

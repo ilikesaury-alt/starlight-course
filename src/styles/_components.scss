@@ -1,0 +1,318 @@
+// ============================================================
+//  Components — 公共样式类库（可复用 UI 原子）
+//  ------------------------------------------------------------
+//  标准化“布局 / 按钮 / 卡片 / 表单 / 徽标”等通用 UI 组件。
+//  各页面与功能模块都应优先复用这里的类，保证全站视觉一致。
+// ============================================================
+@use 'mixins' as *;
+
+// ---------- 应用骨架 App Shell ----------
+.app {
+  max-width: 720px;
+  margin: 0 auto;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  position: relative;
+}
+
+.app-header {
+  padding: 14px 16px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 800;
+  font-size: 18px;
+}
+.brand-star {
+  color: var(--sun);
+  font-size: 22px;
+  display: inline-block;
+  animation: twinkle 2s ease-in-out infinite;
+}
+@keyframes twinkle {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  50% { transform: scale(1.15) rotate(15deg); }
+}
+.brand-text {
+  background: linear-gradient(90deg, var(--brand), var(--brand-deep));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.brand-sub {
+  font-size: 13px;
+  color: var(--ink-mute);
+  background: var(--sun-soft);
+  padding: 3px 10px;
+  border-radius: var(--r-pill);
+  font-weight: 600;
+}
+
+.app-main {
+  flex: 1;
+  padding: 4px 14px 90px; // 底部留空给 nav
+}
+
+// 底部固定导航（大图标大字，儿童拇指友好）
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  max-width: 720px;
+  margin: 0 auto;
+  display: flex;
+  background: var(--card);
+  border-top: 1px solid var(--line);
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.06);
+  z-index: var(--z-nav);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.bottom-nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 4px;
+  color: var(--ink-mute);
+  font-size: 13px;
+  font-weight: 600;
+  gap: 2px;
+  transition: color 0.15s;
+}
+.bottom-nav-item .nav-emoji { font-size: 22px; }
+.bottom-nav-item.active { color: var(--brand); }
+.bottom-nav-item.active .nav-emoji { transform: scale(1.15); }
+.bottom-nav-item:active { transform: scale(0.95); }
+
+.app-footer {
+  text-align: center;
+  font-size: 13px;
+  color: var(--ink-mute);
+  padding: 10px;
+}
+
+// ---------- 页面通用 Page ----------
+.page { padding-bottom: 8px; }
+.page-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: var(--r-lg);
+  background: linear-gradient(135deg, var(--mc, var(--brand)), var(--brand-2));
+  color: #fff;
+  box-shadow: var(--shadow);
+}
+.page-emoji { font-size: 34px; }
+.page-kicker { font-size: 12px; opacity: 0.9; font-weight: 700; letter-spacing: 0.5px; }
+.page-title { margin: 2px 0 0; font-size: 17px; }
+
+.lead {
+  font-size: var(--fs-md);
+  color: var(--ink-soft);
+  margin: 14px 2px;
+  line-height: 1.6;
+}
+
+.page-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.lesson-nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.empty { text-align: center; padding: 50px 20px; }
+.empty p { color: var(--ink-soft); margin-bottom: 16px; }
+
+// ---------- 按钮 Buttons ----------
+.btn {
+  @include btn-base;
+  padding: 14px 22px;
+  background: var(--brand);
+  color: #fff;
+  font-size: var(--fs-md);
+  box-shadow: var(--shadow);
+  &:active { transform: scale(0.96); box-shadow: var(--shadow-sm); }
+}
+.btn--soft {
+  background: var(--brand-soft);
+  color: var(--brand-deep);
+  box-shadow: none;
+}
+.btn--sun {
+  background: var(--sun);
+  color: var(--sun-ink);
+  box-shadow: var(--shadow-pop);
+}
+.btn--lg { padding: 16px 28px; font-size: var(--fs-lg); }
+.btn--sm { padding: 8px 14px; font-size: var(--fs-md); }
+.btn--block { display: flex; width: 100%; }
+
+// 返回链接（标准按钮尺寸，与 .btn 一致；柔和主题色，不再使用“大药丸”）
+// 复用 btn-base：圆角药丸、无边框、字体继承、行高 1。
+// 与右侧 .btn 在 .page-nav 中通过 align-items:center 自动对齐，无需单独覆盖。
+.back-link {
+  @include btn-base;
+  padding: 14px 22px;
+  background: var(--mc-soft, var(--brand-soft));
+  color: var(--mc, var(--brand-deep));
+  font-size: var(--fs-md);
+  box-shadow: none;
+  &:active {
+    transform: scale(0.96);
+    box-shadow: var(--shadow-sm);
+  }
+}
+
+// ---------- 卡片 Cards ----------
+.card {
+  @include card;
+  margin-top: 12px;
+}
+.card-title { margin: 0 0 10px; font-size: var(--fs-md); font-weight: 700; }
+.card-title-emoji { margin-right: 4px; }
+
+.goal-list { margin: 0; padding-left: 20px; list-style: disc; }
+.goal-list li { padding: 4px 0; line-height: 1.5; font-size: var(--fs-md); }
+
+.key-words,
+.key-sent {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+.key-words-text,
+.key-sent-text { font-weight: 600; font-size: var(--fs-base); }
+
+.tip-card {
+  background: var(--sun-soft);
+  border-color: var(--sun-deep);
+}
+.tip-text {
+  margin: 0;
+  font-size: var(--fs-md);
+  line-height: 1.7;
+  color: var(--sun-ink);
+}
+
+// ---------- 表单 Forms（标准化） ----------
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  margin: var(--sp-4) 0;
+}
+.label {
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+.input,
+.select,
+.textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 16px;
+  border-radius: var(--r-md);
+  border: 2px solid var(--line-2);
+  font-size: var(--fs-md);
+  background: var(--card);
+  color: var(--ink);
+  outline: none;
+  transition: border-color var(--ease);
+  @include focus-ring(var(--brand));
+  &:focus { border-color: var(--brand); }
+}
+.textarea { resize: vertical; min-height: 88px; line-height: 1.6; }
+.search {
+  @extend .input;
+  border-radius: var(--r-pill);
+}
+
+// ---------- 徽标 / 标签 Badges & Chips ----------
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: var(--r-pill);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+}
+.badge--soft { @include soft-bg(var(--brand-soft), var(--brand-deep)); }
+.badge--ok { @include soft-bg(var(--ok-soft), var(--ok)); }
+.badge--no { @include soft-bg(var(--no-soft), var(--no)); }
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border-radius: var(--r-md);
+  background: var(--card);
+  border: 1px solid var(--line);
+  font-size: var(--fs-base);
+  font-weight: 600;
+  transition: var(--ease);
+}
+.chip--active {
+  border-color: var(--brand);
+  background: var(--brand-soft);
+}
+
+// ---------- 共享小组件 Shared ----------
+.speak-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--mc, var(--brand));
+  color: #fff;
+  font-size: 17px;
+  box-shadow: var(--shadow-sm);
+  flex-shrink: 0;
+  transition: var(--ease);
+  &:active { transform: scale(0.88); }
+  &.is-playing {
+    background: var(--mc-2, var(--brand-2));
+    animation: speak-pulse 0.8s infinite;
+  }
+}
+@keyframes speak-pulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(var(--brand-rgb), 0.4); }
+  50% { transform: scale(1.1); box-shadow: 0 0 0 8px rgba(var(--brand-rgb), 0); }
+}
+
+.safe-boundary { text-align: center; padding: 40px 20px; }
+.safe-boundary p { color: var(--ink-soft); margin-bottom: 16px; }
+.route-error { text-align: center; padding: 60px 20px; }
+.route-error-emoji { font-size: 56px; }
+.route-error p { color: var(--ink-soft); margin: 12px 0 18px; }
+
+// ---------- 工具类 Helpers ----------
+.clamp-2 { @include clamp(2); }
+.clamp-3 { @include clamp(3); }
+.press { @include press; }

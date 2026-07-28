@@ -1,0 +1,50 @@
+// ============================================================
+//  Base — 全局重置 & 根容器
+//  ------------------------------------------------------------
+//  仅保留最小必要重置，不引入 Preflight，保持与现有组件视觉基线一致。
+// ============================================================
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased;
+  // 童趣背景纹理（极淡双色光斑）
+  background-image:
+    radial-gradient(circle at 20% 10%, rgba(var(--brand-rgb), 0.06) 0%, transparent 40%),
+    radial-gradient(circle at 80% 80%, rgba(var(--sun-rgb), 0.06) 0%, transparent 40%);
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+input,
+textarea {
+  font-family: inherit;
+}
+
+::selection {
+  background: var(--brand-soft);
+  color: var(--brand-deep);
+}

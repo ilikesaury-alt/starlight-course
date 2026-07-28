@@ -5,6 +5,7 @@ import SafeBoundary from '@/components/SafeBoundary'
 import { getStory, flyGuyStories, type FGWord, FG_THEME } from '@/data/flyguy'
 import { useCourseStore } from '@/store/useCourseStore'
 import { speakText } from '@/utils/speak'
+import { moduleThemeVars } from '@/utils/theme'
 
 type Tab = 'vocab' | 'sentences' | 'quiz'
 
@@ -80,8 +81,12 @@ export default function FlyGuyStory() {
 
   const quiz = useMemo(() => buildQuiz(words), [story.slug])
 
+  const storyIdx = flyGuyStories.findIndex((s) => s.slug === story.slug)
+  const prevStory = storyIdx > 0 ? flyGuyStories[storyIdx - 1] : null
+  const nextStory = storyIdx >= 0 && storyIdx < flyGuyStories.length - 1 ? flyGuyStories[storyIdx + 1] : null
+
   return (
-    <div className="page lesson-preview">
+    <div className="page lesson-preview" style={moduleThemeVars(FG_THEME)}>
       <div className="page-head" style={mcStyle}>
         <span className="page-emoji">{story.emoji}</span>
         <div>
@@ -129,7 +134,21 @@ export default function FlyGuyStory() {
       </SafeBoundary>
 
       <div className="page-nav">
-        <Link to="/flyguy" className="back-link">← 故事列表</Link>
+        <Link to="/flyguy" className="btn btn-soft">← 故事列表</Link>
+        {tab === 'quiz' ? (
+          <>
+            {prevStory && (
+              <Link to={`/flyguy/${prevStory.slug}`} className="btn btn-soft">← 上一关</Link>
+            )}
+            {nextStory && (
+              <Link to={`/flyguy/${nextStory.slug}`} className="btn">下一关 →</Link>
+            )}
+          </>
+        ) : (
+          <button type="button" className="btn" onClick={() => setTab(tab === 'vocab' ? 'sentences' : 'quiz')}>
+            {tab === 'vocab' ? '💬 例句 →' : '🎯 闯关 →'}
+          </button>
+        )}
       </div>
     </div>
   )
@@ -309,6 +328,7 @@ function QuizTab({
     })
     const correct = i === cur.answer
     onPick(cur.speakText, correct)
+    speakText(cur.options[i])
   }
 
   const goNext = () => {

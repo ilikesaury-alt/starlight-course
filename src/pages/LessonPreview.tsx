@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import SpeakButton from '../components/SpeakButton'
 import SafeBoundary from '../components/SafeBoundary'
-import { getModule } from '../data/starlight'
+import { getModule, STARLIGHT_THEME } from '../data/starlight'
 import { useCourseStore } from '../store/useCourseStore'
 import { speakText } from '../utils/speak'
+import { moduleThemeVars } from '../utils/theme'
 
 type Tab = 'vocab' | 'patterns' | 'dialogue'
 
@@ -51,12 +52,12 @@ export default function LessonPreview() {
     )
   }
 
-  const mcStyle = { '--mc': mod.color, '--mc-soft': mod.colorSoft } as React.CSSProperties
+  const mcStyle = moduleThemeVars(STARLIGHT_THEME)
   const prevLesson = lessons[lessonIdx - 1]
   const nextLesson = lessons[lessonIdx + 1]
 
   return (
-    <div className="page lesson-preview">
+    <div className="page lesson-preview" style={mcStyle}>
       <div className="page-head" style={mcStyle}>
         <span className="page-emoji">{mod.emoji}</span>
         <div>

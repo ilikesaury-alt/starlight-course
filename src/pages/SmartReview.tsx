@@ -2,10 +2,11 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import SpeakButton from '../components/SpeakButton'
 import SafeBoundary from '../components/SafeBoundary'
-import { modules } from '../data/starlight'
+import { modules, STARLIGHT_THEME } from '../data/starlight'
 import { useCourseStore } from '../store/useCourseStore'
 import { boxLabel, boxEmoji, type SrsCard } from '../data/srs'
 import { speakText } from '../utils/speak'
+import { moduleThemeVars } from '../utils/theme'
 
 // 建一份 en → 内容元信息的索引,供卡片渲染时取 emoji/zh/ipa（单词和句型都索引）
 interface ContentMeta {
@@ -72,6 +73,7 @@ export default function SmartReview() {
 
   const total = queue.length
   const cur = queue[idx]
+  const mcStyle = moduleThemeVars(STARLIGHT_THEME)
 
   // 切换复习卡（进入/下一题/再复习一轮）时自动朗读英文单词,作为回忆提示
   useEffect(() => {
@@ -91,8 +93,8 @@ export default function SmartReview() {
   // 队列为空
   if (total === 0) {
     return (
-      <div className="page smart-review">
-        <div className="page-head" style={{ '--mc': '#a78bfa', '--mc-soft': '#ede9fe' } as React.CSSProperties}>
+      <div className="page smart-review" style={mcStyle}>
+        <div className="page-head" style={mcStyle}>
           <span className="page-emoji">🎯</span>
           <div>
             <div className="page-kicker">智能复习</div>
@@ -128,8 +130,8 @@ export default function SmartReview() {
     const mostlyRight = session.correct >= total * 0.8
     const tomorrowCount = getTomorrowDueCount()
     return (
-      <div className="page smart-review">
-        <div className="page-head" style={{ '--mc': '#a78bfa', '--mc-soft': '#ede9fe' } as React.CSSProperties}>
+      <div className="page smart-review" style={mcStyle}>
+        <div className="page-head" style={mcStyle}>
           <span className="page-emoji">🎯</span>
           <div>
             <div className="page-kicker">智能复习</div>
@@ -241,8 +243,8 @@ export default function SmartReview() {
   const remainMeta = cur ? CONTENT_INDEX[cur.en] : undefined
 
   return (
-    <div className="page smart-review">
-      <div className="page-head" style={{ '--mc': '#a78bfa', '--mc-soft': '#ede9fe' } as React.CSSProperties}>
+    <div className="page smart-review" style={mcStyle}>
+      <div className="page-head" style={mcStyle}>
         <span className="page-emoji">🎯</span>
         <div>
           <div className="page-kicker">智能复习 · 跨单元</div>
@@ -262,7 +264,7 @@ export default function SmartReview() {
         </div>
 
         {cur && remainMeta && (
-          <div className="smart-card" style={{ '--mc': '#a78bfa', '--mc-soft': '#ede9fe' } as React.CSSProperties}>
+          <div className="smart-card" style={mcStyle}>
             <div className="smart-card-from">📍 {remainMeta.from}</div>
             {remainMeta.emoji && <div className="smart-card-emoji">{remainMeta.emoji}</div>}
 

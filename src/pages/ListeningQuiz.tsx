@@ -2,8 +2,9 @@ import { useMemo, useState, useEffect, useRef } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import SpeakButton from '../components/SpeakButton'
 import SafeBoundary from '../components/SafeBoundary'
-import { getModule, type QuizQuestion } from '../data/starlight'
+import { getModule, type QuizQuestion, STARLIGHT_THEME } from '../data/starlight'
 import { useCourseStore } from '../store/useCourseStore'
+import { moduleThemeVars } from '../utils/theme'
 
 interface QuizItem extends QuizQuestion {
   lessonId?: number
@@ -105,7 +106,7 @@ export default function ListeningQuiz() {
     )
   }
 
-  const mcStyle = { '--mc': mod.color, '--mc-soft': mod.colorSoft } as React.CSSProperties
+  const mcStyle = moduleThemeVars(STARLIGHT_THEME)
 
   let correct = 0
   states.forEach((s, i) => {

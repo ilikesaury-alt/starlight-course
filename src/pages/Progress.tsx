@@ -1,6 +1,9 @@
 import { Link } from 'react-router-dom'
-import { modules } from '../data/starlight'
+import { modules, STARLIGHT_THEME } from '../data/starlight'
 import { useCourseStore } from '../store/useCourseStore'
+import { moduleThemeVars } from '../utils/theme'
+
+const mcStyle = moduleThemeVars(STARLIGHT_THEME)
 
 export default function Progress() {
   const totalStars = useCourseStore((s) => s.totalStars)
@@ -22,8 +25,8 @@ export default function Progress() {
   ]
 
   return (
-    <div className="page progress">
-      <div className="page-head" style={{ '--mc': '#fbbf24', '--mc-soft': '#fef3c7' } as React.CSSProperties}>
+    <div className="page progress" style={mcStyle}>
+      <div className="page-head">
         <span className="page-emoji">📊</span>
         <div>
           <div className="page-kicker">学习进度</div>

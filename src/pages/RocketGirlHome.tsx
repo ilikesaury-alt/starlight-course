@@ -8,6 +8,7 @@ import {
   RG_THEME,
 } from '@/data/rocketgirl'
 import { useCourseStore } from '@/store/useCourseStore'
+import { moduleThemeVars } from '@/utils/theme'
 
 const mcStyle = { '--mc': RG_THEME.color, '--mc-soft': RG_THEME.colorSoft } as React.CSSProperties
 
@@ -28,7 +29,7 @@ export default function RocketGirlHome() {
   }, [query])
 
   return (
-    <div className="home">
+    <div className="home" style={moduleThemeVars(RG_THEME)}>
       <section className="hero" style={mcStyle}>
         <div className="hero-emoji">🚀</div>
         <h1 className="hero-title">Rocket Girl 英语闯关</h1>

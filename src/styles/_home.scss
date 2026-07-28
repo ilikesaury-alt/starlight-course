@@ -1,0 +1,354 @@
+// ============================================================
+//  Home / Course — 课程首页与列表相关组件
+//  （首页 hero、模块卡、单元横幅、功能入口、课表、切换器等）
+// ============================================================
+@use 'mixins' as *;
+
+// ---------- 首页 Hero ----------
+.hero {
+  text-align: center;
+  padding: 20px 8px 24px;
+}
+.hero-emoji {
+  font-size: 52px;
+  margin-bottom: 8px;
+  display: inline-block;
+  animation: bounce-soft 2.5s ease-in-out infinite;
+}
+@keyframes bounce-soft {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+.hero-title {
+  font-size: var(--fs-3xl);
+  margin: 0 0 8px;
+  font-weight: 800;
+  background: linear-gradient(90deg, var(--brand), var(--grape));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.hero-sub {
+  color: var(--ink-soft);
+  font-size: var(--fs-md);
+  margin: 0 0 14px;
+  line-height: 1.6;
+}
+.hero-sub b { color: var(--brand-deep); }
+.hero-tags {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  font-size: var(--fs-base);
+  flex-wrap: wrap;
+}
+.hero-tag {
+  background: var(--card);
+  padding: 6px 12px;
+  border-radius: var(--r-pill);
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
+}
+
+.section-title {
+  font-size: var(--fs-md);
+  margin: 20px 4px 10px;
+  color: var(--ink);
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+// ---------- 快速入口 ----------
+.quick-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.quick-card {
+  padding: 18px 14px;
+  text-align: center;
+  border-radius: var(--r-lg);
+  font-weight: 700;
+  font-size: var(--fs-base);
+  position: relative;
+  overflow: hidden;
+  transition: var(--ease);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  &:active { transform: scale(0.97); }
+  .qc-emoji { font-size: 32px; }
+  .qc-sub { font-size: var(--fs-sm); font-weight: 500; opacity: 0.85; }
+}
+.quick-preview { background: linear-gradient(135deg, var(--brand), var(--brand-2)); color: #fff; }
+.quick-review { background: linear-gradient(135deg, var(--leaf), var(--ok)); color: #fff; }
+.quick-alphabet { background: linear-gradient(135deg, var(--sun), var(--sun-deep)); color: var(--sun-ink); }
+.quick-progress { background: linear-gradient(135deg, var(--grape), var(--grape-700)); color: #fff; }
+
+// ---------- 模块卡片 ----------
+.module-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+.module-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border-radius: var(--r-lg);
+  background: var(--card);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  overflow: hidden;
+  transition: var(--ease);
+  @include press(0.98);
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 5px;
+    background: var(--mc, var(--brand));
+  }
+}
+.module-emoji {
+  font-size: 32px;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--r-md);
+  background: var(--mc-soft, var(--brand-soft));
+  flex-shrink: 0;
+}
+.module-info { flex: 1; min-width: 0; }
+.module-num {
+  font-size: var(--fs-xs);
+  color: var(--ink-mute);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.module-title { font-size: var(--fs-lg); font-weight: 700; margin: 1px 0; }
+.module-zh { font-size: var(--fs-base); color: var(--ink-soft); }
+.module-arrow { color: var(--ink-mute); font-size: 20px; flex-shrink: 0; }
+.module-lessons-badge {
+  font-size: var(--fs-xs);
+  color: var(--mc, var(--brand));
+  font-weight: 700;
+  background: var(--mc-soft, var(--brand-soft));
+  padding: 3px 8px;
+  border-radius: var(--r-pill);
+}
+
+// ---------- 单元横幅 ----------
+.unit-banner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px;
+  border-radius: var(--r-xl);
+  background: linear-gradient(135deg, var(--mc, var(--brand)), var(--brand-2));
+  color: #fff;
+  box-shadow: var(--shadow);
+  position: relative;
+  overflow: hidden;
+  &::after { @include blob(100px, rgba(255, 255, 255, 0.15)); right: -20px; top: -20px; }
+}
+.unit-emoji { font-size: 44px; position: relative; z-index: 1; }
+.unit-num { font-size: var(--fs-sm); opacity: 0.9; font-weight: 700; letter-spacing: 0.5px; }
+.unit-title { margin: 2px 0; font-size: var(--fs-2xl); position: relative; z-index: 1; }
+.unit-zh { font-size: var(--fs-md); opacity: 0.9; position: relative; z-index: 1; }
+
+// ---------- 模式标识 ----------
+.mode-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: var(--r-pill);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.mode-preview { background: var(--brand-soft); color: var(--brand-deep); }
+.mode-review { background: var(--leaf-soft); color: var(--leaf-deep); }
+
+// ---------- 功能入口（步骤式） ----------
+.feature-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-top: 16px;
+}
+.feature-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border-radius: var(--r-lg);
+  background: var(--card);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-sm);
+  width: 100%;
+  text-align: left;
+  position: relative;
+  transition: var(--ease);
+  @include press(0.98);
+}
+.feature-step {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--mc, var(--brand));
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+.feature-emoji { font-size: 26px; width: 40px; text-align: center; flex-shrink: 0; }
+.feature-body { flex: 1; min-width: 0; }
+.feature-name { font-weight: 700; font-size: var(--fs-md); }
+.feature-desc { font-size: var(--fs-base); color: var(--ink-soft); margin-top: 2px; }
+.feature-arrow { color: var(--ink-mute); font-size: 20px; flex-shrink: 0; }
+
+// ---------- 8 课一览 ----------
+.lessons-overview { margin-top: 14px; display: grid; gap: 8px; }
+.lesson-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--r-md);
+  background: var(--card);
+  border: 1px solid var(--line);
+  font-size: var(--fs-md);
+}
+.lesson-row-num {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--mc-soft, var(--brand-soft));
+  color: var(--mc, var(--brand));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--fs-sm);
+  font-weight: 800;
+  flex-shrink: 0;
+}
+.lesson-row-title { font-weight: 600; flex: 1; min-width: 0; }
+.lesson-row-title .lr-zh { color: var(--ink-soft); font-size: var(--fs-sm); margin-left: 4px; }
+.lesson-row-count {
+  font-size: var(--fs-sm);
+  color: var(--ink-mute);
+  background: var(--bg-2);
+  padding: 2px 8px;
+  border-radius: var(--r-pill);
+  flex-shrink: 0;
+}
+
+// ---------- 课程内标签切换 ----------
+.tab-bar { display: flex; gap: 8px; margin: 14px 0 8px; }
+.tab-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 8px;
+  border-radius: var(--r-md);
+  background: var(--card);
+  border: 2px solid var(--line-2);
+  font-size: var(--fs-md);
+  font-weight: 700;
+  color: var(--ink-soft);
+  transition: var(--ease);
+  &:active { transform: scale(0.97); }
+  &.active {
+    background: var(--mc, var(--brand));
+    color: #fff;
+    border-color: var(--mc, var(--brand));
+    box-shadow: var(--shadow-sm);
+  }
+}
+a.lesson-link {
+  text-decoration: none;
+  transition: transform var(--ease), box-shadow var(--ease);
+  &:active { transform: scale(0.98); }
+}
+
+// ---------- 课程切换器（痛点修复：大号 pill + 高亮） ----------
+.lesson-switcher {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 4px 2px 10px;
+  @include no-scrollbar;
+}
+.lesson-pill {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 52px;
+  padding: 8px 12px;
+  border-radius: var(--r-md);
+  background: var(--card);
+  border: 2px solid var(--line-2);
+  font-size: var(--fs-base);
+  font-weight: 700;
+  color: var(--ink-soft);
+  transition: var(--ease);
+  gap: 1px;
+  &:active { transform: scale(0.95); }
+  .lp-num { font-size: var(--fs-xs); opacity: 0.7; }
+  &.active {
+    background: var(--mc, var(--brand));
+    color: #fff;
+    border-color: var(--mc, var(--brand));
+    transform: scale(1.05);
+    box-shadow: var(--shadow);
+  }
+  &.active .lp-num { opacity: 0.85; }
+}
+.lesson-current {
+  margin: 4px 2px 12px;
+  padding: 10px 14px;
+  background: var(--mc-soft, var(--brand-soft));
+  border-radius: var(--r-md);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.lesson-current-num {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--mc, var(--brand));
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+.lesson-current-title { font-weight: 700; font-size: var(--fs-base); color: var(--ink); }
+.lesson-current-zh { font-size: var(--fs-base); color: var(--ink-soft); margin-left: 6px; }
+
+// ---------- 响应式 ----------
+@media (min-width: 520px) {
+  .module-grid { grid-template-columns: 1fr 1fr; }
+  .feature-grid { grid-template-columns: 1fr 1fr; }
+  .hero-title { font-size: var(--fs-4xl); }
+}

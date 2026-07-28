@@ -13,6 +13,14 @@ const base = repoName && repoName !== `${process.env.GITHUB_REPOSITORY?.split('/
 // https://vite.dev/config/
 export default defineConfig({
   base,
+  css: {
+    preprocessorOptions: {
+      scss: {
+        // 显式使用 sass 包（而非 sass-embedded），build 与 dev 行为一致
+        api: 'modern',
+      },
+    },
+  },
   build: {
     sourcemap: 'hidden',
   },

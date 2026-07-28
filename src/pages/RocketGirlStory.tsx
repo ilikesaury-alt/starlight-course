@@ -5,6 +5,7 @@ import SafeBoundary from '@/components/SafeBoundary'
 import { getStory, rocketGirlStories, type RGWord, RG_THEME } from '@/data/rocketgirl'
 import { useCourseStore } from '@/store/useCourseStore'
 import { speakText } from '@/utils/speak'
+import { moduleThemeVars } from '@/utils/theme'
 
 type Tab = 'vocab' | 'sentences' | 'quiz'
 
@@ -80,8 +81,12 @@ export default function RocketGirlStory() {
 
   const quiz = useMemo(() => buildQuiz(words), [story.slug])
 
+  const storyIdx = rocketGirlStories.findIndex((s) => s.slug === story.slug)
+  const prevStory = storyIdx > 0 ? rocketGirlStories[storyIdx - 1] : null
+  const nextStory = storyIdx >= 0 && storyIdx < rocketGirlStories.length - 1 ? rocketGirlStories[storyIdx + 1] : null
+
   return (
-    <div className="page lesson-preview">
+    <div className="page lesson-preview" style={moduleThemeVars(RG_THEME)}>
       <div className="page-head" style={mcStyle}>
         <span className="page-emoji">{story.emoji}</span>
         <div>
@@ -129,7 +134,15 @@ export default function RocketGirlStory() {
       </SafeBoundary>
 
       <div className="page-nav">
-        <Link to="/rocketgirl" className="back-link">← 故事列表</Link>
+        <div className="lesson-nav">
+          {prevStory && (
+            <Link to={`/rocketgirl/${prevStory.slug}`} className="btn btn-soft">← 上一关</Link>
+          )}
+          <Link to="/rocketgirl" className="btn">🚀 故事列表</Link>
+          {nextStory && (
+            <Link to={`/rocketgirl/${nextStory.slug}`} className="btn">下一关 →</Link>
+          )}
+        </div>
       </div>
     </div>
   )
@@ -309,6 +322,7 @@ function QuizTab({
     })
     const correct = i === cur.answer
     onPick(cur.speakText, correct)
+    speakText(cur.options[i])
   }
 
   const goNext = () => {

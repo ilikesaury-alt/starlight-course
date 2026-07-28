@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import SafeBoundary from '../components/SafeBoundary'
-import { getModule } from '../data/starlight'
+import { getModule, STARLIGHT_THEME } from '../data/starlight'
 import { useCourseStore } from '../store/useCourseStore'
+import { moduleThemeVars } from '../utils/theme'
 
 export default function LessonList() {
   const { unitId = '' } = useParams()
@@ -20,10 +21,10 @@ export default function LessonList() {
     )
   }
 
-  const mcStyle = { '--mc': mod.color, '--mc-soft': mod.colorSoft } as React.CSSProperties
+  const mcStyle = moduleThemeVars(STARLIGHT_THEME)
 
   return (
-    <div className="page lesson-list">
+    <div className="page lesson-list" style={mcStyle}>
       <div className="unit-banner" style={mcStyle}>
         <span className="unit-emoji">{mod.emoji}</span>
         <div>
