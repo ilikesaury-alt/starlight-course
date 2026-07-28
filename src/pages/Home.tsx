@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { modules } from '@/data/starlight'
+import { flyGuyStoryCount, flyGuyWordCount } from '@/data/flyguy'
 import { useCourseStore } from '@/store/useCourseStore'
 
 export default function Home() {
@@ -35,7 +35,15 @@ export default function Home() {
         </Link>
       )}
 
-      <h2 className="section-title">⚡ 快速入口</h2>
+      <h2 className="section-title">⚡ 课程入口</h2>
+      <Link to="/starlight" className="sl-home-entry">
+        <span className="sl-home-emoji">🌟</span>
+        <div className="sl-home-body">
+          <div className="sl-home-title">Starlight 主课</div>
+          <div className="sl-home-sub">牛津 Starlight 预备级 · 12 单元 / 96 课 / 全教材单词</div>
+        </div>
+        <span className="sl-home-arrow">›</span>
+      </Link>
       <Link to="/rocketgirl" className="rg-home-entry">
         <span className="rg-home-emoji">🚀</span>
         <div className="rg-home-body">
@@ -44,19 +52,16 @@ export default function Home() {
         </div>
         <span className="rg-home-arrow">›</span>
       </Link>
+      <Link to="/flyguy" className="fg-home-entry">
+        <span className="fg-home-emoji">🐝</span>
+        <div className="fg-home-body">
+          <div className="fg-home-title">Fly Guy 英语绘本闯关</div>
+          <div className="fg-home-sub">小男孩 Buzz 和宠物苍蝇的爆笑绘本 · {flyGuyStoryCount} 个故事 / {flyGuyWordCount} 词</div>
+        </div>
+        <span className="fg-home-arrow">›</span>
+      </Link>
+
       <div className="quick-row">
-        <Link to="/preview" className="quick-card quick-preview">
-          <span className="qc-emoji">📖</span>
-          <span>课前预习</span>
-          <span className="qc-sub">先学一遍，上课更自信</span>
-        </Link>
-        <Link to="/review" className="quick-card quick-review">
-          <span className="qc-emoji">🔁</span>
-          <span>课后复习</span>
-          <span className="qc-sub">巩固单词，听力测验</span>
-        </Link>
-      </div>
-      <div className="quick-row" style={{ marginTop: '10px' }}>
         <Link to="/alphabet" className="quick-card quick-alphabet">
           <span className="qc-emoji">🔤</span>
           <span>字母表</span>
@@ -67,27 +72,6 @@ export default function Home() {
           <span>学习进度</span>
           <span className="qc-sub">星星与成就</span>
         </Link>
-      </div>
-
-      <h2 className="section-title">📚 12 个学习模块</h2>
-      <div className="module-grid">
-        {modules.map((m) => (
-          <Link
-            key={m.id}
-            to={`/preview/${m.slug}`}
-            className="module-card"
-            style={{ '--mc': m.color, '--mc-soft': m.colorSoft } as React.CSSProperties}
-          >
-            <div className="module-emoji">{m.emoji}</div>
-            <div className="module-info">
-              <div className="module-num">Module {m.id}</div>
-              <div className="module-title">{m.title}</div>
-              <div className="module-zh">{m.titleZh}</div>
-            </div>
-            <div className="module-lessons-badge">{m.lessons.length} 课</div>
-            <div className="module-arrow">›</div>
-          </Link>
-        ))}
       </div>
     </div>
   )

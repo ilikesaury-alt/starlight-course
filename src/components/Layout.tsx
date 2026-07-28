@@ -3,11 +3,8 @@ import { Link, NavLink } from 'react-router-dom'
 export default function Layout({ children }: { children: React.ReactNode }) {
   const navItems = [
     { to: '/', label: '首页', emoji: '🏠', end: true },
-    { to: '/preview', label: '预习', emoji: '📖', end: false },
-    { to: '/review', label: '复习', emoji: '🔁', end: false },
     { to: '/alphabet', label: '字母', emoji: '🔤', end: false },
     { to: '/progress', label: '进度', emoji: '📊', end: false },
-    { to: '/rocketgirl', label: '火箭', emoji: '🚀', end: false },
   ]
 
   return (

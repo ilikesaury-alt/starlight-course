@@ -1784,3 +1784,75 @@ a.lesson-link:active { transform: scale(0.98); }
 }
 .rg-home-arrow { font-size: 26px; color: #a78bfa; font-weight: 700; flex-shrink: 0; }
 
+/* 首页 Fly Guy 醒目入口卡片(鲜绿主题) */
+.fg-home-entry {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: linear-gradient(135deg, #dcfce7 0%, #ecfccb 100%);
+  border: 2px solid #4ade80;
+  border-radius: var(--r-lg);
+  padding: 16px 18px;
+  margin: 12px 0 6px;
+  box-shadow: var(--shadow-pop);
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.15s;
+  animation: fg-home-pulse 2.4s ease-in-out infinite;
+}
+.fg-home-entry:active { transform: scale(0.98); }
+@keyframes fg-home-pulse {
+  0%, 100% { box-shadow: 0 4px 16px rgba(74, 222, 128, 0.25); }
+  50% { box-shadow: 0 8px 24px rgba(74, 222, 128, 0.45); }
+}
+.fg-home-emoji { font-size: 40px; flex-shrink: 0; }
+.fg-home-body { flex: 1; min-width: 0; }
+.fg-home-title {
+  font-size: 17px;
+  font-weight: 800;
+  color: #15803d;
+  margin-bottom: 2px;
+}
+.fg-home-sub {
+  font-size: 14px;
+  color: #166534;
+  line-height: 1.4;
+}
+.fg-home-arrow { font-size: 26px; color: #4ade80; font-weight: 700; flex-shrink: 0; }
+
+/* 首页 Starlight 主课醒目入口卡片(暖黄 sun 主题) */
+.sl-home-entry {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: linear-gradient(135deg, #fff3c4 0%, #ffe9a8 100%);
+  border: 2px solid #f5b017;
+  border-radius: var(--r-lg);
+  padding: 16px 18px;
+  margin: 12px 0 6px;
+  box-shadow: var(--shadow-pop);
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.15s;
+  animation: sl-home-pulse 2.4s ease-in-out infinite;
+}
+.sl-home-entry:active { transform: scale(0.98); }
+@keyframes sl-home-pulse {
+  0%, 100% { box-shadow: 0 4px 16px rgba(245, 176, 23, 0.25); }
+  50% { box-shadow: 0 8px 24px rgba(245, 176, 23, 0.45); }
+}
+.sl-home-emoji { font-size: 40px; flex-shrink: 0; }
+.sl-home-body { flex: 1; min-width: 0; }
+.sl-home-title {
+  font-size: 17px;
+  font-weight: 800;
+  color: #b45309;
+  margin-bottom: 2px;
+}
+.sl-home-sub {
+  font-size: 14px;
+  color: #92400e;
+  line-height: 1.4;
+}
+.sl-home-arrow { font-size: 26px; color: #f5b017; font-weight: 700; flex-shrink: 0; }
+
