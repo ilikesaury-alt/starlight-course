@@ -2,17 +2,17 @@
  * Universal pronunciation helper.
  *
  * 渐进增强回退链（优先级从高到低）：
- *   0. Kokoro-82M 神经网络 TTS (WebGPU) — 英文首选，自然度 TTS-Arena 榜首（见 engine/kokoro.ts）
- *   1. 有道词典 TTS (audio 元素) — 音质好，作为主兜底（需要网络）
- *   2. Web Speech API (window.speechSynthesis) — 浏览器原生、离线可用，最终兜底
- *   3. 三级都失败则静默
+ *   - 英文：Kokoro-82M 神经网络 TTS (WebGPU) → 有道 → WebSpeech（见 engine/kokoro.ts）
+ *   - 中文：Edge TTS (云端, 仅 Microsoft Edge) → 有道 → WebSpeech（见 engine/edgeTts.ts）
+ *   - 任何一层失败都静默回落到下一层，保证「一定能出声」
  *
  * 稳定性增强：
  *   - 预载 speechSynthesis 的 voices 并监听 voiceschanged，避免 getVoices 为空时静默
- *   - speak 前若 synthesis 处于 paused 则 resume()，并显式指定 en-US voice
+ *   - speak 前若 synthesis 处于 paused 则 resume()，并显式指定 en-US / zh-CN voice
  *   - 有道仅在「2.5s 内从未开始播放」时才降级，不打断正在朗读的句子
  *   - 兜底 native speak 若静默无回调（Chrome 假死），自动复位按钮以便重试
  *   - Kokoro 仅在「模型已就绪」时优先使用；未就绪则走原有链路并后台预热，避免首屏卡顿
+ *   - Edge TTS 仅在 Microsoft Edge 浏览器生效；非 Edge（如 Chrome）直接走有道，无额外延迟
  */
 
 export interface SpeakOptions {
@@ -26,8 +26,10 @@ export interface SpeakOptions {
   onEnd?: () => void
 }
 
-// 神经网络 TTS 引擎（WebGPU）；失败/未启用时由下方回退链无缝接管
+// 神经网络 TTS 引擎（WebGPU，英文）；失败/未启用时由下方回退链无缝接管
 import { speakWithKokoro, isKokoroReady, isKokoroEnabled, warmupKokoro } from './engine/kokoro'
+// 云端中文 TTS 引擎（仅 Microsoft Edge）；非 Edge 时由下方回退链无缝接管
+import { speakWithEdgeTts, isEdgeBrowser, isEdgeTtsEnabled } from './engine/edgeTts'
 
 // ---------- Web Speech API 语音预载 ----------
 let voices: SpeechSynthesisVoice[] = []
@@ -244,7 +246,46 @@ export function speakText(text: string, opts: SpeakOptions = {}) {
   // 将 done 加入池中，供下次调用时通知
   pendingEnds.push(markDone)
 
-  // ---- Level 0: Kokoro 神经网络 TTS（WebGPU，仅英文首选）----
+  // ---- Level 0a: 中文走 Edge TTS（云端，仅 Microsoft Edge 可用）----
+  // 仅在 Edge 浏览器生效；非 Edge（如 Chrome）直接走下方原有链路，无额外延迟。
+  // 失败或代次变更则无缝回落到原有「有道 → WebSpeech」链路。
+  if (lang === 'zh' && isEdgeTtsEnabled() && isEdgeBrowser()) {
+    let settled = false
+    const fallbackToLegacy = () => {
+      if (!settled && gen === generation && !finished) {
+        settled = true
+        youdao(() => nativeSpeak())
+      }
+    }
+    speakWithEdgeTts(text, {
+      slow,
+      guard: () => gen === generation,
+      onAudio: (el) => {
+        // 接管 Edge TTS 的 audio 元素，使其可由 cancelSpeech / 下次点击取消
+        currentAudio = el
+        el.addEventListener(
+          'ended',
+          () => {
+            if (currentAudio === el) currentAudio = null
+          },
+          { once: true }
+        )
+      },
+    })
+      .then((ok) => {
+        if (ok && gen === generation && !finished) {
+          settled = true
+          finished = true
+          done()
+        } else {
+          fallbackToLegacy()
+        }
+      })
+      .catch(() => fallbackToLegacy())
+    return
+  }
+
+  // ---- Level 0b: Kokoro 神经网络 TTS（WebGPU，仅英文首选）----
   // 仅当模型已就绪（已预热）时优先使用，避免首屏模型下载卡顿；
   // 失败或代次变更则无缝回落到原有「有道 → WebSpeech」链路。
   if (lang === 'en' && isKokoroEnabled() && isKokoroReady()) {

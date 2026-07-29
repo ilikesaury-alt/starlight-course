@@ -168,3 +168,12 @@ Kokoro(WebGPU, Chrome/Win)  →  sherpa-onnx/Piper(WASM, 兜底无 WebGPU)  → 
 > 运行时约束（用户确认）：目标为 **Windows + Chrome**，完整支持 WebGPU（D3D12），故 Kokoro 为无前提首选，无需 sherpa-onnx WASM 兜底常驻。
 > 注意：Kokoro 仅对英文启用；中文/古诗仍走原有有道链路（有道 type=2 中文效果好）。
 > 离线/自托管：若需完全离线，将 `KOKORO_CDN` 改为自托管路径，并同时自托管 onnxruntime-web 的 wasm 与 HuggingFace 模型。
+
+### 中文发音（2026-07-29 补充）
+- **结论：Kokoro 主库不支持中文**（官方 kokoro-js v1.2.1 仅列美/英音，无中文分词器）；专做中文的 `kokoro-js-zh` 分支自带音色偏川话口音，不适合教标准普通话 → 放弃用 Kokoro 做中文。
+- **Edge TTS 在 Chrome 已不可用**：微软 2025 年底改 Read Aloud 接口，要求 WebSocket 携带 Edge 专属头（`Sec-WebSocket-Version`），Chrome/Firefox/Safari 前端无法设置 → 直连失败。`edge-tts-universal` 等库明确「仅 Microsoft Edge 可用」。
+- **最终方案**：中文走 **Edge TTS 云端（免费免密钥，标准普通话 `zh-CN-XiaoxiaoNeural`）**，但仅在 **Microsoft Edge 浏览器**生效；非 Edge 自动回落有道。
+  - 新增 `src/utils/engine/edgeTts.ts`：运行时从 CDN 加载 `edge-tts-universal/browser`（`import(/* @vite-ignore */ 'https://esm.sh/edge-tts-universal/browser')`），不进构建依赖；`isEdgeBrowser()` 守卫（UA 含 `Edg/`）、`setEdgeTtsEnabled()` 开关、8s 连接超时护栏、失败返回 false 无缝回落。
+  - `speak.ts` 中文分支：`lang==='zh' && isEdgeTtsEnabled() && isEdgeBrowser()` → Edge TTS → 有道 → WebSpeech。
+- **切到 Edge 浏览器不影响英文**：Kokoro 走 WebGPU，Edge（Chromium）同样完整支持 WebGPU，英文仍是 Kokoro 高自然度；切 Edge 只是额外解锁中文 Edge TTS。
+- 验证：`tsc --noEmit`、`vite build` 均通过。`npm run dev`/`preview` 在沙箱用 Windows+Chrome 无法实测 Edge TTS（需真实 Edge 浏览器联网验证）。
