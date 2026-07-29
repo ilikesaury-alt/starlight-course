@@ -14,7 +14,7 @@ const mcStyle = { '--mc': FG_THEME.color, '--mc-soft': FG_THEME.colorSoft } as R
 
 export default function FlyGuyHome() {
   const [query, setQuery] = useState('')
-  const completed = useCourseStore((s) => s.completedPreviews)
+  const completed = useCourseStore((s) => s.completedStories)
   const doneCount = useMemo(
     () => flyGuyStories.filter((s) => completed.includes(s.slug)).length,
     [completed],

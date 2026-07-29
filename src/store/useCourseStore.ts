@@ -8,7 +8,7 @@ import {
   sortDueCards,
   dayStamp,
 } from '../data/srs'
-import type { ModuleId } from '../data/modules'
+import { MODULE_LIST, type ModuleId } from '../data/modules'
 
 export interface WrongWord {
   en: string
@@ -26,6 +26,8 @@ interface CourseStore {
   totalStars: number
   completedPreviews: string[]
   completedQuizzes: string[]
+  /** 故事类模块(Fly Guy / Rocket Girl)的通关记录,与 completedPreviews(Starlight 单元预习)语义分离 */
+  completedStories: string[]
   /** SRS 智能记忆卡片,key 为单词 en */
   srsCards: Record<string, SrsCard>
 
@@ -38,6 +40,8 @@ interface CourseStore {
   addStars: (n: number) => void
   markPreviewDone: (slug: string) => void
   markQuizDone: (slug: string) => void
+  /** 标记故事类模块某故事已通关(与 markPreviewDone 区分语义) */
+  markStoryDone: (slug: string) => void
   resetAll: () => void
 
   // SRS 智能复习相关
@@ -65,6 +69,7 @@ export const useCourseStore = create<CourseStore>()(
       totalStars: 0,
       completedPreviews: [],
       completedQuizzes: [],
+      completedStories: [],
       srsCards: {},
 
       markMastered: (en) =>
@@ -111,6 +116,13 @@ export const useCourseStore = create<CourseStore>()(
             : { completedQuizzes: [...s.completedQuizzes, slug] }
         ),
 
+      markStoryDone: (slug) =>
+        set((s) =>
+          s.completedStories.includes(slug)
+            ? s
+            : { completedStories: [...s.completedStories, slug] }
+        ),
+
       resetAll: () =>
         set({
           masteredWords: [],
@@ -118,6 +130,7 @@ export const useCourseStore = create<CourseStore>()(
           totalStars: 0,
           completedPreviews: [],
           completedQuizzes: [],
+          completedStories: [],
           srsCards: {},
         }),
 
@@ -199,8 +212,18 @@ export const useCourseStore = create<CourseStore>()(
     }),
     {
       name: 'starlight-course',
-      version: 3,
-      // 迁移：补上模块维度字段
+      version: 4,
+      // 只持久化数据字段,避免函数/瞬态状态被写入 localStorage
+      partialize: (state) => ({
+        masteredWords: state.masteredWords,
+        wrongWords: state.wrongWords,
+        totalStars: state.totalStars,
+        completedPreviews: state.completedPreviews,
+        completedQuizzes: state.completedQuizzes,
+        completedStories: state.completedStories,
+        srsCards: state.srsCards,
+      }),
+      // 迁移：补上模块维度字段 + 拆分 completedPreviews 语义
       migrate: (persistedState: unknown, version: number) => {
         // version 由 zustand 注入,这里仅用于触发迁移逻辑
         void version
@@ -234,7 +257,20 @@ export const useCourseStore = create<CourseStore>()(
         const wrongWords: WrongWord[] = (s.wrongWords ?? []).map((w) =>
           'module' in w ? (w as WrongWord) : { ...(w as WrongWord), module: 'starlight' as ModuleId }
         )
-        return { ...s, srsCards, wrongWords } as CourseStore
+        // 语义拆分:旧 completedPreviews 混入了故事 slug,按"是否 Starlight 单元 slug"
+        // 二分回 单元预习 / 故事通关,历史数据不丢失。
+        const starlightUnitIds =
+          MODULE_LIST.find((m) => m.id === 'starlight')?.items.map((it) => it.id) ?? []
+        const rawPreviews: string[] = Array.isArray(s.completedPreviews) ? s.completedPreviews : []
+        const completedPreviews = rawPreviews.filter((slug) => starlightUnitIds.includes(slug))
+        const completedStories = rawPreviews.filter((slug) => !starlightUnitIds.includes(slug))
+        return {
+          ...s,
+          srsCards,
+          wrongWords,
+          completedPreviews,
+          completedStories,
+        } as CourseStore
       },
     }
   )

@@ -76,7 +76,7 @@ export default function StoryPage({
 
   const seedCards = useCourseStore((s) => s.seedCards)
   const addStars = useCourseStore((s) => s.addStars)
-  const markPreviewDone = useCourseStore((s) => s.markPreviewDone)
+  const markStoryDone = useCourseStore((s) => s.markStoryDone)
   const recordReview = useCourseStore((s) => s.recordReview)
   const addWrongWord = useCourseStore((s) => s.addWrongWord)
 
@@ -157,7 +157,7 @@ export default function StoryPage({
             onFinish={(correct, total, wrongEns) => {
               const stars = correct === total ? correct + 5 : correct
               addStars(stars)
-              markPreviewDone(story.slug)
+              markStoryDone(story.slug)
               wrongEns.forEach((en) => {
                 const w = words.find((x) => x.en === en)
                 if (w) addWrongWord({ en: w.en, zh: w.zh, emoji: w.emoji ?? moduleEmoji, from: story.title, module: moduleId })

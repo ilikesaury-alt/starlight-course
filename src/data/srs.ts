@@ -25,7 +25,8 @@ export interface SrsCard {
   modules: ModuleId[]
 }
 
-/** 把 Date 折算为 UTC 整天的天数戳,避免时区漂移 */
+/** 把 Date 折算为「本地日历日」的天数戳:取本地年月日,按 UTC 零点解释后除以一天毫秒数。
+ *  同一本地日历日返回相同值(复习调度以本地日为单位,避免跨时区 UTC 零点割裂一天)。 */
 export function dayStamp(date: Date = new Date()): number {
   const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
   return Math.floor(d.getTime() / 86_400_000)

@@ -14,7 +14,7 @@ const mcStyle = { '--mc': RG_THEME.color, '--mc-soft': RG_THEME.colorSoft } as R
 
 export default function RocketGirlHome() {
   const [query, setQuery] = useState('')
-  const completed = useCourseStore((s) => s.completedPreviews)
+  const completed = useCourseStore((s) => s.completedStories)
   const doneCount = useMemo(
     () => rocketGirlStories.filter((s) => completed.includes(s.slug)).length,
     [completed],

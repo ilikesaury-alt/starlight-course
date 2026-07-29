@@ -9,16 +9,15 @@
     "lint": "eslint .",
     "preview": "vite preview --host 0.0.0.0",
     "check": "tsc -b --noEmit",
+    "test": "vitest run",
     "pwa-assets": "pwa-assets-generator public/favicon.svg --preset minimal-2023"
   },
   "dependencies": {
-    "clsx": "^2.1.1",
     "framer-motion": "^11.11.17",
     "lucide-react": "^0.511.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^7.3.0",
-    "tailwind-merge": "^3.0.2",
     "zustand": "^5.0.3"
   },
   "devDependencies": {
@@ -36,11 +35,11 @@
     "globals": "^16.0.0",
     "postcss": "^8.5.3",
     "sass": "^1.102.0",
-    "tailwindcss": "^3.4.17",
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.30.1",
     "vite": "^6.3.5",
     "vite-plugin-pwa": "^1.3.0",
-    "vite-tsconfig-paths": "^5.1.4"
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^4.1.10"
   }
 }
