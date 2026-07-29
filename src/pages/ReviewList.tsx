@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { STARLIGHT_THEME } from '../data/starlight'
 import { MODULE_LIST, moduleThemeOf } from '../data/modules'
 import { useCourseStore } from '../store/useCourseStore'
+import { countMastered } from '../utils/words'
 import { moduleThemeVars } from '../utils/theme'
 
 export default function ReviewList() {
@@ -42,7 +43,7 @@ export default function ReviewList() {
         {MODULE_LIST.map((m) => {
           const due = getTodayDueCount(m.id)
           const allWords = m.items.flatMap((it) => m.getWords(it.id))
-          const masteredCount = allWords.filter((w) => masteredWords.includes(w.en)).length
+          const masteredCount = countMastered(allWords, masteredWords)
           const total = allWords.length
           return (
             <Link

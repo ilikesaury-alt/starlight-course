@@ -2,14 +2,13 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import SpeakButton from '../components/SpeakButton'
 import SafeBoundary from '../components/SafeBoundary'
+import ModuleFilterChips, { type ModuleFilter } from '../components/ModuleFilterChips'
 import { useCourseStore } from '../store/useCourseStore'
 import { STARLIGHT_THEME } from '../data/starlight'
 import { MODULE_LIST, moduleThemeOf, type ModuleId } from '../data/modules'
 import { moduleThemeVars } from '../utils/theme'
 
 const mcStyle = moduleThemeVars(STARLIGHT_THEME)
-
-type ModuleFilter = ModuleId | 'all'
 
 export default function WrongBook() {
   const wrongWords = useCourseStore((s) => s.wrongWords)
@@ -20,6 +19,12 @@ export default function WrongBook() {
 
   const [filter, setFilter] = useState<ModuleFilter>('all')
   const list = filter === 'all' ? wrongWords : wrongWords.filter((w) => w.module === filter)
+
+  // 各模块错题数量，供筛选 chips 显示并隐藏为 0 的模块
+  const counts = MODULE_LIST.reduce<Partial<Record<ModuleId, number>>>((acc, m) => {
+    acc[m.id] = wrongWords.filter((w) => w.module === m.id).length
+    return acc
+  }, {})
 
   // 模块中文名查表，用于在标签上展示
   const moduleLabel = (id: ModuleId) => MODULE_LIST.find((m) => m.id === id)?.labelZh ?? id
@@ -48,30 +53,7 @@ export default function WrongBook() {
               共 {wrongWords.length} 个错词。点击 🔊 听发音，练熟后点"已掌握"移除。
             </p>
 
-            <div className="filter-chips">
-              <button
-                type="button"
-                className={'chip' + (filter === 'all' ? ' active' : '')}
-                onClick={() => setFilter('all')}
-              >
-                全部
-              </button>
-              {MODULE_LIST.map((m) => {
-                const count = wrongWords.filter((w) => w.module === m.id).length
-                if (count === 0) return null
-                return (
-                  <button
-                    key={m.id}
-                    type="button"
-                    className={'chip' + (filter === m.id ? ' active' : '')}
-                    style={{ '--mc': m.color, '--mc-soft': m.colorSoft } as React.CSSProperties}
-                    onClick={() => setFilter(m.id)}
-                  >
-                    {m.labelZh} {count}
-                  </button>
-                )
-              })}
-            </div>
+            <ModuleFilterChips value={filter} onChange={setFilter} counts={counts} />
 
             <div className="wrong-list">
               {list.map((w) => (

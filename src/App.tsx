@@ -1,5 +1,4 @@
 import { HashRouter as Router, Routes, Route, useLocation, Navigate, useParams } from 'react-router-dom'
-import { useEffect } from 'react'
 import Layout from '@/components/Layout'
 import SafeBoundary from '@/components/SafeBoundary'
 import Home from '@/pages/Home'
@@ -61,28 +60,6 @@ function RedirectToLessonList() {
 }
 
 export default function App() {
-  // 全局兜底:捕获任何未处理的异步错误,防止整页白屏崩溃
-  useEffect(() => {
-    const onError = (e: ErrorEvent) => {
-      // 只阻止 speechSynthesis 相关错误崩溃,不掩盖真实错误
-      if (e.message?.includes('speechSynthesis') || e.message?.includes('SpeechSynthesis')) {
-        e.preventDefault()
-      }
-    }
-    const onRejection = (e: PromiseRejectionEvent) => {
-      const reason = e.reason
-      if (reason?.message?.includes('speechSynthesis') || reason?.message?.includes('SpeechSynthesis')) {
-        e.preventDefault()
-      }
-    }
-    window.addEventListener('error', onError)
-    window.addEventListener('unhandledrejection', onRejection)
-    return () => {
-      window.removeEventListener('error', onError)
-      window.removeEventListener('unhandledrejection', onRejection)
-    }
-  }, [])
-
   return (
     <Router>
       <Layout>

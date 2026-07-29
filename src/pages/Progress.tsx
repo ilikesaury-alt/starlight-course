@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { modules, STARLIGHT_THEME } from '../data/starlight'
 import { useCourseStore } from '../store/useCourseStore'
+import { countMastered } from '../utils/words'
 import { moduleThemeVars } from '../utils/theme'
 
 const mcStyle = moduleThemeVars(STARLIGHT_THEME)
@@ -50,9 +51,7 @@ export default function Progress() {
           const previewDone = completedPreviews.includes(m.slug)
           const quizDone = completedQuizzes.includes(m.slug)
           const allWords = m.lessons.flatMap((l) => l.words)
-          const masteredCount = allWords.filter((w) =>
-            masteredWords.includes(w.en)
-          ).length
+          const masteredCount = countMastered(allWords, masteredWords)
           return (
             <div key={m.id} className="unit-progress-card">
               <div className="unit-progress-emoji">{m.emoji}</div>

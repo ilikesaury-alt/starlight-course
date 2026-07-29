@@ -6,6 +6,7 @@ import { getModule } from '../data/starlight'
 import { getModuleMeta, moduleThemeOf, type ModuleId } from '../data/modules'
 import { useCourseStore } from '../store/useCourseStore'
 import { speakText } from '../utils/speak'
+import { countMastered } from '../utils/words'
 import { moduleThemeVars } from '../utils/theme'
 
 type ReviewWordRow = { en: string; zh: string; emoji?: string; ipa?: string }
@@ -159,7 +160,7 @@ export default function VocabReview() {
             </div>
 
             <div className="fc-progress">
-              {idx + 1} / {words.length} · 已掌握 {masteredWords.filter((mw) => words.some((ww) => ww.en === mw)).length}
+              {idx + 1} / {words.length} · 已掌握 {countMastered(words, masteredWords)}
             </div>
             <div className="fc-dots">
               {words.map((ww, i) => (

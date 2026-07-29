@@ -2,6 +2,7 @@ import { Link, useParams, Navigate } from 'react-router-dom'
 import { getModuleMeta, moduleThemeOf } from '../data/modules'
 import { getModule } from '../data/starlight'
 import { useCourseStore } from '../store/useCourseStore'
+import { countMastered } from '../utils/words'
 import { moduleThemeVars } from '../utils/theme'
 
 // 某模块的复习主页：列出该模块下的复习项（Starlight = 单元，故事类 = 故事）。
@@ -46,7 +47,7 @@ export default function ModuleReviewHome() {
         {meta.items.map((item) => {
           const words = meta.getWords(item.id)
           const total = words.length
-          const masteredCount = words.filter((w) => masteredWords.includes(w.en)).length
+          const masteredCount = countMastered(words, masteredWords)
           const quizDone = meta.kind === 'unit' && completedQuizzes.includes(item.id)
           return (
             <Link

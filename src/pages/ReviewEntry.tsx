@@ -2,6 +2,7 @@ import { Link, useParams } from 'react-router-dom'
 import { getModuleMeta, moduleThemeOf } from '../data/modules'
 import { getModule } from '../data/starlight'
 import { useCourseStore } from '../store/useCourseStore'
+import { countMastered } from '../utils/words'
 import { moduleThemeVars } from '../utils/theme'
 
 export default function ReviewEntry() {
@@ -24,7 +25,7 @@ export default function ReviewEntry() {
 
   // 汇总该复习项的单词用于统计掌握情况
   const allWords = meta.getWords(item.id)
-  const masteredCount = allWords.filter((w) => masteredWords.includes(w.en)).length
+  const masteredCount = countMastered(allWords, masteredWords)
   const total = allWords.length
 
   // Starlight 单元额外有听力测验；故事类复用其「闯关」练习

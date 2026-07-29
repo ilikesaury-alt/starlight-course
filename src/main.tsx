@@ -2,6 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { registerSW } from 'virtual:pwa-register'
 import App from './App'
+import { installSpeechErrorGuard } from './utils/speechGuard'
 import './index.scss'
 
 createRoot(document.getElementById('root')!).render(
@@ -24,18 +25,6 @@ registerSW({
   },
 })
 
-// speechSynthesis 的异步回调若抛出未捕获错误,React 18 会卸载整个组件树。
-// 这里做全局兜底,配合 SpeakButton 内的 try/catch 与 SafeBoundary 三重防护。
-function swallowSpeechError(e: unknown) {
-  try {
-    const ev = e as Event
-    const target = ev?.target as unknown as Record<string, unknown> | undefined
-    if (target && typeof target === 'object' && 'synthesis' in target) {
-      ev.preventDefault?.()
-    }
-  } catch {
-    /* ignore */
-  }
-}
-window.addEventListener('error', swallowSpeechError)
-window.addEventListener('unhandledrejection', swallowSpeechError)
+// 全局兜底:吞掉 speechSynthesis 异步错误,防止 React 18 因未捕获异常卸载整棵组件树。
+// 与 SpeakButton 的 try/catch、SafeBoundary 错误边界构成三重防护(单点挂载,避免重复)。
+installSpeechErrorGuard()

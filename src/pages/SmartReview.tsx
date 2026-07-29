@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import SpeakButton from '../components/SpeakButton'
 import SafeBoundary from '../components/SafeBoundary'
+import ModuleFilterChips, { type ModuleFilter } from '../components/ModuleFilterChips'
 import { modules, STARLIGHT_THEME } from '../data/starlight'
 import { MODULE_LIST, moduleThemeOf, type ModuleId } from '../data/modules'
 import { useCourseStore } from '../store/useCourseStore'
@@ -61,8 +62,6 @@ interface SessionStats {
   wrong: number
   wrongWords: { en: string; zh: string; emoji?: string; from: string }[]
 }
-
-type ModuleFilter = ModuleId | 'all'
 
 export default function SmartReview() {
   const recordReview = useCourseStore((s) => s.recordReview)
@@ -274,26 +273,7 @@ export default function SmartReview() {
         <div className="mode-badge mode-review">🧠 大脑健身 · 先回忆再翻面</div>
 
         {/* 模块筛选 chips */}
-        <div className="filter-chips">
-          <button
-            type="button"
-            className={'chip' + (filter === 'all' ? ' active' : '')}
-            onClick={() => changeFilter('all')}
-          >
-            全部
-          </button>
-          {MODULE_LIST.map((m) => (
-            <button
-              key={m.id}
-              type="button"
-              className={'chip' + (filter === m.id ? ' active' : '')}
-              style={{ '--mc': m.color, '--mc-soft': m.colorSoft } as React.CSSProperties}
-              onClick={() => changeFilter(m.id)}
-            >
-              {m.labelZh}
-            </button>
-          ))}
-        </div>
+        <ModuleFilterChips value={filter} onChange={changeFilter} />
 
         <div className="quiz-meta">
           <span>第 {idx + 1} / {total} 张</span>
