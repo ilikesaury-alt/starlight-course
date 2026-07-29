@@ -316,3 +316,47 @@
 .clamp-2 { @include clamp(2); }
 .clamp-3 { @include clamp(3); }
 .press { @include press; }
+
+// ---------- 模块筛选 chips（智能复习 / 错题本） ----------
+.filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0 6px;
+}
+.chip {
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink-soft);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: var(--r-pill);
+  cursor: pointer;
+  transition: var(--ease);
+  &:hover { border-color: var(--mc, var(--brand)); }
+  &.active {
+    background: var(--mc, var(--brand));
+    border-color: var(--mc, var(--brand));
+    color: #fff;
+  }
+}
+
+// 错题本里的模块来源标签
+.wrong-module-tag {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 8px;
+  border-radius: var(--r-pill);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  background: var(--mc-soft, var(--brand-soft));
+  color: var(--mc, var(--brand));
+  vertical-align: middle;
+}
+
+// 复习列表：模块到期徽标
+.module-due {
+  background: var(--mc, var(--brand));
+  color: #fff;
+}

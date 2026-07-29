@@ -1,11 +1,13 @@
 import { Link } from 'react-router-dom'
-import { modules, STARLIGHT_THEME } from '../data/starlight'
+import { STARLIGHT_THEME } from '../data/starlight'
+import { MODULE_LIST, moduleThemeOf } from '../data/modules'
 import { useCourseStore } from '../store/useCourseStore'
 import { moduleThemeVars } from '../utils/theme'
 
 export default function ReviewList() {
   const masteredWords = useCourseStore((s) => s.masteredWords)
   const todayDue = useCourseStore((s) => s.getTodayDueCount())
+  const getTodayDueCount = useCourseStore((s) => s.getTodayDueCount)
   const mcStyle = moduleThemeVars(STARLIGHT_THEME)
 
   return (
@@ -34,31 +36,30 @@ export default function ReviewList() {
         <span className="smart-list-arrow">›</span>
       </Link>
 
-      <h2 className="section-title">📚 按单元自主复习</h2>
+      <h2 className="section-title">🧩 选择复习模块</h2>
 
       <div className="module-grid">
-        {modules.map((m) => {
-          const allWords = m.lessons.flatMap((l) => l.words)
-          const masteredCount = allWords.filter((w) =>
-            masteredWords.includes(w.en)
-          ).length
+        {MODULE_LIST.map((m) => {
+          const due = getTodayDueCount(m.id)
+          const allWords = m.items.flatMap((it) => m.getWords(it.id))
+          const masteredCount = allWords.filter((w) => masteredWords.includes(w.en)).length
           const total = allWords.length
           return (
             <Link
               key={m.id}
-              to={`/review/${m.slug}`}
+              to={`/review/${m.id}`}
               className="module-card"
-              style={{ '--mc': m.color, '--mc-soft': m.colorSoft } as React.CSSProperties}
+              style={moduleThemeVars(moduleThemeOf(m.id))}
             >
-              <div className="module-emoji">{m.emoji}</div>
+              <div className="module-emoji">{m.kind === 'unit' ? '📚' : '📖'}</div>
               <div className="module-info">
-                <div className="module-num">Module {m.id}</div>
-                <div className="module-title">{m.title}</div>
+                <div className="module-num">{m.label}</div>
+                <div className="module-title">{m.labelZh}</div>
                 <div className="module-zh">
-                  {m.titleZh} · 掌握 {masteredCount}/{total}
+                  {m.kind === 'unit' ? '按单元复习' : '按故事复习'} · 掌握 {masteredCount}/{total}
                 </div>
               </div>
-              <div className="module-lessons-badge">{m.lessons.length} 课</div>
+              {due > 0 && <div className="module-lessons-badge module-due">{due} 到期</div>}
               <div className="module-arrow">›</div>
             </Link>
           )

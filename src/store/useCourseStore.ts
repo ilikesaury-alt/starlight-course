@@ -8,12 +8,15 @@ import {
   sortDueCards,
   dayStamp,
 } from '../data/srs'
+import type { ModuleId } from '../data/modules'
 
 export interface WrongWord {
   en: string
   zh: string
   emoji: string
   from: string
+  /** 所属模块，用于错题本按模块分组/筛选 */
+  module: ModuleId
 }
 
 interface CourseStore {
@@ -31,7 +34,7 @@ interface CourseStore {
   unmarkMastered: (en: string) => void
   isMastered: (en: string) => boolean
   addWrongWord: (w: WrongWord) => void
-  removeWrongWord: (en: string) => void
+  removeWrongWord: (en: string, module?: ModuleId) => void
   clearWrongWords: () => void
   addStars: (n: number) => void
   markPreviewDone: (slug: string) => void
@@ -39,20 +42,22 @@ interface CourseStore {
   resetAll: () => void
 
   // SRS 智能复习相关
-  /** 确保某词已建卡(预习时调用) */
-  seedCard: (en: string) => void
-  /** 记录一次复习结果,自动调度下次时间 */
-  recordReview: (en: string, correct: boolean) => void
-  /** 批量种子化(进单元预习页时调用) */
-  seedCards: (ens: string[]) => void
-  /** 获取今日到期卡片(已排序),可限制数量 */
-  getDueCards: (limit?: number) => SrsCard[]
-  /** 今日到期卡片数量 */
-  getTodayDueCount: () => number
+  /** 确保某词已建卡(预习时调用)，并归入所属模块 */
+  seedCard: (en: string, module: ModuleId) => void
+  /** 记录一次复习结果,自动调度下次时间；可补登记所属模块 */
+  recordReview: (en: string, correct: boolean, module?: ModuleId) => void
+  /** 批量种子化(进单元/故事预习页时调用)，并归入所属模块 */
+  seedCards: (ens: string[], module: ModuleId) => void
+  /** 获取今日到期卡片(已排序),可限制数量；module 非空时只取该模块的卡 */
+  getDueCards: (limit?: number, module?: ModuleId) => SrsCard[]
+  /** 今日到期卡片数量；module 非空时只计该模块 */
+  getTodayDueCount: (module?: ModuleId) => number
   /** 明日即将到期的卡片数量(用于结果页提示) */
   getTomorrowDueCount: () => number
   /** 取某词的卡片(无则 undefined) */
   getCard: (en: string) => SrsCard | undefined
+  /** 取错题本；module 非空时只取该模块 */
+  getWrongWords: (module?: ModuleId) => WrongWord[]
 }
 
 export const useCourseStore = create<CourseStore>()(
@@ -81,14 +86,16 @@ export const useCourseStore = create<CourseStore>()(
 
       addWrongWord: (w) =>
         set((s) =>
-          s.wrongWords.some((x) => x.en === w.en)
+          s.wrongWords.some((x) => x.en === w.en && x.module === w.module)
             ? s
             : { wrongWords: [...s.wrongWords, w] }
         ),
 
-      removeWrongWord: (en) =>
+      removeWrongWord: (en, module) =>
         set((s) => ({
-          wrongWords: s.wrongWords.filter((w) => w.en !== en),
+          wrongWords: s.wrongWords.filter(
+            (w) => !(w.en === en && (module === undefined || w.module === module))
+          ),
         })),
 
       clearWrongWords: () => set({ wrongWords: [] }),
@@ -120,49 +127,69 @@ export const useCourseStore = create<CourseStore>()(
         }),
 
       // ============ SRS ============
-      seedCard: (en) =>
+      seedCard: (en, module) =>
         set((s) => {
-          if (s.srsCards[en]) return s
+          const existing = s.srsCards[en]
+          if (existing) {
+            if (existing.modules.includes(module)) return s
+            return {
+              srsCards: {
+                ...s.srsCards,
+                [en]: { ...existing, modules: [...existing.modules, module] },
+              },
+            }
+          }
           return {
-            srsCards: { ...s.srsCards, [en]: createNewCard(en) },
+            srsCards: { ...s.srsCards, [en]: createNewCard(en, module) },
           }
         }),
 
-      seedCards: (ens) =>
+      seedCards: (ens, module) =>
         set((s) => {
           const today = dayStamp()
           let changed = false
           const next = { ...s.srsCards }
           for (const en of ens) {
-            if (!next[en]) {
-              next[en] = createNewCard(en, today)
+            const existing = next[en]
+            if (existing) {
+              if (!existing.modules.includes(module)) {
+                next[en] = { ...existing, modules: [...existing.modules, module] }
+                changed = true
+              }
+            } else {
+              next[en] = createNewCard(en, module, today)
               changed = true
             }
           }
           return changed ? { srsCards: next } : s
         }),
 
-      recordReview: (en, correct) =>
+      recordReview: (en, correct, module) =>
         set((s) => {
           const today = dayStamp()
-          const existing = s.srsCards[en] ?? createNewCard(en, today)
+          const existing = s.srsCards[en] ?? createNewCard(en, module ?? 'starlight', today)
           const next = scheduleNext(existing, correct, today)
-          const updatedCard: SrsCard = { ...existing, ...next, en }
+          const modules = [...(existing.modules ?? [])]
+          if (module && !modules.includes(module)) modules.push(module)
+          const updatedCard: SrsCard = { ...existing, ...next, en, modules }
           return {
             srsCards: { ...s.srsCards, [en]: updatedCard },
           }
         }),
 
-      getDueCards: (limit) => {
+      getDueCards: (limit, module) => {
         const today = dayStamp()
-        const all = Object.values(get().srsCards).filter((c) => isDue(c, today))
+        let all = Object.values(get().srsCards).filter((c) => isDue(c, today))
+        if (module) all = all.filter((c) => c.modules.includes(module))
         const sorted = sortDueCards(all, today)
         return typeof limit === 'number' ? sorted.slice(0, limit) : sorted
       },
 
-      getTodayDueCount: () => {
+      getTodayDueCount: (module) => {
         const today = dayStamp()
-        return Object.values(get().srsCards).filter((c) => isDue(c, today)).length
+        let all = Object.values(get().srsCards)
+        if (module) all = all.filter((c) => c.modules.includes(module))
+        return all.filter((c) => isDue(c, today)).length
       },
 
       getTomorrowDueCount: () => {
@@ -171,11 +198,16 @@ export const useCourseStore = create<CourseStore>()(
       },
 
       getCard: (en) => get().srsCards[en],
+
+      getWrongWords: (module) => {
+        const all = get().wrongWords
+        return module ? all.filter((w) => w.module === module) : all
+      },
     }),
     {
       name: 'starlight-course',
-      version: 2,
-      // v1 → v2 迁移:把已有的 masteredWords 自动转为 box 3 卡片(7 天后复习)
+      version: 3,
+      // 迁移：补上模块维度字段
       migrate: (persistedState: unknown, version: number) => {
         // version 由 zustand 注入,这里仅用于触发迁移逻辑
         void version
@@ -183,8 +215,8 @@ export const useCourseStore = create<CourseStore>()(
         const today = dayStamp()
         // 已有 masteredWords 自动升级为 box 3(掌握级),下次复习为 7 天后
         const mastered: string[] = s.masteredWords ?? []
-        const existingCards: Record<string, SrsCard> = s.srsCards ?? {}
-        const srsCards: Record<string, SrsCard> = { ...existingCards }
+        const existingCards: Record<string, any> = (s.srsCards ?? {}) as Record<string, any>
+        const srsCards: Record<string, any> = { ...existingCards }
         for (const en of mastered) {
           if (!srsCards[en]) {
             srsCards[en] = {
@@ -194,10 +226,22 @@ export const useCourseStore = create<CourseStore>()(
               lastReview: today,
               streak: 3,
               reviews: 3,
+              modules: ['starlight'],
             }
           }
         }
-        return { ...s, srsCards } as CourseStore
+        // 旧卡片缺 modules 字段时,默认归入 starlight
+        for (const en of Object.keys(srsCards)) {
+          const c = srsCards[en]
+          if (!Array.isArray(c.modules) || c.modules.length === 0) {
+            srsCards[en] = { ...c, modules: ['starlight'] }
+          }
+        }
+        // 旧错题缺 module 字段时,默认归入 starlight
+        const wrongWords: WrongWord[] = (s.wrongWords ?? []).map((w) =>
+          'module' in w ? (w as WrongWord) : { ...(w as WrongWord), module: 'starlight' as ModuleId }
+        )
+        return { ...s, srsCards, wrongWords } as CourseStore
       },
     }
   )

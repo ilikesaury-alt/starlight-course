@@ -2,14 +2,18 @@ import { useState, useEffect } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import SpeakButton from '../components/SpeakButton'
 import SafeBoundary from '../components/SafeBoundary'
-import { getModule, STARLIGHT_THEME } from '../data/starlight'
+import { getModule } from '../data/starlight'
+import { getModuleMeta, moduleThemeOf, type ModuleId } from '../data/modules'
 import { useCourseStore } from '../store/useCourseStore'
 import { speakText } from '../utils/speak'
 import { moduleThemeVars } from '../utils/theme'
 
+type ReviewWordRow = { en: string; zh: string; emoji?: string; ipa?: string }
+
 export default function VocabReview() {
-  const { unitId = '' } = useParams()
-  const mod = getModule(unitId)
+  const { moduleId = '', itemId = '' } = useParams()
+  const meta = getModuleMeta(moduleId)
+  const isUnit = meta?.kind === 'unit'
   const [lessonIdx, setLessonIdx] = useState(0)
   const [idx, setIdx] = useState(0)
   const [showZh, setShowZh] = useState(false)
@@ -20,14 +24,24 @@ export default function VocabReview() {
   const recordReview = useCourseStore((s) => s.recordReview)
   const seedCard = useCourseStore((s) => s.seedCard)
 
-  // 切换单词（上一个/下一个/点圆点/切换课/进入单词卡）时自动发音
+  // 根据模块类型取单词：Starlight 按 lesson 分组，故事类用扁平词表
+  const lessons: { id: number | string; title: string; titleZh?: string; words: ReviewWordRow[] }[] = isUnit
+    ? (getModule(itemId)?.lessons ?? []).map((l) => ({
+        id: l.id,
+        title: l.title,
+        titleZh: l.titleZh,
+        words: l.words as ReviewWordRow[],
+      }))
+    : [{ id: 1, title: '全部单词', titleZh: '', words: (meta?.getWords(itemId) ?? []) as ReviewWordRow[] }]
+
+  // 切换单词时自动发音
   useEffect(() => {
-    const wd = getModule(unitId)?.lessons?.[lessonIdx]?.words?.[idx]
+    const wd = lessons[lessonIdx]?.words?.[idx]
     if (wd) speakText(wd.en)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [unitId, lessonIdx, idx])
+  }, [moduleId, itemId, lessonIdx, idx])
 
-  if (!mod) {
+  if (!meta) {
     return (
       <div className="empty">
         <p>没有找到这个模块。</p>
@@ -36,9 +50,9 @@ export default function VocabReview() {
     )
   }
 
-  const mcStyle = moduleThemeVars(STARLIGHT_THEME)
-  const lessons = mod.lessons ?? []
-  const lesson = lessons[lessonIdx]
+  const mcStyle = moduleThemeVars(moduleThemeOf(moduleId))
+  const lessonsList = lessons
+  const lesson = lessonsList[lessonIdx]
   const words = lesson?.words ?? []
   const w = words[idx]
   const isMastered = w ? masteredWords.includes(w.en) : false
@@ -54,31 +68,35 @@ export default function VocabReview() {
   return (
     <div className="page vocab-review" style={mcStyle}>
       <div className="page-head" style={mcStyle}>
-        <span className="page-emoji">{mod.emoji}</span>
+        <span className="page-emoji">{isUnit ? '📚' : '📖'}</span>
         <div>
-          <div className="page-kicker">Module {mod.id} · 单词复习</div>
-          <h1 className="page-title">{mod.title}</h1>
+          <div className="page-kicker">
+            {meta.label} · {isUnit ? `Unit ${itemId}` : '单词复习'}
+          </div>
+          <h1 className="page-title">{isUnit ? (getModule(itemId)?.title ?? '单词复习') : meta.labelZh}</h1>
         </div>
       </div>
 
       <SafeBoundary label="单词复习">
         <div className="mode-badge mode-review">🔁 复习模式 · 先想想再看中文</div>
 
-        <div className="lesson-switcher" style={mcStyle}>
-          {lessons.map((l, i) => (
-            <button
-              key={l.id}
-              type="button"
-              className={'lesson-pill' + (i === lessonIdx ? ' active' : '')}
-              onClick={() => selectLesson(i)}
-            >
-              <span className="lp-num">L{l.id}</span>
-              <span>{l.title}</span>
-            </button>
-          ))}
-        </div>
+        {isUnit && (
+          <div className="lesson-switcher" style={mcStyle}>
+            {lessonsList.map((l, i) => (
+              <button
+                key={l.id}
+                type="button"
+                className={'lesson-pill' + (i === lessonIdx ? ' active' : '')}
+                onClick={() => selectLesson(i)}
+              >
+                <span className="lp-num">L{l.id}</span>
+                <span>{l.title}</span>
+              </button>
+            ))}
+          </div>
+        )}
 
-        {lesson && (
+        {lesson && isUnit && (
           <div className="lesson-current" style={mcStyle}>
             <div className="lesson-current-num">{lesson.id}</div>
             <div>
@@ -119,7 +137,7 @@ export default function VocabReview() {
                     className="mastery-btn unfamiliar"
                     onClick={() => {
                       unmarkMastered(w.en)
-                      recordReview(w.en, false)
+                      recordReview(w.en, false, moduleId as ModuleId)
                     }}
                   >
                     😅 标记为生疏
@@ -130,8 +148,8 @@ export default function VocabReview() {
                     className="mastery-btn mastered"
                     onClick={() => {
                       markMastered(w.en)
-                      seedCard(w.en)
-                      recordReview(w.en, true)
+                      seedCard(w.en, moduleId as ModuleId)
+                      recordReview(w.en, true, moduleId as ModuleId)
                     }}
                   >
                     ✅ 已掌握
@@ -164,8 +182,10 @@ export default function VocabReview() {
       </SafeBoundary>
 
       <div className="page-nav">
-        <Link to={`/review/${unitId}`} className="back-link">← 复习菜单</Link>
-        <Link to={`/review/${unitId}/quiz`} className="btn">去听力测验 →</Link>
+        <Link to={`/review/${moduleId}/${itemId}`} className="back-link">← 复习菜单</Link>
+        {isUnit && (
+          <Link to={`/review/${moduleId}/${itemId}/quiz`} className="btn">去听力测验 →</Link>
+        )}
       </div>
     </div>
   )

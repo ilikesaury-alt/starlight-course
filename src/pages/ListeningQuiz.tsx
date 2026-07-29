@@ -2,7 +2,8 @@ import { useMemo, useState, useEffect, useRef } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import SpeakButton from '../components/SpeakButton'
 import SafeBoundary from '../components/SafeBoundary'
-import { getModule, type QuizQuestion, STARLIGHT_THEME } from '../data/starlight'
+import { getModule, type QuizQuestion } from '../data/starlight'
+import { getModuleMeta, moduleThemeOf } from '../data/modules'
 import { useCourseStore } from '../store/useCourseStore'
 import { moduleThemeVars } from '../utils/theme'
 
@@ -45,8 +46,8 @@ function buildQuiz(mod: ReturnType<typeof getModule>): QuizItem[] {
 }
 
 export default function ListeningQuiz() {
-  const { unitId = '' } = useParams()
-  const mod = getModule(unitId)
+  const { moduleId = '', itemId = '' } = useParams()
+  const mod = getModule(itemId)
   const [idx, setIdx] = useState(0)
   const [states, setStates] = useState<QState[]>([])
   const [done, setDone] = useState(false)
@@ -89,12 +90,13 @@ export default function ListeningQuiz() {
           zh: word?.zh ?? '',
           emoji: word?.emoji ?? '❓',
           from: mod.title,
+          module: 'starlight',
         })
       }
     })
     const stars = correct === quiz.length ? correct + 5 : correct
     addStars(stars)
-    markQuizDone(unitId)
+    markQuizDone(itemId)
   }, [done]) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!mod) {
@@ -106,7 +108,7 @@ export default function ListeningQuiz() {
     )
   }
 
-  const mcStyle = moduleThemeVars(STARLIGHT_THEME)
+  const mcStyle = moduleThemeVars(moduleThemeOf(moduleId))
 
   let correct = 0
   states.forEach((s, i) => {
@@ -134,9 +136,9 @@ export default function ListeningQuiz() {
     // 优先用正确选项的词
     const targetWord = allWords.find((w) => w.en === correctOpt)
     if (targetWord) {
-      seedCard(targetWord.en)
+      seedCard(targetWord.en, 'starlight')
       const correct = i === cur.answer
-      recordReview(targetWord.en, correct)
+      recordReview(targetWord.en, correct, 'starlight')
       if (correct) {
         // 答对了顺便从错题本移除
         removeWrongWord(targetWord.en)
@@ -146,8 +148,8 @@ export default function ListeningQuiz() {
     if (i !== cur.answer) {
       const wrongWord = allWords.find((w) => w.en === pickedOpt)
       if (wrongWord && wrongWord.en !== targetWord?.en) {
-        seedCard(wrongWord.en)
-        recordReview(wrongWord.en, false)
+        seedCard(wrongWord.en, 'starlight')
+        recordReview(wrongWord.en, false, 'starlight')
       }
     }
   }
@@ -198,7 +200,7 @@ export default function ListeningQuiz() {
             <div className="result-actions">
               <button type="button" className="btn btn-sun" onClick={restart}>🔁 再做一次</button>
               <Link to="/wrong" className="btn btn-soft">📋 看错题本</Link>
-              <Link to={`/review/${unitId}`} className="btn btn-soft">复习菜单</Link>
+              <Link to={`/review/${moduleId}/${itemId}`} className="btn btn-soft">复习菜单</Link>
             </div>
           </div>
         ) : (
@@ -260,7 +262,7 @@ export default function ListeningQuiz() {
       </SafeBoundary>
 
       <div className="page-nav">
-        <Link to={`/review/${unitId}`} className="back-link">← 复习菜单</Link>
+        <Link to={`/review/${moduleId}/${itemId}`} className="back-link">← 复习菜单</Link>
       </div>
     </div>
   )

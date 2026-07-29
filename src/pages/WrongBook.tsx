@@ -1,11 +1,15 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import SpeakButton from '../components/SpeakButton'
 import SafeBoundary from '../components/SafeBoundary'
 import { useCourseStore } from '../store/useCourseStore'
 import { STARLIGHT_THEME } from '../data/starlight'
+import { MODULE_LIST, moduleThemeOf, type ModuleId } from '../data/modules'
 import { moduleThemeVars } from '../utils/theme'
 
 const mcStyle = moduleThemeVars(STARLIGHT_THEME)
+
+type ModuleFilter = ModuleId | 'all'
 
 export default function WrongBook() {
   const wrongWords = useCourseStore((s) => s.wrongWords)
@@ -13,6 +17,12 @@ export default function WrongBook() {
   const markMastered = useCourseStore((s) => s.markMastered)
   const clearWrongWords = useCourseStore((s) => s.clearWrongWords)
   const recordReview = useCourseStore((s) => s.recordReview)
+
+  const [filter, setFilter] = useState<ModuleFilter>('all')
+  const list = filter === 'all' ? wrongWords : wrongWords.filter((w) => w.module === filter)
+
+  // 模块中文名查表，用于在标签上展示
+  const moduleLabel = (id: ModuleId) => MODULE_LIST.find((m) => m.id === id)?.labelZh ?? id
 
   return (
     <div className="page wrong-book" style={mcStyle}>
@@ -38,14 +48,47 @@ export default function WrongBook() {
               共 {wrongWords.length} 个错词。点击 🔊 听发音，练熟后点"已掌握"移除。
             </p>
 
+            <div className="filter-chips">
+              <button
+                type="button"
+                className={'chip' + (filter === 'all' ? ' active' : '')}
+                onClick={() => setFilter('all')}
+              >
+                全部
+              </button>
+              {MODULE_LIST.map((m) => {
+                const count = wrongWords.filter((w) => w.module === m.id).length
+                if (count === 0) return null
+                return (
+                  <button
+                    key={m.id}
+                    type="button"
+                    className={'chip' + (filter === m.id ? ' active' : '')}
+                    style={{ '--mc': m.color, '--mc-soft': m.colorSoft } as React.CSSProperties}
+                    onClick={() => setFilter(m.id)}
+                  >
+                    {m.labelZh} {count}
+                  </button>
+                )
+              })}
+            </div>
+
             <div className="wrong-list">
-              {wrongWords.map((w) => (
-                <div key={w.en} className="wrong-item">
+              {list.map((w) => (
+                <div key={w.en + '|' + w.module} className="wrong-item">
                   <div className="wrong-emoji">{w.emoji}</div>
                   <div className="wrong-info">
                     <div className="wrong-en">{w.en}</div>
                     {w.zh && <div className="wrong-zh">{w.zh}</div>}
-                    <div className="wrong-from">来自：{w.from}</div>
+                    <div className="wrong-from">
+                      来自：{w.from}
+                      <span
+                        className="wrong-module-tag"
+                        style={moduleThemeVars(moduleThemeOf(w.module))}
+                      >
+                        {moduleLabel(w.module)}
+                      </span>
+                    </div>
                   </div>
                   <div className="wrong-actions">
                     <SpeakButton text={w.en} label={w.en} />
@@ -54,9 +97,9 @@ export default function WrongBook() {
                       className="mastery-btn mastered"
                       onClick={() => {
                         markMastered(w.en)
-                        removeWrongWord(w.en)
+                        removeWrongWord(w.en, w.module)
                         // 同步 SRS:答对一次,升盒,避免今日复习反复考
-                        recordReview(w.en, true)
+                        recordReview(w.en, true, w.module)
                       }}
                     >
                       ✅ 掌握

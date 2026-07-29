@@ -27,10 +27,13 @@ export default function LessonPreview() {
   // 进入某课时,把该课的单词和句型批量种子化进 SRS 调度池
   useEffect(() => {
     if (words.length === 0 && sentences.length === 0) return
-    seedCards([
-      ...words.map((w) => w.en),
-      ...sentences.map((s) => s.en),
-    ])
+    seedCards(
+      [
+        ...words.map((w) => w.en),
+        ...sentences.map((s) => s.en),
+      ],
+      'starlight'
+    )
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lesson?.id, mod?.slug])
 

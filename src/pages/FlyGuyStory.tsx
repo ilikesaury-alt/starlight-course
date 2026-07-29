@@ -66,7 +66,7 @@ export default function FlyGuyStory() {
   // 进入故事:把单词种子化进 SRS 调度池
   useEffect(() => {
     if (words.length === 0) return
-    seedCards(words.map((w) => w.en))
+    seedCards(words.map((w) => w.en), 'flyguy')
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [story?.slug])
 
@@ -122,12 +122,12 @@ export default function FlyGuyStory() {
               markPreviewDone(story.slug)
               wrongEns.forEach((en) => {
                 const w = words.find((x) => x.en === en)
-                if (w) addWrongWord({ en: w.en, zh: w.zh, emoji: w.emoji ?? '🐝', from: story.title })
+                if (w) addWrongWord({ en: w.en, zh: w.zh, emoji: w.emoji ?? '🐝', from: story.title, module: 'flyguy' })
               })
             }}
             onPick={(en, correct) => {
-              seedCards([en])
-              recordReview(en, correct)
+              seedCards([en], 'flyguy')
+              recordReview(en, correct, 'flyguy')
             }}
           />
         )}

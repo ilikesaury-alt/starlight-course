@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import SpeakButton from '../components/SpeakButton'
 import SafeBoundary from '../components/SafeBoundary'
 import { modules, STARLIGHT_THEME } from '../data/starlight'
+import { MODULE_LIST, moduleThemeOf, type ModuleId } from '../data/modules'
 import { useCourseStore } from '../store/useCourseStore'
 import { boxLabel, boxEmoji, type SrsCard } from '../data/srs'
 import { speakText } from '../utils/speak'
@@ -20,20 +21,25 @@ interface ContentMeta {
 }
 const CONTENT_INDEX: Record<string, ContentMeta> = (() => {
   const idx: Record<string, ContentMeta> = {}
-  for (const m of modules) {
-    for (const l of m.lessons) {
-      for (const w of l.words) {
+  // 三个模块的单词（含故事类）
+  for (const m of MODULE_LIST) {
+    for (const it of m.items) {
+      for (const w of m.getWords(it.id)) {
         if (!idx[w.en]) {
           idx[w.en] = {
             en: w.en,
             zh: w.zh,
             emoji: w.emoji,
-            ipa: w.ipa,
-            from: `${m.title} · L${l.id}`,
+            from: `${m.labelZh} · ${it.title || it.id}`,
             type: 'word',
           }
         }
       }
+    }
+  }
+  // Starlight 句型也加入索引
+  for (const m of modules) {
+    for (const l of m.lessons) {
       for (const s of l.sentences) {
         if (!idx[s.en]) {
           idx[s.en] = {
@@ -56,16 +62,20 @@ interface SessionStats {
   wrongWords: { en: string; zh: string; emoji?: string; from: string }[]
 }
 
+type ModuleFilter = ModuleId | 'all'
+
 export default function SmartReview() {
-  // 拍快照:进入页面时一次性确定本次复习队列,避免复习过程中队列抖动
-  // 用 state 而非 const,便于"再复习一轮"时重置
-  const [queue, setQueue] = useState<SrsCard[]>(() => useCourseStore.getState().getDueCards(20))
   const recordReview = useCourseStore((s) => s.recordReview)
   const addWrongWord = useCourseStore((s) => s.addWrongWord)
   const removeWrongWord = useCourseStore((s) => s.removeWrongWord)
   const addStars = useCourseStore((s) => s.addStars)
   const getTomorrowDueCount = useCourseStore((s) => s.getTomorrowDueCount)
+  const getDueCards = useCourseStore((s) => s.getDueCards)
 
+  const [filter, setFilter] = useState<ModuleFilter>('all')
+  // 拍快照:进入页面/切换模块时一次性确定本次复习队列,避免复习过程中队列抖动
+  const loadQueue = (f: ModuleFilter) => getDueCards(20, f === 'all' ? undefined : f)
+  const [queue, setQueue] = useState<SrsCard[]>(() => loadQueue('all'))
   const [idx, setIdx] = useState(0)
   const [revealed, setRevealed] = useState(false)
   const [session, setSession] = useState<SessionStats>({ correct: 0, wrong: 0, wrongWords: [] })
@@ -83,7 +93,17 @@ export default function SmartReview() {
 
   // 重置本次会话,重新拉一次到期队列(答错的词归零后会再次出现)
   const reload = () => {
-    setQueue(useCourseStore.getState().getDueCards(20))
+    setQueue(loadQueue(filter))
+    setIdx(0)
+    setRevealed(false)
+    setSession({ correct: 0, wrong: 0, wrongWords: [] })
+    setDone(false)
+  }
+
+  // 切换模块过滤
+  const changeFilter = (f: ModuleFilter) => {
+    setFilter(f)
+    setQueue(loadQueue(f))
     setIdx(0)
     setRevealed(false)
     setSession({ correct: 0, wrong: 0, wrongWords: [] })
@@ -191,11 +211,7 @@ export default function SmartReview() {
             </p>
 
             <div className="result-actions">
-              <button
-                type="button"
-                className="btn btn-sun"
-                onClick={reload}
-              >
+              <button type="button" className="btn btn-sun" onClick={reload}>
                 🔁 再复习一轮
               </button>
               <Link to="/wrong" className="btn btn-soft">📋 错题本</Link>
@@ -207,16 +223,18 @@ export default function SmartReview() {
     )
   }
 
+  const curModule: ModuleId = filter !== 'all' ? filter : cur.modules[0] ?? 'starlight'
+
   const answer = (correct: boolean) => {
     if (!cur) return
-    recordReview(cur.en, correct)
+    recordReview(cur.en, correct, curModule)
     // 答错自动加入错题本,答对则从错题本移除(已确认掌握)
     const w = CONTENT_INDEX[cur.en]
     const newWrong = !correct && w
       ? [...session.wrongWords, { en: w.en, zh: w.zh, emoji: w.emoji ?? '❓', from: w.from }]
       : session.wrongWords
     if (!correct && w) {
-      addWrongWord({ en: w.en, zh: w.zh, emoji: w.emoji ?? '❓', from: w.from })
+      addWrongWord({ en: w.en, zh: w.zh, emoji: w.emoji ?? '❓', from: w.from, module: curModule })
     } else if (correct) {
       removeWrongWord(cur.en)
     }
@@ -247,13 +265,35 @@ export default function SmartReview() {
       <div className="page-head" style={mcStyle}>
         <span className="page-emoji">🎯</span>
         <div>
-          <div className="page-kicker">智能复习 · 跨单元</div>
+          <div className="page-kicker">智能复习 · 跨模块</div>
           <h1 className="page-title">今日复习</h1>
         </div>
       </div>
 
       <SafeBoundary label="智能复习">
         <div className="mode-badge mode-review">🧠 大脑健身 · 先回忆再翻面</div>
+
+        {/* 模块筛选 chips */}
+        <div className="filter-chips">
+          <button
+            type="button"
+            className={'chip' + (filter === 'all' ? ' active' : '')}
+            onClick={() => changeFilter('all')}
+          >
+            全部
+          </button>
+          {MODULE_LIST.map((m) => (
+            <button
+              key={m.id}
+              type="button"
+              className={'chip' + (filter === m.id ? ' active' : '')}
+              style={{ '--mc': m.color, '--mc-soft': m.colorSoft } as React.CSSProperties}
+              onClick={() => changeFilter(m.id)}
+            >
+              {m.labelZh}
+            </button>
+          ))}
+        </div>
 
         <div className="quiz-meta">
           <span>第 {idx + 1} / {total} 张</span>

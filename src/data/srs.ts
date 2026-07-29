@@ -2,6 +2,8 @@
 // 基于艾宾浩斯遗忘曲线,通过递增间隔减缓遗忘。
 // 算法:答对升一盒、答错归零,盒号决定下次复习间隔。
 
+import type { ModuleId } from './modules'
+
 // 各盒对应的下次复习间隔(天)。box 0 = 当天/短期重练。
 export const BOX_INTERVALS = [0, 1, 2, 4, 7, 14, 30] as const
 export const MAX_BOX = BOX_INTERVALS.length - 1
@@ -19,6 +21,8 @@ export interface SrsCard {
   streak: number
   /** 总复习次数 */
   reviews: number
+  /** 该词出现过的模块（用于按模块筛选复习），记忆进度跨模块共享 */
+  modules: ModuleId[]
 }
 
 /** 把 Date 折算为 UTC 整天的天数戳,避免时区漂移 */
@@ -55,7 +59,7 @@ export function scheduleNext(
 }
 
 /** 创建新卡(从未学过的词) */
-export function createNewCard(en: string, today: number = dayStamp()): SrsCard {
+export function createNewCard(en: string, module: ModuleId, today: number = dayStamp()): SrsCard {
   return {
     en,
     box: 0,
@@ -63,6 +67,7 @@ export function createNewCard(en: string, today: number = dayStamp()): SrsCard {
     lastReview: today,
     streak: 0,
     reviews: 0,
+    modules: [module],
   }
 }
 
