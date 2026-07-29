@@ -50,8 +50,10 @@ export interface Module {
   preview: ModulePreview
   // 按 lesson 细分的学习内容(8 课)
   lessons: Lesson[]
-  // 聚合字段:汇总所有 lesson 的单词和句型,供旧的单元级页面使用
+  // @deprecated 仅保留作数据快照,不再作为单词全集口径。
+  // 单词全集统一以 lessons.flatMap(l => l.words) / modules.ts 的 getWords 为准,避免统计漂移。
   words: Word[]
+  // @deprecated 全站未引用(例句统一从 lesson.sentences 取),可后续删除。
   sentences: Sentence[]
   quiz: QuizQuestion[]
 }

@@ -12,7 +12,11 @@ export default function StarlightHome() {
   const completed = useCourseStore((s) => s.completedPreviews)
 
   const totalLessons = useMemo(() => modules.reduce((a, m) => a + m.lessons.length, 0), [])
-  const totalWords = useMemo(() => modules.reduce((a, m) => a + m.words.length, 0), [])
+  // 统一以「按课细分的完整单词」为单词全集口径(与复习系统 getWords / Progress 一致)
+  const totalWords = useMemo(
+    () => modules.reduce((a, m) => a + m.lessons.flatMap((l) => l.words).length, 0),
+    []
+  )
   const doneCount = useMemo(
     () => modules.filter((m) => completed.includes(m.slug)).length,
     [completed],
@@ -25,7 +29,9 @@ export default function StarlightHome() {
       (m) =>
         m.title.toLowerCase().includes(q) ||
         m.titleZh.includes(q) ||
-        m.words.some((w) => w.en.toLowerCase().includes(q) || w.zh.includes(q)),
+        m.lessons.flatMap((l) => l.words).some(
+          (w) => w.en.toLowerCase().includes(q) || w.zh.includes(q)
+        ),
     )
   }, [query])
 

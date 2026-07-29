@@ -32,7 +32,6 @@ interface CourseStore {
   // 动作
   markMastered: (en: string) => void
   unmarkMastered: (en: string) => void
-  isMastered: (en: string) => boolean
   addWrongWord: (w: WrongWord) => void
   removeWrongWord: (en: string, module?: ModuleId) => void
   clearWrongWords: () => void
@@ -54,8 +53,6 @@ interface CourseStore {
   getTodayDueCount: (module?: ModuleId) => number
   /** 明日即将到期的卡片数量(用于结果页提示) */
   getTomorrowDueCount: () => number
-  /** 取某词的卡片(无则 undefined) */
-  getCard: (en: string) => SrsCard | undefined
   /** 取错题本；module 非空时只取该模块 */
   getWrongWords: (module?: ModuleId) => WrongWord[]
 }
@@ -81,8 +78,6 @@ export const useCourseStore = create<CourseStore>()(
         set((s) => ({
           masteredWords: s.masteredWords.filter((w) => w !== en),
         })),
-
-      isMastered: (en) => get().masteredWords.includes(en),
 
       addWrongWord: (w) =>
         set((s) =>
@@ -196,8 +191,6 @@ export const useCourseStore = create<CourseStore>()(
         const tomorrow = dayStamp() + 1
         return Object.values(get().srsCards).filter((c) => c.nextReview === tomorrow).length
       },
-
-      getCard: (en) => get().srsCards[en],
 
       getWrongWords: (module) => {
         const all = get().wrongWords

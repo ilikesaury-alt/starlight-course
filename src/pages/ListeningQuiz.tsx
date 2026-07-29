@@ -1,21 +1,11 @@
-import { useMemo, useState, useEffect, useRef } from 'react'
+import { useMemo } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import SpeakButton from '../components/SpeakButton'
-import SafeBoundary from '../components/SafeBoundary'
-import { getModule, type QuizQuestion } from '../data/starlight'
-import { getModuleMeta, moduleThemeOf } from '../data/modules'
-import { useCourseStore } from '../store/useCourseStore'
-import { moduleThemeVars } from '../utils/theme'
-
-interface QuizItem extends QuizQuestion {
-  lessonId?: number
-  speakText?: string
-}
-
-interface QState {
-  picked: number | null
-  answered: boolean
-}
+import SafeBoundary from '@/components/SafeBoundary'
+import QuizEngine, { type QuizItem } from '@/components/QuizEngine'
+import { getModule, type QuizQuestion } from '@/data/starlight'
+import { moduleThemeOf } from '@/data/modules'
+import { useCourseStore } from '@/store/useCourseStore'
+import { moduleThemeVars } from '@/utils/theme'
 
 // 从单元所有 lesson 的单词动态生成测验题(每课抽 1 题,最多 16 题)
 function buildQuiz(mod: ReturnType<typeof getModule>): QuizItem[] {
@@ -48,9 +38,6 @@ function buildQuiz(mod: ReturnType<typeof getModule>): QuizItem[] {
 export default function ListeningQuiz() {
   const { moduleId = '', itemId = '' } = useParams()
   const mod = getModule(itemId)
-  const [idx, setIdx] = useState(0)
-  const [states, setStates] = useState<QState[]>([])
-  const [done, setDone] = useState(false)
 
   const addWrongWord = useCourseStore((s) => s.addWrongWord)
   const addStars = useCourseStore((s) => s.addStars)
@@ -58,7 +45,6 @@ export default function ListeningQuiz() {
   const recordReview = useCourseStore((s) => s.recordReview)
   const seedCard = useCourseStore((s) => s.seedCard)
   const removeWrongWord = useCourseStore((s) => s.removeWrongWord)
-  const submittedRef = useRef(false)
 
   // 动态生成测验题(每课 1 题,比原来固定 5 题更全面)
   const quiz = useMemo<QuizItem[]>(() => {
@@ -69,35 +55,8 @@ export default function ListeningQuiz() {
       speakText: q.options[q.answer] ?? q.q,
     }))
     return [...generated, ...manual]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mod])
-
-  // 结果提交：统计错题加入错题本、加星
-  useEffect(() => {
-    if (!done || !mod || submittedRef.current) return
-    submittedRef.current = true
-    const allWords = mod.lessons.flatMap((l) => l.words)
-    let correct = 0
-    quiz.forEach((q, i) => {
-      const st = states[i]
-      if (st?.answered && st.picked === q.answer) {
-        correct++
-      } else if (st?.answered && st.picked !== q.answer) {
-        const correctOpt = q.options[q.answer]
-        // 从全单元单词中匹配正确的词
-        const word = allWords.find((w) => w.en === correctOpt)
-        addWrongWord({
-          en: correctOpt,
-          zh: word?.zh ?? '',
-          emoji: word?.emoji ?? '❓',
-          from: mod.title,
-          module: 'starlight',
-        })
-      }
-    })
-    const stars = correct === quiz.length ? correct + 5 : correct
-    addStars(stars)
-    markQuizDone(itemId)
-  }, [done]) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!mod) {
     return (
@@ -109,65 +68,7 @@ export default function ListeningQuiz() {
   }
 
   const mcStyle = moduleThemeVars(moduleThemeOf(moduleId))
-
-  let correct = 0
-  states.forEach((s, i) => {
-    if (s.answered && s.picked === quiz[i].answer) correct++
-  })
-
-  const cur = quiz[idx]
-  const curState = states[idx]
-  const isAnswered = !!curState?.answered
-  const isCorrect = isAnswered && curState.picked === cur.answer
-
-  // 全单元单词索引,供 pick 同步 SRS 使用(此处 mod 必定存在)
   const allWords = mod.lessons.flatMap((l) => l.words)
-
-  const pick = (i: number) => {
-    if (isAnswered) return
-    setStates((prev) => {
-      const copy = [...prev]
-      copy[idx] = { picked: i, answered: true }
-      return copy
-    })
-    // 同步 SRS:正确选项对应的单词答对升盒,错误则归零
-    const correctOpt = cur.options[cur.answer]
-    const pickedOpt = cur.options[i]
-    // 优先用正确选项的词
-    const targetWord = allWords.find((w) => w.en === correctOpt)
-    if (targetWord) {
-      seedCard(targetWord.en, 'starlight')
-      const correct = i === cur.answer
-      recordReview(targetWord.en, correct, 'starlight')
-      if (correct) {
-        // 答对了顺便从错题本移除
-        removeWrongWord(targetWord.en)
-      }
-    }
-    // 如果选了错的选项,把那个词也记一次错(它会进错题本由下面的 useEffect 处理)
-    if (i !== cur.answer) {
-      const wrongWord = allWords.find((w) => w.en === pickedOpt)
-      if (wrongWord && wrongWord.en !== targetWord?.en) {
-        seedCard(wrongWord.en, 'starlight')
-        recordReview(wrongWord.en, false, 'starlight')
-      }
-    }
-  }
-
-  const goNext = () => {
-    if (idx + 1 >= quiz.length) {
-      setDone(true)
-    } else {
-      setIdx((i) => i + 1)
-    }
-  }
-
-  const restart = () => {
-    setIdx(0)
-    setStates([])
-    setDone(false)
-    submittedRef.current = false
-  }
 
   return (
     <div className="page listening-quiz" style={mcStyle}>
@@ -180,85 +81,57 @@ export default function ListeningQuiz() {
       </div>
 
       <SafeBoundary label="测验">
-        <div className="mode-badge mode-review">🎯 复习测验 · 听一听选一选</div>
-
-        {done ? (
-          <div className="result-card">
-            <div className="result-emoji">{correct === quiz.length ? '🌟' : correct >= quiz.length / 2 ? '👍' : '💪'}</div>
-            <h2 className="result-title">完成啦！</h2>
-            <div className="result-score">
-              答对 <b>{correct}</b> / {quiz.length} 题
-            </div>
-            <div className="result-bar">
-              <div className="result-bar-fill" style={{ width: `${(correct / quiz.length) * 100}%` }} />
-            </div>
-            <p className="result-tip">
-              {correct === quiz.length
-                ? '太棒了！全对！+5 额外星星 🎉'
-                : '错题已加入错题本，再练练一定行！'}
-            </p>
-            <div className="result-actions">
-              <button type="button" className="btn btn-sun" onClick={restart}>🔁 再做一次</button>
+        <QuizEngine
+          quiz={quiz}
+          mcStyle={mcStyle}
+          badgeText="🎯 复习测验 · 听一听选一选"
+          resultTitle="完成啦！"
+          renderQuestionExtra={(q) =>
+            q.lessonId ? <div className="quiz-lesson-tag">📖 Lesson {q.lessonId}</div> : null
+          }
+          resultLinks={
+            <>
               <Link to="/wrong" className="btn btn-soft">📋 看错题本</Link>
               <Link to={`/review/${moduleId}/${itemId}`} className="btn btn-soft">复习菜单</Link>
-            </div>
-          </div>
-        ) : (
-          <>
-            <div className="quiz-meta">
-              <span>第 {idx + 1} / {quiz.length} 题</span>
-              <span>已答对 {correct} 题</span>
-            </div>
-            <div className="quiz-progress">
-              <div className="quiz-progress-fill" style={{ width: `${(idx / quiz.length) * 100}%` }} />
-            </div>
-
-            <div className="quiz-q" style={mcStyle}>
-              {cur.lessonId && (
-                <div className="quiz-lesson-tag">📖 Lesson {cur.lessonId}</div>
-              )}
-              <div className="quiz-q-row">
-                <span>{cur.q}</span>
-                <SpeakButton text={cur.speakText ?? cur.q} label="听发音" />
-              </div>
-              <div className="quiz-opts">
-                {cur.options.map((opt, i) => {
-                  let cls = 'quiz-opt'
-                  if (isAnswered) {
-                    if (i === cur.answer) cls += ' correct'
-                    else if (i === curState.picked) cls += ' wrong'
-                  }
-                  return (
-                    <div key={i} className={cls} onClick={() => !isAnswered && pick(i)}>
-                      <span className="quiz-opt-letter">{String.fromCharCode(65 + i)}</span>
-                      <span>{opt}</span>
-                      <span onClick={(e) => e.stopPropagation()}>
-                        <SpeakButton text={opt} label={opt} />
-                      </span>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-
-            {isAnswered && (
-              <div className={'explain ' + (isCorrect ? 'ok' : 'no')}>
-                <div className="explain-head">
-                  {isCorrect ? '✅ 答对了！' : `❌ 正确答案是 ${String.fromCharCode(65 + cur.answer)}`}
-                </div>
-                <div className="explain-body">{cur.explain}</div>
-              </div>
-            )}
-
-            <div className="quiz-controls">
-              {isAnswered && (
-                <button type="button" className={'btn ' + (isCorrect ? 'btn-sun' : '')} onClick={goNext}>
-                  {idx + 1 >= quiz.length ? '查看结果 🏁' : '下一题 →'}
-                </button>
-              )}
-            </div>
-          </>
-        )}
+            </>
+          }
+          onPick={({ en, picked, correct }) => {
+            // 同步 SRS:正确选项对应的单词答对升盒,错误则归零
+            const targetWord = allWords.find((w) => w.en === en)
+            if (targetWord) {
+              seedCard(targetWord.en, 'starlight')
+              recordReview(targetWord.en, correct, 'starlight')
+              if (correct) {
+                // 答对了顺便从错题本移除
+                removeWrongWord(targetWord.en)
+              }
+            }
+            // 如果选了错的选项,把那个词也记一次错
+            if (!correct) {
+              const wrongWord = allWords.find((w) => w.en === picked)
+              if (wrongWord && wrongWord.en !== targetWord?.en) {
+                seedCard(wrongWord.en, 'starlight')
+                recordReview(wrongWord.en, false, 'starlight')
+              }
+            }
+          }}
+          onFinish={(_correct, _total, wrongEns) => {
+            // 错题加入错题本
+            wrongEns.forEach((en) => {
+              const word = allWords.find((w) => w.en === en)
+              addWrongWord({
+                en,
+                zh: word?.zh ?? '',
+                emoji: word?.emoji ?? '❓',
+                from: mod.title,
+                module: 'starlight',
+              })
+            })
+            const stars = _correct === _total ? _correct + 5 : _correct
+            addStars(stars)
+            markQuizDone(itemId)
+          }}
+        />
       </SafeBoundary>
 
       <div className="page-nav">
