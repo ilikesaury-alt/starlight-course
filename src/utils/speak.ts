@@ -18,6 +18,8 @@ export interface SpeakOptions {
   slow?: boolean
   /** override rate; defaults to 0.9 (or 0.6 when slow) */
   rate?: number
+  /** 'en' (default) uses English voice + Youdao type=1; 'zh' uses Chinese voice + Youdao type=2 */
+  lang?: 'en' | 'zh'
   onStart?: () => void
   onEnd?: () => void
 }
@@ -50,6 +52,16 @@ function pickVoice(): SpeechSynthesisVoice | undefined {
   )
 }
 
+/** 选一个中文嗓音（优先 zh-CN），供中文课文/古诗朗读使用 */
+function pickZhVoice(): SpeechSynthesisVoice | undefined {
+  if (!voices.length) return undefined
+  return (
+    voices.find((v) => v.lang === 'zh-CN') ||
+    voices.find((v) => v.lang?.toLowerCase().startsWith('zh')) ||
+    undefined
+  )
+}
+
 // ---------- 播放状态管理 ----------
 /** 上一次播放的 Audio 引用，用于取消重叠播放 */
 let currentAudio: HTMLAudioElement | null = null
@@ -75,6 +87,7 @@ export function speakText(text: string, opts: SpeakOptions = {}) {
 
   const slow = !!opts.slow
   const rate = opts.rate ?? (slow ? 0.6 : 0.9)
+  const lang = opts.lang ?? 'en'
 
   // 先通知所有旧回调，确保上一个按钮的动画停止
   flushPendingEnds()
@@ -113,10 +126,10 @@ export function speakText(text: string, opts: SpeakOptions = {}) {
   // 递增代次，旧回调检测到代次不匹配时自动跳过
   const gen = ++generation
 
-  // Level 1: 有道词典 TTS
+  // Level 1: 有道词典 TTS（英文 type=1，中文 type=2）
   const youdao = (onComplete?: () => void) => {
     try {
-      const url = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(text)}&type=1`
+      const url = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(text)}&type=${lang === 'zh' ? 2 : 1}`
       const audio = new Audio(url)
       audio.playbackRate = slow ? 0.6 : 1
       currentAudio = audio
@@ -183,10 +196,10 @@ export function speakText(text: string, opts: SpeakOptions = {}) {
 
     try {
       const utter = new SpeechSynthesisUtterance(text)
-      utter.lang = 'en-US'
+      utter.lang = lang === 'zh' ? 'zh-CN' : 'en-US'
       utter.rate = rate
       utter.pitch = 1
-      const voice = pickVoice()
+      const voice = lang === 'zh' ? pickZhVoice() : pickVoice()
       if (voice) utter.voice = voice
 
       let settled = false
@@ -228,4 +241,32 @@ export function speakText(text: string, opts: SpeakOptions = {}) {
 
   // 先尝试有道，失败后降级到 speechSynthesis
   youdao(() => nativeSpeak())
+}
+
+/**
+ * 立即停止任何正在进行的朗读。
+ * 组件卸载（离开页面/切换路由）时调用，避免语音残留。
+ */
+export function cancelSpeech() {
+  // 复位所有在播按钮的动画状态
+  flushPendingEnds()
+  // 终止有道音频
+  if (currentAudio) {
+    try {
+      currentAudio.pause()
+      currentAudio.removeAttribute('src')
+      currentAudio.load()
+    } catch {
+      /* ignore */
+    }
+    currentAudio = null
+  }
+  // 终止原生语音合成
+  try {
+    window.speechSynthesis?.cancel()
+  } catch {
+    /* ignore */
+  }
+  // 代次失效，任何旧回调都不再生效
+  generation++
 }

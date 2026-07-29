@@ -31,6 +31,12 @@ interface CourseStore {
   /** SRS 智能记忆卡片,key 为单词 en */
   srsCards: Record<string, SrsCard>
 
+  // 中文课程(三年级上册语文)进度——独立于英语 SRS,仅做打卡/自测记录
+  /** 背诵打卡:lesson slug -> 已打卡日期戳(dayStamp 整数)列表 */
+  reciteCheckins: Record<string, number[]>
+  /** 自测成绩:lesson slug -> 最近一次 { score, total, date(dayStamp) } */
+  chineseQuiz: Record<string, { score: number; total: number; date: number }>
+
   // 动作
   markMastered: (en: string) => void
   unmarkMastered: (en: string) => void
@@ -42,6 +48,10 @@ interface CourseStore {
   markQuizDone: (slug: string) => void
   /** 标记故事类模块某故事已通关(与 markPreviewDone 区分语义) */
   markStoryDone: (slug: string) => void
+  /** 中文课背诵打卡:记录今天已背该课(同一天重复点击不重复计数) */
+  markRecite: (slug: string) => void
+  /** 中文课自测:记录最近一次成绩 */
+  markChineseQuiz: (slug: string, score: number, total: number) => void
   resetAll: () => void
 
   // SRS 智能复习相关
@@ -71,6 +81,8 @@ export const useCourseStore = create<CourseStore>()(
       completedQuizzes: [],
       completedStories: [],
       srsCards: {},
+      reciteCheckins: {},
+      chineseQuiz: {},
 
       markMastered: (en) =>
         set((s) =>
@@ -123,6 +135,22 @@ export const useCourseStore = create<CourseStore>()(
             : { completedStories: [...s.completedStories, slug] }
         ),
 
+      markRecite: (slug) =>
+        set((s) => {
+          const today = dayStamp()
+          const prev = s.reciteCheckins[slug] ?? []
+          if (prev.includes(today)) return s
+          return { reciteCheckins: { ...s.reciteCheckins, [slug]: [...prev, today] } }
+        }),
+
+      markChineseQuiz: (slug, score, total) =>
+        set((s) => ({
+          chineseQuiz: {
+            ...s.chineseQuiz,
+            [slug]: { score, total, date: dayStamp() },
+          },
+        })),
+
       resetAll: () =>
         set({
           masteredWords: [],
@@ -132,6 +160,8 @@ export const useCourseStore = create<CourseStore>()(
           completedQuizzes: [],
           completedStories: [],
           srsCards: {},
+          reciteCheckins: {},
+          chineseQuiz: {},
         }),
 
       // ============ SRS ============
@@ -222,6 +252,8 @@ export const useCourseStore = create<CourseStore>()(
         completedQuizzes: state.completedQuizzes,
         completedStories: state.completedStories,
         srsCards: state.srsCards,
+        reciteCheckins: state.reciteCheckins,
+        chineseQuiz: state.chineseQuiz,
       }),
       // 迁移：补上模块维度字段 + 拆分 completedPreviews 语义
       migrate: (persistedState: unknown, version: number) => {

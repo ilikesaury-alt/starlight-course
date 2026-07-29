@@ -1,6 +1,8 @@
 import { HashRouter as Router, Routes, Route, useLocation, Navigate, useParams } from 'react-router-dom'
+import { useEffect } from 'react'
 import Layout from '@/components/Layout'
 import SafeBoundary from '@/components/SafeBoundary'
+import { cancelSpeech } from '@/utils/speak'
 import Home from '@/pages/Home'
 import PreviewList from '@/pages/PreviewList'
 import LessonList from '@/pages/LessonList'
@@ -19,10 +21,19 @@ import RocketGirlStory from '@/pages/RocketGirlStory'
 import FlyGuyHome from '@/pages/FlyGuyHome'
 import FlyGuyStory from '@/pages/FlyGuyStory'
 import StarlightHome from '@/pages/StarlightHome'
+import ChineseHome from '@/pages/ChineseHome'
+import ChineseUnit from '@/pages/ChineseUnit'
+import ChineseLesson from '@/pages/ChineseLesson'
 
 // 内层:在 Router 内部使用 useLocation,路由变化时重置 SafeBoundary
 function AppRoutes() {
   const location = useLocation()
+
+  // 离开页面 / 切换路由时立即停止任何残留的语音播放
+  useEffect(() => {
+    cancelSpeech()
+  }, [location.pathname, location.search, location.hash])
+
   return (
     <SafeBoundary key={location.pathname}>
       <Routes>
@@ -48,6 +59,9 @@ function AppRoutes() {
         <Route path="/flyguy" element={<FlyGuyHome />} />
         <Route path="/flyguy/:slug" element={<FlyGuyStory />} />
         <Route path="/starlight" element={<StarlightHome />} />
+        <Route path="/chinese" element={<ChineseHome />} />
+        <Route path="/chinese/:unitId" element={<ChineseUnit />} />
+        <Route path="/chinese/:unitId/:lessonId" element={<ChineseLesson />} />
       </Routes>
     </SafeBoundary>
   )

@@ -36,6 +36,14 @@ export default function Home() {
       )}
 
       <h2 className="section-title">⚡ 课程入口</h2>
+      <Link to="/chinese" className="cn-home-entry">
+        <span className="cn-home-emoji">📚</span>
+        <div className="cn-home-body">
+          <div className="cn-home-title">三年级上册语文</div>
+          <div className="cn-home-sub">人教版必背 · 8 单元 / 古诗词·课文·生字·日积月累</div>
+        </div>
+        <span className="cn-home-arrow">›</span>
+      </Link>
       <Link to="/starlight" className="sl-home-entry">
         <span className="sl-home-emoji">🌟</span>
         <div className="sl-home-body">
