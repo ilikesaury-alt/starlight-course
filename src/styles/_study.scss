@@ -103,6 +103,25 @@
 }
 .fc-controls { display: flex; gap: 10px; justify-content: center; }
 
+// 主动回忆：先选「想起来了 / 没想起来」再揭晓中文
+.recall-actions { display: flex; gap: 10px; margin-top: 12px; }
+.recall-btn {
+  flex: 1;
+  padding: 14px 10px;
+  border-radius: var(--r-lg);
+  border: 2px solid var(--line-2);
+  background: var(--card);
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  color: var(--ink-soft);
+  transition: var(--ease);
+  &:active { transform: scale(0.96); }
+  &.yes { border-color: var(--ok); color: var(--ok); background: var(--ok-soft); }
+}
+.recall-feedback { text-align: center; font-size: var(--fs-md); font-weight: 700; margin-top: 10px; }
+.recall-feedback.ok { color: var(--ok); }
+.recall-feedback.miss { color: var(--ink-soft); }
+
 .word-list-mini { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 16px; }
 .word-chip {
   display: flex;

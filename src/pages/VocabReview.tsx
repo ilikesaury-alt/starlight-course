@@ -17,7 +17,8 @@ export default function VocabReview() {
   const isUnit = meta?.kind === 'unit'
   const [lessonIdx, setLessonIdx] = useState(0)
   const [idx, setIdx] = useState(0)
-  const [showZh, setShowZh] = useState(false)
+  const [answered, setAnswered] = useState(false)
+  const [recalled, setRecalled] = useState(false)
 
   const masteredWords = useCourseStore((s) => s.masteredWords)
   const markMastered = useCourseStore((s) => s.markMastered)
@@ -56,15 +57,30 @@ export default function VocabReview() {
   const lesson = lessonsList[lessonIdx]
   const words = lesson?.words ?? []
   const w = words[idx]
-  const isMastered = w ? masteredWords.includes(w.en) : false
 
   const selectLesson = (i: number) => {
     setLessonIdx(i)
     setIdx(0)
-    setShowZh(false)
+    setAnswered(false)
+    setRecalled(false)
   }
-  const prev = () => { setIdx((i) => (i - 1 + words.length) % words.length); setShowZh(false) }
-  const next = () => { setIdx((i) => (i + 1) % words.length); setShowZh(false) }
+  const prev = () => { setIdx((i) => (i - 1 + words.length) % words.length); setAnswered(false); setRecalled(false) }
+  const next = () => { setIdx((i) => (i + 1) % words.length); setAnswered(false); setRecalled(false) }
+
+  // 先做主动回忆,再揭晓中文并据此计入 SRS(信号来自真实提取,而非主观自评)
+  const handleRecall = (ok: boolean) => {
+    if (!w) return
+    setRecalled(ok)
+    setAnswered(true)
+    if (ok) {
+      markMastered(w.en)
+      seedCard(w.en, moduleId as ModuleId)
+      recordReview(w.en, true, moduleId as ModuleId)
+    } else {
+      unmarkMastered(w.en)
+      recordReview(w.en, false, moduleId as ModuleId)
+    }
+  }
 
   return (
     <div className="page vocab-review" style={mcStyle}>
@@ -121,42 +137,23 @@ export default function VocabReview() {
                 <SpeakButton text={w.en} label={`${w.en} 慢速`} slow />
               </div>
               {w.ipa && <div className="fc-ipa">{w.ipa}</div>}
-              {showZh ? (
-                <div className="fc-zh" onClick={() => setShowZh(false)} title="点击隐藏中文">
-                  {w.zh}
+              {!answered ? (
+                <div className="recall-actions">
+                  <button type="button" className="recall-btn yes" onClick={() => handleRecall(true)}>
+                    💡 想起来了
+                  </button>
+                  <button type="button" className="recall-btn no" onClick={() => handleRecall(false)}>
+                    🤔 没想起来
+                  </button>
                 </div>
               ) : (
-                <button type="button" className="fc-reveal" onClick={() => setShowZh(true)}>
-                  👀 显示中文
-                </button>
+                <>
+                  <div className="fc-zh">{w.zh}</div>
+                  <div className={'recall-feedback ' + (recalled ? 'ok' : 'miss')}>
+                    {recalled ? '厉害，记住了！👍' : '看看中文，下次加油 💪'}
+                  </div>
+                </>
               )}
-
-              <div className="mastery-row">
-                {isMastered ? (
-                  <button
-                    type="button"
-                    className="mastery-btn unfamiliar"
-                    onClick={() => {
-                      unmarkMastered(w.en)
-                      recordReview(w.en, false, moduleId as ModuleId)
-                    }}
-                  >
-                    😅 标记为生疏
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    className="mastery-btn mastered"
-                    onClick={() => {
-                      markMastered(w.en)
-                      seedCard(w.en, moduleId as ModuleId)
-                      recordReview(w.en, true, moduleId as ModuleId)
-                    }}
-                  >
-                    ✅ 已掌握
-                  </button>
-                )}
-              </div>
             </div>
 
             <div className="fc-progress">
@@ -168,7 +165,7 @@ export default function VocabReview() {
                   key={ww.en}
                   type="button"
                   className={'fc-dot' + (i === idx ? ' on' : '') + (masteredWords.includes(ww.en) ? ' mastered' : '')}
-                  onClick={() => { setIdx(i); setShowZh(false) }}
+                  onClick={() => { setIdx(i); setAnswered(false); setRecalled(false) }}
                   aria-label={`第 ${i + 1} 个单词`}
                 />
               ))}
