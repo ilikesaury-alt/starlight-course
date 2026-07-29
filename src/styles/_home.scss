@@ -84,7 +84,6 @@
   .qc-sub { font-size: var(--fs-sm); font-weight: 500; opacity: 0.85; }
 }
 .quick-preview { background: linear-gradient(135deg, var(--brand), var(--brand-2)); color: #fff; }
-.quick-review { background: linear-gradient(135deg, var(--leaf), var(--ok)); color: #fff; }
 .quick-alphabet { background: linear-gradient(135deg, var(--sun), var(--sun-deep)); color: var(--sun-ink); }
 .quick-progress { background: linear-gradient(135deg, var(--grape), var(--grape-700)); color: #fff; }
 
@@ -178,47 +177,6 @@
 }
 .mode-preview { background: var(--brand-soft); color: var(--brand-deep); }
 .mode-review { background: var(--leaf-soft); color: var(--leaf-deep); }
-
-// ---------- 功能入口（步骤式） ----------
-.feature-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 10px;
-  margin-top: 16px;
-}
-.feature-card {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px;
-  border-radius: var(--r-lg);
-  background: var(--card);
-  border: 1px solid var(--line);
-  box-shadow: var(--shadow-sm);
-  width: 100%;
-  text-align: left;
-  position: relative;
-  transition: var(--ease);
-  @include press(0.98);
-}
-.feature-step {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: var(--mc, var(--brand));
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 15px;
-  font-weight: 800;
-  flex-shrink: 0;
-}
-.feature-emoji { font-size: 26px; width: 40px; text-align: center; flex-shrink: 0; }
-.feature-body { flex: 1; min-width: 0; }
-.feature-name { font-weight: 700; font-size: var(--fs-md); }
-.feature-desc { font-size: var(--fs-base); color: var(--ink-soft); margin-top: 2px; }
-.feature-arrow { color: var(--ink-mute); font-size: 20px; flex-shrink: 0; }
 
 // ---------- 8 课一览 ----------
 .lessons-overview { margin-top: 14px; display: grid; gap: 8px; }

@@ -101,7 +101,7 @@ export default function LessonList() {
 
       <div className="page-nav">
         <Link to="/preview" className="back-link">← 预习列表</Link>
-        <Link to={`/review/starlight/${unitId}`} className="btn">去复习 →</Link>
+        <Link to="/smart" className="btn">去复习 →</Link>
       </div>
     </div>
   )

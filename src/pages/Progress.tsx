@@ -81,7 +81,7 @@ export default function Progress() {
 
       <div className="page-nav">
         <Link to="/" className="back-link">← 返回首页</Link>
-        <Link to="/review" className="btn">去复习 →</Link>
+        <Link to="/smart" className="btn">去复习 →</Link>
       </div>
     </div>
   )

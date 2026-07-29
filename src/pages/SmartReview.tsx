@@ -84,9 +84,22 @@ export default function SmartReview() {
   const cur = queue[idx]
   const mcStyle = moduleThemeVars(STARLIGHT_THEME)
 
-  // 切换复习卡（进入/下一题/再复习一轮）时自动朗读英文单词,作为回忆提示
+  // 「去预习」按钮按当前筛选模块跳到对应课程首页,避免语文/故事卡片误跳 Starlight
+  const previewTo =
+    filter === 'all'
+      ? '/preview'
+      : filter === 'chinese'
+        ? '/chinese'
+        : filter === 'flyguy'
+          ? '/flyguy'
+          : filter === 'rocketgirl'
+            ? '/rocketgirl'
+            : '/preview'
+
+  // 切换复习卡（进入/下一题/再复习一轮）时自动朗读单词,作为回忆提示
+  // 语文卡片(汉字)用中文嗓音朗读
   useEffect(() => {
-    if (cur) speakText(cur.en)
+    if (cur) speakText(cur.en, { lang: cur.modules.includes('chinese') ? 'zh' : 'en' })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [idx, queue])
 
@@ -130,8 +143,7 @@ export default function SmartReview() {
               去预习新内容或做听力测验吧!
             </p>
             <div className="smart-empty-actions">
-              <Link to="/preview" className="btn btn-sun">📖 去预习</Link>
-              <Link to="/review" className="btn btn-soft">🔁 自主复习</Link>
+              <Link to={previewTo} className="btn btn-sun">📖 去预习</Link>
             </div>
           </div>
         </SafeBoundary>
@@ -198,7 +210,7 @@ export default function SmartReview() {
                     <span className="sw-en">{w.en}</span>
                     <span className="sw-zh">{w.zh}</span>
                     <span onClick={(e) => e.stopPropagation()}>
-                      <SpeakButton text={w.en} label={w.en} />
+                      <SpeakButton text={w.en} label={w.en} lang={/[一-龥]/.test(w.en) ? 'zh' : 'en'} />
                     </span>
                   </div>
                 ))}
@@ -289,9 +301,9 @@ export default function SmartReview() {
             {remainMeta.emoji && <div className="smart-card-emoji">{remainMeta.emoji}</div>}
 
             <div className="fc-word-row">
-              <button type="button" className="fc-word" onClick={() => speakText(remainMeta.en)}>{remainMeta.en}</button>
-              <SpeakButton text={remainMeta.en} label={remainMeta.en} />
-              <SpeakButton text={remainMeta.en} label={`${remainMeta.en} 慢速`} slow />
+              <button type="button" className="fc-word" onClick={() => speakText(remainMeta.en, { lang: cur.modules.includes('chinese') ? 'zh' : 'en' })}>{remainMeta.en}</button>
+              <SpeakButton text={remainMeta.en} label={remainMeta.en} lang={cur.modules.includes('chinese') ? 'zh' : 'en'} />
+              <SpeakButton text={remainMeta.en} label={`${remainMeta.en} 慢速`} slow lang={cur.modules.includes('chinese') ? 'zh' : 'en'} />
             </div>
             {remainMeta.ipa && <div className="fc-ipa">{remainMeta.ipa}</div>}
 
@@ -302,7 +314,11 @@ export default function SmartReview() {
               </div>
             ) : (
               <button type="button" className="fc-reveal" onClick={() => setRevealed(true)}>
-                {remainMeta.type === 'sentence' ? '👀 想想这句的意思,然后翻面' : '👀 想想中文,然后翻面'}
+                {remainMeta.type === 'sentence'
+                  ? '👀 想想这句的意思,然后翻面'
+                  : cur.modules.includes('chinese')
+                    ? '👀 想想拼音和组词,然后翻面'
+                    : '👀 想想中文,然后翻面'}
               </button>
             )}
 
@@ -338,7 +354,6 @@ export default function SmartReview() {
 
       <div className="page-nav">
         <Link to="/" className="back-link">← 返回首页</Link>
-        <Link to="/review" className="btn btn-soft">自主选单元</Link>
       </div>
     </div>
   )

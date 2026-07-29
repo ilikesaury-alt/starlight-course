@@ -5,8 +5,9 @@
 import { modules as starlightModules, getModule, STARLIGHT_THEME } from './starlight'
 import { flyGuyStories, FG_THEME } from './flyguy'
 import { rocketGirlStories, RG_THEME } from './rocketgirl'
+import { chineseUnits, CHINESE_THEME } from './chinese'
 
-export type ModuleId = 'starlight' | 'flyguy' | 'rocketgirl'
+export type ModuleId = 'starlight' | 'flyguy' | 'rocketgirl' | 'chinese'
 
 export interface ReviewItem {
   /** 单元 slug（Starlight）或故事 slug（故事类） */
@@ -93,13 +94,46 @@ const rocketGirlMeta: ModuleMeta = {
   },
 }
 
+// 语文模块（三年级上册）：生字（汉字）作为 SRS 记忆卡，key = 汉字，zh = 拼音 · 组词，
+// module='chinese'。进语文课（ChineseLesson）即播种到 SRS，统一走「智能复习」(/smart) 到期调度；
+// 古诗/课文段落则在课程页内「自测练习」完成，不进 SRS。
+const chineseMeta: ModuleMeta = {
+  id: 'chinese',
+  label: '语文',
+  labelZh: '三年级上册',
+  color: CHINESE_THEME.color,
+  colorSoft: CHINESE_THEME.colorSoft,
+  kind: 'unit',
+  items: chineseUnits.map((u) => ({
+    id: u.slug,
+    title: u.title,
+    titleZh: u.titleZh,
+    emoji: u.emoji,
+  })),
+  getWords: (unitSlug) => {
+    const u = chineseUnits.find((x) => x.slug === unitSlug)
+    if (!u) return []
+    const seen = new Set<string>()
+    const out: ReviewWord[] = []
+    for (const lesson of u.lessons) {
+      for (const h of lesson.hanzi ?? []) {
+        if (seen.has(h.char)) continue
+        seen.add(h.char)
+        out.push({ en: h.char, zh: `${h.pinyin} · ${h.group.join('、')}`, emoji: '🔤' })
+      }
+    }
+    return out
+  },
+}
+
 export const MODULES: Record<ModuleId, ModuleMeta> = {
   starlight: starlightMeta,
   flyguy: flyGuyMeta,
   rocketgirl: rocketGirlMeta,
+  chinese: chineseMeta,
 }
 
-export const MODULE_LIST: ModuleMeta[] = [starlightMeta, flyGuyMeta, rocketGirlMeta]
+export const MODULE_LIST: ModuleMeta[] = [starlightMeta, flyGuyMeta, rocketGirlMeta, chineseMeta]
 
 export function getModuleMeta(id: string | undefined): ModuleMeta | undefined {
   if (!id) return undefined

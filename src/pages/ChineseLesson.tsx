@@ -15,12 +15,21 @@ export default function ChineseLesson() {
   const found = getChineseLesson(unitId, lessonId)
   const markRecite = useCourseStore((s) => s.markRecite)
   const markChineseQuiz = useCourseStore((s) => s.markChineseQuiz)
+  const seedCards = useCourseStore((s) => s.seedCards)
   const reciteDays = useCourseStore((s) => (found ? s.reciteCheckins[found.lesson.slug] : undefined)) ?? []
   const quizResult = useCourseStore((s) =>
     found ? s.chineseQuiz[found.lesson.slug] : undefined,
   )
 
   const [tab, setTab] = useState<Tab>('knowledge')
+
+  // 进课即把本课「生字(汉字)」播种进 SRS,使其进入智能复习到期调度
+  useEffect(() => {
+    if (!found) return
+    const chars = (found.lesson.hanzi ?? []).map((h) => h.char)
+    if (chars.length) seedCards(chars, 'chinese')
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [found?.lesson.slug])
 
   if (!found) {
     return (

@@ -7,11 +7,6 @@ import Home from '@/pages/Home'
 import PreviewList from '@/pages/PreviewList'
 import LessonList from '@/pages/LessonList'
 import LessonPreview from '@/pages/LessonPreview'
-import ReviewList from '@/pages/ReviewList'
-import ModuleReviewHome from '@/pages/ModuleReviewHome'
-import ReviewEntry from '@/pages/ReviewEntry'
-import VocabReview from '@/pages/VocabReview'
-import ListeningQuiz from '@/pages/ListeningQuiz'
 import WrongBook from '@/pages/WrongBook'
 import Progress from '@/pages/Progress'
 import AlphabetPage from '@/pages/AlphabetPage'
@@ -45,11 +40,6 @@ function AppRoutes() {
         <Route path="/preview/:unitId/vocab" element={<RedirectToLessonList />} />
         <Route path="/preview/:unitId/patterns" element={<RedirectToLessonList />} />
         <Route path="/preview/:unitId/dialogue" element={<RedirectToLessonList />} />
-        <Route path="/review" element={<ReviewList />} />
-        <Route path="/review/:moduleId" element={<ModuleReviewHome />} />
-        <Route path="/review/:moduleId/:itemId" element={<ReviewEntry />} />
-        <Route path="/review/:moduleId/:itemId/vocab" element={<VocabReview />} />
-        <Route path="/review/:moduleId/:itemId/quiz" element={<ListeningQuiz />} />
         <Route path="/smart" element={<SmartReview />} />
         <Route path="/wrong" element={<WrongBook />} />
         <Route path="/progress" element={<Progress />} />

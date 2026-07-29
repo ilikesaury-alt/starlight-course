@@ -45,7 +45,7 @@ export default function WrongBook() {
             <div className="wrong-empty-emoji">🎉</div>
             <p>错题本是空的，太棒啦！</p>
             <p style={{ fontSize: '13px' }}>做完听力测验后，错题会自动出现在这里。</p>
-            <Link to="/review" className="btn">去复习</Link>
+            <Link to="/smart" className="btn">去复习</Link>
           </div>
         ) : (
           <>
@@ -73,7 +73,7 @@ export default function WrongBook() {
                     </div>
                   </div>
                   <div className="wrong-actions">
-                    <SpeakButton text={w.en} label={w.en} />
+                    <SpeakButton text={w.en} label={w.en} lang={w.module === 'chinese' ? 'zh' : 'en'} />
                     <button
                       type="button"
                       className="mastery-btn mastered"
