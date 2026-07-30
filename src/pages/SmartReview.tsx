@@ -136,6 +136,9 @@ export default function SmartReview() {
         </div>
 
         <SafeBoundary label="智能复习">
+          {/* 空状态也要保留模块筛选 chips：切到空模块后仍可切回有内容的模块 */}
+          <ModuleFilterChips value={filter} onChange={changeFilter} />
+
           <div className="smart-empty">
             <div className="smart-empty-emoji">🎉</div>
             <h2 className="smart-empty-title">今天没有需要复习的单词</h2>
