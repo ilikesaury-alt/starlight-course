@@ -8,6 +8,10 @@ interface Props {
   value: ModuleFilter
   onChange: (f: ModuleFilter) => void
   /**
+   * 是否隐藏「全部」选项（如智能复习页改为按模块逐一复习）。默认 false。
+   */
+  hideAll?: boolean
+  /**
    * 各模块的数量；传入后：
    * - 数量为 0 的模块不显示
    * - 有数量的模块标签后追加数量，如「Fly Guy 3」
@@ -20,16 +24,18 @@ interface Props {
  * 模块筛选 chips（智能复习 / 错题本等页面共用）。
  * 统一「全部 + 各模块」的渲染、active 态与模块主题色，消除复制。
  */
-export default function ModuleFilterChips({ value, onChange, counts }: Props) {
+export default function ModuleFilterChips({ value, onChange, hideAll, counts }: Props) {
   return (
     <div className="filter-chips">
-      <button
-        type="button"
-        className={'chip' + (value === 'all' ? ' active' : '')}
-        onClick={() => onChange('all')}
-      >
-        全部
-      </button>
+      {!hideAll && (
+        <button
+          type="button"
+          className={'chip' + (value === 'all' ? ' active' : '')}
+          onClick={() => onChange('all')}
+        >
+          全部
+        </button>
+      )}
       {MODULE_LIST.map((m) => {
         const count = counts ? (counts[m.id] ?? 0) : 0
         if (counts && count === 0) return null

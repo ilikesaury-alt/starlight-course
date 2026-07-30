@@ -72,10 +72,11 @@ export default function SmartReview() {
   const getTomorrowDueCount = useCourseStore((s) => s.getTomorrowDueCount)
   const getDueCards = useCourseStore((s) => s.getDueCards)
 
-  const [filter, setFilter] = useState<ModuleFilter>('all')
+  // 默认选中第一个模块(主课),「全部」在智能复习页已隐藏,改为按模块逐一复习
+  const [filter, setFilter] = useState<ModuleFilter>('starlight')
   // 拍快照:进入页面/切换模块时一次性确定本次复习队列,避免复习过程中队列抖动
   const loadQueue = (f: ModuleFilter) => getDueCards(20, f === 'all' ? undefined : f)
-  const [queue, setQueue] = useState<SrsCard[]>(() => loadQueue('all'))
+  const [queue, setQueue] = useState<SrsCard[]>(() => loadQueue('starlight'))
   const [idx, setIdx] = useState(0)
   const [revealed, setRevealed] = useState(false)
   const [session, setSession] = useState<SessionStats>({ correct: 0, wrong: 0, wrongWords: [] })
@@ -137,7 +138,7 @@ export default function SmartReview() {
 
         <SafeBoundary label="智能复习">
           {/* 空状态也要保留模块筛选 chips：切到空模块后仍可切回有内容的模块 */}
-          <ModuleFilterChips value={filter} onChange={changeFilter} />
+          <ModuleFilterChips value={filter} onChange={changeFilter} hideAll />
 
           <div className="smart-empty">
             <div className="smart-empty-emoji">🎉</div>
@@ -288,8 +289,8 @@ export default function SmartReview() {
       <SafeBoundary label="智能复习">
         <div className="mode-badge mode-review">🧠 大脑健身 · 先回忆再翻面</div>
 
-        {/* 模块筛选 chips */}
-        <ModuleFilterChips value={filter} onChange={changeFilter} />
+        {/* 模块筛选 chips：统一隐藏「全部」，与空状态分支保持一致 */}
+        <ModuleFilterChips value={filter} onChange={changeFilter} hideAll />
 
         <div className="quiz-meta">
           <span>第 {idx + 1} / {total} 张</span>
