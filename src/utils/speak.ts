@@ -29,7 +29,7 @@ export interface SpeakOptions {
 // 神经网络 TTS 引擎（WebGPU，英文）；失败/未启用时由下方回退链无缝接管
 import { speakWithKokoro, isKokoroReady, isKokoroEnabled, warmupKokoro } from './engine/kokoro'
 // 云端中文 TTS 引擎（仅 Microsoft Edge）；非 Edge 时由下方回退链无缝接管
-import { speakWithEdgeTts, isEdgeBrowser, isEdgeTtsEnabled } from './engine/edgeTts'
+import { speakWithEdgeTts, isEdgeBrowser, isEdgeTtsEnabled, warmupEdgeTts, isEdgeReady } from './engine/edgeTts'
 
 // ---------- Web Speech API 语音预载 ----------
 let voices: SpeechSynthesisVoice[] = []
@@ -147,7 +147,9 @@ export function speakText(text: string, opts: SpeakOptions = {}) {
 
       const onSuccess = () => {
         if (playCapTimer) clearTimeout(playCapTimer)
-        if (!settled && gen === generation) {
+        // 音频成功播完即复位本按钮动画；不再受 gen 限制（done 仅复位本按钮自身，
+        // 不会误伤正在播放的其它按钮），避免上一句已播完但动画卡在「播放中」。
+        if (!settled) {
           settled = true
           if (currentAudio === audio) currentAudio = null
           done()
@@ -166,10 +168,16 @@ export function speakText(text: string, opts: SpeakOptions = {}) {
         started = true
         // 已开始播放但 ended 迟迟不触发时的兜底收尾：
         // 依音频时长 + 余量强制 onSuccess，避免按钮动画永久停在「播放中」。
-        const dur = Number.isFinite(audio.duration) ? audio.duration : 20
+        const dur = Number.isFinite(audio.duration) ? audio.duration : 12
         playCapTimer = setTimeout(() => {
           if (!settled) onSuccess()
-        }, dur * 1000 + 3000)
+        }, dur * 1000 + 1200)
+      }
+      // 进度结束检测：跨域有道音频的 ended 偶发不触发，依据 timeupdate 判定已播完，
+      // 比单纯依赖 ended 更可靠，确保动画及时复位。
+      audio.ontimeupdate = () => {
+        const d = audio.duration
+        if (Number.isFinite(d) && d > 0 && audio.currentTime >= d - 0.12) onSuccess()
       }
       audio.onended = onSuccess
       audio.onerror = onFail
@@ -220,7 +228,9 @@ export function speakText(text: string, opts: SpeakOptions = {}) {
 
       let settled = false
       const settle = () => {
-        if (!settled && gen === generation) {
+        // 本 utter 结束即复位本按钮；gen 限制保留在外层安全网（下方 setTimeout），
+        // 避免陈旧回调误复位新按钮。
+        if (!settled) {
           settled = true
           done()
         }
@@ -259,6 +269,12 @@ export function speakText(text: string, opts: SpeakOptions = {}) {
   // 仅在 Edge 浏览器生效；非 Edge（如 Chrome）直接走下方原有链路，无额外延迟。
   // 失败或代次变更则无缝回落到原有「有道 → WebSpeech」链路。
   if (lang === 'zh' && isEdgeTtsEnabled() && isEdgeBrowser()) {
+    if (!isEdgeReady()) {
+      // 模块尚未预热：先 youdao 即时出声（保证跟手），后台预热 Edge 供下次点击使用
+      warmupEdgeTts()
+      youdao(() => nativeSpeak())
+      return
+    }
     let settled = false
     const fallbackToLegacy = () => {
       if (!settled && gen === generation && !finished) {
@@ -297,10 +313,14 @@ export function speakText(text: string, opts: SpeakOptions = {}) {
     })
       .then((ok) => {
         clearTimeout(engineTimer)
-        if (ok && gen === generation && !finished) {
-          settled = true
-          finished = true
-          done()
+        if (ok) {
+          // 播放成功（含音频已自然结束）即复位本按钮动画；
+          // 即便用户中途点了其它的字使 gen 变化，本按钮也应结束，
+          // 否则会出现「多个按钮动画同时停在播放中」。done 仅复位本按钮自身。
+          if (!finished) {
+            finished = true
+            done()
+          }
         } else {
           fallbackToLegacy()
         }
@@ -351,10 +371,14 @@ export function speakText(text: string, opts: SpeakOptions = {}) {
     })
       .then((ok) => {
         clearTimeout(engineTimer)
-        if (ok && gen === generation && !finished) {
-          settled = true
-          finished = true
-          done()
+        if (ok) {
+          // 播放成功（含音频已自然结束）即复位本按钮动画；
+          // 即便用户中途点了其它的字使 gen 变化，本按钮也应结束，
+          // 否则会出现「多个按钮动画同时停在播放中」。done 仅复位本按钮自身。
+          if (!finished) {
+            finished = true
+            done()
+          }
         } else {
           fallbackToLegacy()
         }

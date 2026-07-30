@@ -60,6 +60,15 @@
   transition: transform 0.12s ease, opacity 0.12s ease;
   &:hover { opacity: 0.82; }
   &:active { transform: scale(0.95); }
+  // 正在播放时给一点脉冲反馈，与 SpeakButton 的 ⏸ 一致
+  &.is-playing {
+    animation: word-pulse 1s ease-in-out infinite;
+    color: var(--mc-soft, var(--mc, var(--brand)));
+  }
+}
+@keyframes word-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
 }
 .fc-ipa { color: var(--ink-soft); font-size: var(--fs-md); margin-top: 4px; position: relative; z-index: 1; }
 .fc-zh {

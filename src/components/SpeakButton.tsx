@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { speakText, cancelSpeech } from '../utils/speak'
+import { useEffect } from 'react'
+import { useAnimatedSpeak } from '../utils/speakerControl'
+import { warmupEdgeTts } from '../utils/engine/edgeTts'
 
 interface SpeakButtonProps {
   text: string
@@ -12,40 +13,22 @@ interface SpeakButtonProps {
 
 /**
  * Universal pronunciation button.
- * Reuses the shared `speakText` helper (three-level fallback strategy).
+ * Reuses the shared `speakText` helper (progressive fallback strategy) and the
+ * shared `useAnimatedSpeak` hook (global single-speaker + safety timer), so it
+ * stays perfectly consistent with every other play trigger (custom fc-word,
+ * auto-read, etc.).
  *
  * Must be triggered by a user gesture (onClick) to comply with mobile
  * browsers' autoplay policies.
  */
 export default function SpeakButton({ text, label, slow = false, lang = 'en' }: SpeakButtonProps) {
-  const [playing, setPlaying] = useState(false)
-  // 跟踪本按钮是否正在发声，卸载时据此决定是否停止
-  const activeRef = useRef(false)
+  const { playing, speak } = useAnimatedSpeak(text, { slow, lang })
 
-  const speak = useCallback(() => {
-    activeRef.current = true
-    speakText(text, {
-      slow,
-      lang,
-      onStart: () => {
-        activeRef.current = true
-        setPlaying(true)
-      },
-      onEnd: () => {
-        activeRef.current = false
-        setPlaying(false)
-      },
-    })
-  }, [text, slow, lang])
-
-  // 离开页面 / 组件卸载时，若本按钮正在发声则立即停止，
-  // 避免语音在路由切换后仍残留播放。
-  useEffect(
-    () => () => {
-      if (activeRef.current) cancelSpeech()
-    },
-    []
-  )
+  // 中文按钮挂载即预热 Edge TTS 模块（轻量 CDN），让首次点击即低延迟、跟手。
+  // 英文不在此预热（Kokoro 模型约 80MB，保持点击时再懒加载）。
+  useEffect(() => {
+    if (lang === 'zh') warmupEdgeTts()
+  }, [lang])
 
   return (
     <button

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import SpeakButton from '../components/SpeakButton'
+import FcWord from '../components/FcWord'
 import SafeBoundary from '../components/SafeBoundary'
 import { getModule, STARLIGHT_THEME } from '../data/starlight'
 import { useCourseStore } from '../store/useCourseStore'
@@ -149,7 +150,7 @@ function VocabTab({ words, mcStyle }: { words: { en: string; zh: string; emoji: 
       <div className="flashcard" style={mcStyle}>
         <div className="fc-emoji">{w.emoji}</div>
         <div className="fc-word-row">
-          <button type="button" className="fc-word" onClick={() => speakText(w.en)}>{w.en}</button>
+          <FcWord text={w.en} lang="en" />
           <SpeakButton text={w.en} label={w.en} />
           <SpeakButton text={w.en} label={`${w.en} 慢速`} slow />
         </div>

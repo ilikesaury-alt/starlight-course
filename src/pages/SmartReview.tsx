@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import SpeakButton from '../components/SpeakButton'
+import FcWord from '../components/FcWord'
 import SafeBoundary from '../components/SafeBoundary'
 import ModuleFilterChips, { type ModuleFilter } from '../components/ModuleFilterChips'
 import { modules, STARLIGHT_THEME } from '../data/starlight'
@@ -301,7 +302,7 @@ export default function SmartReview() {
             {remainMeta.emoji && <div className="smart-card-emoji">{remainMeta.emoji}</div>}
 
             <div className="fc-word-row">
-              <button type="button" className="fc-word" onClick={() => speakText(remainMeta.en, { lang: cur.modules.includes('chinese') ? 'zh' : 'en' })}>{remainMeta.en}</button>
+              <FcWord text={remainMeta.en} lang={cur.modules.includes('chinese') ? 'zh' : 'en'} />
               <SpeakButton text={remainMeta.en} label={remainMeta.en} lang={cur.modules.includes('chinese') ? 'zh' : 'en'} />
               <SpeakButton text={remainMeta.en} label={`${remainMeta.en} 慢速`} slow lang={cur.modules.includes('chinese') ? 'zh' : 'en'} />
             </div>

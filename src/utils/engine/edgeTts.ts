@@ -26,10 +26,19 @@ const ZH_VOICE = 'zh-CN-XiaoxiaoNeural'
 const STORAGE_KEY = 'starlight.edgetts.enabled'
 
 // 连接超时（毫秒）：超时即回落，避免在非 Edge/弱网环境挂起
-const CONNECT_TIMEOUT = 8000
+const CONNECT_TIMEOUT = 5000
 
 const featureEnabled = readEnabledFlag()
 let unsupported = false
+
+// ---- 模块缓存：避免每次发音都重新从 CDN 动态 import（造成点击后卡顿）----
+type EdgeTtsCtor = new (
+  text: string,
+  voice: string,
+  options?: Record<string, unknown>
+) => { synthesize: () => Promise<{ audio: Blob }> }
+let ctorPromise: Promise<EdgeTtsCtor> | null = null
+let edgeModuleLoaded = false
 
 function readEnabledFlag(): boolean {
   try {
@@ -72,18 +81,44 @@ interface EdgeTtsModule {
   default?: { EdgeTTS?: unknown; UniversalEdgeTTS?: unknown }
 }
 
-async function loadCtor(): Promise<new (text: string, voice: string, options?: Record<string, unknown>) => { synthesize: () => Promise<{ audio: Blob }> }> {
+async function loadCtor(): Promise<EdgeTtsCtor> {
   if (unsupported) throw new Error('edge-tts-unsupported')
   if (!isEdgeBrowser()) {
     unsupported = true
     throw new Error('not-edge-browser')
   }
-  const mod = (await import(/* @vite-ignore */ EDGE_TTS_CDN)) as unknown as EdgeTtsModule
-  const Ctor = (mod.EdgeTTS || mod.UniversalEdgeTTS || mod.default?.EdgeTTS || mod.default?.UniversalEdgeTTS) as
-    | (new (text: string, voice: string, options?: Record<string, unknown>) => { synthesize: () => Promise<{ audio: Blob }> })
-    | undefined
-  if (!Ctor) throw new Error('edge-tts-ctor-not-found')
-  return Ctor
+  // 缓存模块加载 Promise：首次加载后复用，避免每次点击都重新从 CDN import 造成卡顿
+  if (!ctorPromise) {
+    ctorPromise = (async () => {
+      const mod = (await import(/* @vite-ignore */ EDGE_TTS_CDN)) as unknown as EdgeTtsModule
+      const Ctor = (mod.EdgeTTS || mod.UniversalEdgeTTS || mod.default?.EdgeTTS || mod.default?.UniversalEdgeTTS) as
+        | EdgeTtsCtor
+        | undefined
+      if (!Ctor) throw new Error('edge-tts-ctor-not-found')
+      edgeModuleLoaded = true
+      return Ctor
+    })()
+  }
+  return ctorPromise
+}
+
+/**
+ * 预热：提前从 CDN 拉取 Edge TTS 模块（仅 Edge 浏览器、且启用时）。
+ * 应在中文页面挂载时调用，使首次点击即低延迟、跟手。幂等。
+ */
+export function warmupEdgeTts(): void {
+  if (!state.enabled || unsupported) return
+  if (!isEdgeBrowser()) {
+    unsupported = true
+    return
+  }
+  // 触发模块加载（缓存到 ctorPromise）；失败静默，下次点击仍走兜底链
+  loadCtor().catch(() => {})
+}
+
+/** 同步判断 Edge TTS 模块是否已就绪（可低延迟出声）；未就绪时调用方应走 youdao 兜底以保证跟手 */
+export function isEdgeReady(): boolean {
+  return edgeModuleLoaded
 }
 
 function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {

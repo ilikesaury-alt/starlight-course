@@ -46,6 +46,14 @@ export function playAudioBlob(url: string, opts: PlayBlobOptions = {}): Promise<
     el.onended = () => finish(true)
     el.onerror = () => finish(false)
 
+    // 进度结束检测：部分浏览器/解码路径对 blob 音频偶发不触发 ended（尤其 webm/opus），
+    // 而 timeupdate 在播放期间稳定触发，依据 currentTime 逼近 duration 判定「已播完」，
+    // 比单纯依赖 ended 更可靠，确保动画（done）及时复位。
+    el.ontimeupdate = () => {
+      const d = el.duration
+      if (Number.isFinite(d) && d > 0 && el.currentTime >= d - 0.12) finish(true)
+    }
+
     // 代次守卫：播放前若已变更（用户快速连点），放弃本次播放
     if (opts.guard && !opts.guard()) {
       cleanup()
@@ -59,7 +67,7 @@ export function playAudioBlob(url: string, opts: PlayBlobOptions = {}): Promise<
     // 若 duration 已可直接读取则立即布防；否则在 play 之前注册事件（能捕获提前触发的 metadata）
     const armDurationCap = () => {
       const dur = Number.isFinite(el.duration) && el.duration > 0 ? el.duration : 6
-      timers.push(setTimeout(() => finish(true), dur * 1000 + 1500))
+      timers.push(setTimeout(() => finish(true), dur * 1000 + 1200))
     }
     if (Number.isFinite(el.duration) && el.duration > 0) {
       armDurationCap()
@@ -67,7 +75,7 @@ export function playAudioBlob(url: string, opts: PlayBlobOptions = {}): Promise<
       el.addEventListener('loadedmetadata', armDurationCap, { once: true })
     }
 
-    // 绝对兜底：极端情况下 ended 与 duration 兜底都失效，保证 ~20s 内必然结束，
+    // 绝对兜底：极端情况下 ended / timeupdate / duration 兜底都失效，保证 ~20s 内必然结束，
     // 避免上层按钮动画永久停在「播放中」。
     timers.push(setTimeout(() => finish(true), HARD_CAP_MS))
   })
