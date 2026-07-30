@@ -162,7 +162,11 @@ function KnowledgeTab({ lesson, mcStyle }: { lesson: Lesson; mcStyle: React.CSSP
               <div className="cn-hanzi-card" key={i}>
                 <div className="cn-hanzi-top">
                   <span className="cn-hanzi-char">{h.char}</span>
-                  <SpeakButton text={h.char} label={h.char} lang="zh" />
+                  <SpeakButton
+                    text={`${h.char}，${h.group.join('，')}`}
+                    label={`${h.char} ${h.group.join(' ')}`}
+                    lang="zh"
+                  />
                 </div>
                 <div className="cn-hanzi-pinyin">{h.pinyin}</div>
                 <div className="cn-hanzi-group">{h.group.join('、')}</div>

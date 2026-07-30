@@ -149,12 +149,12 @@
 .cn-hanzi-top { display: flex; align-items: center; justify-content: center; gap: 4px; }
 .cn-hanzi-char {
   font-size: 34px;
-  font-weight: 800;
+  font-weight: 400;
   color: var(--ink);
   font-family: var(--font-cute);
   line-height: 1;
 }
-.cn-hanzi-pinyin { font-size: var(--fs-sm); color: var(--mc, #dc2626); font-weight: 700; margin-top: 4px; }
+.cn-hanzi-pinyin { font-size: var(--fs-sm); color: var(--mc, #dc2626); font-weight: 400; margin-top: 4px; }
 .cn-hanzi-group { font-size: var(--fs-xs); color: var(--ink-soft); margin-top: 2px; line-height: 1.4; }
 
 // 日积月累
