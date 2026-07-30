@@ -143,8 +143,10 @@ export function speakText(text: string, opts: SpeakOptions = {}) {
 
       let settled = false
       let started = false // 是否真正开始播放（用于区分"卡住"与"正在播"）
+      let playCapTimer: ReturnType<typeof setTimeout> | null = null
 
       const onSuccess = () => {
+        if (playCapTimer) clearTimeout(playCapTimer)
         if (!settled && gen === generation) {
           settled = true
           if (currentAudio === audio) currentAudio = null
@@ -152,6 +154,7 @@ export function speakText(text: string, opts: SpeakOptions = {}) {
         }
       }
       const onFail = () => {
+        if (playCapTimer) clearTimeout(playCapTimer)
         if (!settled && gen === generation) {
           settled = true
           if (currentAudio === audio) currentAudio = null
@@ -161,6 +164,12 @@ export function speakText(text: string, opts: SpeakOptions = {}) {
 
       audio.onplaying = () => {
         started = true
+        // 已开始播放但 ended 迟迟不触发时的兜底收尾：
+        // 依音频时长 + 余量强制 onSuccess，避免按钮动画永久停在「播放中」。
+        const dur = Number.isFinite(audio.duration) ? audio.duration : 20
+        playCapTimer = setTimeout(() => {
+          if (!settled) onSuccess()
+        }, dur * 1000 + 3000)
       }
       audio.onended = onSuccess
       audio.onerror = onFail
@@ -254,9 +263,23 @@ export function speakText(text: string, opts: SpeakOptions = {}) {
     const fallbackToLegacy = () => {
       if (!settled && gen === generation && !finished) {
         settled = true
+        // 先停掉引擎可能仍在播放的音频，避免与兜底链路叠加出声
+        if (currentAudio) {
+          try {
+            currentAudio.pause()
+            currentAudio.removeAttribute('src')
+            currentAudio.load()
+          } catch {
+            /* ignore */
+          }
+          currentAudio = null
+        }
         youdao(() => nativeSpeak())
       }
     }
+    // 整体超时兜底：模型/合成/播放任一环节挂起时，强制回落并结束动画，
+    // 避免按钮动画永久停在「播放中」。
+    const engineTimer = setTimeout(fallbackToLegacy, 30000)
     speakWithEdgeTts(text, {
       slow,
       guard: () => gen === generation,
@@ -273,6 +296,7 @@ export function speakText(text: string, opts: SpeakOptions = {}) {
       },
     })
       .then((ok) => {
+        clearTimeout(engineTimer)
         if (ok && gen === generation && !finished) {
           settled = true
           finished = true
@@ -293,9 +317,23 @@ export function speakText(text: string, opts: SpeakOptions = {}) {
     const fallbackToLegacy = () => {
       if (!settled && gen === generation && !finished) {
         settled = true
+        // 先停掉引擎可能仍在播放的音频，避免与兜底链路叠加出声
+        if (currentAudio) {
+          try {
+            currentAudio.pause()
+            currentAudio.removeAttribute('src')
+            currentAudio.load()
+          } catch {
+            /* ignore */
+          }
+          currentAudio = null
+        }
         youdao(() => nativeSpeak())
       }
     }
+    // 整体超时兜底：模型/生成/播放任一环节挂起时，强制回落并结束动画，
+    // 避免按钮动画永久停在「播放中」。
+    const engineTimer = setTimeout(fallbackToLegacy, 30000)
     speakWithKokoro(text, {
       slow,
       guard: () => gen === generation,
@@ -312,6 +350,7 @@ export function speakText(text: string, opts: SpeakOptions = {}) {
       },
     })
       .then((ok) => {
+        clearTimeout(engineTimer)
         if (ok && gen === generation && !finished) {
           settled = true
           finished = true

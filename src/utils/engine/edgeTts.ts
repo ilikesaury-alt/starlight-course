@@ -125,21 +125,42 @@ export async function speakWithEdgeTts(text: string, opts: EdgeTtsSpeakOptions =
       await new Promise<void>((resolve, reject) => {
         const el = new Audio(url)
         opts.onAudio?.(el)
-        el.onended = () => {
+        let settledPlay = false
+        let fallbackTimer: ReturnType<typeof setTimeout> | null = null
+        const onPlayEnd = () => {
+          if (settledPlay) return
+          settledPlay = true
+          if (fallbackTimer) clearTimeout(fallbackTimer)
           URL.revokeObjectURL(url)
           resolve()
         }
-        el.onerror = () => {
+        const onPlayError = () => {
+          if (settledPlay) return
+          settledPlay = true
+          if (fallbackTimer) clearTimeout(fallbackTimer)
           URL.revokeObjectURL(url)
           reject(new Error('play-failed'))
         }
+        el.onended = onPlayEnd
+        el.onerror = onPlayError
         // 播放前守卫：代次已变更（用户快速连点）则放弃本次播放
         if (opts.guard && !opts.guard()) {
           URL.revokeObjectURL(url)
           reject(new Error('aborted'))
           return
         }
-        void el.play().catch(reject)
+        void el.play().catch(onPlayError)
+        // 兜底：部分浏览器/解码路径对 blob 音频偶发不触发 ended，
+        // 依据音频时长 + 余量设置硬超时，确保 Promise 一定会结束，
+        // 从而 speak.ts 的 done()（动画复位）必然被调用。
+        el.addEventListener(
+          'loadedmetadata',
+          () => {
+            const dur = Number.isFinite(el.duration) ? el.duration : 5
+            fallbackTimer = setTimeout(onPlayEnd, dur * 1000 + 2000)
+          },
+          { once: true }
+        )
       })
       return true
     } catch {
