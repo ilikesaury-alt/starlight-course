@@ -2,6 +2,8 @@
 dist/
 dist-ssr/
 dev-dist/
+# 重建时的临时备份目录（如 dist_bak_*），非源码、不应提交
+dist_bak*/
 
 # 依赖
 node_modules/
