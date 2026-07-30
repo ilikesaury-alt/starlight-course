@@ -128,15 +128,18 @@ function KnowledgeTab({ lesson, mcStyle }: { lesson: Lesson; mcStyle: React.CSSP
               <div className="cn-poem-title">《{p.title}》</div>
               <div className="cn-poem-meta">{p.dynasty} · {p.author}</div>
             </div>
-            <button type="button" className="cn-read-all" onClick={() => speakText(p.lines.join(''), { lang: 'zh' })}>
+            <button type="button" className="cn-read-all" onClick={() => speakText(p.lines.map((l) => l.text).join(''), { lang: 'zh' })}>
               🔊 朗读全文
             </button>
           </div>
           <div className="cn-poem-lines">
             {p.lines.map((line, j) => (
-              <div className="cn-poem-line" key={j}>
-                <span>{line}</span>
-                <SpeakButton text={line} label={line} lang="zh" />
+              <div className="cn-poem-line-wrap" key={j}>
+                <div className="cn-poem-line">
+                  <span>{line.text}</span>
+                  <SpeakButton text={line.text} label={line.text} lang="zh" />
+                </div>
+                {line.explain && <div className="cn-poem-explain">💡 {line.explain}</div>}
               </div>
             ))}
           </div>
@@ -170,6 +173,7 @@ function KnowledgeTab({ lesson, mcStyle }: { lesson: Lesson; mcStyle: React.CSSP
                 </div>
                 <div className="cn-hanzi-pinyin">{h.pinyin}</div>
                 <div className="cn-hanzi-group">{h.group.join('、')}</div>
+                {h.mean && <div className="cn-hanzi-mean">释义：{h.mean}</div>}
               </div>
             ))}
           </div>
@@ -182,9 +186,12 @@ function KnowledgeTab({ lesson, mcStyle }: { lesson: Lesson; mcStyle: React.CSSP
           <div className="cn-idiom-list">
             {set.items.map((it, j) => (
               <div className="cn-idiom" key={j}>
-                <span className="cn-idiom-term">{it.term}</span>
-                {it.source && <span className="cn-idiom-src">{it.source}</span>}
-                <SpeakButton text={it.term} label={it.term} lang="zh" />
+                <div className="cn-idiom-row">
+                  <span className="cn-idiom-term">{it.term}</span>
+                  {it.source && <span className="cn-idiom-src">{it.source}</span>}
+                  <SpeakButton text={it.term} label={it.term} lang="zh" />
+                </div>
+                {it.meaning && <div className="cn-idiom-meaning">释义：{it.meaning}</div>}
               </div>
             ))}
           </div>

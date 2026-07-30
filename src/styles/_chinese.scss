@@ -92,7 +92,7 @@
   cursor: pointer;
   white-space: nowrap;
 }
-.cn-poem-lines { display: flex; flex-direction: column; gap: 6px; }
+.cn-poem-lines { display: flex; flex-direction: column; gap: 2px; }
 .cn-poem-line {
   display: flex;
   align-items: center;
@@ -102,6 +102,16 @@
   line-height: 1.5;
   color: var(--ink);
   font-family: var(--font-cute);
+}
+.cn-poem-line-wrap { margin-bottom: 4px; }
+.cn-poem-explain {
+  font-size: var(--fs-sm);
+  color: var(--mc-deep, #991b1b);
+  background: var(--mc-soft, #fee2e2);
+  border-radius: var(--r-sm);
+  padding: 5px 10px;
+  margin: 2px 0 4px 28px;
+  line-height: 1.6;
 }
 
 .cn-passage {
@@ -156,20 +166,39 @@
 }
 .cn-hanzi-pinyin { font-size: var(--fs-sm); color: var(--mc, #dc2626); font-weight: 400; margin-top: 4px; }
 .cn-hanzi-group { font-size: var(--fs-xs); color: var(--ink-soft); margin-top: 2px; line-height: 1.4; }
+.cn-hanzi-mean {
+  font-size: var(--fs-xs);
+  color: var(--ink-soft);
+  margin-top: 5px;
+  padding-top: 5px;
+  border-top: 1px dashed var(--line);
+  line-height: 1.4;
+  text-align: left;
+}
 
 // 日积月累
 .cn-idioms { background: var(--mc-soft, #fee2e2); border-radius: var(--r-lg); padding: 14px 16px; }
 .cn-idiom-list { display: flex; flex-direction: column; gap: 8px; }
 .cn-idiom {
   display: flex;
-  align-items: center;
-  gap: 8px;
+  flex-direction: column;
+  gap: 5px;
   background: var(--card);
   border-radius: var(--r-md);
   padding: 8px 12px;
 }
+.cn-idiom-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 .cn-idiom-term { flex: 1; font-size: var(--fs-md); color: var(--ink); line-height: 1.6; }
 .cn-idiom-src { font-size: var(--fs-xs); color: var(--ink-soft); white-space: nowrap; }
+.cn-idiom-meaning {
+  font-size: var(--fs-sm);
+  color: var(--mc-deep, #991b1b);
+  line-height: 1.6;
+}
 
 // ---------- 背诵打卡 ----------
 .cn-recite { text-align: center; padding: 6px 4px; }

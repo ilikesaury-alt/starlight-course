@@ -17,14 +17,23 @@ export interface Hanzi {
   pinyin: string
   /** 组词 */
   group: string[]
+  /** 释义（面向小朋友的简明白话解释） */
+  mean?: string
+}
+
+export interface PoemLine {
+  /** 原句 */
+  text: string
+  /** 逐句白话译文（面向小朋友） */
+  explain?: string
 }
 
 export interface Poem {
   title: string
   author: string
   dynasty: string
-  /** 诗句逐句 */
-  lines: string[]
+  /** 诗句逐句（含白话译文） */
+  lines: PoemLine[]
 }
 
 export interface Passage {
@@ -34,10 +43,19 @@ export interface Passage {
   note?: string
 }
 
+export interface IdiomItem {
+  /** 词语 / 俗语 / 格言原文 */
+  term: string
+  /** 出处 */
+  source?: string
+  /** 释义（面向小朋友的简明白话解释） */
+  meaning?: string
+}
+
 export interface IdiomSet {
   title: string
   kind: 'idioms' | 'proverbs' | 'sayings'
-  items: { term: string; source?: string }[]
+  items: IdiomItem[]
 }
 
 export interface QuizItem {
@@ -148,7 +166,12 @@ export const chineseUnits: ChineseUnit[] = [
             title: '所见',
             author: '袁枚',
             dynasty: '清',
-            lines: ['牧童骑黄牛，', '歌声振林樾。', '意欲捕鸣蝉，', '忽然闭口立。'],
+            lines: [
+              { text: '牧童骑黄牛，', explain: '牧童骑在黄牛背上，' },
+              { text: '歌声振林樾。', explain: '嘹亮的歌声在树林中回荡。' },
+              { text: '意欲捕鸣蝉，', explain: '心里想捉树上鸣叫的蝉，' },
+              { text: '忽然闭口立。', explain: '忽然闭嘴站住不动了。' },
+            ],
           },
         ],
         quiz: [
@@ -172,32 +195,110 @@ export const chineseUnits: ChineseUnit[] = [
         title: '第一单元 · 生字词',
         emoji: '✍️',
         hanzi: [
-          { char: '晨', pinyin: 'chén', group: ['早晨', '晨光'] },
-          { char: '绒', pinyin: 'róng', group: ['绒毛', '绒球'] },
-          { char: '球', pinyin: 'qiú', group: ['皮球', '足球'] },
-          { char: '汉', pinyin: 'hàn', group: ['汉族', '汉字'] },
-          { char: '艳', pinyin: 'yàn', group: ['鲜艳', '艳丽'] },
-          { char: '服', pinyin: 'fú', group: ['衣服', '服务'] },
-          { char: '装', pinyin: 'zhuāng', group: ['服装', '化妆'] },
-          { char: '扮', pinyin: 'bàn', group: ['打扮', '扮演'] },
-          { char: '读', pinyin: 'dú', group: ['读书', '朗读'] },
-          { char: '静', pinyin: 'jìng', group: ['安静', '平静'] },
-          { char: '停', pinyin: 'tíng', group: ['停止', '停车'] },
-          { char: '粗', pinyin: 'cū', group: ['粗心', '粗壮'] },
-          { char: '影', pinyin: 'yǐng', group: ['影子', '电影'] },
-          { char: '落', pinyin: 'luò', group: ['落下', '落叶'] },
-          { char: '荒', pinyin: 'huāng', group: ['荒野', '荒凉'] },
-          { char: '笛', pinyin: 'dí', group: ['笛子', '口笛'] },
-          { char: '舞', pinyin: 'wǔ', group: ['跳舞', '舞蹈'] },
-          { char: '狂', pinyin: 'kuáng', group: ['狂欢', '狂风'] },
-          { char: '罚', pinyin: 'fá', group: ['罚站', '惩罚'] },
-          { char: '假', pinyin: 'jià', group: ['放假', '假期'] },
-          { char: '互', pinyin: 'hù', group: ['互相', '互动'] },
-          { char: '所', pinyin: 'suǒ', group: ['所以', '场所'] },
-          { char: '够', pinyin: 'gòu', group: ['足够', '能够'] },
-          { char: '猜', pinyin: 'cāi', group: ['猜想', '猜测'] },
-          { char: '扬', pinyin: 'yáng', group: ['飞扬', '表扬'] },
-          { char: '臂', pinyin: 'bì', group: ['手臂', '双臂'] },
+          {
+  char: '晨', pinyin: 'chén', group: ['早晨', '晨光'],
+  mean: '清早；天刚亮。'
+},
+          {
+  char: '绒', pinyin: 'róng', group: ['绒毛', '绒球'],
+  mean: '柔软细小的毛。'
+},
+          {
+  char: '球', pinyin: 'qiú', group: ['皮球', '足球'],
+  mean: '圆形的立体物；体育用品。'
+},
+          {
+  char: '汉', pinyin: 'hàn', group: ['汉族', '汉字'],
+  mean: '汉族；男子。'
+},
+          {
+  char: '艳', pinyin: 'yàn', group: ['鲜艳', '艳丽'],
+  mean: '色彩鲜明好看。'
+},
+          {
+  char: '服', pinyin: 'fú', group: ['衣服', '服务'],
+  mean: '衣裳；担任。'
+},
+          {
+  char: '装', pinyin: 'zhuāng', group: ['服装', '化妆'],
+  mean: '衣裳；打扮。'
+},
+          {
+  char: '扮', pinyin: 'bàn', group: ['打扮', '扮演'],
+  mean: '装饰；表演。'
+},
+          {
+  char: '读', pinyin: 'dú', group: ['读书', '朗读'],
+  mean: '看着文字念；学习。'
+},
+          {
+  char: '静', pinyin: 'jìng', group: ['安静', '平静'],
+  mean: '没有声音；不动。'
+},
+          {
+  char: '停', pinyin: 'tíng', group: ['停止', '停车'],
+  mean: '止住；留下。'
+},
+          {
+  char: '粗', pinyin: 'cū', group: ['粗心', '粗壮'],
+  mean: '不细心；条状物粗大。'
+},
+          {
+  char: '影', pinyin: 'yǐng', group: ['影子', '电影'],
+  mean: '物体挡光形成的暗像。'
+},
+          {
+  char: '落', pinyin: 'luò', group: ['落下', '落叶'],
+  mean: '掉下；下降。'
+},
+          {
+  char: '荒', pinyin: 'huāng', group: ['荒野', '荒凉'],
+  mean: '没人耕种；冷清。'
+},
+          {
+  char: '笛', pinyin: 'dí', group: ['笛子', '口笛'],
+  mean: '一种管乐器。'
+},
+          {
+  char: '舞', pinyin: 'wǔ', group: ['跳舞', '舞蹈'],
+  mean: '跳舞。'
+},
+          {
+  char: '狂', pinyin: 'kuáng', group: ['狂欢', '狂风'],
+  mean: '猛烈；发疯。'
+},
+          {
+  char: '罚', pinyin: 'fá', group: ['罚站', '惩罚'],
+  mean: '处罚。'
+},
+          {
+  char: '假', pinyin: 'jià', group: ['放假', '假期'],
+  mean: '放假；休息的日子。'
+},
+          {
+  char: '互', pinyin: 'hù', group: ['互相', '互动'],
+  mean: '彼此；交替。'
+},
+          {
+  char: '所', pinyin: 'suǒ', group: ['所以', '场所'],
+  mean: '地方；原因。'
+},
+          {
+  char: '够', pinyin: 'gòu', group: ['足够', '能够'],
+  mean: '充足；达到。'
+},
+          {
+  char: '猜', pinyin: 'cāi', group: ['猜想', '猜测'],
+  mean: '推测；估摸。'
+},
+          {
+  char: '扬', pinyin: 'yáng', group: ['飞扬', '表扬'],
+  mean: '高举；飘起。'
+},
+          {
+  char: '臂', pinyin: 'bì', group: ['手臂', '双臂'],
+  mean: '胳膊。'
+},
         ],
         quiz: [
           {
@@ -242,19 +343,34 @@ export const chineseUnits: ChineseUnit[] = [
             title: '山行',
             author: '杜牧',
             dynasty: '唐',
-            lines: ['远上寒山石径斜，', '白云生处有人家。', '停车坐爱枫林晚，', '霜叶红于二月花。'],
+            lines: [
+              { text: '远上寒山石径斜，', explain: '弯弯曲曲的石头小路伸向远处的秋山，' },
+              { text: '白云生处有人家。', explain: '白云升起的地方隐隐约约住着人家。' },
+              { text: '停车坐爱枫林晚，', explain: '因为喜爱傍晚的枫林而停下车来，' },
+              { text: '霜叶红于二月花。', explain: '经霜的枫叶比二月的春花还要红。' },
+            ],
           },
           {
             title: '赠刘景文',
             author: '苏轼',
             dynasty: '宋',
-            lines: ['荷尽已无擎雨盖，', '菊残犹有傲霜枝。', '一年好景君须记，', '最是橙黄橘绿时。'],
+            lines: [
+              { text: '荷尽已无擎雨盖，', explain: '荷花谢了，再没有像伞一样撑开的荷叶，' },
+              { text: '菊残犹有傲霜枝。', explain: '菊花虽残，却还有傲视寒霜的枝条。' },
+              { text: '一年好景君须记，', explain: '一年中最美的景色你可要记住，' },
+              { text: '最是橙黄橘绿时。', explain: '正是橙子黄、橘子绿的秋末冬初。' },
+            ],
           },
           {
             title: '夜书所见',
             author: '叶绍翁',
             dynasty: '宋',
-            lines: ['萧萧梧叶送寒声，', '江上秋风动客情。', '知有儿童挑促织，', '夜深篱落一灯明。'],
+            lines: [
+              { text: '萧萧梧叶送寒声，', explain: '梧桐叶沙沙作响，送来阵阵寒意，' },
+              { text: '江上秋风动客情。', explain: '江上的秋风触动了游子的思乡之情。' },
+              { text: '知有儿童挑促织，', explain: '知道有孩童在拨弄蟋蟀，' },
+              { text: '夜深篱落一灯明。', explain: '深夜里篱笆边有一盏灯火明亮。' },
+            ],
           },
         ],
         quiz: [
@@ -315,15 +431,15 @@ export const chineseUnits: ChineseUnit[] = [
             title: '描写秋天的成语',
             kind: 'idioms',
             items: [
-              { term: '秋高气爽' },
-              { term: '天高云淡' },
-              { term: '秋风习习' },
-              { term: '一叶知秋' },
-              { term: '金桂飘香' },
-              { term: '层林尽染' },
-              { term: '五谷丰登' },
-              { term: '果实累累' },
-              { term: '春华秋实' },
+              { term: '秋高气爽', meaning: '秋天天空晴朗，气候凉爽宜人。' },
+              { term: '天高云淡', meaning: '天空高远，云彩稀薄。' },
+              { term: '秋风习习', meaning: '秋风轻轻地吹。' },
+              { term: '一叶知秋', meaning: '看到一片落叶就知道秋天到了，比喻由小见大。' },
+              { term: '金桂飘香', meaning: '金色的桂花散发香气。' },
+              { term: '层林尽染', meaning: '层层树林都被秋色染成各种颜色。' },
+              { term: '五谷丰登', meaning: '五谷都丰收了。' },
+              { term: '果实累累', meaning: '树上结的果子很多。' },
+              { term: '春华秋实', meaning: '春天开花，秋天结果，比喻有付出才有收获。' },
             ],
           },
         ],
@@ -348,42 +464,150 @@ export const chineseUnits: ChineseUnit[] = [
         title: '第二单元 · 生字词',
         emoji: '✍️',
         hanzi: [
-          { char: '寒', pinyin: 'hán', group: ['寒冷', '寒风'] },
-          { char: '径', pinyin: 'jìng', group: ['小径', '路径'] },
-          { char: '斜', pinyin: 'xié', group: ['斜阳', '倾斜'] },
-          { char: '霜', pinyin: 'shuāng', group: ['秋霜', '冰霜'] },
-          { char: '赠', pinyin: 'zèng', group: ['赠送', '赠品'] },
-          { char: '刘', pinyin: 'liú', group: ['姓刘', '刘海'] },
-          { char: '盖', pinyin: 'gài', group: ['盖子', '锅盖'] },
-          { char: '菊', pinyin: 'jú', group: ['菊花', '秋菊'] },
-          { char: '残', pinyin: 'cán', group: ['残菊', '残月'] },
-          { char: '君', pinyin: 'jūn', group: ['君子', '诸君'] },
-          { char: '橙', pinyin: 'chéng', group: ['橙子', '橙色'] },
-          { char: '送', pinyin: 'sòng', group: ['送给', '送别'] },
-          { char: '挑', pinyin: 'tiāo', group: ['挑选', '挑食'] },
-          { char: '铺', pinyin: 'pū', group: ['铺满', '床铺'] },
-          { char: '泥', pinyin: 'ní', group: ['泥土', '水泥'] },
-          { char: '晶', pinyin: 'jīng', group: ['水晶', '亮晶晶'] },
-          { char: '紧', pinyin: 'jǐn', group: ['紧张', '抓紧'] },
-          { char: '院', pinyin: 'yuàn', group: ['院子', '庭院'] },
-          { char: '印', pinyin: 'yìn', group: ['印象', '脚印'] },
-          { char: '排', pinyin: 'pái', group: ['排队', '排列'] },
-          { char: '列', pinyin: 'liè', group: ['排列', '列车'] },
-          { char: '规', pinyin: 'guī', group: ['规则', '规定'] },
-          { char: '则', pinyin: 'zé', group: ['法则', '否则'] },
-          { char: '乱', pinyin: 'luàn', group: ['杂乱', '凌乱'] },
-          { char: '棕', pinyin: 'zōng', group: ['棕色', '棕树'] },
-          { char: '迟', pinyin: 'chí', group: ['迟到', '迟延'] },
-          { char: '盒', pinyin: 'hé', group: ['盒子', '文具盒'] },
-          { char: '颜', pinyin: 'yán', group: ['颜色', '容颜'] },
-          { char: '料', pinyin: 'liào', group: ['颜料', '材料'] },
-          { char: '票', pinyin: 'piào', group: ['邮票', '车票'] },
-          { char: '飘', pinyin: 'piāo', group: ['飘扬', '飘落'] },
-          { char: '争', pinyin: 'zhēng', group: ['争论', '争取'] },
-          { char: '仙', pinyin: 'xiān', group: ['神仙', '仙女'] },
-          { char: '闻', pinyin: 'wén', group: ['新闻', '见闻'] },
-          { char: '梨', pinyin: 'lí', group: ['梨子', '梨花'] },
-          { char: '淡', pinyin: 'dàn', group: ['平淡', '冷淡'] },
+          {
+  char: '寒', pinyin: 'hán', group: ['寒冷', '寒风'],
+  mean: '冷。'
+},
+          {
+  char: '径', pinyin: 'jìng', group: ['小径', '路径'],
+  mean: '小路。'
+},
+          {
+  char: '斜', pinyin: 'xié', group: ['斜阳', '倾斜'],
+  mean: '不正；歪。'
+},
+          {
+  char: '霜', pinyin: 'shuāng', group: ['秋霜', '冰霜'],
+  mean: '水汽遇冷凝结的白冰晶。'
+},
+          {
+  char: '赠', pinyin: 'zèng', group: ['赠送', '赠品'],
+  mean: '送。'
+},
+          {
+  char: '刘', pinyin: 'liú', group: ['姓刘', '刘海'],
+  mean: '姓氏。'
+},
+          {
+  char: '盖', pinyin: 'gài', group: ['盖子', '锅盖'],
+  mean: '器物上部遮挡的东西。'
+},
+          {
+  char: '菊', pinyin: 'jú', group: ['菊花', '秋菊'],
+  mean: '菊花。'
+},
+          {
+  char: '残', pinyin: 'cán', group: ['残菊', '残月'],
+  mean: '不完整；剩余。'
+},
+          {
+  char: '君', pinyin: 'jūn', group: ['君子', '诸君'],
+  mean: '对人的尊称。'
+},
+          {
+  char: '橙', pinyin: 'chéng', group: ['橙子', '橙色'],
+  mean: '橙子；橙黄色。'
+},
+          {
+  char: '送', pinyin: 'sòng', group: ['送给', '送别'],
+  mean: '把东西给人；送行。'
+},
+          {
+  char: '挑', pinyin: 'tiāo', group: ['挑选', '挑食'],
+  mean: '选；用肩担。'
+},
+          {
+  char: '铺', pinyin: 'pū', group: ['铺满', '床铺'],
+  mean: '把东西展开摆好。'
+},
+          {
+  char: '泥', pinyin: 'ní', group: ['泥土', '水泥'],
+  mean: '水和土的混合。'
+},
+          {
+  char: '晶', pinyin: 'jīng', group: ['水晶', '亮晶晶'],
+  mean: '光亮透明的东西。'
+},
+          {
+  char: '紧', pinyin: 'jǐn', group: ['紧张', '抓紧'],
+  mean: '密切合拢；急。'
+},
+          {
+  char: '院', pinyin: 'yuàn', group: ['院子', '庭院'],
+  mean: '院子；场所。'
+},
+          {
+  char: '印', pinyin: 'yìn', group: ['印象', '脚印'],
+  mean: '痕迹；图章。'
+},
+          {
+  char: '排', pinyin: 'pái', group: ['排队', '排列'],
+  mean: '摆成行列。'
+},
+          {
+  char: '列', pinyin: 'liè', group: ['排列', '列车'],
+  mean: '行列。'
+},
+          {
+  char: '规', pinyin: 'guī', group: ['规则', '规定'],
+  mean: '法则；圆规。'
+},
+          {
+  char: '则', pinyin: 'zé', group: ['法则', '否则'],
+  mean: '规范；就。'
+},
+          {
+  char: '乱', pinyin: 'luàn', group: ['杂乱', '凌乱'],
+  mean: '没有秩序。'
+},
+          {
+  char: '棕', pinyin: 'zōng', group: ['棕色', '棕树'],
+  mean: '棕树；棕毛色。'
+},
+          {
+  char: '迟', pinyin: 'chí', group: ['迟到', '迟延'],
+  mean: '慢；晚。'
+},
+          {
+  char: '盒', pinyin: 'hé', group: ['盒子', '文具盒'],
+  mean: '盛东西的器物。'
+},
+          {
+  char: '颜', pinyin: 'yán', group: ['颜色', '容颜'],
+  mean: '色彩；脸面。'
+},
+          {
+  char: '料', pinyin: 'liào', group: ['颜料', '材料'],
+  mean: '材料；推测。'
+},
+          {
+  char: '票', pinyin: 'piào', group: ['邮票', '车票'],
+  mean: '票据。'
+},
+          {
+  char: '飘', pinyin: 'piāo', group: ['飘扬', '飘落'],
+  mean: '随风飞动。'
+},
+          {
+  char: '争', pinyin: 'zhēng', group: ['争论', '争取'],
+  mean: '抢；力求。'
+},
+          {
+  char: '仙', pinyin: 'xiān', group: ['神仙', '仙女'],
+  mean: '神仙。'
+},
+          {
+  char: '闻', pinyin: 'wén', group: ['新闻', '见闻'],
+  mean: '听见；消息。'
+},
+          {
+  char: '梨', pinyin: 'lí', group: ['梨子', '梨花'],
+  mean: '梨树；梨子。'
+},
+          {
+  char: '淡', pinyin: 'dàn', group: ['平淡', '冷淡'],
+  mean: '味道不浓；颜色浅。'
+},
         ],
         quiz: [
           {
@@ -449,9 +673,9 @@ export const chineseUnits: ChineseUnit[] = [
             title: '关于道理的俗语',
             kind: 'proverbs',
             items: [
-              { term: '灯不拨不亮，理不辩不明。' },
-              { term: '有理走遍天下，无理寸步难行。' },
-              { term: '一时强弱在于力，万古胜负在于理。' },
+              { term: '灯不拨不亮，理不辩不明。', meaning: '油灯不拨不亮，道理不辩论不清，说明道理越辩越明。' },
+              { term: '有理走遍天下，无理寸步难行。', meaning: '只要有道理，到哪儿都行得通；没道理，一步也走不了。' },
+              { term: '一时强弱在于力，万古胜负在于理。', meaning: '一时的强弱靠力气，长远的胜负靠道理。' },
             ],
           },
         ],
@@ -476,19 +700,58 @@ export const chineseUnits: ChineseUnit[] = [
         title: '第三单元 · 生字词',
         emoji: '✍️',
         hanzi: [
-          { char: '旅', pinyin: 'lǚ', group: ['旅行', '旅游'] },
-          { char: '咱', pinyin: 'zán', group: ['咱们', '咱家'] },
-          { char: '救', pinyin: 'jiù', group: ['救命', '抢救'] },
-          { char: '命', pinyin: 'mìng', group: ['生命', '命令'] },
-          { char: '拼', pinyin: 'pīn', group: ['拼命', '拼写'] },
-          { char: '扫', pinyin: 'sǎo', group: ['打扫', '扫地'] },
-          { char: '胃', pinyin: 'wèi', group: ['胃口', '肠胃'] },
-          { char: '管', pinyin: 'guǎn', group: ['保管', '管理'] },
-          { char: '等', pinyin: 'děng', group: ['等待', '等于'] },
-          { char: '流', pinyin: 'liú', group: ['流水', '流泪'] },
-          { char: '算', pinyin: 'suàn', group: ['计算', '打算'] },
-          { char: '泪', pinyin: 'lèi', group: ['眼泪', '泪水'] },
-          { char: '富', pinyin: 'fù', group: ['富有', '丰富'] },
+          {
+  char: '旅', pinyin: 'lǚ', group: ['旅行', '旅游'],
+  mean: '出行；在外。'
+},
+          {
+  char: '咱', pinyin: 'zán', group: ['咱们', '咱家'],
+  mean: '“我们”的口语说法。'
+},
+          {
+  char: '救', pinyin: 'jiù', group: ['救命', '抢救'],
+  mean: '帮助脱离危险。'
+},
+          {
+  char: '命', pinyin: 'mìng', group: ['生命', '命令'],
+  mean: '生命；指派。'
+},
+          {
+  char: '拼', pinyin: 'pīn', group: ['拼命', '拼写'],
+  mean: '尽全力；连合。'
+},
+          {
+  char: '扫', pinyin: 'sǎo', group: ['打扫', '扫地'],
+  mean: '用扫帚清除。'
+},
+          {
+  char: '胃', pinyin: 'wèi', group: ['胃口', '肠胃'],
+  mean: '消化食物的器官。'
+},
+          {
+  char: '管', pinyin: 'guǎn', group: ['保管', '管理'],
+  mean: '负责；看管。'
+},
+          {
+  char: '等', pinyin: 'děng', group: ['等待', '等于'],
+  mean: '等候；等同。'
+},
+          {
+  char: '流', pinyin: 'liú', group: ['流水', '流泪'],
+  mean: '液体移动；流动。'
+},
+          {
+  char: '算', pinyin: 'suàn', group: ['计算', '打算'],
+  mean: '核算数目；计划。'
+},
+          {
+  char: '泪', pinyin: 'lèi', group: ['眼泪', '泪水'],
+  mean: '眼睛里流出的水。'
+},
+          {
+  char: '富', pinyin: 'fù', group: ['富有', '丰富'],
+  mean: '财物多；充足。'
+},
         ],
         quiz: [
           {
@@ -554,10 +817,10 @@ export const chineseUnits: ChineseUnit[] = [
             title: '关于团结的俗语',
             kind: 'proverbs',
             items: [
-              { term: '人心齐，泰山移。' },
-              { term: '二人同心，其利断金。' },
-              { term: '三个臭皮匠，顶个诸葛亮。' },
-              { term: '一个篱笆三个桩，一个好汉三个帮。' },
+              { term: '人心齐，泰山移。', meaning: '大家心齐，连泰山也能移动，比喻团结力量大。' },
+              { term: '二人同心，其利断金。', meaning: '两人一条心，力量能切断金属，比喻同心协力。' },
+              { term: '三个臭皮匠，顶个诸葛亮。', meaning: '三个人合计，智慧能抵上诸葛亮，比喻集思广益。' },
+              { term: '一个篱笆三个桩，一个好汉三个帮。', meaning: '篱笆要三个桩才稳，好汉也需别人帮助，比喻人离不开互助。' },
             ],
           },
         ],
@@ -582,18 +845,54 @@ export const chineseUnits: ChineseUnit[] = [
         title: '第四单元 · 生字词',
         emoji: '✍️',
         hanzi: [
-          { char: '暴', pinyin: 'bào', group: ['暴雨', '暴力'] },
-          { char: '准', pinyin: 'zhǔn', group: ['准备', '准确'] },
-          { char: '备', pinyin: 'bèi', group: ['准备', '备用'] },
-          { char: '睡', pinyin: 'shuì', group: ['睡觉', '睡眠'] },
-          { char: '砍', pinyin: 'kǎn', group: ['砍柴', '砍树'] },
-          { char: '蜘', pinyin: 'zhī', group: ['蜘蛛'] },
-          { char: '蛛', pinyin: 'zhū', group: ['蜘蛛', '蛛丝'] },
-          { char: '撞', pinyin: 'zhuàng', group: ['撞上', '撞击'] },
-          { char: '晒', pinyin: 'shài', group: ['晒太阳', '晾晒'] },
-          { char: '壁', pinyin: 'bì', group: ['墙壁', '壁画'] },
-          { char: '漂', pinyin: 'piào', group: ['漂亮', '漂泊'] },
-          { char: '饱', pinyin: 'bǎo', group: ['吃饱', '饱满'] },
+          {
+  char: '暴', pinyin: 'bào', group: ['暴雨', '暴力'],
+  mean: '突然猛烈；凶狠。'
+},
+          {
+  char: '准', pinyin: 'zhǔn', group: ['准备', '准确'],
+  mean: '正确；准许。'
+},
+          {
+  char: '备', pinyin: 'bèi', group: ['准备', '备用'],
+  mean: '具备；防备。'
+},
+          {
+  char: '睡', pinyin: 'shuì', group: ['睡觉', '睡眠'],
+  mean: '闭眼休息。'
+},
+          {
+  char: '砍', pinyin: 'kǎn', group: ['砍柴', '砍树'],
+  mean: '用刀斧劈。'
+},
+          {
+  char: '蜘', pinyin: 'zhī', group: ['蜘蛛'],
+  mean: '蜘蛛（一种会结网的虫）。'
+},
+          {
+  char: '蛛', pinyin: 'zhū', group: ['蜘蛛', '蛛丝'],
+  mean: '蜘蛛（一种会结网的虫）。'
+},
+          {
+  char: '撞', pinyin: 'zhuàng', group: ['撞上', '撞击'],
+  mean: '碰；击。'
+},
+          {
+  char: '晒', pinyin: 'shài', group: ['晒太阳', '晾晒'],
+  mean: '太阳照；晾干。'
+},
+          {
+  char: '壁', pinyin: 'bì', group: ['墙壁', '壁画'],
+  mean: '墙。'
+},
+          {
+  char: '漂', pinyin: 'piào', group: ['漂亮', '漂泊'],
+  mean: '好看；美丽。'
+},
+          {
+  char: '饱', pinyin: 'bǎo', group: ['吃饱', '饱满'],
+  mean: '吃足了；充实。'
+},
         ],
         quiz: [
           {
@@ -682,29 +981,98 @@ export const chineseUnits: ChineseUnit[] = [
         title: '第五单元 · 生字词',
         emoji: '✍️',
         hanzi: [
-          { char: '搭', pinyin: 'dā', group: ['搭船', '搭车'] },
-          { char: '亲', pinyin: 'qīn', group: ['亲人', '亲密'] },
-          { char: '父', pinyin: 'fù', group: ['父亲', '父母'] },
-          { char: '沙', pinyin: 'shā', group: ['沙子', '沙滩'] },
-          { char: '啦', pinyin: 'la', group: ['哗啦', '呼啦'] },
-          { char: '响', pinyin: 'xiǎng', group: ['响亮', '响声'] },
-          { char: '羽', pinyin: 'yǔ', group: ['羽毛', '羽翼'] },
-          { char: '翠', pinyin: 'cuì', group: ['翠绿', '翠鸟'] },
-          { char: '嘴', pinyin: 'zuǐ', group: ['嘴巴', '嘴角'] },
-          { char: '吞', pinyin: 'tūn', group: ['吞下', '吞吐'] },
-          { char: '捕', pinyin: 'bǔ', group: ['捕鱼', '捕捉'] },
-          { char: '蒲', pinyin: 'pú', group: ['蒲公英', '蒲扇'] },
-          { char: '英', pinyin: 'yīng', group: ['英雄', '英语'] },
-          { char: '盛', pinyin: 'shèng', group: ['盛开', '盛大'] },
-          { char: '耍', pinyin: 'shuǎ', group: ['玩耍', '戏耍'] },
-          { char: '喊', pinyin: 'hǎn', group: ['喊叫', '呼喊'] },
-          { char: '欠', pinyin: 'qiàn', group: ['哈欠', '欠身'] },
-          { char: '钓', pinyin: 'diào', group: ['钓鱼', '钓竿'] },
-          { char: '而', pinyin: 'ér', group: ['而且', '然而'] },
-          { char: '察', pinyin: 'chá', group: ['观察', '察觉'] },
-          { char: '拢', pinyin: 'lǒng', group: ['合拢', '拉拢'] },
-          { char: '趣', pinyin: 'qù', group: ['有趣', '趣味'] },
-          { char: '喜', pinyin: 'xǐ', group: ['喜欢', '欢喜'] },
+          {
+  char: '搭', pinyin: 'dā', group: ['搭船', '搭车'],
+  mean: '乘；支起。'
+},
+          {
+  char: '亲', pinyin: 'qīn', group: ['亲人', '亲密'],
+  mean: '家人；近。'
+},
+          {
+  char: '父', pinyin: 'fù', group: ['父亲', '父母'],
+  mean: '爸爸。'
+},
+          {
+  char: '沙', pinyin: 'shā', group: ['沙子', '沙滩'],
+  mean: '细碎的石粒。'
+},
+          {
+  char: '啦', pinyin: 'la', group: ['哗啦', '呼啦'],
+  mean: '用在句末的语气词。'
+},
+          {
+  char: '响', pinyin: 'xiǎng', group: ['响亮', '响声'],
+  mean: '声音大；发出声。'
+},
+          {
+  char: '羽', pinyin: 'yǔ', group: ['羽毛', '羽翼'],
+  mean: '鸟的毛。'
+},
+          {
+  char: '翠', pinyin: 'cuì', group: ['翠绿', '翠鸟'],
+  mean: '绿而明亮。'
+},
+          {
+  char: '嘴', pinyin: 'zuǐ', group: ['嘴巴', '嘴角'],
+  mean: '口。'
+},
+          {
+  char: '吞', pinyin: 'tūn', group: ['吞下', '吞吐'],
+  mean: '不嚼就咽下。'
+},
+          {
+  char: '捕', pinyin: 'bǔ', group: ['捕鱼', '捕捉'],
+  mean: '捉；逮。'
+},
+          {
+  char: '蒲', pinyin: 'pú', group: ['蒲公英', '蒲扇'],
+  mean: '蒲公英（一种草）。'
+},
+          {
+  char: '英', pinyin: 'yīng', group: ['英雄', '英语'],
+  mean: '才能出众的人；花。'
+},
+          {
+  char: '盛', pinyin: 'shèng', group: ['盛开', '盛大'],
+  mean: '兴旺；隆重。'
+},
+          {
+  char: '耍', pinyin: 'shuǎ', group: ['玩耍', '戏耍'],
+  mean: '玩。'
+},
+          {
+  char: '喊', pinyin: 'hǎn', group: ['喊叫', '呼喊'],
+  mean: '大声叫。'
+},
+          {
+  char: '欠', pinyin: 'qiàn', group: ['哈欠', '欠身'],
+  mean: '不足；身体稍稍弯下。'
+},
+          {
+  char: '钓', pinyin: 'diào', group: ['钓鱼', '钓竿'],
+  mean: '用饵捕鱼。'
+},
+          {
+  char: '而', pinyin: 'ér', group: ['而且', '然而'],
+  mean: '并且；但是。'
+},
+          {
+  char: '察', pinyin: 'chá', group: ['观察', '察觉'],
+  mean: '仔细看；发现。'
+},
+          {
+  char: '拢', pinyin: 'lǒng', group: ['合拢', '拉拢'],
+  mean: '合上；靠近。'
+},
+          {
+  char: '趣', pinyin: 'qù', group: ['有趣', '趣味'],
+  mean: '趣味；有意思。'
+},
+          {
+  char: '喜', pinyin: 'xǐ', group: ['喜欢', '欢喜'],
+  mean: '高兴；爱好。'
+},
         ],
         quiz: [
           {
@@ -743,19 +1111,34 @@ export const chineseUnits: ChineseUnit[] = [
             title: '望天门山',
             author: '李白',
             dynasty: '唐',
-            lines: ['天门中断楚江开，', '碧水东流至此回。', '两岸青山相对出，', '孤帆一片日边来。'],
+            lines: [
+              { text: '天门中断楚江开，', explain: '天门山被楚江从中间劈开，' },
+              { text: '碧水东流至此回。', explain: '碧绿的江水东流到这里回旋澎湃。' },
+              { text: '两岸青山相对出，', explain: '两岸青翠的山峦相对耸立，' },
+              { text: '孤帆一片日边来。', explain: '一片孤帆从太阳那边驶来。' },
+            ],
           },
           {
             title: '饮湖上初晴后雨',
             author: '苏轼',
             dynasty: '宋',
-            lines: ['水光潋滟晴方好，', '山色空蒙雨亦奇。', '欲把西湖比西子，', '淡妆浓抹总相宜。'],
+            lines: [
+              { text: '水光潋滟晴方好，', explain: '晴天里湖面波光闪动，正好看，' },
+              { text: '山色空蒙雨亦奇。', explain: '雨中山色迷蒙，也十分奇妙。' },
+              { text: '欲把西湖比西子，', explain: '若把西湖比作美人西施，' },
+              { text: '淡妆浓抹总相宜。', explain: '无论淡妆还是浓妆都合适美丽。' },
+            ],
           },
           {
             title: '望洞庭',
             author: '刘禹锡',
             dynasty: '唐',
-            lines: ['湖光秋月两相和，', '潭面无风镜未磨。', '遥望洞庭山水翠，', '白银盘里一青螺。'],
+            lines: [
+              { text: '湖光秋月两相和，', explain: '洞庭湖光与秋月交相辉映，' },
+              { text: '潭面无风镜未磨。', explain: '无风的湖面像一面没磨过的铜镜。' },
+              { text: '遥望洞庭山水翠，', explain: '远望洞庭，山水一片青翠，' },
+              { text: '白银盘里一青螺。', explain: '如同白银盘里托着一只青螺。' },
+            ],
           },
         ],
         quiz: [
@@ -816,7 +1199,12 @@ export const chineseUnits: ChineseUnit[] = [
             title: '早发白帝城',
             author: '李白',
             dynasty: '唐',
-            lines: ['朝辞白帝彩云间，', '千里江陵一日还。', '两岸猿声啼不住，', '轻舟已过万重山。'],
+            lines: [
+              { text: '朝辞白帝彩云间，', explain: '早晨告别彩云间的白帝城，' },
+              { text: '千里江陵一日还。', explain: '千里外的江陵一天就能到达。' },
+              { text: '两岸猿声啼不住，', explain: '两岸猿猴的啼声连绵不绝，' },
+              { text: '轻舟已过万重山。', explain: '轻快的小船已驶过万重山峦。' },
+            ],
           },
         ],
         quiz: [
@@ -840,56 +1228,206 @@ export const chineseUnits: ChineseUnit[] = [
         title: '第六单元 · 生字词',
         emoji: '✍️',
         hanzi: [
-          { char: '断', pinyin: 'duàn', group: ['断开', '中断'] },
-          { char: '楚', pinyin: 'chǔ', group: ['清楚', '楚国'] },
-          { char: '至', pinyin: 'zhì', group: ['至于', '至少'] },
-          { char: '孤', pinyin: 'gū', group: ['孤单', '孤独'] },
-          { char: '帆', pinyin: 'fān', group: ['帆船', '风帆'] },
-          { char: '饮', pinyin: 'yǐn', group: ['饮水', '饮料'] },
-          { char: '初', pinyin: 'chū', group: ['初升', '初级'] },
-          { char: '镜', pinyin: 'jìng', group: ['镜子', '明镜'] },
-          { char: '未', pinyin: 'wèi', group: ['未来', '未必'] },
-          { char: '磨', pinyin: 'mó', group: ['磨刀', '折磨'] },
-          { char: '遥', pinyin: 'yáo', group: ['遥远', '遥望'] },
-          { char: '银', pinyin: 'yín', group: ['银色', '银子'] },
-          { char: '盘', pinyin: 'pán', group: ['盘子', '圆盘'] },
-          { char: '优', pinyin: 'yōu', group: ['优美', '优秀'] },
-          { char: '浅', pinyin: 'qiǎn', group: ['浅绿', '深浅'] },
-          { char: '错', pinyin: 'cuò', group: ['错误', '对错'] },
-          { char: '岩', pinyin: 'yán', group: ['岩石', '岩洞'] },
-          { char: '虾', pinyin: 'xiā', group: ['小虾', '鱼虾'] },
-          { char: '挺', pinyin: 'tǐng', group: ['挺立', '挺直'] },
-          { char: '鼓', pinyin: 'gǔ', group: ['鼓励', '鼓掌'] },
-          { char: '数', pinyin: 'shǔ', group: ['数不清', '数数'] },
-          { char: '厚', pinyin: 'hòu', group: ['厚厚', '深厚'] },
-          { char: '宝', pinyin: 'bǎo', group: ['宝贝', '宝贵'] },
-          { char: '贵', pinyin: 'guì', group: ['珍贵', '贵重'] },
-          { char: '滨', pinyin: 'bīn', group: ['海滨', '湖滨'] },
-          { char: '灰', pinyin: 'huī', group: ['灰色', '灰心'] },
-          { char: '渔', pinyin: 'yú', group: ['渔民', '渔船'] },
-          { char: '遍', pinyin: 'biàn', group: ['一遍', '遍布'] },
-          { char: '躺', pinyin: 'tǎng', group: ['躺下', '躺椅'] },
-          { char: '载', pinyin: 'zài', group: ['满载', '装载'] },
-          { char: '靠', pinyin: 'kào', group: ['靠岸', '依靠'] },
-          { char: '栽', pinyin: 'zāi', group: ['栽树', '栽种'] },
-          { char: '亚', pinyin: 'yà', group: ['亚热带', '亚军'] },
-          { char: '夏', pinyin: 'xià', group: ['夏天', '夏季'] },
-          { char: '除', pinyin: 'chú', group: ['除了', '消除'] },
-          { char: '踩', pinyin: 'cǎi', group: ['踩踏', '踩水'] },
-          { char: '洁', pinyin: 'jié', group: ['洁白', '清洁'] },
-          { char: '脑', pinyin: 'nǎo', group: ['脑袋', '大脑'] },
-          { char: '袋', pinyin: 'dài', group: ['口袋', '袋子'] },
-          { char: '严', pinyin: 'yán', group: ['严实', '严格'] },
-          { char: '实', pinyin: 'shí', group: ['实在', '果实'] },
-          { char: '挡', pinyin: 'dǎng', group: ['挡住', '阻挡'] },
-          { char: '视', pinyin: 'shì', group: ['视线', '电视'] },
-          { char: '线', pinyin: 'xiàn', group: ['线条', '电线'] },
-          { char: '坛', pinyin: 'tán', group: ['花坛', '天坛'] },
-          { char: '显', pinyin: 'xiǎn', group: ['显现', '明显'] },
-          { char: '材', pinyin: 'cái', group: ['木材', '材料'] },
-          { char: '软', pinyin: 'ruǎn', group: ['柔软', '松软'] },
-          { char: '刮', pinyin: 'guā', group: ['刮风', '刮胡子'] },
-          { char: '库', pinyin: 'kù', group: ['宝库', '仓库'] },
+          {
+  char: '断', pinyin: 'duàn', group: ['断开', '中断'],
+  mean: '分开；断绝。'
+},
+          {
+  char: '楚', pinyin: 'chǔ', group: ['清楚', '楚国'],
+  mean: '清晰；古国名。'
+},
+          {
+  char: '至', pinyin: 'zhì', group: ['至于', '至少'],
+  mean: '到；极。'
+},
+          {
+  char: '孤', pinyin: 'gū', group: ['孤单', '孤独'],
+  mean: '单独；独自。'
+},
+          {
+  char: '帆', pinyin: 'fān', group: ['帆船', '风帆'],
+  mean: '挂船桅上的布篷。'
+},
+          {
+  char: '饮', pinyin: 'yǐn', group: ['饮水', '饮料'],
+  mean: '喝。'
+},
+          {
+  char: '初', pinyin: 'chū', group: ['初升', '初级'],
+  mean: '开始；开头。'
+},
+          {
+  char: '镜', pinyin: 'jìng', group: ['镜子', '明镜'],
+  mean: '照影子的器具。'
+},
+          {
+  char: '未', pinyin: 'wèi', group: ['未来', '未必'],
+  mean: '没；不。'
+},
+          {
+  char: '磨', pinyin: 'mó', group: ['磨刀', '折磨'],
+  mean: '摩擦使锋利；困扰。'
+},
+          {
+  char: '遥', pinyin: 'yáo', group: ['遥远', '遥望'],
+  mean: '远。'
+},
+          {
+  char: '银', pinyin: 'yín', group: ['银色', '银子'],
+  mean: '白银；银白色。'
+},
+          {
+  char: '盘', pinyin: 'pán', group: ['盘子', '圆盘'],
+  mean: '扁圆盛物的器具。'
+},
+          {
+  char: '优', pinyin: 'yōu', group: ['优美', '优秀'],
+  mean: '好；充足。'
+},
+          {
+  char: '浅', pinyin: 'qiǎn', group: ['浅绿', '深浅'],
+  mean: '深度小；颜色淡。'
+},
+          {
+  char: '错', pinyin: 'cuò', group: ['错误', '对错'],
+  mean: '不对；交叉。'
+},
+          {
+  char: '岩', pinyin: 'yán', group: ['岩石', '岩洞'],
+  mean: '石头；岩石。'
+},
+          {
+  char: '虾', pinyin: 'xiā', group: ['小虾', '鱼虾'],
+  mean: '水生小动物。'
+},
+          {
+  char: '挺', pinyin: 'tǐng', group: ['挺立', '挺直'],
+  mean: '直；硬而直。'
+},
+          {
+  char: '鼓', pinyin: 'gǔ', group: ['鼓励', '鼓掌'],
+  mean: '一种乐器；敲。'
+},
+          {
+  char: '数', pinyin: 'shǔ', group: ['数不清', '数数'],
+  mean: '计算；查点。'
+},
+          {
+  char: '厚', pinyin: 'hòu', group: ['厚厚', '深厚'],
+  mean: '扁平物上下距离大。'
+},
+          {
+  char: '宝', pinyin: 'bǎo', group: ['宝贝', '宝贵'],
+  mean: '珍贵的东西。'
+},
+          {
+  char: '贵', pinyin: 'guì', group: ['珍贵', '贵重'],
+  mean: '价值高。'
+},
+          {
+  char: '滨', pinyin: 'bīn', group: ['海滨', '湖滨'],
+  mean: '水边。'
+},
+          {
+  char: '灰', pinyin: 'huī', group: ['灰色', '灰心'],
+  mean: '灰白；消沉。'
+},
+          {
+  char: '渔', pinyin: 'yú', group: ['渔民', '渔船'],
+  mean: '捕鱼。'
+},
+          {
+  char: '遍', pinyin: 'biàn', group: ['一遍', '遍布'],
+  mean: '全面；次。'
+},
+          {
+  char: '躺', pinyin: 'tǎng', group: ['躺下', '躺椅'],
+  mean: '身体平放。'
+},
+          {
+  char: '载', pinyin: 'zài', group: ['满载', '装载'],
+  mean: '装；年。'
+},
+          {
+  char: '靠', pinyin: 'kào', group: ['靠岸', '依靠'],
+  mean: '倚着；依赖。'
+},
+          {
+  char: '栽', pinyin: 'zāi', group: ['栽树', '栽种'],
+  mean: '种植。'
+},
+          {
+  char: '亚', pinyin: 'yà', group: ['亚热带', '亚军'],
+  mean: '次一等的；第二。'
+},
+          {
+  char: '夏', pinyin: 'xià', group: ['夏天', '夏季'],
+  mean: '夏季。'
+},
+          {
+  char: '除', pinyin: 'chú', group: ['除了', '消除'],
+  mean: '去掉；不计算。'
+},
+          {
+  char: '踩', pinyin: 'cǎi', group: ['踩踏', '踩水'],
+  mean: '脚底接触地面。'
+},
+          {
+  char: '洁', pinyin: 'jié', group: ['洁白', '清洁'],
+  mean: '干净。'
+},
+          {
+  char: '脑', pinyin: 'nǎo', group: ['脑袋', '大脑'],
+  mean: '头脑。'
+},
+          {
+  char: '袋', pinyin: 'dài', group: ['口袋', '袋子'],
+  mean: '口袋；囊。'
+},
+          {
+  char: '严', pinyin: 'yán', group: ['严实', '严格'],
+  mean: '紧密；认真。'
+},
+          {
+  char: '实', pinyin: 'shí', group: ['实在', '果实'],
+  mean: '真实；果子。'
+},
+          {
+  char: '挡', pinyin: 'dǎng', group: ['挡住', '阻挡'],
+  mean: '阻拦。'
+},
+          {
+  char: '视', pinyin: 'shì', group: ['视线', '电视'],
+  mean: '看。'
+},
+          {
+  char: '线', pinyin: 'xiàn', group: ['线条', '电线'],
+  mean: '细长的东西。'
+},
+          {
+  char: '坛', pinyin: 'tán', group: ['花坛', '天坛'],
+  mean: '土台；场所。'
+},
+          {
+  char: '显', pinyin: 'xiǎn', group: ['显现', '明显'],
+  mean: '露出；清楚。'
+},
+          {
+  char: '材', pinyin: 'cái', group: ['木材', '材料'],
+  mean: '原料；能力。'
+},
+          {
+  char: '软', pinyin: 'ruǎn', group: ['柔软', '松软'],
+  mean: '不硬。'
+},
+          {
+  char: '刮', pinyin: 'guā', group: ['刮风', '刮胡子'],
+  mean: '用刀刮；风吹。'
+},
+          {
+  char: '库', pinyin: 'kù', group: ['宝库', '仓库'],
+  mean: '存放东西的房屋。'
+},
         ],
         quiz: [
           {
@@ -955,7 +1493,12 @@ export const chineseUnits: ChineseUnit[] = [
             title: '采莲曲',
             author: '王昌龄',
             dynasty: '唐',
-            lines: ['荷叶罗裙一色裁，', '芙蓉向脸两边开。', '乱入池中看不见，', '闻歌始觉有人来。'],
+            lines: [
+              { text: '荷叶罗裙一色裁，', explain: '采莲女的罗裙和荷叶同色，像用一块布裁成，' },
+              { text: '芙蓉向脸两边开。', explain: '荷花朝着脸庞两边开放。' },
+              { text: '乱入池中看不见，', explain: '采莲女混入池中难分辨，' },
+              { text: '闻歌始觉有人来。', explain: '听到歌声才发觉有人来了。' },
+            ],
           },
         ],
         quiz: [
@@ -979,19 +1522,58 @@ export const chineseUnits: ChineseUnit[] = [
         title: '第七单元 · 生字词',
         emoji: '✍️',
         hanzi: [
-          { char: '妙', pinyin: 'miào', group: ['美妙', '奇妙'] },
-          { char: '演', pinyin: 'yǎn', group: ['演奏', '表演'] },
-          { char: '奏', pinyin: 'zòu', group: ['演奏', '节拍'] },
-          { char: '琴', pinyin: 'qín', group: ['钢琴', '琴声'] },
-          { char: '柔', pinyin: 'róu', group: ['温柔', '柔和'] },
-          { char: '感', pinyin: 'gǎn', group: ['感受', '感动'] },
-          { char: '受', pinyin: 'shòu', group: ['接受', '感受'] },
-          { char: '激', pinyin: 'jī', group: ['激动', '激发'] },
-          { char: '击', pinyin: 'jī', group: ['打击', '敲击'] },
-          { char: '器', pinyin: 'qì', group: ['乐器', '机器'] },
-          { char: '滴', pinyin: 'dī', group: ['水滴', '滴水'] },
-          { char: '敲', pinyin: 'qiāo', group: ['敲打', '敲门'] },
-          { char: '鸣', pinyin: 'míng', group: ['虫鸣', '鸣叫'] },
+          {
+  char: '妙', pinyin: 'miào', group: ['美妙', '奇妙'],
+  mean: '好；神奇。'
+},
+          {
+  char: '演', pinyin: 'yǎn', group: ['演奏', '表演'],
+  mean: '表演；发挥。'
+},
+          {
+  char: '奏', pinyin: 'zòu', group: ['演奏', '节拍'],
+  mean: '演奏乐器；发生。'
+},
+          {
+  char: '琴', pinyin: 'qín', group: ['钢琴', '琴声'],
+  mean: '一种乐器。'
+},
+          {
+  char: '柔', pinyin: 'róu', group: ['温柔', '柔和'],
+  mean: '软；温和。'
+},
+          {
+  char: '感', pinyin: 'gǎn', group: ['感受', '感动'],
+  mean: '觉得；触动。'
+},
+          {
+  char: '受', pinyin: 'shòu', group: ['接受', '感受'],
+  mean: '接纳；遭到。'
+},
+          {
+  char: '激', pinyin: 'jī', group: ['激动', '激发'],
+  mean: '使感情冲动；急剧。'
+},
+          {
+  char: '击', pinyin: 'jī', group: ['打击', '敲击'],
+  mean: '打；敲。'
+},
+          {
+  char: '器', pinyin: 'qì', group: ['乐器', '机器'],
+  mean: '用具；器官。'
+},
+          {
+  char: '滴', pinyin: 'dī', group: ['水滴', '滴水'],
+  mean: '液体一点一点落下。'
+},
+          {
+  char: '敲', pinyin: 'qiāo', group: ['敲打', '敲门'],
+  mean: '打；击。'
+},
+          {
+  char: '鸣', pinyin: 'míng', group: ['虫鸣', '鸣叫'],
+  mean: '鸟兽或昆虫叫。'
+},
         ],
         quiz: [
           {
@@ -1090,10 +1672,10 @@ export const chineseUnits: ChineseUnit[] = [
             title: '关于仁爱的格言',
             kind: 'sayings',
             items: [
-              { term: '爱人若爱其身。', source: '《墨子》' },
-              { term: '不迁怒，不贰过。', source: '《论语》' },
-              { term: '仁者爱人，有礼者敬人。', source: '《孟子》' },
-              { term: '与人善言，暖于布帛；伤人以言，深于矛戟。', source: '《荀子》' },
+              { term: '爱人若爱其身。', source: '《墨子》', meaning: '爱别人要像爱自己一样。' },
+              { term: '不迁怒，不贰过。', source: '《论语》', meaning: '不把怒气转到别人身上，不犯同样的错。' },
+              { term: '仁者爱人，有礼者敬人。', source: '《孟子》', meaning: '仁爱的人爱人，懂礼的人尊敬人。' },
+              { term: '与人善言，暖于布帛；伤人以言，深于矛戟。', source: '《荀子》', meaning: '对人有善意的话比布帛还温暖；伤人的话比矛戟还锋利。' },
             ],
           },
         ],
@@ -1118,26 +1700,86 @@ export const chineseUnits: ChineseUnit[] = [
         title: '第八单元 · 生字词',
         emoji: '✍️',
         hanzi: [
-          { char: '司', pinyin: 'sī', group: ['司机', '公司'] },
-          { char: '庭', pinyin: 'tíng', group: ['庭院', '家庭'] },
-          { char: '登', pinyin: 'dēng', group: ['登山', '登高'] },
-          { char: '跌', pinyin: 'diē', group: ['跌倒', '跌跤'] },
-          { char: '众', pinyin: 'zhòng', group: ['观众', '众人'] },
-          { char: '弃', pinyin: 'qì', group: ['放弃', '丢弃'] },
-          { char: '持', pinyin: 'chí', group: ['坚持', '保持'] },
-          { char: '雀', pinyin: 'què', group: ['灰雀', '麻雀'] },
-          { char: '郊', pinyin: 'jiāo', group: ['郊外', '郊区'] },
-          { char: '养', pinyin: 'yǎng', group: ['养病', '养成'] },
-          { char: '粉', pinyin: 'fěn', group: ['粉红', '粉笔'] },
-          { char: '谷', pinyin: 'gǔ', group: ['谷粒', '山谷'] },
-          { char: '粒', pinyin: 'lì', group: ['米粒', '颗粒'] },
-          { char: '男', pinyin: 'nán', group: ['男孩', '男生'] },
-          { char: '或', pinyin: 'huò', group: ['或者', '或许'] },
-          { char: '者', pinyin: 'zhě', group: ['作者', '读者'] },
-          { char: '冻', pinyin: 'dòng', group: ['冻死', '冻结'] },
-          { char: '惜', pinyin: 'xī', group: ['可惜', '珍惜'] },
-          { char: '肯', pinyin: 'kěn', group: ['肯定', '不肯'] },
-          { char: '诚', pinyin: 'chéng', group: ['诚实', '真诚'] },
+          {
+  char: '司', pinyin: 'sī', group: ['司机', '公司'],
+  mean: '掌管；也作姓氏。'
+},
+          {
+  char: '庭', pinyin: 'tíng', group: ['庭院', '家庭'],
+  mean: '院子；厅堂。'
+},
+          {
+  char: '登', pinyin: 'dēng', group: ['登山', '登高'],
+  mean: '由低处向高处走；刊载。'
+},
+          {
+  char: '跌', pinyin: 'diē', group: ['跌倒', '跌跤'],
+  mean: '摔倒；下降。'
+},
+          {
+  char: '众', pinyin: 'zhòng', group: ['观众', '众人'],
+  mean: '许多人；大家。'
+},
+          {
+  char: '弃', pinyin: 'qì', group: ['放弃', '丢弃'],
+  mean: '丢掉；放弃。'
+},
+          {
+  char: '持', pinyin: 'chí', group: ['坚持', '保持'],
+  mean: '拿着；保持。'
+},
+          {
+  char: '雀', pinyin: 'què', group: ['灰雀', '麻雀'],
+  mean: '小鸟，如麻雀。'
+},
+          {
+  char: '郊', pinyin: 'jiāo', group: ['郊外', '郊区'],
+  mean: '城市外面的地方。'
+},
+          {
+  char: '养', pinyin: 'yǎng', group: ['养病', '养成'],
+  mean: '照料；生育。'
+},
+          {
+  char: '粉', pinyin: 'fěn', group: ['粉红', '粉笔'],
+  mean: '细末；白色。'
+},
+          {
+  char: '谷', pinyin: 'gǔ', group: ['谷粒', '山谷'],
+  mean: '粮食作物；两山之间的低地。'
+},
+          {
+  char: '粒', pinyin: 'lì', group: ['米粒', '颗粒'],
+  mean: '小圆颗的东西。'
+},
+          {
+  char: '男', pinyin: 'nán', group: ['男孩', '男生'],
+  mean: '男性；儿子。'
+},
+          {
+  char: '或', pinyin: 'huò', group: ['或者', '或许'],
+  mean: '也许；或者。'
+},
+          {
+  char: '者', pinyin: 'zhě', group: ['作者', '读者'],
+  mean: '指人或有某种特点的事物。'
+},
+          {
+  char: '冻', pinyin: 'dòng', group: ['冻死', '冻结'],
+  mean: '水遇冷结成冰；受冷。'
+},
+          {
+  char: '惜', pinyin: 'xī', group: ['可惜', '珍惜'],
+  mean: '爱惜；可惜。'
+},
+          {
+  char: '肯', pinyin: 'kěn', group: ['肯定', '不肯'],
+  mean: '愿意；同意。'
+},
+          {
+  char: '诚', pinyin: 'chéng', group: ['诚实', '真诚'],
+  mean: '真实；诚恳。'
+},
         ],
         quiz: [
           {
