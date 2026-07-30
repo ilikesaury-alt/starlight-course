@@ -32,6 +32,9 @@ interface KokoroModule {
   }
 }
 
+// 共享 blob 音频播放器（保证 Promise 一定结束，避免动画卡死）
+import { playAudioBlob } from './playBlob'
+
 // 官方 ONNX 模型仓库（含 q8 量化权重）
 const MODEL_ID = 'onnx-community/kokoro-82m-v1.0-onnx'
 // 量化权重：体积/显存更小，Windows + Chrome(WebGPU) 性能充足且自然度几乎无损
@@ -159,52 +162,12 @@ export async function speakWithKokoro(text: string, opts: KokoroSpeakOptions = {
     })
     const blob = audio.toBlob()
     const url = URL.createObjectURL(blob)
-    try {
-      await new Promise<void>((resolve, reject) => {
-        const el = new Audio(url)
-        opts.onAudio?.(el)
-        let settledPlay = false
-        let fallbackTimer: ReturnType<typeof setTimeout> | null = null
-        const onPlayEnd = () => {
-          if (settledPlay) return
-          settledPlay = true
-          if (fallbackTimer) clearTimeout(fallbackTimer)
-          URL.revokeObjectURL(url)
-          resolve()
-        }
-        const onPlayError = () => {
-          if (settledPlay) return
-          settledPlay = true
-          if (fallbackTimer) clearTimeout(fallbackTimer)
-          URL.revokeObjectURL(url)
-          reject(new Error('play-failed'))
-        }
-        el.onended = onPlayEnd
-        el.onerror = onPlayError
-        // 播放前守卫：代次已变更（用户快速连点）则放弃本次播放
-        if (opts.guard && !opts.guard()) {
-          URL.revokeObjectURL(url)
-          reject(new Error('aborted'))
-          return
-        }
-        void el.play().catch(onPlayError)
-        // 兜底：部分浏览器/解码路径对 blob 音频偶发不触发 ended，
-        // 依据音频时长 + 余量设置硬超时，确保 Promise 一定会结束，
-        // 从而 speak.ts 的 done()（动画复位）必然被调用。
-        el.addEventListener(
-          'loadedmetadata',
-          () => {
-            const dur = Number.isFinite(el.duration) ? el.duration : 5
-            fallbackTimer = setTimeout(onPlayEnd, dur * 1000 + 2000)
-          },
-          { once: true }
-        )
-      })
-      return true
-    } catch {
-      URL.revokeObjectURL(url)
-      return false
-    }
+    // 用共享播放器：保证 Promise 一定结束（ended 缺失也不卡死动画）。
+    // 详见 engine/playBlob.ts 的三重兜底设计。
+    return await playAudioBlob(url, {
+      guard: opts.guard,
+      onAudio: opts.onAudio,
+    })
   } catch (e) {
     console.warn('[kokoro] speak failed, falling back:', e)
     return false

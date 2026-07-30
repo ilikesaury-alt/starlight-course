@@ -1,0 +1,27 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#5BC0EB"/>
+      <stop offset="1" stop-color="#3CA7E0"/>
+    </linearGradient>
+  </defs>
+  <!-- 背景:圆角方形蓝色渐变 -->
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <!-- 大星星:居中偏上 -->
+  <g transform="translate(256,220)">
+    <path d="M0 -80 L24 -24 L84 -24 L36 12 L54 72 L0 36 L-54 72 L-36 12 L-84 -24 L-24 -24 Z" fill="#FFE080" stroke="#FFFFFF" stroke-width="6" stroke-linejoin="round"/>
+  </g>
+  <!-- 打开的书:下方 -->
+  <g transform="translate(256,400)">
+    <!-- 左页 -->
+    <path d="M-100 -50 Q-100 -58 -92 -58 L-8 -58 L-8 50 L-92 50 Q-100 50 -100 42 Z" fill="#FFFFFF" stroke="#E2EEF6" stroke-width="3"/>
+    <!-- 右页 -->
+    <path d="M100 -50 Q100 -58 92 -58 L8 -58 L8 50 L92 50 Q100 50 100 42 Z" fill="#FFFFFF" stroke="#E2EEF6" stroke-width="3"/>
+    <!-- 书脊中线 -->
+    <line x1="0" y1="-58" x2="0" y2="50" stroke="#E2EEF6" stroke-width="4" stroke-linecap="round"/>
+    <!-- 左页字母 A -->
+    <text x="-50" y="10" font-family="Arial, sans-serif" font-size="36" font-weight="bold" fill="#5BC0EB" text-anchor="middle">A</text>
+    <!-- 右页字母 a -->
+    <text x="50" y="10" font-family="Arial, sans-serif" font-size="36" font-weight="bold" fill="#3CA7E0" text-anchor="middle">a</text>
+  </g>
+</svg>

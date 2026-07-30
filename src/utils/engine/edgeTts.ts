@@ -12,6 +12,9 @@
  *   - 含连接超时护栏，避免在非 Edge 环境意外挂起。
  */
 
+// 共享 blob 音频播放器（保证 Promise 一定结束，避免动画卡死）
+import { playAudioBlob } from './playBlob'
+
 // 运行时从 CDN 按需加载（浏览器专用子入口，零依赖、纯 Web API）。
 // 如需锁定版本，把末尾改为具体版本号，例如 edge-tts-universal@1.4.0/browser
 const EDGE_TTS_CDN = 'https://esm.sh/edge-tts-universal/browser'
@@ -121,52 +124,12 @@ export async function speakWithEdgeTts(text: string, opts: EdgeTtsSpeakOptions =
     const audio = result?.audio
     if (!(audio instanceof Blob)) throw new Error('edge-tts-no-blob')
     const url = URL.createObjectURL(audio)
-    try {
-      await new Promise<void>((resolve, reject) => {
-        const el = new Audio(url)
-        opts.onAudio?.(el)
-        let settledPlay = false
-        let fallbackTimer: ReturnType<typeof setTimeout> | null = null
-        const onPlayEnd = () => {
-          if (settledPlay) return
-          settledPlay = true
-          if (fallbackTimer) clearTimeout(fallbackTimer)
-          URL.revokeObjectURL(url)
-          resolve()
-        }
-        const onPlayError = () => {
-          if (settledPlay) return
-          settledPlay = true
-          if (fallbackTimer) clearTimeout(fallbackTimer)
-          URL.revokeObjectURL(url)
-          reject(new Error('play-failed'))
-        }
-        el.onended = onPlayEnd
-        el.onerror = onPlayError
-        // 播放前守卫：代次已变更（用户快速连点）则放弃本次播放
-        if (opts.guard && !opts.guard()) {
-          URL.revokeObjectURL(url)
-          reject(new Error('aborted'))
-          return
-        }
-        void el.play().catch(onPlayError)
-        // 兜底：部分浏览器/解码路径对 blob 音频偶发不触发 ended，
-        // 依据音频时长 + 余量设置硬超时，确保 Promise 一定会结束，
-        // 从而 speak.ts 的 done()（动画复位）必然被调用。
-        el.addEventListener(
-          'loadedmetadata',
-          () => {
-            const dur = Number.isFinite(el.duration) ? el.duration : 5
-            fallbackTimer = setTimeout(onPlayEnd, dur * 1000 + 2000)
-          },
-          { once: true }
-        )
-      })
-      return true
-    } catch {
-      URL.revokeObjectURL(url)
-      return false
-    }
+    // 用共享播放器：保证 Promise 一定结束（ended 缺失也不卡死动画）。
+    // 详见 engine/playBlob.ts 的三重兜底设计。
+    return await playAudioBlob(url, {
+      guard: opts.guard,
+      onAudio: opts.onAudio,
+    })
   } catch (e) {
     console.warn('[edge-tts] speak failed, falling back:', e)
     return false
