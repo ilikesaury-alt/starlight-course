@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { flyGuyStoryCount, flyGuyWordCount } from '@/data/flyguy'
+import { totalEngLessons, eng3aWordCount } from '@/data/eng3a'
 import { useCourseStore } from '@/store/useCourseStore'
 
 export default function Home() {
@@ -43,6 +44,14 @@ export default function Home() {
           <div className="cn-home-sub">人教版必背 · 8 单元 / 古诗词·课文·生字·日积月累</div>
         </div>
         <span className="cn-home-arrow">›</span>
+      </Link>
+      <Link to="/eng3a" className="en3-home-entry">
+        <span className="en3-home-emoji">📘</span>
+        <div className="en3-home-body">
+          <div className="en3-home-title">三年级上册英语</div>
+          <div className="en3-home-sub">外研版（新标准 2024）· 6 单元 / {totalEngLessons} 课 / {eng3aWordCount} 词 · 听说启蒙</div>
+        </div>
+        <span className="en3-home-arrow">›</span>
       </Link>
       <Link to="/starlight" className="sl-home-entry">
         <span className="sl-home-emoji">🌟</span>

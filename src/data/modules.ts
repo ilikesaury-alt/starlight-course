@@ -6,8 +6,9 @@ import { modules as starlightModules, getModule, STARLIGHT_THEME } from './starl
 import { flyGuyStories, FG_THEME } from './flyguy'
 import { rocketGirlStories, RG_THEME } from './rocketgirl'
 import { chineseUnits, CHINESE_THEME } from './chinese'
+import { eng3aUnits, ENG3A_THEME } from './eng3a'
 
-export type ModuleId = 'starlight' | 'flyguy' | 'rocketgirl' | 'chinese'
+export type ModuleId = 'starlight' | 'flyguy' | 'rocketgirl' | 'chinese' | 'eng3a'
 
 export interface ReviewItem {
   /** 单元 slug（Starlight）或故事 slug（故事类） */
@@ -126,14 +127,46 @@ const chineseMeta: ModuleMeta = {
   },
 }
 
+// 三年级上册英语（外研版）：单词作为 SRS 记忆卡,key = 单词英文,zh = 中文释义,
+// module='eng3a'。进英语课（Eng3aLesson）即播种到 SRS,统一走「智能复习」(/smart) 到期调度。
+const eng3aMeta: ModuleMeta = {
+  id: 'eng3a',
+  label: '英语',
+  labelZh: '三年级上册',
+  color: ENG3A_THEME.color,
+  colorSoft: ENG3A_THEME.colorSoft,
+  kind: 'unit',
+  items: eng3aUnits.map((u) => ({
+    id: u.slug,
+    title: u.title,
+    titleZh: u.titleZh,
+    emoji: u.emoji,
+  })),
+  getWords: (unitSlug) => {
+    const u = eng3aUnits.find((x) => x.slug === unitSlug)
+    if (!u) return []
+    const seen = new Set<string>()
+    const out: ReviewWord[] = []
+    for (const lesson of u.lessons) {
+      for (const w of lesson.words ?? []) {
+        if (seen.has(w.en)) continue
+        seen.add(w.en)
+        out.push({ en: w.en, zh: w.zh, emoji: w.emoji ?? '🔤' })
+      }
+    }
+    return out
+  },
+}
+
 export const MODULES: Record<ModuleId, ModuleMeta> = {
   starlight: starlightMeta,
   flyguy: flyGuyMeta,
   rocketgirl: rocketGirlMeta,
   chinese: chineseMeta,
+  eng3a: eng3aMeta,
 }
 
-export const MODULE_LIST: ModuleMeta[] = [starlightMeta, flyGuyMeta, rocketGirlMeta, chineseMeta]
+export const MODULE_LIST: ModuleMeta[] = [starlightMeta, flyGuyMeta, rocketGirlMeta, chineseMeta, eng3aMeta]
 
 export function getModuleMeta(id: string | undefined): ModuleMeta | undefined {
   if (!id) return undefined

@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tsconfigPaths from "vite-tsconfig-paths";
 import { VitePWA } from 'vite-plugin-pwa'
+import { fileURLToPath, URL } from 'node:url'
 
 // GitHub Pages 部署时自动设置子路径,本地开发/Cloudflare Pages 用根路径
 // GITHUB_REPOSITORY 格式为 "用户名/仓库名",提取仓库名作为 base
@@ -13,6 +14,11 @@ const base = repoName && repoName !== `${process.env.GITHUB_REPOSITORY?.split('/
 // https://vite.dev/config/
 export default defineConfig({
   base,
+  resolve: {
+    alias: {
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
+    },
+  },
   css: {
     preprocessorOptions: {
       scss: {
@@ -55,7 +61,7 @@ export default defineConfig({
       },
       workbox: {
         // 预缓存所有静态资源,支持离线使用
-        globPatterns: ['**/*.{js,css,html,svg,png,ico,woff,woff2}'],
+        globPatterns: ['**/*.{js,css,html,svg,png,jpg,jpeg,webp,ico,woff,woff2}'],
         // 让新的 Service Worker 立即激活并接管所有客户端,
         // 避免"必须关闭所有标签页再重开才能更新"的问题
         skipWaiting: true,

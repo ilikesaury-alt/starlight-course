@@ -1,0 +1,155 @@
+// ============================================================
+//  Eng3a — 三年级上册英语（外研版）课程样式
+//  页面根容器已通过 moduleThemeVars 注入 --mc / --mc-soft / --brand-*，
+//  下列类统一引用这些令牌，随各单元主题色变化。
+//  英文单词卡复用 .cn-hanzi-* 结构，另用 .en3-* 修正为英文排版与新增板块。
+// ============================================================
+@use 'mixins' as *;
+
+// ---------- 单元封面图 / 课页封面图 ----------
+.en3-cover {
+  width: 100%;
+  max-height: 200px;
+  object-fit: cover;
+  border-radius: var(--r-lg);
+  margin: 4px 0 10px;
+  box-shadow: var(--shadow-sm);
+  border: 2px solid var(--mc-soft, #dbeafe);
+}
+.en3-lesson-cover {
+  width: 100%;
+  max-height: 150px;
+  object-fit: cover;
+  border-radius: var(--r-md);
+  margin: 4px 0 10px;
+  box-shadow: var(--shadow-sm);
+  border: 2px solid var(--mc-soft, #dbeafe);
+}
+
+// ---------- 插图画廊 ----------
+.en3-gallery { margin-top: 16px; }
+.en3-gallery-title {
+  font-size: var(--fs-md);
+  font-weight: 800;
+  color: var(--mc, #2563eb);
+  margin-bottom: 8px;
+}
+.en3-gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 8px;
+}
+.en3-gallery-grid img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: var(--r-md);
+  border: 1px solid var(--line);
+  background: var(--bg-3);
+}
+
+// ---------- 词汇网格：英文词普遍比单字长，改用更宽、左对齐的栅格 ----------
+// （仅作用于英语课，不影响语文 .cn-hanzi-grid 的汉字网格）
+.en3-word-grid {
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+}
+.en3-word-grid .cn-hanzi-card { text-align: left; }
+.en3-word-grid .cn-hanzi-top { justify-content: flex-start; flex-wrap: wrap; }
+
+// ---------- 词汇卡（英文）----------
+// 复用 .cn-hanzi-* 结构，但英文词普遍比单字长，需改用更宽、左对齐的排版，
+// 否则 96px 窄列会让 "stand up" 之类单词被迫换行、网格参差。
+.en3-word-emoji { font-size: 22px; flex-shrink: 0; }
+.en3-word-en {
+  font-family: var(--font-sans) !important;
+  font-size: 19px !important;
+  font-weight: 800 !important;
+  line-height: 1.15 !important;
+  color: var(--ink) !important;
+  word-break: break-word;
+  text-align: left;
+}
+// 覆盖中文默认：左对齐、词与发音键同行、允许换行但不强制
+.cn-hanzi-card { text-align: left; }
+.cn-hanzi-top { justify-content: flex-start; flex-wrap: wrap; }
+
+// 例句：词 + 发音键 同行；中文释义换行在下方
+.en3-word-sentence {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px dashed var(--line);
+  font-size: var(--fs-md);
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.4;
+  text-align: left;
+  // 让圆形发音键保持 38px 不被拉伸
+  .speak-btn { width: 34px; height: 34px; font-size: 15px; }
+  .en3-word-sentence-en { flex: 1 1 100%; }
+  .en3-word-sentence-zh {
+    flex-basis: 100%;
+    color: var(--mc-deep, #1e3a8a);
+    font-size: var(--fs-xs);
+    font-weight: 500;
+  }
+}
+
+// ---------- 句型对话 ----------
+.en3-dialogs { background: var(--card); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 12px 14px; box-shadow: var(--shadow-sm); }
+.en3-dialog { padding: 6px 0; border-bottom: 1px dashed var(--line); }
+.en3-dialog:last-child { border-bottom: none; }
+.en3-dialog-line { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.en3-dialog-speaker {
+  font-size: var(--fs-sm);
+  font-weight: 800;
+  color: #fff;
+  background: var(--mc, #2563eb);
+  border-radius: var(--r-pill);
+  padding: 1px 10px;
+  flex-shrink: 0;
+}
+.en3-dialog-en { font-size: var(--fs-lg); font-weight: 700; color: var(--ink); flex: 1; min-width: 0; }
+.en3-dialog-zh { font-size: var(--fs-sm); color: var(--mc-deep, #1e3a8a); margin: 2px 0 2px 4px; }
+
+// ---------- 歌谣 ----------
+.en3-chant { background: var(--mc-soft, #dbeafe); border-radius: var(--r-lg); padding: 14px 16px; }
+.en3-chant-lines { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
+.en3-chant-line { font-size: var(--fs-xl); font-weight: 800; color: var(--ink); line-height: 1.4; font-family: var(--font-cute); }
+.en3-chant-tip {
+  margin-top: 10px;
+  font-size: var(--fs-sm);
+  color: var(--mc-deep, #1e3a8a);
+  background: var(--card);
+  border-radius: var(--r-md);
+  padding: 8px 12px;
+  line-height: 1.6;
+}
+
+// ---------- 字母认读 ----------
+.en3-letters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+  gap: 10px;
+}
+.en3-letter-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-top: 4px solid var(--mc, #2563eb);
+  border-radius: var(--r-md);
+  padding: 10px 6px;
+  box-shadow: var(--shadow-sm);
+}
+.en3-letter {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--mc-deep, #1e3a8a);
+  font-family: var(--font-cute);
+}

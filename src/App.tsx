@@ -19,6 +19,9 @@ import StarlightHome from '@/pages/StarlightHome'
 import ChineseHome from '@/pages/ChineseHome'
 import ChineseUnit from '@/pages/ChineseUnit'
 import ChineseLesson from '@/pages/ChineseLesson'
+import Eng3aHome from '@/pages/Eng3aHome'
+import Eng3aUnit from '@/pages/Eng3aUnit'
+import Eng3aLesson from '@/pages/Eng3aLesson'
 
 // 内层:在 Router 内部使用 useLocation,路由变化时重置 SafeBoundary
 function AppRoutes() {
@@ -52,6 +55,9 @@ function AppRoutes() {
         <Route path="/chinese" element={<ChineseHome />} />
         <Route path="/chinese/:unitId" element={<ChineseUnit />} />
         <Route path="/chinese/:unitId/:lessonId" element={<ChineseLesson />} />
+        <Route path="/eng3a" element={<Eng3aHome />} />
+        <Route path="/eng3a/:unitId" element={<Eng3aUnit />} />
+        <Route path="/eng3a/:unitId/:lessonId" element={<Eng3aLesson />} />
       </Routes>
     </SafeBoundary>
   )
