@@ -8,7 +8,7 @@
 .flashcard {
   background: var(--card);
   border-radius: var(--r-xl);
-  padding: 30px 20px 20px;
+  padding: 26px 20px 18px;
   margin: 14px 0 10px;
   text-align: center;
   border: 3px solid var(--mc, var(--brand));
@@ -41,17 +41,17 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
-  margin-top: 10px;
+  margin-top: 8px;
   flex-wrap: wrap;
   position: relative;
   z-index: 1;
 }
 .fc-audio {
   display: flex;
-  gap: 14px;
+  gap: 12px;
   justify-content: center;
   align-items: center;
-  margin-top: 14px;
+  margin-top: 12px;
   padding: 12px;
   background: var(--mc-soft, var(--brand-soft));
   border-radius: var(--r-lg);

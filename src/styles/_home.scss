@@ -52,7 +52,7 @@
 
 .section-title {
   font-size: var(--fs-md);
-  margin: 20px 4px 10px;
+  margin: 18px 2px 12px;
   color: var(--ink);
   font-weight: 800;
   display: flex;
@@ -62,7 +62,7 @@
 .home-entries {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  gap: 12px;
   margin-top: 4px;
   & > a:last-child { grid-column: 1 / -1; }
 }
@@ -71,10 +71,10 @@
 .quick-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  gap: 12px;
 }
 .quick-card {
-  padding: 18px 14px;
+  padding: 16px 14px;
   text-align: center;
   border-radius: var(--r-lg);
   font-weight: 700;
@@ -85,7 +85,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   &:active { transform: scale(0.97); }
   .qc-emoji { font-size: 32px; }
   .qc-sub { font-size: var(--fs-sm); font-weight: 500; opacity: 0.85; }
@@ -98,7 +98,7 @@
 .module-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 10px;
+  gap: 12px;
 }
 .module-card {
   display: flex;
@@ -186,7 +186,7 @@
 .mode-review { background: var(--leaf-soft); color: var(--leaf-deep); }
 
 // ---------- 8 课一览 ----------
-.lessons-overview { margin-top: 14px; display: grid; gap: 8px; }
+.lessons-overview { margin-top: 14px; display: grid; gap: 10px; }
 .lesson-row {
   display: flex;
   align-items: center;
@@ -222,7 +222,7 @@
 }
 
 // ---------- 课程内标签切换 ----------
-.tab-bar { display: flex; gap: 8px; margin: 14px 0 8px; }
+.tab-bar { display: flex; gap: 10px; margin: 14px 0 8px; }
 .tab-btn {
   flex: 1;
   display: flex;
