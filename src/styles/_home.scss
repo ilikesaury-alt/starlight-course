@@ -59,6 +59,13 @@
   align-items: center;
   gap: 6px;
 }
+.home-entries {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 4px;
+  & > a:last-child { grid-column: 1 / -1; }
+}
 
 // ---------- 快速入口 ----------
 .quick-row {
@@ -259,6 +266,7 @@ a.lesson-link {
   align-items: center;
   justify-content: center;
   min-width: 52px;
+  min-height: 40px;
   padding: 8px 12px;
   border-radius: var(--r-md);
   background: var(--card);

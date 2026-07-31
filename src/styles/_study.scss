@@ -46,6 +46,18 @@
   position: relative;
   z-index: 1;
 }
+.fc-audio {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  align-items: center;
+  margin-top: 14px;
+  padding: 12px;
+  background: var(--mc-soft, var(--brand-soft));
+  border-radius: var(--r-lg);
+  position: relative;
+  z-index: 1;
+}
 .fc-word {
   font-size: 30px;
   font-weight: 800;
@@ -89,6 +101,7 @@
   background: var(--bg-2);
   border: none;
   padding: 8px 18px;
+  min-height: 44px;
   border-radius: var(--r-pill);
   font-size: var(--fs-md);
   color: var(--mc, var(--brand));
@@ -99,14 +112,17 @@
   &:active { transform: scale(0.96); }
 }
 .fc-progress { text-align: center; font-size: var(--fs-base); color: var(--ink-soft); margin: 8px 0; font-weight: 600; }
-.fc-dots { display: flex; gap: 5px; justify-content: center; flex-wrap: wrap; margin-bottom: 12px; }
+.fc-dots { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 12px; }
 .fc-dot {
-  width: 8px; height: 8px;
+  position: relative;
+  width: 12px; height: 12px;
   border-radius: 50%;
   border: none;
   background: var(--line-2);
   padding: 0;
   transition: var(--ease);
+  // 视觉小圆点，但点击区用伪元素向外扩 ~8px（约 28px），避免小朋友误触相邻圆点
+  &::after { content: ''; position: absolute; inset: -8px; border-radius: 50%; }
   &.on { background: var(--mc, var(--brand)); width: 20px; border-radius: var(--r-pill); }
   &.mastered { background: var(--ok); }
 }
@@ -124,8 +140,10 @@
   font-size: var(--fs-base);
   font-weight: 600;
   transition: var(--ease);
+  flex-wrap: nowrap;
   &:active { transform: scale(0.96); }
   &.on { border-color: var(--mc, var(--brand)); background: var(--mc-soft, var(--brand-soft)); }
+  span:nth-child(2) { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 }
 
 // ---------- 句型 Sentences ----------

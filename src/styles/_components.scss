@@ -143,10 +143,37 @@
 .empty { text-align: center; padding: 50px 20px; }
 .empty p { color: var(--ink-soft); margin-bottom: 16px; }
 
+// ---------- 面包屑 Breadcrumb（轻量导航，降低多层页面迷失感） ----------
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px;
+  font-size: var(--fs-sm);
+  color: var(--ink-soft);
+  padding: 12px 4px 2px;
+}
+.bc-item { display: inline-flex; align-items: center; gap: 2px; }
+.bc-link {
+  color: var(--mc, var(--brand-deep));
+  font-weight: 700;
+  text-decoration: none;
+  padding: 4px 6px;
+  border-radius: var(--r-sm);
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  &:active { background: var(--mc-soft, var(--brand-soft)); }
+}
+.bc-text { font-weight: 600; }
+.bc-current { color: var(--ink); font-weight: 800; }
+.bc-sep { color: var(--ink-mute); opacity: 0.7; margin: 0 2px; }
+
 // ---------- 按钮 Buttons ----------
 .btn {
   @include btn-base;
   padding: 14px 22px;
+  min-height: 44px;
   background: var(--brand);
   color: #fff;
   font-size: var(--fs-md);
@@ -286,12 +313,12 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 38px;
-  height: 38px;
+  width: 46px;
+  height: 46px;
   border-radius: 50%;
   background: var(--mc, var(--brand));
   color: #fff;
-  font-size: 17px;
+  font-size: 18px;
   box-shadow: var(--shadow-sm);
   flex-shrink: 0;
   transition: var(--ease);
@@ -331,6 +358,10 @@
   font-size: var(--fs-sm);
   font-weight: 700;
   padding: 6px 14px;
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border-radius: var(--r-pill);
   cursor: pointer;
   transition: var(--ease);

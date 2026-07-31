@@ -3,6 +3,7 @@ import { Link, NavLink } from 'react-router-dom'
 export default function Layout({ children }: { children: React.ReactNode }) {
   const navItems = [
     { to: '/', label: '首页', emoji: '🏠', end: true },
+    { to: '/courses', label: '课程', emoji: '📚', end: false },
     { to: '/alphabet', label: '字母', emoji: '🔤', end: false },
     { to: '/progress', label: '进度', emoji: '📊', end: false },
   ]

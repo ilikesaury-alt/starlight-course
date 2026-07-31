@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { modules, STARLIGHT_THEME } from '../data/starlight'
 import { useCourseStore } from '../store/useCourseStore'
 import { moduleThemeVars } from '../utils/theme'
+import Breadcrumb from '@/components/Breadcrumb'
 
 export default function PreviewList() {
   const completedPreviews = useCourseStore((s) => s.completedPreviews)
@@ -9,6 +10,7 @@ export default function PreviewList() {
 
   return (
     <div className="page preview-list" style={mcStyle}>
+      <Breadcrumb items={[{ label: '🏠', to: '/' }, { label: 'Starlight 预习', to: '/preview' }]} />
       <div className="page-head" style={mcStyle}>
         <span className="page-emoji">📖</span>
         <div>

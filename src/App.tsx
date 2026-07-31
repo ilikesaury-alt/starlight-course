@@ -4,6 +4,7 @@ import Layout from '@/components/Layout'
 import SafeBoundary from '@/components/SafeBoundary'
 import { cancelSpeech } from '@/utils/speak'
 import Home from '@/pages/Home'
+import Courses from '@/pages/Courses'
 import PreviewList from '@/pages/PreviewList'
 import LessonList from '@/pages/LessonList'
 import LessonPreview from '@/pages/LessonPreview'
@@ -36,6 +37,7 @@ function AppRoutes() {
     <SafeBoundary key={location.pathname}>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/courses" element={<Courses />} />
         <Route path="/preview" element={<PreviewList />} />
         <Route path="/preview/:unitId" element={<LessonList />} />
         <Route path="/preview/:unitId/:lessonId" element={<LessonPreview />} />

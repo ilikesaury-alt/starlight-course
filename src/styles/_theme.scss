@@ -13,14 +13,16 @@
 // 首页醒目入口卡片（rg / fg / sl 三主题共用同一结构）
 @mixin home-entry($prefix, $g1, $g2, $border, $title, $sub, $arrow, $pa, $pb) {
   .#{$prefix}-entry {
+    position: relative;
     display: flex;
-    align-items: center;
-    gap: 14px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
     background: linear-gradient(135deg, $g1 0%, $g2 100%);
     border: 2px solid $border;
     border-radius: var(--r-lg);
-    padding: 16px 18px;
-    margin: 12px 0 6px;
+    padding: 14px 14px 12px;
+    margin: 0;
     box-shadow: var(--shadow-pop);
     text-decoration: none;
     cursor: pointer;
@@ -28,12 +30,16 @@
     --pulse-a: #{$pa};
     --pulse-b: #{$pb};
     animation: entry-pulse 2.4s ease-in-out infinite;
-    &:active { transform: scale(0.98); }
-    .#{$prefix}-emoji { font-size: 40px; flex-shrink: 0; }
-    .#{$prefix}-body { flex: 1; min-width: 0; }
-    .#{$prefix}-title { font-size: var(--fs-lg); font-weight: 800; color: $title; margin-bottom: 2px; }
-    .#{$prefix}-sub { font-size: var(--fs-base); color: $sub; line-height: 1.4; }
-    .#{$prefix}-arrow { font-size: 26px; color: $arrow; font-weight: 700; flex-shrink: 0; }
+    &:active { transform: scale(0.97); }
+    .#{$prefix}-emoji { font-size: 36px; line-height: 1; }
+    .#{$prefix}-body { flex: 1; min-width: 0; width: 100%; }
+    .#{$prefix}-title { font-size: var(--fs-md); font-weight: 800; color: $title; margin-bottom: 2px; line-height: 1.2; }
+    .#{$prefix}-sub { font-size: var(--fs-sm); color: $sub; line-height: 1.35; }
+    .#{$prefix}-arrow {
+      position: absolute;
+      top: 12px; right: 12px;
+      font-size: 20px; color: $arrow; font-weight: 700;
+    }
   }
 }
 

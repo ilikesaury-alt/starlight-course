@@ -4,6 +4,7 @@ import SafeBoundary from '../components/SafeBoundary'
 import { getModule, STARLIGHT_THEME } from '../data/starlight'
 import { useCourseStore } from '../store/useCourseStore'
 import { moduleThemeVars } from '../utils/theme'
+import Breadcrumb from '@/components/Breadcrumb'
 
 export default function LessonList() {
   const { unitId = '' } = useParams()
@@ -25,6 +26,7 @@ export default function LessonList() {
 
   return (
     <div className="page lesson-list" style={mcStyle}>
+      <Breadcrumb items={[{ label: '🏠', to: '/' }, { label: 'Starlight 预习', to: '/preview' }, { label: mod.title }]} />
       <div className="unit-banner" style={mcStyle}>
         <span className="unit-emoji">{mod.emoji}</span>
         <div>

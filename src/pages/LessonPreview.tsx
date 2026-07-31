@@ -7,6 +7,7 @@ import { getModule, STARLIGHT_THEME } from '../data/starlight'
 import { useCourseStore } from '../store/useCourseStore'
 import { speakText } from '../utils/speak'
 import { moduleThemeVars } from '../utils/theme'
+import Breadcrumb from '@/components/Breadcrumb'
 
 type Tab = 'vocab' | 'patterns' | 'dialogue'
 
@@ -62,6 +63,7 @@ export default function LessonPreview() {
 
   return (
     <div className="page lesson-preview" style={mcStyle}>
+      <Breadcrumb items={[{ label: '🏠', to: '/' }, { label: 'Starlight 预习', to: '/preview' }, { label: mod.title }, { label: `Lesson ${lesson?.id}` }]} />
       <div className="page-head" style={mcStyle}>
         <span className="page-emoji">{mod.emoji}</span>
         <div>
@@ -151,6 +153,8 @@ function VocabTab({ words, mcStyle }: { words: { en: string; zh: string; emoji: 
         <div className="fc-emoji">{w.emoji}</div>
         <div className="fc-word-row">
           <FcWord text={w.en} lang="en" />
+        </div>
+        <div className="fc-audio">
           <SpeakButton text={w.en} label={w.en} />
           <SpeakButton text={w.en} label={`${w.en} 慢速`} slow />
         </div>
