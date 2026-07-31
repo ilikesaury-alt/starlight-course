@@ -49,3 +49,8 @@ src/data/starlight0_extracted.json
 # 本地 agent 工作数据（非应用源码）
 .workbuddy/
 /src/data/rocketgirl
+
+# Playwright 测试产物（每次运行生成，不纳入版本控制）
+test-results/
+playwright-report/
+

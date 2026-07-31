@@ -106,7 +106,10 @@ export default defineConfig({
         ],
       },
       devOptions: {
-        enabled: true, // 开发环境也启用,方便在局域网测试
+        // 默认开发环境启用,方便在局域网真机测试。
+        // 但本仓库 E2E 通过 PW_TEST=1 关闭 dev SW——沙箱里 vite-plugin-pwa
+        // 写 dev-dist/sw.js 会被 EPERM 拒绝并弹出错误覆盖层,干扰 Playwright 点击。
+        enabled: process.env.PW_TEST !== '1',
       },
     }),
   ],
