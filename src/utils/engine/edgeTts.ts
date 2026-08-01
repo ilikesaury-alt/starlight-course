@@ -12,8 +12,9 @@
  *   - 含连接超时护栏，避免在非 Edge 环境意外挂起。
  */
 
-// 共享 blob 音频播放器（保证 Promise 一定结束，避免动画卡死）
-import { playAudioBlob } from './playBlob'
+// 统一 URL 播放器（保证 Promise 一定结束，区分 blocked/failed）
+import { playUrl } from './playUrl'
+import { PlayOutcome } from './types'
 
 // 运行时从 CDN 按需加载（浏览器专用子入口，零依赖、纯 Web API）。
 // 如需锁定版本，把末尾改为具体版本号，例如 edge-tts-universal@1.4.0/browser
@@ -147,26 +148,29 @@ export interface EdgeTtsSpeakOptions {
 
 /**
  * 用 Edge TTS 合成并播放中文文本。
- * @returns 是否成功播放（false 表示应回落到原有链路）
+ * @returns 播放结果：success 表示已发声；failed 表示应回落到下一层；
+ *          aborted 表示代次已失效（用户已发起新的播放）。
  */
-export async function speakWithEdgeTts(text: string, opts: EdgeTtsSpeakOptions = {}): Promise<boolean> {
-  if (!state.enabled) return false
+export async function speakWithEdgeTts(text: string, opts: EdgeTtsSpeakOptions = {}): Promise<PlayOutcome> {
+  if (!state.enabled) return { status: 'failed' }
   try {
     const Ctor = await loadCtor()
+    if (opts.guard && !opts.guard()) return { status: 'aborted' }
     const rate = opts.slow ? '-30%' : '+0%'
     const tts = new Ctor(text, ZH_VOICE, { rate, volume: '+0%', pitch: '+0Hz' })
     const result = await withTimeout(tts.synthesize(), CONNECT_TIMEOUT)
+    if (opts.guard && !opts.guard()) return { status: 'aborted' }
     const audio = result?.audio
     if (!(audio instanceof Blob)) throw new Error('edge-tts-no-blob')
     const url = URL.createObjectURL(audio)
-    // 用共享播放器：保证 Promise 一定结束（ended 缺失也不卡死动画）。
-    // 详见 engine/playBlob.ts 的三重兜底设计。
-    return await playAudioBlob(url, {
+    // 用统一播放器：保证 Promise 一定结束（ended 缺失也不卡死动画）。
+    return await playUrl(url, {
       guard: opts.guard,
       onAudio: opts.onAudio,
+      hardCapMs: 120000,
     })
   } catch (e) {
     console.warn('[edge-tts] speak failed, falling back:', e)
-    return false
+    return { status: 'failed' }
   }
 }

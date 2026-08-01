@@ -32,8 +32,9 @@ interface KokoroModule {
   }
 }
 
-// 共享 blob 音频播放器（保证 Promise 一定结束，避免动画卡死）
-import { playAudioBlob } from './playBlob'
+// 统一 URL 播放器（保证 Promise 一定结束，区分 blocked/failed）
+import { playUrl } from './playUrl'
+import { PlayOutcome } from './types'
 
 // 官方 ONNX 模型仓库（含 q8 量化权重）
 const MODEL_ID = 'onnx-community/kokoro-82m-v1.0-onnx'
@@ -155,26 +156,28 @@ export interface KokoroSpeakOptions {
 
 /**
  * 用 Kokoro 合成并播放文本。
- * @returns 是否成功播放（false 表示应回落到原有链路）
+ * @returns 播放结果：success 表示已发声；failed 表示应回落到下一层；
+ *          aborted 表示代次已失效（用户已发起新的播放）。
  */
-export async function speakWithKokoro(text: string, opts: KokoroSpeakOptions = {}): Promise<boolean> {
-  if (!featureEnabled) return false
+export async function speakWithKokoro(text: string, opts: KokoroSpeakOptions = {}): Promise<PlayOutcome> {
+  if (!featureEnabled) return { status: 'failed' }
   try {
     const tts = await loadModel()
+    if (opts.guard && !opts.guard()) return { status: 'aborted' }
     const audio = await tts.generate(text, {
       voice: DEFAULT_VOICE,
       speed: opts.slow ? 0.6 : 1.0,
     })
+    if (opts.guard && !opts.guard()) return { status: 'aborted' }
     const blob = audio.toBlob()
     const url = URL.createObjectURL(blob)
-    // 用共享播放器：保证 Promise 一定结束（ended 缺失也不卡死动画）。
-    // 详见 engine/playBlob.ts 的三重兜底设计。
-    return await playAudioBlob(url, {
+    return await playUrl(url, {
       guard: opts.guard,
       onAudio: opts.onAudio,
+      hardCapMs: 120000,
     })
   } catch (e) {
     console.warn('[kokoro] speak failed, falling back:', e)
-    return false
+    return { status: 'failed' }
   }
 }
