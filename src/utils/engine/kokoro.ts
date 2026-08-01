@@ -59,10 +59,15 @@ let featureEnabled = readEnabledFlag()
 function readEnabledFlag(): boolean {
   try {
     const v = localStorage.getItem(STORAGE_KEY)
-    if (v === null) return true // 默认开启
+    // 默认关闭：Kokoro 为异步 WebGPU 推理，发声发生在用户点击手势之外；
+    // 一旦其失败回退到「跨域有道音频」，跨域媒体的异步 play() 易被 Chrome 自动播放
+    // 策略拦截 → 英文整条链路静音（表现为「前几次能响、模型就绪后反而哑火」）。
+    // 关闭后英文走「有道(同步)→WebSpeech」稳定链路；需要神经音色时在控制台执行
+    //   localStorage.setItem('starlight.kokoro.enabled','1')  并刷新即可开启。
+    if (v === null) return false
     return v === '1' || v === 'true'
   } catch {
-    return true
+    return false
   }
 }
 
