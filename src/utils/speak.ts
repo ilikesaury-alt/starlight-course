@@ -113,7 +113,7 @@ export function speakText(text: string, opts: SpeakOptions = {}) {
   }
   const markDone = done
 
-  // 取消上一次播放
+  // 取消上一次播放（有道 / Kokoro 音频）
   if (currentAudio) {
     try {
       currentAudio.pause()
@@ -124,8 +124,12 @@ export function speakText(text: string, opts: SpeakOptions = {}) {
     }
     currentAudio = null
   }
+  // 仅当原生合成器确实在播 / 排队时才 cancel，避免「每次点击都 cancel」的轰炸。
+  // 这正是 Chrome speechSynthesis 说出几个就永久失声（假死）的根因之一：
+  // 连续的 cancel()+speak() 会把引擎拖入既不 onend 也不报错、speaking/pending 卡 false 的死状态。
   try {
-    window.speechSynthesis?.cancel()
+    const s = window.speechSynthesis
+    if (s && typeof s.cancel === 'function' && (s.speaking || s.pending)) s.cancel()
   } catch {
     /* ignore */
   }
@@ -209,57 +213,80 @@ export function speakText(text: string, opts: SpeakOptions = {}) {
   }
 
   // Level 2: speechSynthesis 兜底（Web Speech API）
-  const nativeSpeak = () => {
+  // 关键健壮性修复：Chrome 在连续 speak / cancel 数次后，合成器会「假死」——
+  // speak() 后既无 onend 也无 onerror，synth.speaking / synth.pending 也卡在 false，
+  // 表现为「点几个就不发音」。对策：
+  //   1) 仅在确有发声 / 排队时才 cancel，避免 cancel 轰炸触发假死；
+  //   2) 1.2s 静默检测：若没真正在播且未结束，cancel + 重新 speak 一次（自愈）；
+  //   3) 若仍假死，最后再退回有道音频一次并复位按钮，杜绝永久静音。
+  const playNative = (allowYoudaoFallback: boolean) => {
     if (gen !== generation) return
 
     const synth = window.speechSynthesis
     if (!synth || typeof synth.cancel !== 'function') {
-      done()
+      if (allowYoudaoFallback) youdao()
+      else done()
       return
     }
 
-    try {
-      const utter = new SpeechSynthesisUtterance(text)
-      utter.lang = lang === 'zh' ? 'zh-CN' : 'en-US'
-      utter.rate = rate
-      utter.pitch = 1
-      const voice = lang === 'zh' ? pickZhVoice() : pickVoice()
-      if (voice) utter.voice = voice
-
-      let settled = false
-      const settle = () => {
-        // 本 utter 结束即复位本按钮；gen 限制保留在外层安全网（下方 setTimeout），
-        // 避免陈旧回调误复位新按钮。
-        if (!settled) {
-          settled = true
-          done()
-        }
+    let settled = false
+    const onSettle = () => {
+      if (!settled) {
+        settled = true
+        done()
       }
-      utter.onend = settle
-      utter.onerror = settle
-
-      // Chrome 有时停在 paused 状态（尤其是 cancel 之后），先 resume 再播
-      try {
-        if (synth.paused) synth.resume()
-      } catch {
-        /* ignore */
-      }
-      synth.speak(utter)
-
-      // 安全网：若合成器静默吞掉本次朗读（onend/onerror 都不触发），
-      // 且当前确实没有在播，则复位按钮，让用户能再次点击重试。
-      setTimeout(() => {
-        if (!settled && gen === generation) {
-          try {
-            if (!synth.speaking && !synth.pending) settle()
-          } catch {
-            settle()
-          }
-        }
-      }, 1500)
-    } catch {
-      done()
     }
+
+    const makeUtter = (): SpeechSynthesisUtterance => {
+      const u = new SpeechSynthesisUtterance(text)
+      u.lang = lang === 'zh' ? 'zh-CN' : 'en-US'
+      u.rate = rate
+      u.pitch = 1
+      const v = lang === 'zh' ? pickZhVoice() : pickVoice()
+      if (v) u.voice = v
+      u.onend = onSettle
+      u.onerror = onSettle
+      return u
+    }
+
+    // 仅在队列忙时清队（避免 cancel 轰炸）
+    try {
+      if (synth.speaking || synth.pending) synth.cancel()
+    } catch {
+      /* ignore */
+    }
+    try {
+      if (synth.paused) synth.resume()
+    } catch {
+      /* ignore */
+    }
+
+    synth.speak(makeUtter())
+
+    // 自愈：1.2s 后若既无 onend 也未在播（卡死），cancel + 重说一次
+    setTimeout(() => {
+      if (settled || gen !== generation) return
+      if (!synth.speaking && !synth.pending) {
+        try {
+          synth.cancel()
+        } catch {
+          /* ignore */
+        }
+        try {
+          synth.speak(makeUtter())
+        } catch {
+          /* ignore */
+        }
+        // 再给 1.2s 判定：重说仍未发声 → 彻底假死
+        setTimeout(() => {
+          if (settled || gen !== generation) return
+          if (!synth.speaking && !synth.pending) {
+            if (allowYoudaoFallback) youdao() // 最后退回有道音频（不再回 native，避免死循环）
+            onSettle() // 始终复位按钮，避免 ⏸ 永久卡死
+          }
+        }, 1200)
+      }
+    }, 1200)
   }
 
   // 将 done 加入池中，供下次调用时通知
@@ -272,7 +299,7 @@ export function speakText(text: string, opts: SpeakOptions = {}) {
     if (!isEdgeReady()) {
       // 模块尚未预热：先 youdao 即时出声（保证跟手），后台预热 Edge 供下次点击使用
       warmupEdgeTts()
-      youdao(() => nativeSpeak())
+      youdao(() => playNative(true))
       return
     }
     let settled = false
@@ -290,7 +317,7 @@ export function speakText(text: string, opts: SpeakOptions = {}) {
           }
           currentAudio = null
         }
-        youdao(() => nativeSpeak())
+        youdao(() => playNative(true))
       }
     }
     // 整体超时兜底：模型/合成/播放任一环节挂起时，强制回落并结束动画，
@@ -348,7 +375,7 @@ export function speakText(text: string, opts: SpeakOptions = {}) {
           }
           currentAudio = null
         }
-        youdao(() => nativeSpeak())
+        youdao(() => playNative(true))
       }
     }
     // 整体超时兜底：模型/生成/播放任一环节挂起时，强制回落并结束动画，
@@ -389,7 +416,7 @@ export function speakText(text: string, opts: SpeakOptions = {}) {
 
   // ---- 未走 Kokoro：走原有链路，并在后台预热 Kokoro（仅英文）----
   if (lang === 'en') warmupKokoro()
-  youdao(() => nativeSpeak())
+  youdao(() => playNative(true))
 }
 
 /**
