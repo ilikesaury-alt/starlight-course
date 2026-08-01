@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import SpeakButton from '../components/SpeakButton'
 import SafeBoundary from '../components/SafeBoundary'
+import ConfirmDialog from '../components/ConfirmDialog'
 import ModuleFilterChips, { type ModuleFilter } from '../components/ModuleFilterChips'
 import { useCourseStore } from '../store/useCourseStore'
 import { STARLIGHT_THEME } from '../data/starlight'
@@ -18,6 +19,7 @@ export default function WrongBook() {
   const recordReview = useCourseStore((s) => s.recordReview)
 
   const [filter, setFilter] = useState<ModuleFilter>('all')
+  const [showClear, setShowClear] = useState(false)
   const list = filter === 'all' ? wrongWords : wrongWords.filter((w) => w.module === filter)
 
   // 各模块错题数量，供筛选 chips 显示并隐藏为 0 的模块
@@ -95,13 +97,26 @@ export default function WrongBook() {
               <button
                 type="button"
                 className="btn btn-soft"
-                onClick={() => {
-                  if (confirm('确定清空所有错题吗？')) clearWrongWords()
-                }}
+                onClick={() => setShowClear(true)}
               >
                 🧹 清空全部
               </button>
             </div>
+
+            <ConfirmDialog
+              open={showClear}
+              emoji="🧹"
+              title="要清空所有错题吗？"
+              message="清空后就找不回来了哦，确定吗？"
+              confirmText="清空"
+              cancelText="先不啦"
+              danger
+              onConfirm={() => {
+                clearWrongWords()
+                setShowClear(false)
+              }}
+              onCancel={() => setShowClear(false)}
+            />
           </>
         )}
       </SafeBoundary>

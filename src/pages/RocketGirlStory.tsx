@@ -11,7 +11,6 @@ export default function RocketGirlStory() {
       basePath="/rocketgirl"
       label="Rocket Girl"
       moduleEmoji="🚀"
-      navLayout="rocketgirl"
     />
   )
 }

@@ -11,7 +11,6 @@ export default function FlyGuyStory() {
       basePath="/flyguy"
       label="Fly Guy"
       moduleEmoji="🐝"
-      navLayout="flyguy"
     />
   )
 }

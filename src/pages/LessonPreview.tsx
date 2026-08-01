@@ -1,15 +1,16 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import SpeakButton from '../components/SpeakButton'
 import FcWord from '../components/FcWord'
 import SafeBoundary from '../components/SafeBoundary'
+import QuizEngine, { type QuizItem } from '../components/QuizEngine'
 import { getModule, STARLIGHT_THEME } from '../data/starlight'
 import { useCourseStore } from '../store/useCourseStore'
 import { speakText } from '../utils/speak'
 import { moduleThemeVars } from '../utils/theme'
 import Breadcrumb from '@/components/Breadcrumb'
 
-type Tab = 'vocab' | 'patterns' | 'dialogue'
+type Tab = 'vocab' | 'patterns' | 'dialogue' | 'quiz'
 
 const SPEAKERS = ['🧒 小星', '👧 小月']
 
@@ -17,6 +18,8 @@ export default function LessonPreview() {
   const { unitId = '', lessonId = '' } = useParams()
   const mod = getModule(unitId)
   const seedCards = useCourseStore((s) => s.seedCards)
+  const addStars = useCourseStore((s) => s.addStars)
+  const markQuizDone = useCourseStore((s) => s.markQuizDone)
   const [tab, setTab] = useState<Tab>('vocab')
 
   const lessons = mod?.lessons ?? []
@@ -25,6 +28,19 @@ export default function LessonPreview() {
 
   const words = lesson?.words ?? []
   const sentences = lesson?.sentences ?? []
+
+  // 单元测验：由该单元 QuizQuestion 数据生成（听正确的选项发音）
+  const quizItems = useMemo<QuizItem[]>(
+    () =>
+      (mod?.quiz ?? []).map((q) => ({
+        q: q.q,
+        options: q.options,
+        answer: q.answer,
+        explain: q.explain,
+        speakText: q.options[q.answer] ?? q.q,
+      })),
+    [mod]
+  )
 
   // 进入某课时,把该课的单词和句型批量种子化进 SRS 调度池
   useEffect(() => {
@@ -97,31 +113,49 @@ export default function LessonPreview() {
           >
             🎭 对话
           </button>
+          <button
+            type="button"
+            className={'tab-btn' + (tab === 'quiz' ? ' active' : '')}
+            onClick={() => setTab('quiz')}
+          >
+            🎯 测验
+          </button>
         </div>
 
         {tab === 'vocab' && <VocabTab words={words} mcStyle={mcStyle} />}
         {tab === 'patterns' && <PatternsTab sentences={sentences} mcStyle={mcStyle} />}
         {tab === 'dialogue' && <DialogueTab sentences={sentences} mcStyle={mcStyle} />}
+        {tab === 'quiz' && (
+          <QuizEngine
+            quiz={quizItems}
+            mcStyle={mcStyle}
+            badgeText="🎯 单元测验 · 听一听选一选"
+            resultTitle="测验完成！"
+            resultLinks={
+              <>
+                <Link to={`/preview/${unitId}`} className="btn btn-soft">← 课程列表</Link>
+                <Link to="/smart" className="btn btn-soft">🧠 去复习</Link>
+              </>
+            }
+            onPick={() => {}}
+            onFinish={(correct, total) => {
+              addStars(correct === total ? correct + 5 : correct)
+              markQuizDone(mod.slug)
+            }}
+          />
+        )}
       </SafeBoundary>
 
       <div className="page-nav">
         <Link to={`/preview/${unitId}`} className="back-link">← 课程列表</Link>
-        {tab === 'dialogue' ? (
-          <div className="lesson-nav">
-            {prevLesson && (
-              <Link to={`/preview/${unitId}/${prevLesson.id}`} className="btn btn-soft">← 上一课</Link>
-            )}
-            {nextLesson && (
-              <Link to={`/preview/${unitId}/${nextLesson.id}`} className="btn">下一课 →</Link>
-            )}
-          </div>
-        ) : (
-          <div className="lesson-nav">
-            <button type="button" className="btn" onClick={() => setTab(tab === 'vocab' ? 'patterns' : 'dialogue')}>
-              {tab === 'vocab' ? '💬 句型 →' : '🎭 对话 →'}
-            </button>
-          </div>
-        )}
+        <div className="lesson-nav">
+          {prevLesson && (
+            <Link to={`/preview/${unitId}/${prevLesson.id}`} className="btn btn-soft">← 上一课</Link>
+          )}
+          {nextLesson && (
+            <Link to={`/preview/${unitId}/${nextLesson.id}`} className="btn">下一课 →</Link>
+          )}
+        </div>
       </div>
     </div>
   )

@@ -322,6 +322,7 @@
 // ---------- 进度 Progress ----------
 .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
 .stat-card { text-align: center; padding: 18px 12px; border-radius: var(--r-lg); background: var(--card); border: 1px solid var(--line); box-shadow: var(--shadow-sm); }
+.stat-card-link { display: block; transition: transform 0.15s; &:active { transform: scale(0.97); } }
 .stat-emoji { font-size: 28px; }
 .stat-value { font-size: 26px; font-weight: 800; color: var(--brand); margin: 4px 0; }
 .stat-label { font-size: var(--fs-sm); color: var(--ink-soft); }
@@ -331,6 +332,29 @@
 .unit-progress-name { font-size: var(--fs-base); font-weight: 600; margin-top: 4px; }
 .unit-progress-status { font-size: var(--fs-sm); color: var(--ink-soft); margin-top: 2px; }
 .unit-progress-status.done { color: var(--ok); font-weight: 600; }
+
+// 各模块进度栏（可点击跳转）
+.module-progress-list { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+.module-progress-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: var(--r-lg);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-left: 6px solid var(--mc, var(--brand));
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.15s, box-shadow 0.15s;
+  &:active { transform: scale(0.98); }
+}
+.mp-emoji { font-size: 30px; flex-shrink: 0; }
+.mp-body { flex: 1; min-width: 0; }
+.mp-name { font-size: var(--fs-md); font-weight: 800; }
+.mp-status { font-size: var(--fs-sm); color: var(--ink-soft); margin-top: 2px; font-weight: 600; }
+.mp-bar { height: 10px; background: var(--line); border-radius: var(--r-pill); overflow: hidden; margin-top: 8px; }
+.mp-bar-fill { height: 100%; border-radius: var(--r-pill); background: linear-gradient(90deg, var(--mc, var(--brand)), var(--sun)); transition: width 0.6s ease; }
+.mp-arrow { font-size: 22px; color: var(--ink-mute); font-weight: 700; flex-shrink: 0; }
 
 // ---------- 掌握度 Mastery ----------
 .mastery-row { display: flex; gap: 8px; justify-content: center; margin-top: 12px; }

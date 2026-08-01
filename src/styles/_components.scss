@@ -190,6 +190,11 @@
   color: var(--sun-ink);
   box-shadow: var(--shadow-pop);
 }
+.btn--danger {
+  background: var(--no);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);
+}
 .btn--lg { padding: 16px 28px; font-size: var(--fs-lg); }
 .btn--sm { padding: 8px 14px; font-size: var(--fs-md); }
 .btn--block { display: flex; width: 100%; }
@@ -338,6 +343,55 @@
 .route-error { text-align: center; padding: 60px 20px; }
 .route-error-emoji { font-size: 56px; }
 .route-error p { color: var(--ink-soft); margin: 12px 0 18px; }
+
+// 兜底卡片：SafeBoundary 出错时给儿童一个可爱、可操作的返回入口，而非白屏
+.safe-boundary {
+  background: var(--card);
+  border-radius: var(--r-xl);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-sm);
+  margin: 14px auto;
+  max-width: 420px;
+}
+.safe-boundary-emoji { font-size: 56px; margin-bottom: 8px; }
+.safe-boundary-title { font-size: var(--fs-xl); font-weight: 800; margin: 0 0 6px; }
+.safe-boundary-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 16px; }
+
+// ---------- 确认弹窗（儿童友好，替代 window.confirm） ----------
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(31, 41, 55, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: var(--z-overlay);
+  animation: fade-in 0.18s ease;
+}
+@keyframes fade-in {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+.confirm-dialog {
+  width: 100%;
+  max-width: 360px;
+  background: var(--card);
+  border-radius: var(--r-xl);
+  padding: 26px 22px 20px;
+  text-align: center;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.22);
+  animation: dialog-pop 0.22s var(--ease-pop);
+}
+@keyframes dialog-pop {
+  0% { transform: scale(0.85); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.confirm-emoji { font-size: 56px; }
+.confirm-title { font-size: var(--fs-xl); font-weight: 800; margin: 10px 0 4px; color: var(--ink); }
+.confirm-message { font-size: var(--fs-md); color: var(--ink-soft); line-height: 1.6; margin: 0 0 6px; }
+.confirm-actions { display: flex; gap: 10px; justify-content: center; margin-top: 18px; }
+.confirm-actions .btn { flex: 1; max-width: 150px; }
 
 // ---------- 工具类 Helpers ----------
 .clamp-2 { @include clamp(2); }

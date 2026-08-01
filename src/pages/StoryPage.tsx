@@ -21,8 +21,6 @@ interface StoryPageProps {
   basePath: string
   label: string
   moduleEmoji: string
-  /** 底部导航布局：flyguy = 列表链接 + 闯关时上下关；rocketgirl = 上关 + 列表 + 下关 */
-  navLayout: 'flyguy' | 'rocketgirl'
 }
 
 type Tab = 'vocab' | 'sentences' | 'quiz'
@@ -69,7 +67,6 @@ export default function StoryPage({
   basePath,
   label,
   moduleEmoji,
-  navLayout,
 }: StoryPageProps) {
   const { slug = '' } = useParams()
   const story = getStory(slug)
@@ -167,37 +164,17 @@ export default function StoryPage({
         )}
       </SafeBoundary>
 
-      {navLayout === 'flyguy' ? (
-        <div className="page-nav">
-          <Link to={basePath} className="btn btn-soft">← 故事列表</Link>
-          {tab === 'quiz' ? (
-            <>
-              {prevStory && (
-                <Link to={`${basePath}/${prevStory.slug}`} className="btn btn-soft">← 上一关</Link>
-              )}
-              {nextStory && (
-                <Link to={`${basePath}/${nextStory.slug}`} className="btn">下一关 →</Link>
-              )}
-            </>
-          ) : (
-            <button type="button" className="btn" onClick={() => setTab(tab === 'vocab' ? 'sentences' : 'quiz')}>
-              {tab === 'vocab' ? '💬 例句 →' : '🎯 闯关 →'}
-            </button>
+      <div className="page-nav">
+        <Link to={basePath} className="back-link">← 故事列表</Link>
+        <div className="lesson-nav">
+          {prevStory && (
+            <Link to={`${basePath}/${prevStory.slug}`} className="btn btn-soft">← 上一关</Link>
+          )}
+          {nextStory && (
+            <Link to={`${basePath}/${nextStory.slug}`} className="btn">下一关 →</Link>
           )}
         </div>
-      ) : (
-        <div className="page-nav">
-          <div className="lesson-nav">
-            {prevStory && (
-              <Link to={`${basePath}/${prevStory.slug}`} className="btn btn-soft">← 上一关</Link>
-            )}
-            <Link to={basePath} className="btn">{moduleEmoji} 故事列表</Link>
-            {nextStory && (
-              <Link to={`${basePath}/${nextStory.slug}`} className="btn">下一关 →</Link>
-            )}
-          </div>
-        </div>
-      )}
+      </div>
     </div>
   )
 }

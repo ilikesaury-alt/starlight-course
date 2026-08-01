@@ -15,7 +15,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <span className="brand-star">★</span>
           <span className="brand-text">Starlight 学习伙伴</span>
         </Link>
-        <span className="brand-sub">预备级 · 一对一菲教</span>
+        <span className="brand-sub">语文 · 英语 · 主课</span>
       </header>
 
       <main className="app-main">{children}</main>

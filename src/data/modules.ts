@@ -101,7 +101,7 @@ const rocketGirlMeta: ModuleMeta = {
 const chineseMeta: ModuleMeta = {
   id: 'chinese',
   label: '语文',
-  labelZh: '三年级上册',
+  labelZh: '语文',
   color: CHINESE_THEME.color,
   colorSoft: CHINESE_THEME.colorSoft,
   kind: 'unit',
@@ -132,7 +132,7 @@ const chineseMeta: ModuleMeta = {
 const eng3aMeta: ModuleMeta = {
   id: 'eng3a',
   label: '英语',
-  labelZh: '三年级上册',
+  labelZh: '英语',
   color: ENG3A_THEME.color,
   colorSoft: ENG3A_THEME.colorSoft,
   kind: 'unit',

@@ -11,7 +11,7 @@ export default function Home() {
         <div className="hero-emoji">🌟</div>
         <h1 className="hero-title">课前预习 · 课后复习</h1>
         <p className="hero-sub">
-          配合一对一菲教课，每单元都有 <b>预习导学</b>、<b>单词卡</b>、<b>句型对话</b>、<b>互动测验</b>。
+          配合校内课程与一对一外教课，每本教材都有 <b>预习导学</b>、<b>单词卡</b>、<b>句型对话</b>、<b>互动测验</b>。
         </p>
         <div className="hero-tags">
           <span className="hero-tag">👂 听</span>
