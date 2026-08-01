@@ -69,6 +69,155 @@ function pickZhVoice(): SpeechSynthesisVoice | undefined {
   )
 }
 
+// ---------- 中文长文本：分片有道顺序播放 ----------
+// 有道 dictvoice 单请求有长度上限（约 40~50 字），长自然段超出后返回的是「截断音频」，
+// 表现为「播一半就停」。故对长文本按标点切分、逐片请求有道、顺序播放；
+// 任一分段失败则对「剩余整体」回退 WebSpeech，不再回退整段有道（避免二次截断）。
+
+/** 按标点断句，过长句再按 max 字符硬切；返回若干短片段 */
+function chunkByPunct(text: string, max = 26): string[] {
+  const raw = text.match(/[^。！？!?；;，,、\n]+[。！？!?；;，,、]?|\n+/g) ?? [text]
+  const out: string[] = []
+  for (const s of raw) {
+    const t = s.trim()
+    if (!t) continue
+    if (t.length <= max) out.push(t)
+    else for (let k = 0; k < t.length; k += max) out.push(t.slice(k, k + max))
+  }
+  return out.length ? out : [text]
+}
+
+/** 用 WebSpeech 朗读一段文本（自带一次自愈），用于分片失败后的剩余兜底 */
+function playRemainderWeb(text: string, gen: number, rate: number, onDone: () => void) {
+  if (gen !== generation) {
+    onDone()
+    return
+  }
+  const synth = window.speechSynthesis
+  if (!synth || typeof synth.cancel !== 'function') {
+    onDone()
+    return
+  }
+  let settled = false
+  const u = new SpeechSynthesisUtterance(text)
+  u.lang = 'zh-CN'
+  u.rate = rate
+  u.pitch = 1
+  const v = pickZhVoice()
+  if (v) u.voice = v
+  const end = () => {
+    if (!settled) {
+      settled = true
+      onDone()
+    }
+  }
+  u.onend = end
+  u.onerror = end
+  try {
+    if (synth.speaking || synth.pending) synth.cancel()
+  } catch {
+    /* ignore */
+  }
+  try {
+    if (synth.paused) synth.resume()
+  } catch {
+    /* ignore */
+  }
+  synth.speak(u)
+  // 自愈：1.2s 后若既无回调也未在播，cancel + 重说一次
+  setTimeout(() => {
+    if (settled || gen !== generation) return
+    if (!synth.speaking && !synth.pending) {
+      try {
+        synth.cancel()
+      } catch {
+        /* ignore */
+      }
+      try {
+        synth.speak(u)
+      } catch {
+        /* ignore */
+      }
+      setTimeout(() => {
+        if (!settled) {
+          settled = true
+          onDone()
+        }
+      }, 1500)
+    }
+  }, 1200)
+}
+
+/**
+ * 分片顺序播放有道音频；全部成功或最终兜底完成即 onDone。
+ * 健壮性：单片因网络抖动 onerror 时，先「同片重试」（最多 2 次）而非立即丢弃到 WebSpeech，
+ * 避免偶发失败把整段剩余文本交给可能「假死」的原生合成器而彻底静音。
+ * 仅当同片重试耗尽，才把「本片 + 剩余」整体交给原生合成器兜底（原生无长度上限）。
+ */
+function playZhLongYoudao(text: string, gen: number, rate: number, onDone: () => void) {
+  const chunks = chunkByPunct(text, 26)
+  let i = 0
+  const playChunk = (piece: string, attempt: number) => {
+    if (gen !== generation) {
+      onDone()
+      return
+    }
+    const url = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(piece)}&type=2`
+    const audio = new Audio(url)
+    currentAudio = audio
+    let settled = false
+    const finish = (ok: boolean) => {
+      if (settled) return
+      settled = true
+      if (currentAudio === audio) currentAudio = null
+      if (ok) {
+        i++
+        playNext()
+      } else if (attempt < 2) {
+        playChunk(piece, attempt + 1) // 同片重试，不推进游标
+      } else {
+        // 重试耗尽：把「本片 + 剩余」整体交给原生合成器兜底（原生无长度上限）
+        playRemainderWeb(chunks.slice(i).join(''), gen, rate, onDone)
+      }
+    }
+    audio.onended = () => finish(true)
+    audio.onerror = () => finish(false)
+    const cap = setTimeout(() => finish(true), 9000) // 短分片，9s 足够
+    audio.addEventListener('ended', () => clearTimeout(cap), { once: true })
+    audio.addEventListener('error', () => clearTimeout(cap), { once: true })
+    void audio.play().catch(() => finish(false))
+  }
+  const playNext = () => {
+    if (gen !== generation) {
+      onDone()
+      return
+    }
+    if (i >= chunks.length) {
+      onDone()
+      return
+    }
+    playChunk(chunks[i], 0)
+  }
+  playNext()
+}
+
+/** 中文路由：长文本(>30字)走分片有道，短文本走原有「有道→WebSpeech」 */
+function zhSpeak(
+  youdaoFn: (onComplete?: () => void) => void,
+  text: string,
+  lang: 'en' | 'zh',
+  gen: number,
+  rate: number,
+  fallback: () => void,
+  done: () => void,
+) {
+  if (lang === 'zh' && text.length > 30) {
+    playZhLongYoudao(text, gen, rate, () => done())
+  } else {
+    youdaoFn(fallback)
+  }
+}
+
 // ---------- 播放状态管理 ----------
 /** 上一次播放的 Audio 引用，用于取消重叠播放 */
 let currentAudio: HTMLAudioElement | null = null
@@ -172,17 +321,15 @@ export function speakText(text: string, opts: SpeakOptions = {}) {
         started = true
         // 已开始播放但 ended 迟迟不触发时的兜底收尾：
         // 依音频时长 + 余量强制 onSuccess，避免按钮动画永久停在「播放中」。
-        const dur = Number.isFinite(audio.duration) ? audio.duration : 12
+        // 若 duration 不可靠（Infinity/0），用 12s 保守兜底，避免长音频被中途判定结束。
+        const dur = Number.isFinite(audio.duration) && audio.duration > 0 ? audio.duration : 12
         playCapTimer = setTimeout(() => {
           if (!settled) onSuccess()
         }, dur * 1000 + 1200)
       }
-      // 进度结束检测：跨域有道音频的 ended 偶发不触发，依据 timeupdate 判定已播完，
-      // 比单纯依赖 ended 更可靠，确保动画及时复位。
-      audio.ontimeupdate = () => {
-        const d = audio.duration
-        if (Number.isFinite(d) && d > 0 && audio.currentTime >= d - 0.12) onSuccess()
-      }
+      // 不再用 timeupdate 在「接近末尾」提前 onSuccess：跨域有道音频的 duration
+      // 偶发不可靠，提前复位会让按钮动画在真正播完前停下，体验不一致。
+      // 统一依赖 onended + onplaying 的时长兜底来收尾。
       audio.onended = onSuccess
       audio.onerror = onFail
 
@@ -299,7 +446,7 @@ export function speakText(text: string, opts: SpeakOptions = {}) {
     if (!isEdgeReady()) {
       // 模块尚未预热：先 youdao 即时出声（保证跟手），后台预热 Edge 供下次点击使用
       warmupEdgeTts()
-      youdao(() => playNative(true))
+      zhSpeak(youdao, text, lang, gen, rate, () => playNative(true), done)
       return
     }
     let settled = false
@@ -317,7 +464,7 @@ export function speakText(text: string, opts: SpeakOptions = {}) {
           }
           currentAudio = null
         }
-        youdao(() => playNative(true))
+        zhSpeak(youdao, text, lang, gen, rate, () => playNative(true), done)
       }
     }
     // 整体超时兜底：模型/合成/播放任一环节挂起时，强制回落并结束动画，
@@ -375,7 +522,7 @@ export function speakText(text: string, opts: SpeakOptions = {}) {
           }
           currentAudio = null
         }
-        youdao(() => playNative(true))
+        zhSpeak(youdao, text, lang, gen, rate, () => playNative(true), done)
       }
     }
     // 整体超时兜底：模型/生成/播放任一环节挂起时，强制回落并结束动画，
@@ -416,7 +563,7 @@ export function speakText(text: string, opts: SpeakOptions = {}) {
 
   // ---- 未走 Kokoro：走原有链路，并在后台预热 Kokoro（仅英文）----
   if (lang === 'en') warmupKokoro()
-  youdao(() => playNative(true))
+  zhSpeak(youdao, text, lang, gen, rate, () => playNative(true), done)
 }
 
 /**

@@ -3,12 +3,16 @@
  *
  * 设计动机：浏览器对 blob 音频的 `ended` 事件偶发不触发（尤其是 WebGPU 合成的
  * webm/opus 流），若把「动画结束 / done() 回调」完全押在 ended 上，按钮会永久停在
- * 「播放中」。本函数通过三重保险保证 resolve：
- *   1. 已知 duration 时立即布防「时长 + 余量」兜底定时器；
- *   2. 未知 duration 时，在 play() 之前注册 loadedmetadata（能捕获提前触发的 metadata）；
- *   3. 绝对兜底定时器（上限 ~20s），即使上述两路都失效也不会永久挂起。
+ * 「播放中」。本函数通过兜底定时器保证 resolve。
  *
- * @returns true=成功播放到结束；false=失败或被守卫放弃（上层应回落到兜底链）
+ * ⚠️ 关键修复（「播一半就停」根因）：
+ *   旧实现会在「时长 + 余量」处提前 finish 并 `URL.revokeObjectURL`。但 Edge TTS 等
+ *   流式音频的 duration 常被浏览器低估（或报 Infinity/0），于是定时器在音频尚未播完
+ *   时吊销正在播放的 blob → 声音戛然而止。
+ *   新实现：
+ *     - 软兜底（duration+余量）**只复位按钮动画，绝不 revoke**，让音频继续播到自然结束；
+ *     - 真正的 revoke 仅发生在 `ended` / `onerror` 或绝对兜底（HARD_CAP）时。
+ *   这样无论 duration 是否被低估，都不会中途掐断。
  */
 
 export interface PlayBlobOptions {
@@ -18,65 +22,79 @@ export interface PlayBlobOptions {
   onAudio?: (el: HTMLAudioElement) => void
 }
 
-/** 绝对兜底上限：即使 ended 与 duration 兜底都失效，也不会永久挂起 */
-const HARD_CAP_MS = 20000
+/** 绝对兜底上限：仅在 loadedmetadata 始终不触发、ended 也丢失时才依赖它，给足余量覆盖长文本 */
+const HARD_CAP_MS = 90000
 
 export function playAudioBlob(url: string, opts: PlayBlobOptions = {}): Promise<boolean> {
   return new Promise<boolean>((resolve) => {
     const el = new Audio(url)
     opts.onAudio?.(el)
 
-    let settled = false
+    let resolved = false
+    let revoked = false
     const timers: ReturnType<typeof setTimeout>[] = []
-    const cleanup = () => {
-      timers.forEach(clearTimeout)
+
+    const revoke = () => {
+      if (revoked) return
+      revoked = true
+      // 先暂停再吊销：避免「revoke 正在播放的 blob」导致声音戛然而止
+      try {
+        el.pause()
+      } catch {
+        /* ignore */
+      }
       try {
         URL.revokeObjectURL(url)
       } catch {
         /* ignore */
       }
     }
-    const finish = (ok: boolean) => {
-      if (settled) return
-      settled = true
-      cleanup()
+    // 仅复位 Promise（按钮动画），不吊销 URL —— 让音频继续播到自然结束
+    const resolveOnce = (ok: boolean) => {
+      if (resolved) return
+      resolved = true
       resolve(ok)
     }
 
-    el.onended = () => finish(true)
-    el.onerror = () => finish(false)
-
-    // 进度结束检测：部分浏览器/解码路径对 blob 音频偶发不触发 ended（尤其 webm/opus），
-    // 而 timeupdate 在播放期间稳定触发，依据 currentTime 逼近 duration 判定「已播完」，
-    // 比单纯依赖 ended 更可靠，确保动画（done）及时复位。
-    el.ontimeupdate = () => {
-      const d = el.duration
-      if (Number.isFinite(d) && d > 0 && el.currentTime >= d - 0.12) finish(true)
+    el.onended = () => {
+      resolveOnce(true)
+      revoke()
+    }
+    el.onerror = () => {
+      resolveOnce(false)
+      revoke()
     }
 
     // 代次守卫：播放前若已变更（用户快速连点），放弃本次播放
     if (opts.guard && !opts.guard()) {
-      cleanup()
-      resolve(false)
+      revoke()
+      resolveOnce(false)
       return
     }
 
-    void el.play().catch(() => finish(false))
+    void el.play().catch(() => {
+      resolveOnce(false)
+      revoke()
+    })
 
-    // 时长兜底：不依赖 loadedmetadata 事件顺序 ——
-    // 若 duration 已可直接读取则立即布防；否则在 play 之前注册事件（能捕获提前触发的 metadata）
-    const armDurationCap = () => {
-      const dur = Number.isFinite(el.duration) && el.duration > 0 ? el.duration : 6
-      timers.push(setTimeout(() => finish(true), dur * 1000 + 1200))
-    }
-    if (Number.isFinite(el.duration) && el.duration > 0) {
-      armDurationCap()
-    } else {
-      el.addEventListener('loadedmetadata', armDurationCap, { once: true })
-    }
+    // 软兜底：用「duration + 余量」仅复位按钮动画。
+    // 若 duration 可靠且≥真实时长，onended 会先于它触发（已 revoke，此处 resolve 幂等）；
+    // 若 duration 被低估（<真实时长），此处提前复位按钮，但音频继续播放，
+    // 直到真实 onended 触发才 revoke —— 绝不中途掐断。
+    el.addEventListener(
+      'loadedmetadata',
+      () => {
+        const d = Number.isFinite(el.duration) && el.duration > 0 ? el.duration : 0
+        const soft = (d > 0 ? d : 45) * 1000 + 1500
+        timers.push(setTimeout(() => resolveOnce(true), soft))
+      },
+      { once: true },
+    )
 
-    // 绝对兜底：极端情况下 ended / timeupdate / duration 兜底都失效，保证 ~20s 内必然结束，
-    // 避免上层按钮动画永久停在「播放中」。
-    timers.push(setTimeout(() => finish(true), HARD_CAP_MS))
+    // 绝对兜底：仅在 ended 始终不触发时才依赖它（复位 + revoke），覆盖长文本朗读
+    timers.push(setTimeout(() => {
+      resolveOnce(true)
+      revoke()
+    }, HARD_CAP_MS))
   })
 }
