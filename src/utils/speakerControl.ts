@@ -80,6 +80,17 @@ export function useAnimatedSpeak(
     cancelSpeech()
   }, [])
 
+  // 仅复位本按钮动画（绝不取消音频）：专供「安全网超时」使用。
+  // 长段落/全文朗读远超 12~18s，若超时贸然 cancelSpeech 会把正在播放的音频掐断，
+  // 表现为「播到一半停」（如中文长段落播到『有汉族的』附近被 12s 上限腰斩）。
+  // 故这里只把 ⏸ 复位成 🔊；保留全局发声者引用，以便用户下一次点击仍能 cancel 掉
+  // 这段可能仍在播放的音频，避免与新音频叠加出声。
+  const resetSelfAnim = useCallback(() => {
+    clearSafety()
+    activeRef.current = false
+    setPlaying(false)
+  }, [])
+
   // 注册 / 注销本按钮的强制停止函数
   useEffect(() => {
     isMounted.current = true
@@ -110,12 +121,15 @@ export function useAnimatedSpeak(
         clearSpeaker(stopSelfRef.current)
       },
     })
-    // 安全网：无论引擎 / 网络如何，超过上限仍未收到 onEnd 也强制复位，
-    // 杜绝动画永久停在「播放中」。单字/词播放极短，12~18s 已是极大余量。
+    // 安全网：极长朗读（段落/全文）可能远超 12~18s，硬超时若贸然 cancelSpeech
+    // 会把正在播放的长音频掐断（表现为「播到一半停」）；故超时只复位按钮动画
+    // （resetSelfAnim，不取消音频）。超时上限按文本长度估算，保证正常长朗读期间
+    // 不会误触发，仅作极端兜底——真正卡死时靠用户下一次点击 stopSelf 取消音频。
     clearSafety()
-    const capMs = opts.lang === 'zh' ? 12000 : 18000
+    const estMs = text.length * (opts.slow ? 900 : 550)
+    const capMs = Math.max(opts.lang === 'zh' ? 12000 : 18000, estMs + 6000)
     safetyTimer.current = setTimeout(() => {
-      if (isMounted.current) stopSelf()
+      if (isMounted.current) resetSelfAnim()
     }, capMs)
   }, [text, opts.slow, opts.lang, stopSelf])
 
