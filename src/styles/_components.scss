@@ -91,7 +91,7 @@
   transition: color 0.15s;
 }
 .bottom-nav-item .nav-emoji { font-size: 22px; }
-.bottom-nav-item.active { color: var(--brand); }
+.bottom-nav-item.active { color: var(--brand-deep); }
 .bottom-nav-item.active .nav-emoji { transform: scale(1.15); }
 .bottom-nav-item:active { transform: scale(0.95); }
 
@@ -110,8 +110,8 @@
   gap: 12px;
   padding: 14px 16px;
   border-radius: var(--r-lg);
-  background: linear-gradient(135deg, var(--mc, var(--brand)), var(--brand-2));
-  color: #fff;
+  background: linear-gradient(135deg, var(--mc-soft, var(--brand-soft)), var(--brand-tint));
+  color: var(--brand-deep);
   box-shadow: var(--shadow);
 }
 .page-emoji { font-size: 34px; }
@@ -155,7 +155,7 @@
 }
 .bc-item { display: inline-flex; align-items: center; gap: 4px; }
 .bc-link {
-  color: var(--mc, var(--brand-deep));
+  color: var(--brand-deep);
   font-weight: 700;
   text-decoration: none;
   padding: 4px 6px;
@@ -174,7 +174,7 @@
   @include btn-base;
   padding: 14px 22px;
   min-height: 44px;
-  background: var(--brand);
+  background: var(--brand-deep);
   color: #fff;
   font-size: var(--fs-md);
   box-shadow: var(--shadow);
@@ -191,7 +191,7 @@
   box-shadow: var(--shadow-pop);
 }
 .btn--danger {
-  background: var(--no);
+  background: var(--no-deep);
   color: #fff;
   box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);
 }
@@ -206,7 +206,7 @@
   @include btn-base;
   padding: 14px 22px;
   background: var(--mc-soft, var(--brand-soft));
-  color: var(--mc, var(--brand-deep));
+  color: var(--brand-deep);
   font-size: var(--fs-md);
   box-shadow: none;
   &:active {
@@ -293,8 +293,8 @@
   font-weight: 700;
 }
 .badge--soft { @include soft-bg(var(--brand-soft), var(--brand-deep)); }
-.badge--ok { @include soft-bg(var(--ok-soft), var(--ok)); }
-.badge--no { @include soft-bg(var(--no-soft), var(--no)); }
+.badge--ok { @include soft-bg(var(--ok-soft), var(--ok-deep)); }
+.badge--no { @include soft-bg(var(--no-soft), var(--no-deep)); }
 
 .chip {
   display: inline-flex;
@@ -321,7 +321,7 @@
   width: 46px;
   height: 46px;
   border-radius: 50%;
-  background: var(--mc, var(--brand));
+  background: var(--brand-deep);
   color: #fff;
   font-size: 18px;
   box-shadow: var(--shadow-sm);
@@ -329,7 +329,7 @@
   transition: var(--ease);
   &:active { transform: scale(0.88); }
   &.is-playing {
-    background: var(--mc-2, var(--brand-2));
+    background: var(--brand-deep);
     animation: speak-pulse 0.8s infinite;
   }
 }
@@ -421,9 +421,9 @@
   transition: var(--ease);
   &:hover { border-color: var(--mc, var(--brand)); }
   &.active {
-    background: var(--mc, var(--brand));
+    background: var(--mc-soft, var(--brand-soft));
     border-color: var(--mc, var(--brand));
-    color: #fff;
+    color: var(--brand-deep);
   }
 }
 
@@ -436,12 +436,12 @@
   font-size: var(--fs-xs);
   font-weight: 700;
   background: var(--mc-soft, var(--brand-soft));
-  color: var(--mc, var(--brand));
+  color: var(--brand-deep);
   vertical-align: middle;
 }
 
 // 复习列表：模块到期徽标
 .module-due {
-  background: var(--mc, var(--brand));
-  color: #fff;
+  background: var(--mc-soft, var(--brand-soft));
+  color: var(--brand-deep);
 }

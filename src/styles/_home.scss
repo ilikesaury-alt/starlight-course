@@ -23,10 +23,7 @@
   font-size: var(--fs-3xl);
   margin: 0 0 8px;
   font-weight: 800;
-  background: linear-gradient(90deg, var(--brand), var(--grape));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: var(--brand-deep);
 }
 .hero-sub {
   color: var(--ink-soft);
@@ -90,9 +87,9 @@
   .qc-emoji { font-size: 32px; }
   .qc-sub { font-size: var(--fs-sm); font-weight: 500; opacity: 0.85; }
 }
-.quick-preview { background: linear-gradient(135deg, var(--brand), var(--brand-2)); color: #fff; }
-.quick-alphabet { background: linear-gradient(135deg, var(--sun), var(--sun-deep)); color: var(--sun-ink); }
-.quick-progress { background: linear-gradient(135deg, var(--grape), var(--grape-700)); color: #fff; }
+.quick-preview { background: var(--brand-soft); color: var(--brand-deep); }
+.quick-alphabet { background: var(--sun-soft); color: var(--sun-ink); }
+.quick-progress { background: var(--grape-soft); color: var(--grape-deep); }
 
 // ---------- 模块卡片 ----------
 .module-grid {
@@ -145,7 +142,7 @@
 .module-arrow { color: var(--ink-mute); font-size: 20px; flex-shrink: 0; }
 .module-lessons-badge {
   font-size: var(--fs-xs);
-  color: var(--mc, var(--brand));
+  color: var(--brand-deep);
   font-weight: 700;
   background: var(--mc-soft, var(--brand-soft));
   padding: 3px 8px;
@@ -159,12 +156,12 @@
   gap: 14px;
   padding: 18px;
   border-radius: var(--r-xl);
-  background: linear-gradient(135deg, var(--mc, var(--brand)), var(--brand-2));
-  color: #fff;
+  background: linear-gradient(135deg, var(--mc-soft, var(--brand-soft)), var(--brand-tint));
+  color: var(--brand-deep);
   box-shadow: var(--shadow);
   position: relative;
   overflow: hidden;
-  &::after { @include blob(100px, rgba(255, 255, 255, 0.15)); right: -20px; top: -20px; }
+  &::after { @include blob(100px, rgba(255, 255, 255, 0.5)); right: -20px; top: -20px; }
 }
 .unit-emoji { font-size: 44px; position: relative; z-index: 1; }
 .unit-num { font-size: var(--fs-sm); opacity: 0.9; font-weight: 700; letter-spacing: 0.5px; }
@@ -202,7 +199,7 @@
   height: 24px;
   border-radius: 50%;
   background: var(--mc-soft, var(--brand-soft));
-  color: var(--mc, var(--brand));
+  color: var(--brand-deep);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -239,8 +236,8 @@
   transition: var(--ease);
   &:active { transform: scale(0.97); }
   &.active {
-    background: var(--mc, var(--brand));
-    color: #fff;
+    background: var(--mc-soft, var(--brand-soft));
+    color: var(--brand-deep);
     border-color: var(--mc, var(--brand));
     box-shadow: var(--shadow-sm);
   }
@@ -279,8 +276,8 @@ a.lesson-link {
   &:active { transform: scale(0.95); }
   .lp-num { font-size: var(--fs-xs); opacity: 0.7; }
   &.active {
-    background: var(--mc, var(--brand));
-    color: #fff;
+    background: var(--mc-soft, var(--brand-soft));
+    color: var(--brand-deep);
     border-color: var(--mc, var(--brand));
     transform: scale(1.05);
     box-shadow: var(--shadow);
@@ -300,7 +297,7 @@ a.lesson-link {
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  background: var(--mc, var(--brand));
+  background: var(--brand-deep);
   color: #fff;
   display: flex;
   align-items: center;

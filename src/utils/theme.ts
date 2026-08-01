@@ -23,7 +23,7 @@ export function moduleThemeVars(theme: ModuleTheme): CSSProperties {
     '--brand': c,
     '--brand-2': `color-mix(in srgb, ${c} 72%, white)`,
     '--brand-soft': theme.colorSoft,
-    '--brand-deep': `color-mix(in srgb, ${c} 68%, black)`,
+    '--brand-deep': `color-mix(in srgb, ${c} 58%, black)`,
     '--brand-tint': `color-mix(in srgb, ${c} 12%, white)`,
     '--brand-rgb': hexToRgb(c),
     '--mc': c,

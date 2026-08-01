@@ -12,7 +12,7 @@
 $brand:        #5bc0eb; // 天蓝
 $brand-2:      #3ca7e0;
 $brand-soft:   #e0f2fe;
-$brand-deep:   #0284c7;
+$brand-deep:   #356f88;
 
 // 童趣强调色
 $sun:          #fbbf24; // 暖黄
@@ -49,8 +49,10 @@ $sun-rgb:      251, 191, 36;
 // 状态色
 $ok:           #10b981;
 $ok-soft:      #d1fae5;
+$ok-deep:      #047857;
 $no:           #ef4444;
 $no-soft:      #fee2e2;
+$no-deep:      #b91c1c;
 $warn:         #f59e0b;
 $warn-soft:    #fef3c7;
 
@@ -160,8 +162,10 @@ $z-toast: 1000;
   // 状态
   --ok: #{$ok};
   --ok-soft: #{$ok-soft};
+  --ok-deep: #{$ok-deep};
   --no: #{$no};
   --no-soft: #{$no-soft};
+  --no-deep: #{$no-deep};
   --warn: #{$warn};
   --warn-soft: #{$warn-soft};
 

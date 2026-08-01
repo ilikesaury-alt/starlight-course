@@ -61,7 +61,7 @@
 .fc-word {
   font-size: 30px;
   font-weight: 800;
-  color: var(--mc, var(--brand));
+  color: var(--brand-deep);
   letter-spacing: 0.5px;
   background: none;
   border: none;
@@ -75,7 +75,7 @@
   // 正在播放时给一点脉冲反馈，与 SpeakButton 的 ⏸ 一致
   &.is-playing {
     animation: word-pulse 1s ease-in-out infinite;
-    color: var(--mc-soft, var(--mc, var(--brand)));
+    color: var(--brand-deep);
   }
 }
 @keyframes word-pulse {
@@ -104,7 +104,7 @@
   min-height: 44px;
   border-radius: var(--r-pill);
   font-size: var(--fs-md);
-  color: var(--mc, var(--brand));
+  color: var(--brand-deep);
   font-weight: 700;
   position: relative;
   z-index: 1;
@@ -123,8 +123,8 @@
   transition: var(--ease);
   // 视觉小圆点，但点击区用伪元素向外扩 ~8px（约 28px），避免小朋友误触相邻圆点
   &::after { content: ''; position: absolute; inset: -8px; border-radius: 50%; }
-  &.on { background: var(--mc, var(--brand)); width: 20px; border-radius: var(--r-pill); }
-  &.mastered { background: var(--ok); }
+  &.on { background: var(--brand-deep); width: 20px; border-radius: var(--r-pill); }
+  &.mastered { background: var(--ok-deep); }
 }
 .fc-controls { display: flex; gap: 10px; justify-content: center; }
 
@@ -161,7 +161,7 @@
 .sent-zh { font-size: var(--fs-base); color: var(--ink-soft); margin-top: 3px; }
 .sent-hint {
   font-size: var(--fs-sm);
-  color: var(--mc, var(--brand));
+  color: var(--brand-deep);
   margin-top: 4px;
   background: var(--mc-soft, var(--brand-soft));
   display: inline-block;
@@ -171,7 +171,7 @@
 }
 .role-text { font-size: var(--fs-md); color: var(--ink-soft); }
 .role-demo { margin-top: 10px; display: grid; gap: 6px; font-size: var(--fs-md); }
-.role-demo b { color: var(--mc, var(--brand)); }
+.role-demo b { color: var(--brand-deep); }
 
 // ---------- 答题 Quiz ----------
 .quiz-meta { display: flex; justify-content: space-between; font-size: var(--fs-base); color: var(--ink-soft); margin: 14px 2px 6px; font-weight: 600; }
@@ -195,7 +195,7 @@
 .quiz-q-row { display: flex; align-items: center; justify-content: center; gap: 10px; font-size: var(--fs-xl); font-weight: 700; flex-wrap: wrap; }
 .quiz-lesson-tag {
   font-size: var(--fs-sm);
-  color: var(--mc, var(--brand));
+  color: var(--brand-deep);
   background: var(--mc-soft, var(--brand-soft));
   padding: 3px 10px;
   border-radius: var(--r-pill);
@@ -225,7 +225,7 @@
   background: #fff;
   font-size: var(--fs-sm);
   font-weight: 800;
-  color: var(--mc, var(--brand));
+  color: var(--brand-deep);
   flex-shrink: 0;
   transition: var(--ease);
 }
@@ -234,7 +234,7 @@
   background: var(--ok-soft);
   border-color: var(--ok);
   animation: correct-pop 0.4s ease;
-  .quiz-opt-letter { background: var(--ok); color: #fff; animation: letter-bounce 0.5s ease; }
+  .quiz-opt-letter { background: var(--ok-deep); color: #fff; animation: letter-bounce 0.5s ease; }
 }
 @keyframes correct-pop { 0% { transform: scale(1); } 50% { transform: scale(1.03); } 100% { transform: scale(1); } }
 @keyframes letter-bounce { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); } }
@@ -242,7 +242,7 @@
   background: var(--no-soft);
   border-color: var(--no);
   animation: shake 0.4s ease;
-  .quiz-opt-letter { background: var(--no); color: #fff; }
+  .quiz-opt-letter { background: var(--no-deep); color: #fff; }
 }
 @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
 .explain {
@@ -274,7 +274,7 @@
 @keyframes result-bounce { 0% { transform: scale(0) rotate(-180deg); } 60% { transform: scale(1.2) rotate(10deg); } 100% { transform: scale(1) rotate(0); } }
 .result-title { margin: 8px 0; font-size: 22px; font-weight: 800; }
 .result-score { font-size: var(--fs-lg); color: var(--ink-soft); }
-.result-score b { color: var(--mc, var(--brand)); font-size: var(--fs-4xl); font-weight: 800; }
+.result-score b { color: var(--brand-deep); font-size: var(--fs-4xl); font-weight: 800; }
 .result-bar { height: 14px; background: var(--line); border-radius: var(--r-pill); overflow: hidden; margin: 16px 0; position: relative; }
 .result-bar-fill { height: 100%; transition: width 0.8s ease; border-radius: var(--r-pill); background: linear-gradient(90deg, var(--mc, var(--brand)), var(--sun)); }
 .result-tip { color: var(--ink-soft); font-size: var(--fs-md); margin: 8px 0 16px; }
@@ -293,8 +293,8 @@
   &:active { transform: scale(0.97); }
 }
 .letter-shape { display: flex; align-items: baseline; justify-content: center; gap: 4px; }
-.letter-upper { font-size: 32px; font-weight: 800; color: var(--brand); }
-.letter-lower { font-size: 22px; font-weight: 700; color: var(--brand-2); }
+.letter-upper { font-size: 32px; font-weight: 800; color: var(--brand-deep); }
+.letter-lower { font-size: 22px; font-weight: 700; color: var(--brand-deep); }
 .letter-acts { display: flex; gap: 6px; justify-content: center; margin-top: 6px; }
 .letter-word { margin-top: 6px; display: flex; align-items: center; justify-content: center; gap: 4px; font-weight: 600; font-size: var(--fs-md); }
 .letter-emoji { font-size: 20px; }
@@ -314,7 +314,7 @@
 .wrong-info { flex: 1; min-width: 0; }
 .wrong-en { font-size: var(--fs-lg); font-weight: 700; }
 .wrong-zh { font-size: var(--fs-base); color: var(--ink-soft); }
-.wrong-from { font-size: var(--fs-sm); color: var(--brand); margin-top: 2px; background: var(--brand-soft); display: inline-block; padding: 1px 6px; border-radius: var(--r-pill); }
+.wrong-from { font-size: var(--fs-sm); color: var(--brand-deep); margin-top: 2px; background: var(--brand-soft); display: inline-block; padding: 1px 6px; border-radius: var(--r-pill); }
 .wrong-actions { display: flex; gap: 6px; flex-shrink: 0; }
 .wrong-empty { text-align: center; padding: 50px 20px; color: var(--ink-soft); }
 .wrong-empty-emoji { font-size: 56px; }
@@ -324,7 +324,7 @@
 .stat-card { text-align: center; padding: 18px 12px; border-radius: var(--r-lg); background: var(--card); border: 1px solid var(--line); box-shadow: var(--shadow-sm); }
 .stat-card-link { display: block; transition: transform 0.15s; &:active { transform: scale(0.97); } }
 .stat-emoji { font-size: 28px; }
-.stat-value { font-size: 26px; font-weight: 800; color: var(--brand); margin: 4px 0; }
+.stat-value { font-size: 26px; font-weight: 800; color: var(--brand-deep); margin: 4px 0; }
 .stat-label { font-size: var(--fs-sm); color: var(--ink-soft); }
 .unit-progress-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
 .unit-progress-card { padding: 12px; border-radius: var(--r-md); background: var(--card); border: 1px solid var(--line); text-align: center; }
@@ -359,8 +359,8 @@
 // ---------- 掌握度 Mastery ----------
 .mastery-row { display: flex; gap: 8px; justify-content: center; margin-top: 12px; }
 .mastery-btn { padding: 8px 16px; border-radius: var(--r-pill); border: 2px solid; font-size: var(--fs-md); font-weight: 700; transition: var(--ease);
-  &.mastered { border-color: var(--ok); color: var(--ok); background: var(--ok-soft); }
-  &.unfamiliar { border-color: var(--no); color: var(--no); background: var(--no-soft); }
+  &.mastered { border-color: var(--ok); color: var(--ok-deep); background: var(--ok-soft); }
+  &.unfamiliar { border-color: var(--no); color: var(--no-deep); background: var(--no-soft); }
   &:active { transform: scale(0.96); }
 }
 
@@ -375,7 +375,7 @@
   box-shadow: var(--shadow-sm);
   animation: bubble-in 0.3s ease;
   &.left { align-self: flex-start; background: var(--card); border: 1px solid var(--line); border-bottom-left-radius: 4px; }
-  &.right { align-self: flex-end; background: var(--mc, var(--brand)); color: #fff; border-bottom-right-radius: 4px; }
+  &.right { align-self: flex-end; background: var(--brand-deep); color: #fff; border-bottom-right-radius: 4px; }
 }
 @keyframes bubble-in { 0% { transform: translateY(8px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
 .dialogue-zh { font-size: var(--fs-sm); font-weight: 400; margin-top: 4px; opacity: 0.8; }
