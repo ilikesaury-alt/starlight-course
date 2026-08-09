@@ -57,6 +57,12 @@ playwright-report/
 # ===== 工作产出：临时脚本 / 备份 / 验证产物 / 原始素材 =====
 # 构建验证产物（非源码，沙箱 safe-delete 拦截时用 --outDir dist-verify 验证）
 dist-verify/
+dist-probe*/
+
+# 页面截图/对比图验证产物（Playwright 临时验证脚本 + 输出目录，非源码）
+.cache/
+scripts_shot*.mjs
+
 
 # 源文件备份
 *.bak

@@ -48,6 +48,14 @@ export default function CourseEntries() {
           </div>
           <span className="fg-home-arrow">›</span>
         </Link>
+        <Link to="/phrases" className="ph-home-entry">
+          <span className="ph-home-emoji">🗣️</span>
+          <div className="ph-home-body">
+            <div className="ph-home-title">菲教课堂用语</div>
+            <div className="ph-home-sub">外教每天说的话 · 点英文听发音，课前先听懂不慌</div>
+          </div>
+          <span className="ph-home-arrow">›</span>
+        </Link>
       </div>
 
       <div className="quick-row">

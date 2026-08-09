@@ -1,0 +1,311 @@
+// ============================================================
+//  Phrases — 菲教课堂用语模块（点英文听发音）
+//  主题色：珊瑚粉 coral，通过 moduleThemeVars 注入 --brand*。
+// ============================================================
+@use 'mixins' as *;
+
+// 页面根：比常规页面多留底部空间，避免被全局 bottom-nav 遮挡
+.page.phrases {
+  padding-bottom: 180px;
+}
+
+// ---------- 英雄头部 ----------
+.phrases-hero {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--brand-soft), var(--brand-tint));
+  border: 2px solid var(--brand-soft);
+  box-shadow: var(--shadow);
+  padding: 18px 16px 22px;
+
+  .page-emoji {
+    font-size: 44px;
+    filter: drop-shadow(0 3px 6px rgba(var(--brand-rgb), 0.18));
+  }
+  .page-title {
+    font-size: var(--fs-2xl);
+    margin-top: 4px;
+  }
+  .page-kicker {
+    font-size: var(--fs-xs);
+    color: var(--brand-deep);
+    background: rgba(255, 255, 255, 0.55);
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: var(--r-pill);
+  }
+}
+.phrases-lead {
+  margin: 16px 2px 10px;
+}
+.ph-hero-sub {
+  font-size: var(--fs-sm);
+  color: var(--brand-deep);
+  margin-top: 6px;
+  opacity: 0.9;
+}
+
+// 头部底部装饰波浪
+.phrases-hero::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -28px;
+  width: 120%;
+  height: 56px;
+  margin-left: -60%;
+  background: var(--bg);
+  border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+  z-index: 0;
+}
+
+// ---------- 分类 Tab 网格 ----------
+.ph-tabbar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin: 14px 0 12px;
+}
+.ph-tab {
+  @include btn-base;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 4px 9px;
+  min-height: 68px;
+  border-radius: var(--r-lg);
+  background: var(--card);
+  border: 2px solid var(--line);
+  color: var(--ink-soft);
+  font-size: var(--fs-sm);
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  @include press(0.95);
+  @include focus-ring(var(--brand));
+}
+.ph-tab-emoji {
+  font-size: 24px;
+  line-height: 1;
+}
+.ph-tab-text {
+  font-size: var(--fs-xs);
+  font-weight: 700;
+}
+.ph-tab-spark {
+  position: absolute;
+  top: -4px;
+  right: -3px;
+  font-size: 13px;
+  animation: spark-bounce 1.6s ease-in-out infinite;
+}
+@keyframes spark-bounce {
+  0%, 100% { transform: rotate(-8deg) scale(1); }
+  50% { transform: rotate(8deg) scale(1.15); }
+}
+.ph-tab.active {
+  background: var(--brand-soft);
+  border-color: var(--brand);
+  color: var(--brand-deep);
+  box-shadow: var(--shadow);
+}
+.ph-tab:disabled {
+  opacity: 0.45;
+}
+
+// ---------- 当前分类标题卡 ----------
+.ph-cat-head {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--brand-soft), var(--brand-tint));
+  border: 2px solid var(--brand-soft);
+  border-radius: var(--r-xl);
+  padding: 18px 16px;
+  margin: 6px 0 14px;
+  box-shadow: var(--shadow);
+}
+.ph-cat-emoji {
+  position: absolute;
+  right: -8px;
+  bottom: -22px;
+  font-size: 92px;
+  opacity: 0.16;
+  transform: rotate(-8deg);
+  pointer-events: none;
+}
+.ph-cat-text {
+  position: relative;
+  z-index: 1;
+}
+.ph-cat-title {
+  font-size: var(--fs-xl);
+  font-weight: 800;
+  color: var(--ink);
+}
+.ph-cat-sub {
+  font-size: var(--fs-sm);
+  color: var(--brand-deep);
+  margin-top: 4px;
+  font-weight: 600;
+}
+
+// ---------- 用语卡片 ----------
+.ph-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+.ph-row {
+  position: relative;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: 14px 14px 14px 22px;
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  transition: var(--ease);
+  @include press(0.985);
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 14px;
+    bottom: 14px;
+    width: 7px;
+    border-radius: 0 6px 6px 0;
+    background: linear-gradient(180deg, var(--brand), var(--brand-2));
+  }
+}
+.ph-row-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.ph-num {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--brand-soft);
+  color: var(--brand-deep);
+  font-size: var(--fs-sm);
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.ph-en-text {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--fs-xl);
+  font-weight: 800;
+  color: var(--ink);
+  line-height: 1.35;
+}
+.ph-zh {
+  margin: 9px 0 0 38px;
+  font-size: var(--fs-md);
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+.ph-tip {
+  margin: 7px 0 0 38px;
+  font-size: var(--fs-xs);
+  color: var(--brand-deep);
+  background: var(--brand-soft);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: var(--r-pill);
+  font-weight: 600;
+}
+
+// 页面内播放按钮：主题色圆角方块，跟主题统一
+.ph-row .speak-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--r-md);
+  background: linear-gradient(135deg, var(--brand), var(--brand-2));
+  font-size: 18px;
+  box-shadow: 0 3px 10px rgba(var(--brand-rgb), 0.22);
+}
+
+// ---------- 底部切换按钮 ----------
+.ph-switch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 22px;
+}
+.ph-switch-btn {
+  @include btn-base;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 10px;
+  min-height: 70px;
+  border-radius: var(--r-xl);
+  background: var(--card);
+  border: 2px solid var(--brand-soft);
+  color: var(--brand-deep);
+  box-shadow: var(--shadow-sm);
+  @include press(0.96);
+  @include focus-ring(var(--brand));
+
+  &:disabled {
+    opacity: 0.5;
+    border-color: var(--line);
+    color: var(--ink-mute);
+    cursor: default;
+  }
+  &:active:not(:disabled) {
+    background: var(--brand-soft);
+  }
+}
+.ph-switch-btn--prev .ph-switch-arrow { margin-right: auto; }
+.ph-switch-btn--next .ph-switch-arrow { margin-left: auto; }
+.ph-switch-arrow {
+  font-size: var(--fs-lg);
+  font-weight: 900;
+  color: var(--brand);
+}
+.ph-switch-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  font-size: var(--fs-md);
+  font-weight: 700;
+}
+.ph-switch-emoji {
+  font-size: 18px;
+}
+
+// ---------- 返回首页 ----------
+.ph-home {
+  margin-top: 18px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+.ph-home-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 22px;
+  border-radius: var(--r-pill);
+  background: var(--card);
+  border: 2px solid var(--line-2);
+  color: var(--ink-soft);
+  font-size: var(--fs-md);
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: var(--shadow-sm);
+  transition: var(--ease);
+  &:active {
+    transform: scale(0.96);
+    background: var(--surface-2);
+  }
+}
