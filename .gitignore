@@ -54,3 +54,23 @@ src/data/starlight0_extracted.json
 test-results/
 playwright-report/
 
+# ===== 工作产出：临时脚本 / 备份 / 验证产物 / 原始素材 =====
+# 构建验证产物（非源码，沙箱 safe-delete 拦截时用 --outDir dist-verify 验证）
+dist-verify/
+
+# 源文件备份
+*.bak
+*.bak[0-9]*
+
+# 本轮工作脚本（数据处理/翻译/PDF 抽取等草稿，非应用源码）
+scripts_*.py
+gen_dict*.py
+_gen_dict*.py
+scripts_dict_words.txt
+scripts_still_missing.json
+scripts_trans/
+scripts_pdf_out/
+
+# 原始绘本素材（含版权 PDF/txt，不纳入版本控制）
+src/data/Fly Guy/
+
