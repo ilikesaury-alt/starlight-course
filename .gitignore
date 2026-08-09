@@ -76,6 +76,10 @@ scripts_dict_words.txt
 scripts_still_missing.json
 scripts_trans/
 scripts_pdf_out/
+# Starlight 课本提取/翻译/验证脚本与产物（本地用，不提交；生成的 starlight-book.ts 已纳入版本控制）
+scripts_sl_*.json
+scripts_sl_*.txt
+dist-final*/
 
 # 原始绘本素材（含版权 PDF/txt，不纳入版本控制）
 src/data/Fly Guy/
