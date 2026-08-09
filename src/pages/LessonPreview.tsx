@@ -1,18 +1,25 @@
+// Starlight 单课学习页：与 Fly Guy / Rocket Girl 的故事页保持同一套三标签结构
+//   🎴 单词卡 —— 逐词翻卡 + 本课词表
+//   📖 课本原文 —— 教材 PDF 提取的真实课文（逐词可点、可听、带中文），顶部先给本课重点句型
+//   🎯 闯关 —— 从课本原文挖空生成选词填空，题量不足时用本课单词与单元测验补足
+// 三个标签共用 BookTextView / bookQuiz / bookDict，逻辑不在页面里重复实现。
+
 import { useState, useEffect, useMemo } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import SpeakButton from '../components/SpeakButton'
-import FcWord from '../components/FcWord'
-import SafeBoundary from '../components/SafeBoundary'
-import QuizEngine, { type QuizItem } from '../components/QuizEngine'
-import { getModule, STARLIGHT_THEME } from '../data/starlight'
-import { useCourseStore } from '../store/useCourseStore'
-import { speakText } from '../utils/speak'
-import { moduleThemeVars } from '../utils/theme'
+import SpeakButton from '@/components/SpeakButton'
+import FcWord from '@/components/FcWord'
+import SafeBoundary from '@/components/SafeBoundary'
+import QuizEngine, { type QuizItem } from '@/components/QuizEngine'
+import BookTextView from '@/components/BookTextView'
 import Breadcrumb from '@/components/Breadcrumb'
+import { getModule, STARLIGHT_THEME, type Sentence, type Word } from '@/data/starlight'
+import { getLessonBook } from '@/data/starlight-book'
+import { useCourseStore } from '@/store/useCourseStore'
+import { speakText } from '@/utils/speak'
+import { moduleThemeVars } from '@/utils/theme'
+import { buildClozeQuiz, buildWordQuiz } from '@/utils/bookQuiz'
 
-type Tab = 'vocab' | 'patterns' | 'dialogue' | 'quiz'
-
-const SPEAKERS = ['🧒 小星', '👧 小月']
+type Tab = 'vocab' | 'book' | 'quiz'
 
 export default function LessonPreview() {
   const { unitId = '', lessonId = '' } = useParams()
@@ -20,6 +27,8 @@ export default function LessonPreview() {
   const seedCards = useCourseStore((s) => s.seedCards)
   const addStars = useCourseStore((s) => s.addStars)
   const markQuizDone = useCourseStore((s) => s.markQuizDone)
+  const recordReview = useCourseStore((s) => s.recordReview)
+  const addWrongWord = useCourseStore((s) => s.addWrongWord)
   const [tab, setTab] = useState<Tab>('vocab')
 
   const lessons = mod?.lessons ?? []
@@ -28,32 +37,48 @@ export default function LessonPreview() {
 
   const words = lesson?.words ?? []
   const sentences = lesson?.sentences ?? []
+  // 课本原文：按「单元号-课号」取，教材 PDF 每课一份
+  const book = mod && lesson ? getLessonBook(mod.id, lesson.id) : undefined
+  const chapters = book?.sections ?? []
 
-  // 单元测验：由该单元 QuizQuestion 数据生成（听正确的选项发音）
-  const quizItems = useMemo<QuizItem[]>(
-    () =>
-      (mod?.quiz ?? []).map((q) => ({
-        q: q.q,
-        options: q.options,
-        answer: q.answer,
-        explain: q.explain,
-        speakText: q.options[q.answer] ?? q.q,
-      })),
-    [mod]
-  )
+  // 闯关题：课本原文选词填空优先，不足 6 题时用本课单词词义题补足，再不够就用单元测验
+  const quizItems = useMemo<QuizItem[]>(() => {
+    const cloze = chapters.length > 0
+      ? buildClozeQuiz(chapters, {
+          vocab: words,
+          limit: 8,
+          source: `Lesson ${lesson?.id} 《${lesson?.title ?? ''}》`,
+          emoji: mod?.emoji ?? '📖',
+        })
+      : []
+    const items = [...cloze]
+    if (items.length < 6 && words.length > 0) {
+      items.push(...buildWordQuiz(words, lessons.flatMap((l) => l.words), 6 - items.length))
+    }
+    if (items.length < 4) {
+      items.push(
+        ...(mod?.quiz ?? []).slice(0, 4 - items.length).map((q) => ({
+          q: q.q,
+          options: q.options,
+          answer: q.answer,
+          explain: q.explain,
+          speakText: q.options[q.answer] ?? q.q,
+        }))
+      )
+    }
+    return items
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mod?.slug, lesson?.id])
 
   // 进入某课时,把该课的单词和句型批量种子化进 SRS 调度池
   useEffect(() => {
     if (words.length === 0 && sentences.length === 0) return
-    seedCards(
-      [
-        ...words.map((w) => w.en),
-        ...sentences.map((s) => s.en),
-      ],
-      'starlight'
-    )
+    seedCards([...words.map((w) => w.en), ...sentences.map((s) => s.en)], 'starlight')
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lesson?.id, mod?.slug])
+
+  // 换课时回到第一个标签，避免停留在上一课的闯关结果页
+  useEffect(() => { setTab('vocab') }, [lessonId, unitId])
 
   if (!mod) {
     return (
@@ -76,20 +101,28 @@ export default function LessonPreview() {
   const mcStyle = moduleThemeVars(STARLIGHT_THEME)
   const prevLesson = lessons[lessonIdx - 1]
   const nextLesson = lessons[lessonIdx + 1]
+  const hasBook = chapters.length > 0
 
   return (
     <div className="page lesson-preview" style={mcStyle}>
-      <Breadcrumb items={[{ label: '🏠', to: '/' }, { label: 'Starlight 预习', to: '/preview' }, { label: mod.title }, { label: `Lesson ${lesson?.id}` }]} />
+      <Breadcrumb
+        items={[
+          { label: '🏠', to: '/' },
+          { label: 'Starlight 预习', to: '/preview' },
+          { label: mod.title, to: `/preview/${unitId}` },
+          { label: `Lesson ${lesson.id}` },
+        ]}
+      />
       <div className="page-head" style={mcStyle}>
         <span className="page-emoji">{mod.emoji}</span>
         <div>
-          <div className="page-kicker">Module {mod.id} · Lesson {lesson?.id}</div>
-          <h1 className="page-title">{lesson?.title}{lesson?.titleZh ? ` · ${lesson.titleZh}` : ''}</h1>
+          <div className="page-kicker">Module {mod.id} · Lesson {lesson.id}</div>
+          <h1 className="page-title">{lesson.title}{lesson.titleZh ? ` · ${lesson.titleZh}` : ''}</h1>
         </div>
       </div>
 
       <SafeBoundary label="课前预习">
-        <div className="mode-badge mode-preview">📖 预习模式</div>
+        <div className="mode-badge mode-preview">📖 Starlight 课前预习</div>
 
         <div className="tab-bar" style={mcStyle}>
           <button
@@ -97,50 +130,74 @@ export default function LessonPreview() {
             className={'tab-btn' + (tab === 'vocab' ? ' active' : '')}
             onClick={() => setTab('vocab')}
           >
-            🎴 单词
+            🎴 单词卡
           </button>
           <button
             type="button"
-            className={'tab-btn' + (tab === 'patterns' ? ' active' : '')}
-            onClick={() => setTab('patterns')}
+            className={'tab-btn' + (tab === 'book' ? ' active' : '')}
+            onClick={() => setTab('book')}
           >
-            💬 句型
-          </button>
-          <button
-            type="button"
-            className={'tab-btn' + (tab === 'dialogue' ? ' active' : '')}
-            onClick={() => setTab('dialogue')}
-          >
-            🎭 对话
+            📖 课本原文
           </button>
           <button
             type="button"
             className={'tab-btn' + (tab === 'quiz' ? ' active' : '')}
             onClick={() => setTab('quiz')}
           >
-            🎯 测验
+            🎯 闯关
           </button>
         </div>
 
         {tab === 'vocab' && <VocabTab words={words} mcStyle={mcStyle} />}
-        {tab === 'patterns' && <PatternsTab sentences={sentences} mcStyle={mcStyle} />}
-        {tab === 'dialogue' && <DialogueTab sentences={sentences} mcStyle={mcStyle} />}
+        {tab === 'book' && (
+          <>
+            <PatternStrip sentences={sentences} mcStyle={mcStyle} />
+            {hasBook ? (
+              <BookTextView
+                chapters={chapters}
+                mc={mcStyle}
+                lead={
+                  <>
+                    下面是这一课教材上的真实课文，按课堂活动顺序排好了。
+                    <span className="sent-hint">点单词听发音、鼠标悬停看词义，点 🔊 听整句</span>
+                  </>
+                }
+              />
+            ) : (
+              <div className="empty"><p>这一课暂时没有课本原文。</p></div>
+            )}
+          </>
+        )}
         {tab === 'quiz' && (
           <QuizEngine
             quiz={quizItems}
             mcStyle={mcStyle}
-            badgeText="🎯 单元测验 · 听一听选一选"
-            resultTitle="测验完成！"
+            badgeText={hasBook ? '📖 课文选词填空 · 读原文选一选' : '🎯 闯关测验 · 听一听选一选'}
+            resultTitle="闯关完成！"
             resultLinks={
               <>
+                <Link to="/wrong" className="btn btn-soft">📋 看错题本</Link>
                 <Link to={`/preview/${unitId}`} className="btn btn-soft">← 课程列表</Link>
                 <Link to="/smart" className="btn btn-soft">🧠 去复习</Link>
               </>
             }
-            onPick={() => {}}
-            onFinish={(correct, total) => {
+            onPick={({ en, correct }) => {
+              seedCards([en], 'starlight')
+              recordReview(en, correct, 'starlight')
+            }}
+            onFinish={(correct, total, wrongEns) => {
               addStars(correct === total ? correct + 5 : correct)
               markQuizDone(mod.slug)
+              wrongEns.forEach((en) => {
+                const w = words.find((x) => x.en.toLowerCase() === en.toLowerCase())
+                addWrongWord({
+                  en: w?.en ?? en,
+                  zh: w?.zh ?? '',
+                  emoji: w?.emoji ?? mod.emoji,
+                  from: `${mod.title} · Lesson ${lesson.id}`,
+                  module: 'starlight',
+                })
+              })
             }}
           />
         )}
@@ -161,7 +218,7 @@ export default function LessonPreview() {
   )
 }
 
-function VocabTab({ words, mcStyle }: { words: { en: string; zh: string; emoji: string; ipa?: string }[]; mcStyle: React.CSSProperties }) {
+function VocabTab({ words, mcStyle }: { words: Word[]; mcStyle: React.CSSProperties }) {
   const [idx, setIdx] = useState(0)
   const [showZh, setShowZh] = useState(true)
   useEffect(() => { setIdx(0); setShowZh(true) }, [words])
@@ -241,70 +298,31 @@ function VocabTab({ words, mcStyle }: { words: { en: string; zh: string; emoji: 
   )
 }
 
-function PatternsTab({ sentences, mcStyle }: { sentences: { en: string; zh: string; hint?: string }[]; mcStyle: React.CSSProperties }) {
-  if (sentences.length === 0) {
-    return <div className="empty"><p>这一课还没有句型内容。</p></div>
-  }
+// 本课重点句型：放在课本原文上方，先看 5 个核心句，再读整篇课文。
+function PatternStrip({ sentences, mcStyle }: { sentences: Sentence[]; mcStyle: React.CSSProperties }) {
+  const [open, setOpen] = useState(true)
+  if (sentences.length === 0) return null
   return (
-    <>
-      <p className="lead">点击 🔊 听整句，再跟读。括号里的内容可以替换练习。</p>
-      <div className="sent-list">
-        {sentences.map((s, i) => (
-          <div key={i} className="sent-card" style={mcStyle}>
-            <div className="sent-en-row">
-              <span className="sent-en">{s.en}</span>
-              <SpeakButton text={s.en} label={s.en} />
-              <SpeakButton text={s.en} label={`${s.en} 慢速`} slow />
-            </div>
-            <div className="sent-zh">{s.zh}</div>
-            {s.hint && <div className="sent-hint">💡 {s.hint}</div>}
-          </div>
-        ))}
-      </div>
-
-      <section className="card role-card">
-        <h2 className="card-title">🎭 角色扮演</h2>
-        <p className="role-text">
-          家长和孩子轮流读句子，一方读问句，一方读答句。例如：
-        </p>
-        <div className="role-demo" style={mcStyle}>
-          {sentences.slice(0, 2).map((s, i) => (
-            <div key={i}>
-              <b>{i === 0 ? '家长' : '孩子'}：</b>{s.en} <SpeakButton text={s.en} />
+    <section className="pattern-strip" style={mcStyle}>
+      <button type="button" className="pattern-strip-head" onClick={() => setOpen((v) => !v)}>
+        <span>💬 本课重点句型（{sentences.length}）</span>
+        <span className="pattern-strip-toggle">{open ? '收起 ▲' : '展开 ▼'}</span>
+      </button>
+      {open && (
+        <div className="pattern-strip-body">
+          {sentences.map((s, i) => (
+            <div key={i} className="pattern-item">
+              <div className="pattern-en-row">
+                <span className="pattern-en">{s.en}</span>
+                <SpeakButton text={s.en} label={s.en} />
+                <SpeakButton text={s.en} label={`${s.en} 慢速`} slow />
+              </div>
+              <div className="pattern-zh">{s.zh}</div>
+              {s.hint && <div className="pattern-hint">💡 {s.hint}</div>}
             </div>
           ))}
         </div>
-      </section>
-    </>
-  )
-}
-
-function DialogueTab({ sentences, mcStyle }: { sentences: { en: string; zh: string }[]; mcStyle: React.CSSProperties }) {
-  if (sentences.length === 0) {
-    return <div className="empty"><p>这一课还没有对话内容。</p></div>
-  }
-  const lines = sentences.map((s, i) => ({
-    ...s,
-    side: i % 2 === 0 ? ('left' as const) : ('right' as const),
-    speaker: SPEAKERS[i % 2],
-  }))
-  return (
-    <>
-      <p className="lead">跟着对话练习说英语，点击 🔊 听一句读一句，和家长轮流扮演小星和小月。</p>
-      <div className="dialogue-list" style={{ ...mcStyle, display: 'flex', flexDirection: 'column' }}>
-        {lines.map((l, i) => (
-          <div key={i} style={{ display: 'flex', flexDirection: 'column' }}>
-            <div className={`dialogue-bubble ${l.side}`}>
-              <div className="dialogue-speaker">{l.speaker}</div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span>{l.en}</span>
-                <SpeakButton text={l.en} label={l.en} />
-              </div>
-              <div className="dialogue-zh">{l.zh}</div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </>
+      )}
+    </section>
   )
 }

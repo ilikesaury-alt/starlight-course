@@ -23,6 +23,8 @@ export interface BookTextPage {
 }
 export interface BookTextChapter {
   chapter?: string
+  // 小节标题的中文。Starlight 课本原文里标题是「Listen and say.」这类课堂指令，需要配中文。
+  chapterZh?: string
   pages: BookTextPage[]
 }
 

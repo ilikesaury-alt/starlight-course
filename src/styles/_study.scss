@@ -207,11 +207,25 @@
   margin-top: 6px;
 }
 .bo-chapter-title {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
   font-size: var(--fs-md);
   font-weight: 800;
   color: var(--mc-deep, var(--brand-deep));
   margin: 0 0 8px;
   letter-spacing: 0.02em;
+}
+// 课本原文的小节标题是课堂指令（Listen and say.），英文在前、中文低调跟随
+.bo-chapter-en::before {
+  content: '▸ ';
+  opacity: 0.7;
+}
+.bo-chapter-zh {
+  font-size: var(--fs-sm, 13px);
+  font-weight: 600;
+  color: var(--ink-soft);
 }
 .bo-pages {
   display: grid;
@@ -496,6 +510,67 @@
 .dialogue-zh { font-size: var(--fs-sm); font-weight: 400; margin-top: 4px; opacity: 0.8; }
 .dialogue-speaker { font-size: var(--fs-xs); color: var(--ink-soft); margin-bottom: 2px; }
 .dialogue-bubble.right .dialogue-speaker { color: rgba(255, 255, 255, 0.7); }
+
+// ---------- 本课重点句型（课本原文标签顶部的折叠条） ----------
+.pattern-strip {
+  border: 1px solid var(--mc, var(--brand));
+  border-radius: var(--r-md);
+  background: var(--card);
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+.pattern-strip-head {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 0;
+  cursor: pointer;
+  background: var(--mc-soft, var(--brand-soft));
+  color: var(--mc-deep, var(--brand-deep));
+  font-family: inherit;
+  font-size: var(--fs-md);
+  font-weight: 800;
+}
+.pattern-strip-toggle {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  opacity: 0.8;
+}
+.pattern-strip-body {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+}
+.pattern-item {
+  border-bottom: 1px dashed var(--line, #e5e7eb);
+  padding-bottom: 10px;
+  &:last-child { border-bottom: 0; padding-bottom: 0; }
+}
+.pattern-en-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.pattern-en {
+  font-size: var(--fs-lg, 18px);
+  font-weight: 700;
+  color: var(--ink);
+}
+.pattern-zh {
+  margin-top: 4px;
+  font-size: var(--fs-md);
+  color: var(--ink-soft);
+}
+.pattern-hint {
+  margin-top: 2px;
+  font-size: var(--fs-sm);
+  color: var(--ink-soft);
+  opacity: 0.85;
+}
 
 // ---------- 装饰 Confetti ----------
 .confetti-container { position: fixed; top: 0; left: 0; right: 0; pointer-events: none; z-index: var(--z-toast); overflow: hidden; }
