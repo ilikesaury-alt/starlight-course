@@ -17,6 +17,8 @@ export interface QuizItem {
   emoji?: string
   /** Starlight 听力测验专用：标注该题来自第几课 */
   lessonId?: number
+  /** 绘本选词填空：prompt 为带横线的原句，full 为完整原句（用于听读） */
+  cloze?: { prompt: string; full: string }
 }
 
 export interface QuizPickInfo {
@@ -141,8 +143,24 @@ export default function QuizEngine({
           <div className="quiz-q" style={mcStyle}>
             {renderQuestionExtra ? renderQuestionExtra(cur) : null}
             <div className="quiz-q-row">
-              <span>{cur.emoji ? `${cur.emoji} ` : ''}{cur.q}</span>
-              <SpeakButton text={cur.speakText ?? cur.q} label="听发音" />
+              {cur.cloze ? (
+                <>
+                  <span className="cloze-sentence">
+                    {cur.cloze.prompt.split('＿＿＿').map((part, i, arr) => (
+                      <span key={i}>
+                        {part}
+                        {i < arr.length - 1 && <span className="cloze-blank">＿＿＿</span>}
+                      </span>
+                    ))}
+                  </span>
+                  <SpeakButton text={cur.cloze.full} label="听原文" />
+                </>
+              ) : (
+                <>
+                  <span>{cur.emoji ? `${cur.emoji} ` : ''}{cur.q}</span>
+                  <SpeakButton text={cur.speakText ?? cur.q} label="听发音" />
+                </>
+              )}
             </div>
             <div className="quiz-opts">
               {cur.options.map((opt, i) => {

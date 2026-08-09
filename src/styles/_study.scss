@@ -169,6 +169,103 @@
   border-radius: var(--r-pill);
   font-weight: 600;
 }
+
+// 📖 绘本原句：取自实体书的真实短句摘录，与「学法句型」区分
+.book-sentence {
+  margin-top: 10px;
+  padding: 9px 11px 8px;
+  border-radius: var(--r-md);
+  background: var(--mc-soft, var(--brand-soft));
+  border: 1px dashed var(--mc, var(--brand));
+}
+.book-sentence-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+.book-sentence-tag {
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--mc-deep, var(--brand-deep));
+  background: var(--card);
+  border: 1px solid var(--mc, var(--brand));
+  padding: 1px 8px;
+  border-radius: var(--r-pill);
+}
+.book-sentence-tag--fallback {
+  color: var(--ink-soft);
+  border-color: var(--line, #e5e7eb);
+  background: var(--paper, #fafafa);
+}
+
+/* ---- 绘本原文(按章节顺序整段展示) ---- */
+.book-original {
+  display: grid;
+  gap: 18px;
+  margin-top: 6px;
+}
+.bo-chapter-title {
+  font-size: var(--fs-md);
+  font-weight: 800;
+  color: var(--mc-deep, var(--brand-deep));
+  margin: 0 0 8px;
+  letter-spacing: 0.02em;
+}
+.bo-pages {
+  display: grid;
+  gap: 10px;
+}
+.bo-page {
+  background: var(--card);
+  border: 1px solid var(--mc, var(--brand));
+  border-radius: var(--r-md);
+  padding: 10px 12px 12px;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.03);
+}
+.bo-page-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.bo-page-num {
+  font-size: var(--fs-xs, 12px);
+  font-weight: 700;
+  color: var(--mc-deep, var(--brand-deep));
+  background: var(--mc-soft, var(--brand-soft));
+  padding: 1px 8px;
+  border-radius: var(--r-pill);
+}
+.bo-text {
+  margin: 0;
+  font-size: var(--fs-lg, 18px);
+  line-height: 1.6;
+  color: var(--ink);
+  font-weight: 600;
+}
+.bo-text-zh {
+  margin: 6px 0 0;
+  font-size: var(--fs-md, 15px);
+  line-height: 1.5;
+  color: var(--ink-soft);
+  font-weight: 500;
+}
+
+// 逐词中文参考(无 textZh 时自动拼出,样式低调以示区分)
+.bo-text-zh--auto {
+  font-style: italic;
+  opacity: 0.72;
+  font-size: var(--fs-sm, 13px);
+  &::before {
+    content: '逐词参考：';
+    font-style: normal;
+    opacity: 0.8;
+  }
+}
+.book-sentence .sent-example { font-size: var(--fs-md); font-weight: 600; color: var(--ink); }
+.book-sentence .rg-sentence-zh { color: var(--ink-soft); }
 .role-text { font-size: var(--fs-md); color: var(--ink-soft); }
 .role-demo { margin-top: 10px; display: grid; gap: 6px; font-size: var(--fs-md); }
 .role-demo b { color: var(--brand-deep); }
@@ -193,6 +290,24 @@
   text-align: center;
 }
 .quiz-q-row { display: flex; align-items: center; justify-content: center; gap: 10px; font-size: var(--fs-xl); font-weight: 700; flex-wrap: wrap; }
+.cloze-sentence {
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  line-height: 1.8;
+  color: var(--ink);
+  max-width: 640px;
+  text-align: center;
+}
+.cloze-blank {
+  display: inline-block;
+  min-width: 64px;
+  margin: 0 4px;
+  padding: 0 8px;
+  border-bottom: 3px solid var(--mc, var(--brand));
+  color: var(--mc-deep, var(--brand-deep));
+  font-weight: 800;
+  letter-spacing: 2px;
+}
 .quiz-lesson-tag {
   font-size: var(--fs-sm);
   color: var(--brand-deep);
