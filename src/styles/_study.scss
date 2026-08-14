@@ -111,6 +111,23 @@
   transition: var(--ease);
   &:active { transform: scale(0.96); }
 }
+// 单词卡自评(会了/不会 -> SRS 反馈)
+.fc-self-check {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 12px;
+  position: relative;
+  z-index: 1;
+}
+.fc-self-done {
+  margin-top: 12px;
+  color: var(--ok, #16a34a);
+  font-weight: 700;
+  font-size: var(--fs-sm);
+  position: relative;
+  z-index: 1;
+}
 .fc-progress { text-align: center; font-size: var(--fs-base); color: var(--ink-soft); margin: 8px 0; font-weight: 600; }
 .fc-dots { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 12px; }
 .fc-dot {

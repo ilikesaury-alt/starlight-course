@@ -9,6 +9,7 @@ import QuizEngine, { type QuizItem } from '@/components/QuizEngine'
 import { getModule, STARLIGHT_THEME } from '@/data/starlight'
 import { useCourseStore } from '@/store/useCourseStore'
 import { moduleThemeVars } from '@/utils/theme'
+import { quizStars } from '@/utils/stars'
 
 export default function UnitQuiz() {
   const { unitId = '' } = useParams()
@@ -100,7 +101,7 @@ export default function UnitQuiz() {
           }}
           onFinish={(correct, total, wrongEns) => {
             const allRight = correct === total && total > 0
-            addStars(allRight ? correct + 5 : correct)
+            addStars(quizStars(correct, total))
             markQuizDone(mod.slug)
             // 单元测验全对 ⇒ 本单元第 6 课(Quiz 课)记为完成
             if (allRight) markLessonDone(mod.slug, 6)

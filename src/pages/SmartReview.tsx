@@ -5,11 +5,12 @@ import FcWord from '../components/FcWord'
 import SafeBoundary from '../components/SafeBoundary'
 import ModuleFilterChips, { type ModuleFilter } from '../components/ModuleFilterChips'
 import { modules, STARLIGHT_THEME } from '../data/starlight'
-import { MODULE_LIST, moduleThemeOf, type ModuleId } from '../data/modules'
+import { MODULE_LIST, type ModuleId } from '../data/modules'
 import { useCourseStore } from '../store/useCourseStore'
 import { boxLabel, boxEmoji, type SrsCard } from '../data/srs'
 import { speakText } from '../utils/speak'
 import { moduleThemeVars } from '../utils/theme'
+import { quizStars } from '../utils/stars'
 
 // 建一份 en → 内容元信息的索引,供卡片渲染时取 emoji/zh/ipa（单词和句型都索引）
 interface ContentMeta {
@@ -201,7 +202,7 @@ export default function SmartReview() {
               </div>
               <div className="smart-stat">
                 <div className="smart-stat-emoji">⭐</div>
-                <div className="smart-stat-val">+{allRight ? session.correct + 5 : session.correct}</div>
+                <div className="smart-stat-val">+{quizStars(session.correct, total)}</div>
                 <div className="smart-stat-label">星星</div>
               </div>
             </div>
@@ -264,8 +265,7 @@ export default function SmartReview() {
 
     if (idx + 1 >= total) {
       // 最后一题:直接结算加星,不依赖 useEffect,避免重复触发
-      const stars = finalCorrect === total ? finalCorrect + 5 : finalCorrect
-      addStars(stars)
+      addStars(quizStars(finalCorrect, total))
       setDone(true)
     } else {
       setIdx(idx + 1)

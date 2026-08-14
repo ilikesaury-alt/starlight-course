@@ -20,6 +20,7 @@ import { speakText } from '@/utils/speak'
 import { moduleThemeVars } from '@/utils/theme'
 import { buildClozeQuiz, buildListeningQuiz, buildWordQuiz } from '@/utils/bookQuiz'
 import { lookupZh, wordBase } from '@/utils/bookDict'
+import { quizStars } from '@/utils/stars'
 
 type Tab = 'vocab' | 'book' | 'quiz'
 
@@ -208,7 +209,7 @@ export default function LessonPreview() {
             }}
             onFinish={(correct, total, wrongEns) => {
               const allRight = correct === total && total > 0
-              addStars(allRight ? correct + 5 : correct)
+              addStars(quizStars(correct, total))
               markQuizDone(mod.slug)
               // 闯关全对 ⇒ 自动标记本课完成
               if (allRight) markLessonDone(mod.slug, lesson.id)
@@ -276,7 +277,18 @@ export default function LessonPreview() {
 function VocabTab({ words, mcStyle }: { words: Word[]; mcStyle: React.CSSProperties }) {
   const [idx, setIdx] = useState(0)
   const [showZh, setShowZh] = useState(true)
-  useEffect(() => { setIdx(0); setShowZh(true) }, [words])
+  const [selfChecked, setSelfChecked] = useState<Set<string>>(new Set())
+  const seedCards = useCourseStore((s) => s.seedCards)
+  const recordReview = useCourseStore((s) => s.recordReview)
+  useEffect(() => { setIdx(0); setShowZh(true); setSelfChecked(new Set()) }, [words])
+
+  // 自评:翻面看到中文后,点「会了/不会」把记忆反馈写回 SRS,
+  // 让预习从被动翻卡升级为主动回忆(与智能复习同一调度池)
+  const selfAssess = (en: string, know: boolean) => {
+    seedCards([en], 'starlight')
+    recordReview(en, know, 'starlight')
+    setSelfChecked((s) => new Set(s).add(en))
+  }
 
   // 切换单词（上一个/下一个/点圆点/进入单词卡）时自动发音
   useEffect(() => {
@@ -314,6 +326,27 @@ function VocabTab({ words, mcStyle }: { words: Word[]; mcStyle: React.CSSPropert
             👀 显示中文
           </button>
         )}
+        {showZh &&
+          (selfChecked.has(w.en) ? (
+            <p className="fc-self-done">⭐ 已记录，继续加油！</p>
+          ) : (
+            <div className="fc-self-check">
+              <button
+                type="button"
+                className="btn btn-soft"
+                onClick={() => selfAssess(w.en, false)}
+              >
+                😅 还不会
+              </button>
+              <button
+                type="button"
+                className="btn"
+                onClick={() => selfAssess(w.en, true)}
+              >
+                ✅ 我会了
+              </button>
+            </div>
+          ))}
       </div>
 
       <div className="fc-progress">{idx + 1} / {words.length}</div>
