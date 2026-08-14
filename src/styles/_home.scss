@@ -218,6 +218,23 @@
   flex-shrink: 0;
 }
 
+// ---------- 单元测验入口卡 ----------
+.lesson-quiz-entry { margin-top: 14px; }
+.lesson-quiz-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: var(--r-md);
+  background: linear-gradient(135deg, var(--mc-soft, var(--brand-soft)), #fff);
+  border: 2px dashed var(--mc, var(--brand));
+  font-size: var(--fs-md);
+}
+.lesson-quiz-emoji { font-size: 26px; }
+.lesson-quiz-body { flex: 1; min-width: 0; }
+.lesson-quiz-title { font-weight: 800; color: var(--brand-deep, var(--ink)); }
+.lesson-quiz-sub { font-size: var(--fs-sm); color: var(--ink-soft); margin-top: 2px; }
+
 // ---------- 课程内标签切换 ----------
 .tab-bar { display: flex; gap: 10px; margin: 14px 0 8px; }
 .tab-btn {

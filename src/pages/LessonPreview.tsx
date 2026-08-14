@@ -18,7 +18,7 @@ import { getLessonBook } from '@/data/starlight-book'
 import { useCourseStore } from '@/store/useCourseStore'
 import { speakText } from '@/utils/speak'
 import { moduleThemeVars } from '@/utils/theme'
-import { buildClozeQuiz, buildWordQuiz } from '@/utils/bookQuiz'
+import { buildClozeQuiz, buildListeningQuiz, buildWordQuiz } from '@/utils/bookQuiz'
 import { lookupZh, wordBase } from '@/utils/bookDict'
 
 type Tab = 'vocab' | 'book' | 'quiz'
@@ -48,8 +48,13 @@ export default function LessonPreview() {
   const book = mod && lesson ? getLessonBook(mod.id, lesson.id) : undefined
   const chapters = book?.sections ?? []
 
-  // 闯关题：课本原文选词填空优先，不足 6 题时用本课单词词义题补足，再不够就用单元测验
+  // 闯关题：听力题优先(听说核心)→ 课本原文选词填空 → 词义题/单元测验补足
   const quizItems = useMemo<QuizItem[]>(() => {
+    // ① 听力题：本课单词自动朗读选中文,最多 4 题
+    const listen = words.length > 0
+      ? buildListeningQuiz(words, lessons.flatMap((l) => l.words), 4)
+      : []
+    // ② 选词填空：从真实课文挖空
     const cloze = chapters.length > 0
       ? buildClozeQuiz(chapters, {
           vocab: words,
@@ -58,7 +63,7 @@ export default function LessonPreview() {
           emoji: mod?.emoji ?? '📖',
         })
       : []
-    const items = [...cloze]
+    const items = [...listen, ...cloze]
     if (items.length < 6 && words.length > 0) {
       items.push(...buildWordQuiz(words, lessons.flatMap((l) => l.words), 6 - items.length))
     }

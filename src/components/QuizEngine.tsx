@@ -17,6 +17,8 @@ export interface QuizItem {
   emoji?: string
   /** Starlight 听力测验专用：标注该题来自第几课 */
   lessonId?: number
+  /** 听力题：进入题目时自动朗读 speakText,用户听后选择 */
+  listen?: boolean
   /** 绘本选词填空：prompt 为带横线的原句，full 为完整原句（用于听读） */
   cloze?: { prompt: string; full: string }
 }
@@ -65,6 +67,14 @@ export default function QuizEngine({
   const curState = states[idx]
   const isAnswered = !!curState?.answered
   const isCorrect = isAnswered && curState.picked === cur.answer
+
+  // 听力题:进入题目自动朗读一遍 prompt(点选项发音钮可反复听)
+  useEffect(() => {
+    if (!done && cur?.listen && cur.speakText) {
+      speakText(cur.speakText)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [idx, done])
 
   useEffect(() => {
     if (!done || submittedRef.current) return

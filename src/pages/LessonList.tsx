@@ -71,6 +71,16 @@ export default function LessonList() {
         <p className="lead" style={{ marginTop: '-4px' }}>
           已完成 <b>{mod.lessons.filter((l) => (lessonCompleted[unitId] ?? []).includes(l.id)).length}</b> / {mod.lessons.length} 课
         </p>
+        <div className="lesson-quiz-entry" style={mcStyle}>
+          <Link to={`/preview/${unitId}/quiz`} className="lesson-quiz-card">
+            <span className="lesson-quiz-emoji">🏁</span>
+            <div className="lesson-quiz-body">
+              <div className="lesson-quiz-title">单元测验</div>
+              <div className="lesson-quiz-sub">{mod.quiz.length} 题综合检验 · 学完本单元挑战一下</div>
+            </div>
+            <span className="module-arrow">›</span>
+          </Link>
+        </div>
         <div className="lessons-overview" style={mcStyle}>
           {mod.lessons.map((lesson) => {
             const done = (lessonCompleted[unitId] ?? []).includes(lesson.id)

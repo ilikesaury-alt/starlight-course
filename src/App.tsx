@@ -8,6 +8,7 @@ import Courses from '@/pages/Courses'
 import PreviewList from '@/pages/PreviewList'
 import LessonList from '@/pages/LessonList'
 import LessonPreview from '@/pages/LessonPreview'
+import UnitQuiz from '@/pages/UnitQuiz'
 import WrongBook from '@/pages/WrongBook'
 import Progress from '@/pages/Progress'
 import AlphabetPage from '@/pages/AlphabetPage'
@@ -42,6 +43,7 @@ function AppRoutes() {
         <Route path="/preview" element={<PreviewList />} />
         <Route path="/preview/:unitId" element={<LessonList />} />
         <Route path="/preview/:unitId/:lessonId" element={<LessonPreview />} />
+        <Route path="/preview/:unitId/quiz" element={<UnitQuiz />} />
         {/* 旧路由兜底：重定向到课程列表，兼容已存书签 */}
         <Route path="/preview/:unitId/vocab" element={<RedirectToLessonList />} />
         <Route path="/preview/:unitId/patterns" element={<RedirectToLessonList />} />

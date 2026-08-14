@@ -86,6 +86,45 @@ export function buildClozeQuiz(chapters: BookTextChapter[], opts: BookQuizOption
   return items
 }
 
+/**
+ * 听力题：听英文发音选中文意思(核心听说训练,排在闯关最前面)。
+ * 自动朗读 prompt,选项为中文释义;干扰项取词形/词义均不同的词。
+ */
+export function buildListeningQuiz(
+  words: { en: string; zh: string; emoji?: string }[],
+  allPool: { en: string; zh: string; emoji?: string }[],
+  limit = 4
+): QuizItem[] {
+  const questions: QuizItem[] = []
+  const n = Math.min(words.length, limit)
+  for (let i = 0; i < n; i++) {
+    const target = words[i]
+    // 干扰项：排除与目标词同词形或同中文的词,避免选项重复/混淆
+    let distractPool = words.filter(
+      (w) => w.en !== target.en && w.zh !== target.zh
+    )
+    if (distractPool.length < 3) {
+      distractPool = allPool.filter(
+        (w) => w.en !== target.en && w.zh !== target.zh
+      )
+    }
+    if (distractPool.length < 3) continue
+    const distract = shuffle(distractPool).slice(0, 3)
+    const options = shuffle([target, ...distract])
+    const answer = options.findIndex((o) => o.en === target.en)
+    questions.push({
+      q: '🔊 听发音，选出正确的意思',
+      options: options.map((o) => o.zh),
+      answer,
+      explain: `${target.en} 意思是“${target.zh}”。`,
+      speakText: target.en,
+      emoji: target.emoji,
+      listen: true,
+    })
+  }
+  return questions
+}
+
 /** 词义选择题：哪个是「中文」？—— 原文题目不够时用来补足。 */
 export function buildWordQuiz(
   words: { en: string; zh: string; emoji?: string }[],
