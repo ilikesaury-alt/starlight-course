@@ -4,7 +4,7 @@
 //   🎯 闯关 —— 从课本原文挖空生成选词填空，题量不足时用本课单词与单元测验补足
 // 三个标签共用 BookTextView / bookQuiz / bookDict，逻辑不在页面里重复实现。
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import SpeakButton from '@/components/SpeakButton'
 import FcWord from '@/components/FcWord'
@@ -19,6 +19,7 @@ import { useCourseStore } from '@/store/useCourseStore'
 import { speakText } from '@/utils/speak'
 import { moduleThemeVars } from '@/utils/theme'
 import { buildClozeQuiz, buildWordQuiz } from '@/utils/bookQuiz'
+import { lookupZh, wordBase } from '@/utils/bookDict'
 
 type Tab = 'vocab' | 'book' | 'quiz'
 
@@ -34,6 +35,8 @@ export default function LessonPreview() {
   const addWrongWord = useCourseStore((s) => s.addWrongWord)
   const [tab, setTab] = useState<Tab>('vocab')
   const [showLessonDone, setShowLessonDone] = useState(false)
+  // 一场测验内已结算过 SRS 的词集合:同一词被多题重复考时只结算一次,避免盒子抖动
+  const reviewedRef = useRef<Set<string>>(new Set())
 
   const lessons = mod?.lessons ?? []
   const lessonIdx = lessons.findIndex((l) => String(l.id) === lessonId)
@@ -188,7 +191,15 @@ export default function LessonPreview() {
             }
             onPick={({ en, correct }) => {
               seedCards([en], 'starlight')
+              // 同词去重:cloze 挖空/干扰项可能让同一词在一场测验出现多次,
+              // 重复 recordReview 会来回升/降盒,导致 SRS 调度失真
+              if (reviewedRef.current.has(en)) return
+              reviewedRef.current.add(en)
               recordReview(en, correct, 'starlight')
+            }}
+            onRestart={() => {
+              // 新一轮测验重新开始去重范围
+              reviewedRef.current = new Set()
             }}
             onFinish={(correct, total, wrongEns) => {
               const allRight = correct === total && total > 0
@@ -196,11 +207,14 @@ export default function LessonPreview() {
               markQuizDone(mod.slug)
               // 闯关全对 ⇒ 自动标记本课完成
               if (allRight) markLessonDone(mod.slug, lesson.id)
+              // 新一轮测验结束后清空去重范围
+              reviewedRef.current = new Set()
               wrongEns.forEach((en) => {
                 const w = words.find((x) => x.en.toLowerCase() === en.toLowerCase())
                 addWrongWord({
                   en: w?.en ?? en,
-                  zh: w?.zh ?? '',
+                  // 词表里没有的课文词,用逐词词典兜底,避免错题本出现无释义裸词
+                  zh: w?.zh ?? lookupZh(wordBase(en)) ?? '',
                   emoji: w?.emoji ?? mod.emoji,
                   from: `${mod.title} · Lesson ${lesson.id}`,
                   module: 'starlight',

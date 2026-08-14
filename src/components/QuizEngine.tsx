@@ -4,7 +4,7 @@
 // 全部由调用方注入，保证各模块行为可独立定制、互不干扰。
 
 import { useState, useEffect, useRef } from 'react'
-import { Link } from 'react-router-dom'
+
 import SpeakButton from './SpeakButton'
 import { speakText } from '@/utils/speak'
 
@@ -39,6 +39,8 @@ interface QuizEngineProps {
   resultLinks: React.ReactNode
   onPick: (info: QuizPickInfo) => void
   onFinish: (correct: number, total: number, wrongEns: string[]) => void
+  /** 用户点「再做一次」时通知调用方(如重置会话内去重状态) */
+  onRestart?: () => void
   /** 题目上方额外渲染（如 Starlight 的「Lesson N」标签） */
   renderQuestionExtra?: (item: QuizItem) => React.ReactNode
 }
@@ -51,6 +53,7 @@ export default function QuizEngine({
   resultLinks,
   onPick,
   onFinish,
+  onRestart,
   renderQuestionExtra,
 }: QuizEngineProps) {
   const [idx, setIdx] = useState(0)
@@ -101,6 +104,7 @@ export default function QuizEngine({
     setStates([])
     setDone(false)
     submittedRef.current = false
+    onRestart?.()
   }
 
   let correct = 0
