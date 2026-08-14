@@ -15,7 +15,7 @@ export const BOOK_WORD_ZH: Record<string, string> = {
   'backward': "向后", 'bad': "坏的", 'balance': "平衡", 'ball': "球", 'bath': "洗澡", 'bathtub': "浴缸",
   'be': "是", 'beach': "海滩", 'beautiful': "美丽的", 'became': "成为(过去)", 'because': "因为", 'become': "成为",
   'bed': "床", 'before': "在…之前", 'began': "开始(过去)", 'begin': "开始", 'behind': "在…后面", 'being': "存在",
-  'bell': "铃铛", 'bench': "长椅", 'best': "最好的", 'between': "在…之间", 'bezt': "最好的(best)", 'big': "大的",
+  'bell': "铃铛", 'bench': "长椅", 'best': "最好的", 'between': "在…之间", 'big': "大的",
   'biggest': "最大的", 'bike': "自行车", 'bird': "鸟", 'birdbath': "鸟澡盆", 'bit': "一点", 'bizzy': "忙碌的(busy)",
   'black': "黑色的", 'blew': "吹了", 'blue': "蓝色的", 'boat': "船", 'boink': "哐(撞击声)", 'bolt': "闪电",
   'bone': "骨头", 'booger': "鼻屎", 'book': "书", 'bored': "无聊的", 'boss': "老板", 'both': "两者都",
@@ -274,8 +274,8 @@ export const BOOK_WORD_ZH: Record<string, string> = {
   'la': "啦", 'tra': "啦(歌词)", 'di': "滴", 'da': "哒", 'moo': "哞", 'oink': "哼(猪叫)",
   'quack': "嘎嘎(鸭叫)", 'cluck': "咯咯(鸡叫)", 'whispering': "小声说", 'abracadabra': "阿布拉卡达布拉(咒语)",
   'hickety': "希克提(童谣)", 'pickety': "皮克提(童谣)", 'years': "岁；年", 'coming': "来了",
-  'abc': "字母表", 'tv': "电视", 'www': "网址", 'landi': "朗迪", 'com': "com(网址)",
-  'vs': "对阵", 'fix': "修好", 'foo': "食物(food)", 'su': "超(super)", 'per': "级(super)",
+  'abc': "字母表", 'tv': "电视", 'www': "网址",
+  'vs': "对阵", 'fix': "修好",
   'list': "清单", 'patterns': "规律(复数)", 'actions': "动作(复数)", 'add': "加", 'lay': "放置",
 }
 
@@ -298,6 +298,7 @@ export function wordBase(token: string): string {
 }
 
 // 去掉首尾标点，避免 TTS 把 "." "“" 也读出来。
+// 含中文弯引号(’‘)与英文弯引号(’‘)——教材原文常带这类字符,不清理会被读成怪音。
 export function cleanForSpeak(tok: string): string {
-  return tok.replace(/^[“"'`([{]+/, '').replace(/[.,!?;:”"'`)\]}]+$/, '').trim() || tok
+  return tok.replace(/^[“”‘’"'`([{]+/, '').replace(/[.,!?;:”’“‘"'`)\]}]+$/, '').trim() || tok
 }
