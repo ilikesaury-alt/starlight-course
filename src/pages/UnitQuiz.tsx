@@ -54,7 +54,7 @@ export default function UnitQuiz() {
     return (
       <div className="empty">
         <p>没有找到这个模块。</p>
-        <Link to="/preview" className="btn">返回预习列表</Link>
+        <Link to="/starlight" className="btn">返回主课</Link>
       </div>
     )
   }
@@ -64,7 +64,7 @@ export default function UnitQuiz() {
       <Breadcrumb
         items={[
           { label: '🏠', to: '/' },
-          { label: 'Starlight 预习', to: '/preview' },
+          { label: 'Starlight 主课', to: '/starlight' },
           { label: mod.title, to: `/preview/${unitId}` },
           { label: '单元测验' },
         ]}

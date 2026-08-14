@@ -5,7 +5,6 @@ import SafeBoundary from '@/components/SafeBoundary'
 import { cancelSpeech } from '@/utils/speak'
 import Home from '@/pages/Home'
 import Courses from '@/pages/Courses'
-import PreviewList from '@/pages/PreviewList'
 import LessonList from '@/pages/LessonList'
 import LessonPreview from '@/pages/LessonPreview'
 import UnitQuiz from '@/pages/UnitQuiz'
@@ -40,7 +39,7 @@ function AppRoutes() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/courses" element={<Courses />} />
-        <Route path="/preview" element={<PreviewList />} />
+        <Route path="/preview" element={<Navigate to="/starlight" replace />} />
         <Route path="/preview/:unitId" element={<LessonList />} />
         <Route path="/preview/:unitId/:lessonId" element={<LessonPreview />} />
         <Route path="/preview/:unitId/quiz" element={<UnitQuiz />} />

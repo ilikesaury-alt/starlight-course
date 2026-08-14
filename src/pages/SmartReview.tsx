@@ -90,14 +90,14 @@ export default function SmartReview() {
   // 「去预习」按钮按当前筛选模块跳到对应课程首页,避免语文/故事卡片误跳 Starlight
   const previewTo =
     filter === 'all'
-      ? '/preview'
+      ? '/starlight'
       : filter === 'chinese'
         ? '/chinese'
         : filter === 'flyguy'
           ? '/flyguy'
           : filter === 'rocketgirl'
             ? '/rocketgirl'
-            : '/preview'
+            : '/starlight'
 
   // 切换复习卡（进入/下一题/再复习一轮）时自动朗读单词,作为回忆提示
   // 语文卡片(汉字)用中文嗓音朗读

@@ -21,7 +21,7 @@ export default function LessonList() {
     return (
       <div className="empty">
         <p>没有找到这个模块。</p>
-        <Link to="/preview" className="btn">返回预习列表</Link>
+        <Link to="/starlight" className="btn">返回主课</Link>
       </div>
     )
   }
@@ -30,7 +30,7 @@ export default function LessonList() {
 
   return (
     <div className="page lesson-list" style={mcStyle}>
-      <Breadcrumb items={[{ label: '🏠', to: '/' }, { label: 'Starlight 预习', to: '/preview' }, { label: mod.title }]} />
+      <Breadcrumb items={[{ label: '🏠', to: '/' }, { label: 'Starlight 主课', to: '/starlight' }, { label: mod.title }]} />
       <div className="unit-banner" style={mcStyle}>
         <span className="unit-emoji">{mod.emoji}</span>
         <div>
@@ -138,7 +138,7 @@ export default function LessonList() {
       </SafeBoundary>
 
       <div className="page-nav">
-        <Link to="/preview" className="back-link">← 预习列表</Link>
+        <Link to="/starlight" className="back-link">← 主课列表</Link>
         <Link to="/smart" className="btn">去复习 →</Link>
       </div>
     </div>
