@@ -9,6 +9,10 @@ import {
   dayStamp,
 } from '../data/srs'
 import { MODULE_LIST, type ModuleId } from '../data/modules'
+import { modules } from '../data/starlight'
+
+// Starlight 主课:单元 slug -> 全部课 id,用于课级进度判断
+const lessonsOf = (unitId: string) => modules.find((m) => m.slug === unitId)?.lessons ?? []
 
 export interface WrongWord {
   en: string
@@ -26,6 +30,9 @@ interface CourseStore {
   totalStars: number
   completedPreviews: string[]
   completedQuizzes: string[]
+  /** Starlight 主课课级完成记录:unit slug -> 已完成 lesson id 列表。
+   *  单元级 completedPreviews 由它派生(全部课时完成即单元完成),展示粒度更细。 */
+  lessonCompleted: Record<string, number[]>
   /** 故事类模块(Fly Guy / Rocket Girl)的通关记录,与 completedPreviews(Starlight 单元预习)语义分离 */
   completedStories: string[]
   /** SRS 智能记忆卡片,key 为单词 en */
@@ -51,6 +58,9 @@ interface CourseStore {
   clearWrongWords: () => void
   addStars: (n: number) => void
   markPreviewDone: (slug: string) => void
+  /** 标记 Starlight 某课的课级完成(闯关全对自动触发 / 手动按钮触发)。
+   *  该单元全部课时完成时自动同步单元级完成标记。 */
+  markLessonDone: (unitId: string, lessonId: number) => void
   markQuizDone: (slug: string) => void
   /** 标记故事类模块某故事已通关(与 markPreviewDone 区分语义) */
   markStoryDone: (slug: string) => void
@@ -89,6 +99,7 @@ export const useCourseStore = create<CourseStore>()(
       totalStars: 0,
       completedPreviews: [],
       completedQuizzes: [],
+      lessonCompleted: {},
       completedStories: [],
       srsCards: {},
       reciteCheckins: {},
@@ -127,11 +138,42 @@ export const useCourseStore = create<CourseStore>()(
       addStars: (n) => set((s) => ({ totalStars: s.totalStars + n })),
 
       markPreviewDone: (slug) =>
-        set((s) =>
-          s.completedPreviews.includes(slug)
-            ? s
-            : { completedPreviews: [...s.completedPreviews, slug] }
-        ),
+        set((s) => {
+          // 手动标记单元完成时,同步把该单元全部课时标为课级完成,两种粒度保持一致
+          const lessons = lessonsOf(slug)
+          const completedPreviews = s.completedPreviews.includes(slug)
+            ? s.completedPreviews
+            : [...s.completedPreviews, slug]
+          if (lessons.length === 0) return { completedPreviews }
+          const prev = s.lessonCompleted[slug] ?? []
+          const merged = [...prev]
+          let changed = false
+          for (const l of lessons) {
+            if (!merged.includes(l.id)) {
+              merged.push(l.id)
+              changed = true
+            }
+          }
+          return changed
+            ? { completedPreviews, lessonCompleted: { ...s.lessonCompleted, [slug]: merged } }
+            : { completedPreviews }
+        }),
+
+      markLessonDone: (unitId, lessonId) =>
+        set((s) => {
+          const prev = s.lessonCompleted[unitId] ?? []
+          if (prev.includes(lessonId)) return s
+          const next = { ...s.lessonCompleted, [unitId]: [...prev, lessonId] }
+          // 全部课时完成后自动同步单元级完成标记(保持 completedPreviews 语义不变)
+          const lessons = lessonsOf(unitId)
+          const allDone =
+            lessons.length > 0 && lessons.every((l) => next[unitId].includes(l.id))
+          const completedPreviews =
+            allDone && !s.completedPreviews.includes(unitId)
+              ? [...s.completedPreviews, unitId]
+              : s.completedPreviews
+          return { lessonCompleted: next, completedPreviews }
+        }),
 
       markQuizDone: (slug) =>
         set((s) =>
@@ -186,6 +228,7 @@ export const useCourseStore = create<CourseStore>()(
           totalStars: 0,
           completedPreviews: [],
           completedQuizzes: [],
+          lessonCompleted: {},
           completedStories: [],
           srsCards: {},
           reciteCheckins: {},
@@ -272,7 +315,7 @@ export const useCourseStore = create<CourseStore>()(
     }),
     {
       name: 'starlight-course',
-      version: 4,
+      version: 5,
       // 只持久化数据字段,避免函数/瞬态状态被写入 localStorage
       partialize: (state) => ({
         masteredWords: state.masteredWords,
@@ -280,6 +323,7 @@ export const useCourseStore = create<CourseStore>()(
         totalStars: state.totalStars,
         completedPreviews: state.completedPreviews,
         completedQuizzes: state.completedQuizzes,
+        lessonCompleted: state.lessonCompleted,
         completedStories: state.completedStories,
         srsCards: state.srsCards,
         reciteCheckins: state.reciteCheckins,
@@ -328,12 +372,23 @@ export const useCourseStore = create<CourseStore>()(
         const rawPreviews: string[] = Array.isArray(s.completedPreviews) ? s.completedPreviews : []
         const completedPreviews = rawPreviews.filter((slug) => starlightUnitIds.includes(slug))
         const completedStories = rawPreviews.filter((slug) => !starlightUnitIds.includes(slug))
+        // v5:旧数据只有单元级完成,补全课级记录(单元完成 ⇒ 该单元全部课时完成)
+        const rawLessonCompleted = (s.lessonCompleted ?? {}) as Record<string, number[]>
+        const lessonCompleted: Record<string, number[]> = { ...rawLessonCompleted }
+        for (const slug of completedPreviews) {
+          const lessons = lessonsOf(slug)
+          if (lessons.length === 0) continue
+          const prev = lessonCompleted[slug] ?? []
+          if (prev.length >= lessons.length) continue
+          lessonCompleted[slug] = [...new Set([...prev, ...lessons.map((l) => l.id)])]
+        }
         return {
           ...s,
           srsCards,
           wrongWords,
           completedPreviews,
           completedStories,
+          lessonCompleted,
         } as CourseStore
       },
     }

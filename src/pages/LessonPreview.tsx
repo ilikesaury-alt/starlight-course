@@ -9,6 +9,7 @@ import { Link, useParams } from 'react-router-dom'
 import SpeakButton from '@/components/SpeakButton'
 import FcWord from '@/components/FcWord'
 import SafeBoundary from '@/components/SafeBoundary'
+import ConfirmDialog from '@/components/ConfirmDialog'
 import QuizEngine, { type QuizItem } from '@/components/QuizEngine'
 import BookTextView from '@/components/BookTextView'
 import Breadcrumb from '@/components/Breadcrumb'
@@ -27,9 +28,12 @@ export default function LessonPreview() {
   const seedCards = useCourseStore((s) => s.seedCards)
   const addStars = useCourseStore((s) => s.addStars)
   const markQuizDone = useCourseStore((s) => s.markQuizDone)
+  const markLessonDone = useCourseStore((s) => s.markLessonDone)
+  const lessonCompleted = useCourseStore((s) => s.lessonCompleted)
   const recordReview = useCourseStore((s) => s.recordReview)
   const addWrongWord = useCourseStore((s) => s.addWrongWord)
   const [tab, setTab] = useState<Tab>('vocab')
+  const [showLessonDone, setShowLessonDone] = useState(false)
 
   const lessons = mod?.lessons ?? []
   const lessonIdx = lessons.findIndex((l) => String(l.id) === lessonId)
@@ -102,6 +106,8 @@ export default function LessonPreview() {
   const prevLesson = lessons[lessonIdx - 1]
   const nextLesson = lessons[lessonIdx + 1]
   const hasBook = chapters.length > 0
+  // 课级完成状态:闯关全对自动标记,或手动点「本课完成」
+  const lessonDone = lessonCompleted[mod.slug]?.includes(lesson.id) ?? false
 
   return (
     <div className="page lesson-preview" style={mcStyle}>
@@ -123,7 +129,6 @@ export default function LessonPreview() {
 
       <SafeBoundary label="课前预习">
         <div className="mode-badge mode-preview">📖 Starlight 课前预习</div>
-
         <div className="tab-bar" style={mcStyle}>
           <button
             type="button"
@@ -186,8 +191,11 @@ export default function LessonPreview() {
               recordReview(en, correct, 'starlight')
             }}
             onFinish={(correct, total, wrongEns) => {
-              addStars(correct === total ? correct + 5 : correct)
+              const allRight = correct === total && total > 0
+              addStars(allRight ? correct + 5 : correct)
               markQuizDone(mod.slug)
+              // 闯关全对 ⇒ 自动标记本课完成
+              if (allRight) markLessonDone(mod.slug, lesson.id)
               wrongEns.forEach((en) => {
                 const w = words.find((x) => x.en.toLowerCase() === en.toLowerCase())
                 addWrongWord({
@@ -214,6 +222,34 @@ export default function LessonPreview() {
           )}
         </div>
       </div>
+
+      {/* 课级完成:手动标记(闯关全对也会自动标记) */}
+      <div style={{ textAlign: 'center', marginTop: '18px' }}>
+        {lessonDone ? (
+          <p style={{ color: 'var(--ok)', fontWeight: 600 }}>✅ 本课已完成学习</p>
+        ) : (
+          <button
+            type="button"
+            className="btn btn-soft"
+            onClick={() => setShowLessonDone(true)}
+          >
+            ✅ 标记本课完成
+          </button>
+        )}
+      </div>
+      <ConfirmDialog
+        open={showLessonDone}
+        emoji="✅"
+        title="学完这一课了吗？"
+        message="标记后这一课就算完成啦，可以在课程列表里看到进度。"
+        confirmText="完成啦"
+        cancelText="再学一会儿"
+        onConfirm={() => {
+          markLessonDone(mod.slug, lesson.id)
+          setShowLessonDone(false)
+        }}
+        onCancel={() => setShowLessonDone(false)}
+      />
     </div>
   )
 }

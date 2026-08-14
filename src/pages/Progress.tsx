@@ -14,8 +14,8 @@ import ConfirmDialog from '../components/ConfirmDialog'
 export default function Progress() {
   const totalStars = useCourseStore((s) => s.totalStars)
   const wrongWords = useCourseStore((s) => s.wrongWords)
-  const completedPreviews = useCourseStore((s) => s.completedPreviews)
   const completedQuizzes = useCourseStore((s) => s.completedQuizzes)
+  const lessonCompleted = useCourseStore((s) => s.lessonCompleted)
   const completedStories = useCourseStore((s) => s.completedStories)
   const reciteCheckins = useCourseStore((s) => s.reciteCheckins)
   const eng3aRecite = useCourseStore((s) => s.eng3aRecite)
@@ -28,13 +28,17 @@ export default function Progress() {
   const flyguyDone = flyGuyStories.filter((s) => completedStories.includes(s.slug)).length
   const rocketgirlDone = rocketGirlStories.filter((s) => completedStories.includes(s.slug)).length
 
+  // Starlight 主课:课级进度(12 单元 × 8 课 = 96 课)
+  const slDone = Object.values(lessonCompleted).reduce((a, ids) => a + ids.length, 0)
+  const slTotal = 96
+
   const rows = [
     {
       id: 'starlight', to: '/starlight', emoji: '🌟', name: 'Starlight 主课',
       status: completedQuizzes.length > 0
-        ? `已预习 ${completedPreviews.length}/12 单元 · 已测 ${completedQuizzes.length} 关`
-        : `已预习 ${completedPreviews.length}/12 单元`,
-      total: 12, done: completedPreviews.length,
+        ? `已学 ${slDone}/${slTotal} 课 · 已闯关 ${completedQuizzes.length} 关`
+        : `已学 ${slDone}/${slTotal} 课`,
+      total: slTotal, done: slDone,
     },
     { id: 'chinese', to: '/chinese', emoji: '📚', name: '三年级上册语文', status: `已背 ${chineseDone}/${totalChineseLessons} 课`, total: totalChineseLessons, done: chineseDone },
     { id: 'eng3a', to: '/eng3a', emoji: '📘', name: '三年级上册英语', status: `已读 ${eng3aDone}/${totalEngLessons} 课`, total: totalEngLessons, done: eng3aDone },

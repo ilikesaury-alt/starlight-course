@@ -10,6 +10,7 @@ const mcStyle = moduleThemeVars(STARLIGHT_THEME)
 export default function StarlightHome() {
   const [query, setQuery] = useState('')
   const completed = useCourseStore((s) => s.completedPreviews)
+  const lessonCompleted = useCourseStore((s) => s.lessonCompleted)
 
   const totalLessons = useMemo(() => modules.reduce((a, m) => a + m.lessons.length, 0), [])
   // 统一以「按课细分的完整单词」为单词全集口径(与复习系统 getWords / Progress 一致)
@@ -20,6 +21,11 @@ export default function StarlightHome() {
   const doneCount = useMemo(
     () => modules.filter((m) => completed.includes(m.slug)).length,
     [completed],
+  )
+  // 课粒度完成统计(12 单元 × 8 课 = 96 课)
+  const doneLessons = useMemo(
+    () => Object.values(lessonCompleted).reduce((a, ids) => a + ids.length, 0),
+    [lessonCompleted],
   )
 
   const filtered = useMemo(() => {
@@ -54,7 +60,7 @@ export default function StarlightHome() {
       </section>
 
       <div className="rg-progress-pill" style={mcStyle}>
-        🏆 已完成 <b>{doneCount}</b> / {modules.length} 个单元预习
+        🏆 已完成 <b>{doneLessons}</b> / {totalLessons} 课 · {doneCount} / {modules.length} 个单元预习
       </div>
 
       <div className="rg-search-wrap">
