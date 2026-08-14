@@ -14,7 +14,7 @@ export default function LessonList() {
   const markLessonDone = useCourseStore((s) => s.markLessonDone)
   const completed = useCourseStore((s) => s.completedPreviews.includes(unitId))
   const lessonCompleted = useCourseStore((s) => s.lessonCompleted)
-  const [showGuide, setShowGuide] = useState(false)
+  const [showGuide, setShowGuide] = useState(true)
   const [showUnitDone, setShowUnitDone] = useState(false)
 
   if (!mod) {

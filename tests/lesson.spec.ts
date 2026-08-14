@@ -41,12 +41,11 @@ test.describe('Starlight 主课与单词卡', () => {
     await expect(page.locator('.flashcard').getByText('好的')).toBeVisible()
   })
 
-  test('单词卡可切到「句型」tab 查看句子', async ({ page }) => {
+  test('课本原文 tab 可查看重点句型', async ({ page }) => {
     await page.goto('/#/preview/hello/1')
 
-    // 顶部 tab 按钮文本精确为「💬 句型」；底部另有一个「💬 句型 →」CTA，
-    // 故用 exact 精确匹配，避免 strict mode 命中两个元素。
-    await page.getByRole('button', { name: '💬 句型', exact: true }).click()
+    // 三标签结构:句型在「课本原文」tab 顶部的重点句型条中
+    await page.getByRole('button', { name: /课本原文/ }).click()
     // 第一课首句
     await expect(page.getByText('Hello! How are you?').first()).toBeVisible()
   })

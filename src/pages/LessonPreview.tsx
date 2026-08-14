@@ -280,6 +280,8 @@ function VocabTab({ words, mcStyle }: { words: Word[]; mcStyle: React.CSSPropert
   const [selfChecked, setSelfChecked] = useState<Set<string>>(new Set())
   const seedCards = useCourseStore((s) => s.seedCards)
   const recordReview = useCourseStore((s) => s.recordReview)
+  // 首卡/首次进入不自动发音(等用户点击),避免挂载即响;仅「切换单词」时发音
+  const firstSpeakRef = useRef(true)
   useEffect(() => { setIdx(0); setShowZh(true); setSelfChecked(new Set()) }, [words])
 
   // 自评:翻面看到中文后,点「会了/不会」把记忆反馈写回 SRS,
@@ -290,8 +292,12 @@ function VocabTab({ words, mcStyle }: { words: Word[]; mcStyle: React.CSSPropert
     setSelfChecked((s) => new Set(s).add(en))
   }
 
-  // 切换单词（上一个/下一个/点圆点/进入单词卡）时自动发音
+  // 切换单词（上一个/下一个/点圆点/进入单词卡）时自动发音;首卡不自动读
   useEffect(() => {
+    if (firstSpeakRef.current) {
+      firstSpeakRef.current = false
+      return
+    }
     const cur = words[idx]
     if (cur) speakText(cur.en)
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -71,9 +71,6 @@ test.describe('智能复习与错题本', () => {
   })
 
   test('错题本「清空全部」经确认后清空', async ({ page }) => {
-    // 监听并自动接受原生 confirm 对话框
-    page.on('dialog', (d) => d.accept())
-
     await seedAndOpenReview(page)
     await expect(page.getByText(/第 1 \/ \d+ 张/)).toBeVisible()
 
@@ -90,6 +87,8 @@ test.describe('智能复习与错题本', () => {
     expect(wrongCount).toBeGreaterThan(0)
 
     await page.getByRole('button', { name: /清空全部/ }).click()
+    // 自绘 ConfirmDialog:点红色「清空」确认按钮
+    await page.getByRole('button', { name: '清空', exact: true }).click()
     // 清空后回到空状态
     await expect(page.getByText('错题本是空的')).toBeVisible()
   })
