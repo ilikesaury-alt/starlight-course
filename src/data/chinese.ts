@@ -65,6 +65,10 @@ export interface QuizItem {
   /** 正确选项下标 */
   answer: number
   explain?: string
+  /** 错题关联的记忆卡 key(如生字);缺省时该题错题不入错题本(阅读理解题无对应记忆卡) */
+  key?: string
+  /** 记忆卡中文释义;缺省时用正确选项文本 */
+  keyZh?: string
 }
 
 export interface ChineseLesson {

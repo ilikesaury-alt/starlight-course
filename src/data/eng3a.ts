@@ -52,6 +52,10 @@ export interface EngExercise {
   options: string[]
   answer: number
   explain?: string
+  /** 错题关联的记忆卡 key(考的词/句);缺省时该题错题不入错题本 */
+  key?: string
+  /** 记忆卡中文释义;缺省时用正确选项文本 */
+  keyZh?: string
 }
 
 export interface EngLesson {
@@ -124,10 +128,10 @@ export const eng3aUnits: EngUnit[] = [
           { en: 'write', zh: '写', emoji: '✍️' },
         ],
         exercise: [
-          { q: '“Hello!” 的中文是？', options: ['你好', '再见', '谢谢'], answer: 0, explain: 'Hello! = 你好！' },
-          { q: '“Goodbye!” 是什么意思？', options: ['早上好', '再见', '你好'], answer: 1, explain: 'Goodbye! = 再见！' },
-          { q: '“Stand up!” 是让我们做什么？', options: ['起立', '坐下', '打开书'], answer: 0, explain: 'Stand up! = 起立！' },
-          { q: '“Open your book.” 意思是？', options: ['合上书', '打开你的书', '读书'], answer: 1, explain: 'Open = 打开；book = 书。' },
+          { q: '“Hello!” 的中文是？', key: 'Hello!', options: ['你好', '再见', '谢谢'], answer: 0, explain: 'Hello! = 你好！' },
+          { q: '“Goodbye!” 是什么意思？', key: 'Goodbye!', options: ['早上好', '再见', '你好'], answer: 1, explain: 'Goodbye! = 再见！' },
+          { q: '“Stand up!” 是让我们做什么？', key: 'Stand up!', options: ['起立', '坐下', '打开书'], answer: 0, explain: 'Stand up! = 起立！' },
+          { q: '“Open your book.” 意思是？', key: 'Open your book.', options: ['合上书', '打开你的书', '读书'], answer: 1, explain: 'Open = 打开；book = 书。' },
         ],
       },
       {
@@ -161,9 +165,9 @@ export const eng3aUnits: EngUnit[] = [
           { en: "Let's be friends!", zh: '我们做朋友吧！' },
         ],
         exercise: [
-          { q: '“What’s your name?” 意思是？', options: ['你叫什么名字？', '你好吗？', '再见'], answer: 0, explain: 'name = 名字；问对方姓名。' },
-          { q: '“I’m Lingling.” 意思是？', options: ['我是玲玲。', '你是玲玲。', '我的名字'], answer: 0, explain: "I'm = I am = 我是。" },
-          { q: '别人说 “Nice to meet you.”，怎么回？', options: ['Nice to meet you, too.', 'Goodbye.', 'Thank you.'], answer: 0, explain: 'too = 也，回以同样的问候。' },
+          { q: '“What’s your name?” 意思是？', key: 'What’s your name?', options: ['你叫什么名字？', '你好吗？', '再见'], answer: 0, explain: 'name = 名字；问对方姓名。' },
+          { q: '“I’m Lingling.” 意思是？', key: 'I’m Lingling.', options: ['我是玲玲。', '你是玲玲。', '我的名字'], answer: 0, explain: "I'm = I am = 我是。" },
+          { q: '别人说 “Nice to meet you.”，怎么回？', key: 'Nice to meet you.', options: ['Nice to meet you, too.', 'Goodbye.', 'Thank you.'], answer: 0, explain: 'too = 也，回以同样的问候。' },
         ],
       },
       {
@@ -194,9 +198,9 @@ export const eng3aUnits: EngUnit[] = [
         },
         letters: ['Aa', 'Bb', 'Cc', 'Dd'],
         exercise: [
-          { q: '“How are you?” 怎么回答？', options: ['I’m fine, thank you.', "I'm Sam.", 'Goodbye.'], answer: 0, explain: 'fine = 很好。' },
-          { q: '“Thank you!” 中文是？', options: ['谢谢你！', '你好！', '没关系'], answer: 0, explain: 'thank you = 谢谢你。' },
-          { q: '下面哪个是字母 “Cc”？', options: ['Cc', 'Bb', 'Dd'], answer: 0, explain: 'Cc 在 Bb 与 Dd 之间。' },
+          { q: '“How are you?” 怎么回答？', key: 'How are you?', options: ['I’m fine, thank you.', "I'm Sam.", 'Goodbye.'], answer: 0, explain: 'fine = 很好。' },
+          { q: '“Thank you!” 中文是？', key: 'Thank you!', options: ['谢谢你！', '你好！', '没关系'], answer: 0, explain: 'thank you = 谢谢你。' },
+          { q: '下面哪个是字母 “Cc”？', key: 'Cc', options: ['Cc', 'Bb', 'Dd'], answer: 0, explain: 'Cc 在 Bb 与 Dd 之间。' },
         ],
       },
       {
@@ -206,10 +210,10 @@ export const eng3aUnits: EngUnit[] = [
         topic: 'Practice',
         emoji: '✏️',
         exercise: [
-          { q: '“Let’s be friends!” 意思是？', options: ['我们做朋友吧！', '我们唱歌吧。', '再见'], answer: 0, explain: 'friend = 朋友。' },
-          { q: '“Ms” 指的是？', options: ['女士', '先生', '老师'], answer: 0, explain: 'Ms = 女士（不区分婚否）。' },
-          { q: '“together” 意思是？', options: ['一起', '分开', '快乐'], answer: 0, explain: 'together = 一起。' },
-          { q: '“sing” 是？', options: ['唱', '听', '读'], answer: 0, explain: 'sing = 唱（歌）。' },
+          { q: '“Let’s be friends!” 意思是？', key: 'Let’s be friends!', options: ['我们做朋友吧！', '我们唱歌吧。', '再见'], answer: 0, explain: 'friend = 朋友。' },
+          { q: '“Ms” 指的是？', key: 'Ms', options: ['女士', '先生', '老师'], answer: 0, explain: 'Ms = 女士（不区分婚否）。' },
+          { q: '“together” 意思是？', key: 'together', options: ['一起', '分开', '快乐'], answer: 0, explain: 'together = 一起。' },
+          { q: '“sing” 是？', key: 'sing', options: ['唱', '听', '读'], answer: 0, explain: 'sing = 唱（歌）。' },
         ],
       },
     ],
@@ -250,10 +254,10 @@ export const eng3aUnits: EngUnit[] = [
           { en: 'thing', zh: '东西', emoji: '📦' },
         ],
         exercise: [
-          { q: '“schoolbag” 是？', options: ['书包', '钢笔', '尺子'], answer: 0, explain: 'school = 学校；bag = 包。' },
-          { q: '“eraser” 意思是？', options: ['橡皮', '铅笔', '书包'], answer: 0, explain: 'eraser = 橡皮。' },
-          { q: '“ruler” 是？', options: ['尺子', '书', '笔袋'], answer: 0, explain: 'ruler = 尺子。' },
-          { q: '“What’s this?” 意思是？', options: ['这是什么？', '那是什么？', '它是书包'], answer: 0, explain: 'this = 这，这个。' },
+          { q: '“schoolbag” 是？', key: 'schoolbag', options: ['书包', '钢笔', '尺子'], answer: 0, explain: 'school = 学校；bag = 包。' },
+          { q: '“eraser” 意思是？', key: 'eraser', options: ['橡皮', '铅笔', '书包'], answer: 0, explain: 'eraser = 橡皮。' },
+          { q: '“ruler” 是？', key: 'ruler', options: ['尺子', '书', '笔袋'], answer: 0, explain: 'ruler = 尺子。' },
+          { q: '“What’s this?” 意思是？', key: 'What’s this?', options: ['这是什么？', '那是什么？', '它是书包'], answer: 0, explain: 'this = 这，这个。' },
         ],
       },
       {
@@ -274,9 +278,9 @@ export const eng3aUnits: EngUnit[] = [
         ],
         letters: ['Ee', 'Ff', 'Gg', 'Hh', 'Ii', 'Jj'],
         exercise: [
-          { q: '“What’s that?” 问的是？', options: ['那是什么？', '这是什么？', '它在哪里'], answer: 0, explain: 'that = 那，那个。' },
-          { q: '“It’s a pencil.” 意思是？', options: ['它是一支铅笔。', '它是一本书。', '它是尺子。'], answer: 0, explain: 'pencil = 铅笔。' },
-          { q: '“Yes, it is.” 是对哪句的回答？', options: ['Is it a book?', "What's this?", 'Thank you.'], answer: 0, explain: 'Yes, it is. 回答 Is it…? 一般疑问句。' },
+          { q: '“What’s that?” 问的是？', key: 'What’s that?', options: ['那是什么？', '这是什么？', '它在哪里'], answer: 0, explain: 'that = 那，那个。' },
+          { q: '“It’s a pencil.” 意思是？', key: 'It’s a pencil.', options: ['它是一支铅笔。', '它是一本书。', '它是尺子。'], answer: 0, explain: 'pencil = 铅笔。' },
+          { q: '“Yes, it is.” 是对哪句的回答？', key: 'Yes, it is.', options: ['Is it a book?', "What's this?", 'Thank you.'], answer: 0, explain: 'Yes, it is. 回答 Is it…? 一般疑问句。' },
         ],
       },
       {
@@ -304,9 +308,9 @@ export const eng3aUnits: EngUnit[] = [
           zh: '《文具歌》：边拍手边念，复习本课单词。',
         },
         exercise: [
-          { q: '“lost and found” 是？', options: ['失物招领', '书包', '铅笔盒'], answer: 0, explain: 'lost = 丢失；found = 找到。' },
-          { q: '“Look at your book.” 意思是？', options: ['看你的书。', '打开书。', '合上书。'], answer: 0, explain: 'look at = 看……。' },
-          { q: '“come back” 意思是？', options: ['回来', '照看', '猜一猜'], answer: 0, explain: 'back = 回到原处。' },
+          { q: '“lost and found” 是？', key: 'lost and found', options: ['失物招领', '书包', '铅笔盒'], answer: 0, explain: 'lost = 丢失；found = 找到。' },
+          { q: '“Look at your book.” 意思是？', key: 'Look at your book.', options: ['看你的书。', '打开书。', '合上书。'], answer: 0, explain: 'look at = 看……。' },
+          { q: '“come back” 意思是？', key: 'come back', options: ['回来', '照看', '猜一猜'], answer: 0, explain: 'back = 回到原处。' },
         ],
       },
       {
@@ -316,9 +320,9 @@ export const eng3aUnits: EngUnit[] = [
         topic: 'Practice',
         emoji: '✏️',
         exercise: [
-          { q: '“please” 意思是？', options: ['请', '谢谢', '再见'], answer: 0, explain: 'please = 请，礼貌用语。' },
-          { q: '“guess” 是？', options: ['猜', '找', '看'], answer: 0, explain: 'guess = 猜。' },
-          { q: '“take care of” 意思是？', options: ['照看，照料', '回来', '失物招领'], answer: 0, explain: 'take care of = 照看/照料某人某物。' },
+          { q: '“please” 意思是？', key: 'please', options: ['请', '谢谢', '再见'], answer: 0, explain: 'please = 请，礼貌用语。' },
+          { q: '“guess” 是？', key: 'guess', options: ['猜', '找', '看'], answer: 0, explain: 'guess = 猜。' },
+          { q: '“take care of” 意思是？', key: 'take care of', options: ['照看，照料', '回来', '失物招领'], answer: 0, explain: 'take care of = 照看/照料某人某物。' },
         ],
       },
     ],
@@ -359,9 +363,9 @@ export const eng3aUnits: EngUnit[] = [
           { en: 'clothes', zh: '衣服', emoji: '👕' },
         ],
         exercise: [
-          { q: '“red” 是？', options: ['红色', '蓝色', '绿色'], answer: 0, explain: 'red = 红色。' },
-          { q: '“What colour is it?” 意思是？', options: ['它是什么颜色？', '它是一只狗。', '这是什么？'], answer: 0, explain: 'colour = 颜色。' },
-          { q: '“rainbow” 是？', options: ['彩虹', '气球', '雨伞'], answer: 0, explain: 'rainbow = 彩虹。' },
+          { q: '“red” 是？', key: 'red', options: ['红色', '蓝色', '绿色'], answer: 0, explain: 'red = 红色。' },
+          { q: '“What colour is it?” 意思是？', key: 'What colour is it?', options: ['它是什么颜色？', '它是一只狗。', '这是什么？'], answer: 0, explain: 'colour = 颜色。' },
+          { q: '“rainbow” 是？', key: 'rainbow', options: ['彩虹', '气球', '雨伞'], answer: 0, explain: 'rainbow = 彩虹。' },
         ],
       },
       {
@@ -381,9 +385,9 @@ export const eng3aUnits: EngUnit[] = [
         ],
         letters: ['Kk', 'Ll', 'Mm', 'Nn', 'Oo', 'Pp'],
         exercise: [
-          { q: '“It’s blue.” 意思是？', options: ['它是蓝色的。', '它是红色的。', '它是书。'], answer: 0, explain: 'blue = 蓝色。' },
-          { q: '“black” 是？', options: ['黑色', '白色', '紫色'], answer: 0, explain: 'black = 黑色。' },
-          { q: '“colourful” 意思是？', options: ['色彩丰富的', '圆的', '大的'], answer: 0, explain: 'colourful = 色彩丰富的。' },
+          { q: '“It’s blue.” 意思是？', key: 'It’s blue.', options: ['它是蓝色的。', '它是红色的。', '它是书。'], answer: 0, explain: 'blue = 蓝色。' },
+          { q: '“black” 是？', key: 'black', options: ['黑色', '白色', '紫色'], answer: 0, explain: 'black = 黑色。' },
+          { q: '“colourful” 意思是？', key: 'colourful', options: ['色彩丰富的', '圆的', '大的'], answer: 0, explain: 'colourful = 色彩丰富的。' },
         ],
       },
       {
@@ -412,9 +416,9 @@ export const eng3aUnits: EngUnit[] = [
           zh: '《颜色歌》：把学过的颜色都唱出来。',
         },
         exercise: [
-          { q: '“paint” 是？', options: ['画（作画）', '看见', '想要'], answer: 0, explain: 'paint = 画/涂色。' },
-          { q: '“I can see a dog.” 意思是？', options: ['我能看见一只狗。', '我想要一只狗。', '它是狗。'], answer: 0, explain: 'see = 看见。' },
-          { q: '“so many” 意思是？', options: ['这么多', '首先', '正确的'], answer: 0, explain: 'so = 这么；many = 许多。' },
+          { q: '“paint” 是？', key: 'paint', options: ['画（作画）', '看见', '想要'], answer: 0, explain: 'paint = 画/涂色。' },
+          { q: '“I can see a dog.” 意思是？', key: 'I can see a dog.', options: ['我能看见一只狗。', '我想要一只狗。', '它是狗。'], answer: 0, explain: 'see = 看见。' },
+          { q: '“so many” 意思是？', key: 'so many', options: ['这么多', '首先', '正确的'], answer: 0, explain: 'so = 这么；many = 许多。' },
         ],
       },
       {
@@ -424,9 +428,9 @@ export const eng3aUnits: EngUnit[] = [
         topic: 'Practice',
         emoji: '✏️',
         exercise: [
-          { q: '“umbrella” 是？', options: ['雨伞', '衣服', '彩虹'], answer: 0, explain: 'umbrella = 雨伞。' },
-          { q: '“It’s a black dog.” 意思是？', options: ['它是一只黑色的狗。', '它是一把蓝色的伞。', '它是图画。'], answer: 0, explain: 'black = 黑色；dog = 狗。' },
-          { q: '“today” 是？', options: ['今天', '首先', '许多'], answer: 0, explain: 'today = 今天。' },
+          { q: '“umbrella” 是？', key: 'umbrella', options: ['雨伞', '衣服', '彩虹'], answer: 0, explain: 'umbrella = 雨伞。' },
+          { q: '“It’s a black dog.” 意思是？', key: 'It’s a black dog.', options: ['它是一只黑色的狗。', '它是一把蓝色的伞。', '它是图画。'], answer: 0, explain: 'black = 黑色；dog = 狗。' },
+          { q: '“today” 是？', key: 'today', options: ['今天', '首先', '许多'], answer: 0, explain: 'today = 今天。' },
         ],
       },
     ],
@@ -467,9 +471,9 @@ export const eng3aUnits: EngUnit[] = [
           { en: 'how', zh: '多少；怎样', emoji: '❓' },
         ],
         exercise: [
-          { q: '“seven” 是？', options: ['七', '六', '八'], answer: 0, explain: 'seven = 七。' },
-          { q: '“twelve” 是？', options: ['十二', '十一', '十'], answer: 0, explain: 'twelve = 十二。' },
-          { q: '“How many?” 意思是？', options: ['多少？', '什么颜色？', '你叫什么名字？'], answer: 0, explain: 'how many = 多少。' },
+          { q: '“seven” 是？', key: 'seven', options: ['七', '六', '八'], answer: 0, explain: 'seven = 七。' },
+          { q: '“twelve” 是？', key: 'twelve', options: ['十二', '十一', '十'], answer: 0, explain: 'twelve = 十二。' },
+          { q: '“How many?” 意思是？', key: 'How many?', options: ['多少？', '什么颜色？', '你叫什么名字？'], answer: 0, explain: 'how many = 多少。' },
         ],
       },
       {
@@ -489,9 +493,9 @@ export const eng3aUnits: EngUnit[] = [
         ],
         letters: ['Qq', 'Rr', 'Ss', 'Tt', 'Uu', 'Vv'],
         exercise: [
-          { q: '“How old are you?” 意思是？', options: ['你几岁了？', '多少只？', '你叫什么名字？'], answer: 0, explain: 'how old = 多大年龄。' },
-          { q: '“I’m nine.” 意思是？', options: ['我九岁。', '我是九。', '数字九。'], answer: 0, explain: "I'm = I am。" },
-          { q: '“count” 是？', options: ['数数', '数字', '多少'], answer: 0, explain: 'count = 数数。' },
+          { q: '“How old are you?” 意思是？', key: 'How old are you?', options: ['你几岁了？', '多少只？', '你叫什么名字？'], answer: 0, explain: 'how old = 多大年龄。' },
+          { q: '“I’m nine.” 意思是？', key: 'I’m nine.', options: ['我九岁。', '我是九。', '数字九。'], answer: 0, explain: "I'm = I am。" },
+          { q: '“count” 是？', key: 'count', options: ['数数', '数字', '多少'], answer: 0, explain: 'count = 数数。' },
         ],
       },
       {
@@ -522,9 +526,9 @@ export const eng3aUnits: EngUnit[] = [
           zh: '《数数歌》：边唱边数到八。',
         },
         exercise: [
-          { q: '“Chinese knot” 是？', options: ['中国结', '小鸟', '绳子'], answer: 0, explain: '中国结是传统手工艺品。' },
-          { q: '“hungry” 意思是？', options: ['饥饿的', '美丽的', '惊讶的'], answer: 0, explain: 'hungry = 饿。' },
-          { q: '“baby” 是？', options: ['幼崽；雏鸟', '蛋', '鸟'], answer: 0, explain: 'baby = 小宝宝/雏鸟。' },
+          { q: '“Chinese knot” 是？', key: 'Chinese knot', options: ['中国结', '小鸟', '绳子'], answer: 0, explain: '中国结是传统手工艺品。' },
+          { q: '“hungry” 意思是？', key: 'hungry', options: ['饥饿的', '美丽的', '惊讶的'], answer: 0, explain: 'hungry = 饿。' },
+          { q: '“baby” 是？', key: 'baby', options: ['幼崽；雏鸟', '蛋', '鸟'], answer: 0, explain: 'baby = 小宝宝/雏鸟。' },
         ],
       },
       {
@@ -534,9 +538,9 @@ export const eng3aUnits: EngUnit[] = [
         topic: 'Practice',
         emoji: '✏️',
         exercise: [
-          { q: '“beautiful” 是？', options: ['美丽的', '饥饿的', '仅仅'], answer: 0, explain: 'beautiful = 美丽的。' },
-          { q: '“How many eggs?” 问的是？', options: ['多少个蛋？', '什么颜色？', '你几岁？'], answer: 0, explain: 'egg = 蛋。' },
-          { q: '“amazing” 意思是？', options: ['令人惊讶的', '环绕', '制作'], answer: 0, explain: 'amazing = 令人惊叹的。' },
+          { q: '“beautiful” 是？', key: 'beautiful', options: ['美丽的', '饥饿的', '仅仅'], answer: 0, explain: 'beautiful = 美丽的。' },
+          { q: '“How many eggs?” 问的是？', key: 'How many eggs?', options: ['多少个蛋？', '什么颜色？', '你几岁？'], answer: 0, explain: 'egg = 蛋。' },
+          { q: '“amazing” 意思是？', key: 'amazing', options: ['令人惊讶的', '环绕', '制作'], answer: 0, explain: 'amazing = 令人惊叹的。' },
         ],
       },
     ],
@@ -572,9 +576,9 @@ export const eng3aUnits: EngUnit[] = [
           { en: 'my', zh: '我的', emoji: '🤚' },
         ],
         exercise: [
-          { q: '“father” 是？', options: ['爸爸', '妈妈', '哥哥'], answer: 0, explain: 'father = 爸爸（= dad）。' },
-          { q: '“grandma” 是？', options: ['祖母；外祖母', '祖父', '姐姐'], answer: 0, explain: 'grandma = 奶奶/外婆。' },
-          { q: '“This is my mother.” 意思是？', options: ['这是我的妈妈。', '这是我的爸爸。', '我的妈妈。'], answer: 0, explain: 'mother = 妈妈。' },
+          { q: '“father” 是？', key: 'father', options: ['爸爸', '妈妈', '哥哥'], answer: 0, explain: 'father = 爸爸（= dad）。' },
+          { q: '“grandma” 是？', key: 'grandma', options: ['祖母；外祖母', '祖父', '姐姐'], answer: 0, explain: 'grandma = 奶奶/外婆。' },
+          { q: '“This is my mother.” 意思是？', key: 'This is my mother.', options: ['这是我的妈妈。', '这是我的爸爸。', '我的妈妈。'], answer: 0, explain: 'mother = 妈妈。' },
         ],
       },
       {
@@ -593,9 +597,9 @@ export const eng3aUnits: EngUnit[] = [
         ],
         letters: ['Ww', 'Xx', 'Yy', 'Zz'],
         exercise: [
-          { q: '“He’s my brother.” 意思是？', options: ['他是我的弟弟。', '她是我的妹妹。', '这是我的弟弟。'], answer: 0, explain: 'He = 他。' },
-          { q: '“She’s my sister.” 中的 She 指？', options: ['她', '他', '它'], answer: 0, explain: 'She = 她。' },
-          { q: '“We’re family!” 意思是？', options: ['我们是一家人！', '这是我的家。', '我爱家人。'], answer: 0, explain: "We're = We are。" },
+          { q: '“He’s my brother.” 意思是？', key: 'He’s my brother.', options: ['他是我的弟弟。', '她是我的妹妹。', '这是我的弟弟。'], answer: 0, explain: 'He = 他。' },
+          { q: '“She’s my sister.” 中的 She 指？', key: 'She’s my sister.', options: ['她', '他', '它'], answer: 0, explain: 'She = 她。' },
+          { q: '“We’re family!” 意思是？', key: 'We’re family!', options: ['我们是一家人！', '这是我的家。', '我爱家人。'], answer: 0, explain: "We're = We are。" },
         ],
       },
       {
@@ -625,9 +629,9 @@ export const eng3aUnits: EngUnit[] = [
           zh: '《家庭歌》：唱出家庭成员。',
         },
         exercise: [
-          { q: '“photo” 是？', options: ['照片', '故事', '帽子'], answer: 0, explain: 'photo = 照片。' },
-          { q: '“Where’s the dog?” 意思是？', options: ['狗在哪里？', '狗是什么？', '这是狗。'], answer: 0, explain: 'where = 在哪里。' },
-          { q: '“Don’t worry.” 意思是？', options: ['别担心。', '快点。', '我爱你。'], answer: 0, explain: "don't = 不要；worry = 担心。" },
+          { q: '“photo” 是？', key: 'photo', options: ['照片', '故事', '帽子'], answer: 0, explain: 'photo = 照片。' },
+          { q: '“Where’s the dog?” 意思是？', key: 'Where’s the dog?', options: ['狗在哪里？', '狗是什么？', '这是狗。'], answer: 0, explain: 'where = 在哪里。' },
+          { q: '“Don’t worry.” 意思是？', key: 'Don’t worry.', options: ['别担心。', '快点。', '我爱你。'], answer: 0, explain: "don't = 不要；worry = 担心。" },
         ],
       },
       {
@@ -637,9 +641,9 @@ export const eng3aUnits: EngUnit[] = [
         topic: 'Practice',
         emoji: '✏️',
         exercise: [
-          { q: '“love” 是？', options: ['爱，关爱', '担心', '故事'], answer: 0, explain: 'love = 爱。' },
-          { q: '“on the box” 意思是？', options: ['在盒子上', '在盒子里面', '盒子'], answer: 0, explain: 'on = 在……上面。' },
-          { q: '“come on” 意思是？', options: ['快点；加油', '别担心', '照片'], answer: 0, explain: 'come on = 快点/加油。' },
+          { q: '“love” 是？', key: 'love', options: ['爱，关爱', '担心', '故事'], answer: 0, explain: 'love = 爱。' },
+          { q: '“on the box” 意思是？', key: 'on the box', options: ['在盒子上', '在盒子里面', '盒子'], answer: 0, explain: 'on = 在……上面。' },
+          { q: '“come on” 意思是？', key: 'come on', options: ['快点；加油', '别担心', '照片'], answer: 0, explain: 'come on = 快点/加油。' },
         ],
       },
     ],
@@ -675,9 +679,9 @@ export const eng3aUnits: EngUnit[] = [
           { en: 'bed', zh: '床', emoji: '🛏️' },
         ],
         exercise: [
-          { q: '“living room” 是？', options: ['客厅', '卧室', '厨房'], answer: 0, explain: 'living room = 客厅。' },
-          { q: '“bedroom” 是？', options: ['卧室', '浴室', '餐厅'], answer: 0, explain: 'bed = 床；bedroom = 卧室。' },
-          { q: '“bathroom” 是？', options: ['浴室，卫生间', '厨房', '客厅'], answer: 0, explain: 'bath = 洗澡；bathroom = 浴室。' },
+          { q: '“living room” 是？', key: 'living room', options: ['客厅', '卧室', '厨房'], answer: 0, explain: 'living room = 客厅。' },
+          { q: '“bedroom” 是？', key: 'bedroom', options: ['卧室', '浴室', '餐厅'], answer: 0, explain: 'bed = 床；bedroom = 卧室。' },
+          { q: '“bathroom” 是？', key: 'bathroom', options: ['浴室，卫生间', '厨房', '客厅'], answer: 0, explain: 'bath = 洗澡；bathroom = 浴室。' },
         ],
       },
       {
@@ -708,9 +712,9 @@ export const eng3aUnits: EngUnit[] = [
           { speaker: 'B', en: 'It’s on the table.', zh: '它在桌子上面。' },
         ],
         exercise: [
-          { q: '“under the chair” 意思是？', options: ['在椅子下面', '在椅子上面', '椅子'], answer: 0, explain: 'under = 在……下面。' },
-          { q: '“Where’s the cat?” 问的是？', options: ['猫在哪里？', '猫是什么？', '这是猫。'], answer: 0, explain: 'where = 在哪里。' },
-          { q: '“table” 是？', options: ['桌子', '床', '球'], answer: 0, explain: 'table = 桌子。' },
+          { q: '“under the chair” 意思是？', key: 'under the chair', options: ['在椅子下面', '在椅子上面', '椅子'], answer: 0, explain: 'under = 在……下面。' },
+          { q: '“Where’s the cat?” 问的是？', key: 'Where’s the cat?', options: ['猫在哪里？', '猫是什么？', '这是猫。'], answer: 0, explain: 'where = 在哪里。' },
+          { q: '“table” 是？', key: 'table', options: ['桌子', '床', '球'], answer: 0, explain: 'table = 桌子。' },
         ],
       },
       {
@@ -740,9 +744,9 @@ export const eng3aUnits: EngUnit[] = [
           zh: '《家之歌》：唱出家里的各个房间。',
         },
         exercise: [
-          { q: '“share” 意思是？', options: ['共用；分享', '放', '喜欢'], answer: 0, explain: 'share = 分享。' },
-          { q: '“under” 是？', options: ['在……下面', '在……上面', '全部'], answer: 0, explain: 'under = 在……下面。' },
-          { q: '“I like my home.” 意思是？', options: ['我喜欢我的家。', '这是我的家。', '我的家。'], answer: 0, explain: 'like = 喜欢。' },
+          { q: '“share” 意思是？', key: 'share', options: ['共用；分享', '放', '喜欢'], answer: 0, explain: 'share = 分享。' },
+          { q: '“under” 是？', key: 'under', options: ['在……下面', '在……上面', '全部'], answer: 0, explain: 'under = 在……下面。' },
+          { q: '“I like my home.” 意思是？', key: 'I like my home.', options: ['我喜欢我的家。', '这是我的家。', '我的家。'], answer: 0, explain: 'like = 喜欢。' },
         ],
       },
       {
@@ -752,9 +756,9 @@ export const eng3aUnits: EngUnit[] = [
         topic: 'Practice',
         emoji: '✏️',
         exercise: [
-          { q: '“lucky” 是？', options: ['幸运的', '甜蜜的', '到处'], answer: 0, explain: 'lucky = 幸运的。' },
-          { q: '“all around” 意思是？', options: ['处处，到处', '全部', '游戏'], answer: 0, explain: 'all around = 处处/到处。' },
-          { q: '“cooking” 是？', options: ['做饭', '跑', '太阳'], answer: 0, explain: 'cook = 烹饪；cooking = 做饭。' },
+          { q: '“lucky” 是？', key: 'lucky', options: ['幸运的', '甜蜜的', '到处'], answer: 0, explain: 'lucky = 幸运的。' },
+          { q: '“all around” 意思是？', key: 'all around', options: ['处处，到处', '全部', '游戏'], answer: 0, explain: 'all around = 处处/到处。' },
+          { q: '“cooking” 是？', key: 'cooking', options: ['做饭', '跑', '太阳'], answer: 0, explain: 'cook = 烹饪；cooking = 做饭。' },
         ],
       },
     ],

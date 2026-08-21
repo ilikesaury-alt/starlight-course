@@ -10,15 +10,17 @@ export default function ChineseUnit() {
   const unit = getUnit(unitId)
   const reciteCheckins = useCourseStore((s) => s.reciteCheckins)
   const chineseQuiz = useCourseStore((s) => s.chineseQuiz)
+  const completed = useCourseStore((s) => s.completedChinese)
 
   const mcStyle = moduleThemeVars(unit?.theme ?? { color: '#dc2626', colorSoft: '#fee2e2' })
 
   const stats = useMemo(() => {
-    if (!unit) return { recited: 0, quizzed: 0 }
+    if (!unit) return { recited: 0, quizzed: 0, done: 0 }
     const recited = unit.lessons.filter((l) => (reciteCheckins[l.slug]?.length ?? 0) > 0).length
     const quizzed = unit.lessons.filter((l) => chineseQuiz[l.slug]).length
-    return { recited, quizzed }
-  }, [unit, reciteCheckins, chineseQuiz])
+    const done = unit.lessons.filter((l) => completed.includes(l.slug)).length
+    return { recited, quizzed, done }
+  }, [unit, reciteCheckins, chineseQuiz, completed])
 
   if (!unit) {
     return (
@@ -41,6 +43,7 @@ export default function ChineseUnit() {
 
       <div className="cn-unit-stat" style={mcStyle}>
         <span>📖 {unit.lessons.length} 课</span>
+        <span>🎓 已学完 {stats.done}</span>
         <span>✅ 已背 {stats.recited}</span>
         <span>📝 已测 {stats.quizzed}</span>
       </div>
@@ -68,6 +71,7 @@ export default function ChineseUnit() {
                   </div>
                 </div>
                 <div className="cn-lesson-status">
+                  {completed.includes(l.slug) && <span className="cn-done">🎓学</span>}
                   {recited && <span className="cn-done">✅背</span>}
                   {quiz && <span className="cn-done">📝测</span>}
                   <span className="cn-lesson-arrow">›</span>

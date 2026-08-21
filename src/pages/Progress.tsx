@@ -19,12 +19,14 @@ export default function Progress() {
   const completedStories = useCourseStore((s) => s.completedStories)
   const reciteCheckins = useCourseStore((s) => s.reciteCheckins)
   const eng3aRecite = useCourseStore((s) => s.eng3aRecite)
+  const completedChinese = useCourseStore((s) => s.completedChinese)
+  const completedEng3a = useCourseStore((s) => s.completedEng3a)
   const todayDue = useCourseStore((s) => s.getTodayDueCount())
   const resetAll = useCourseStore((s) => s.resetAll)
   const [showReset, setShowReset] = useState(false)
 
-  const chineseDone = Object.keys(reciteCheckins).filter((k) => (reciteCheckins[k]?.length ?? 0) > 0).length
-  const eng3aDone = Object.keys(eng3aRecite).filter((k) => (eng3aRecite[k]?.length ?? 0) > 0).length
+  const chineseRecited = Object.keys(reciteCheckins).filter((k) => (reciteCheckins[k]?.length ?? 0) > 0).length
+  const eng3aRead = Object.keys(eng3aRecite).filter((k) => (eng3aRecite[k]?.length ?? 0) > 0).length
   const flyguyDone = flyGuyStories.filter((s) => completedStories.includes(s.slug)).length
   const rocketgirlDone = rocketGirlStories.filter((s) => completedStories.includes(s.slug)).length
 
@@ -40,8 +42,8 @@ export default function Progress() {
         : `已学 ${slDone}/${slTotal} 课`,
       total: slTotal, done: slDone,
     },
-    { id: 'chinese', to: '/chinese', emoji: '📚', name: '三年级上册语文', status: `已背 ${chineseDone}/${totalChineseLessons} 课`, total: totalChineseLessons, done: chineseDone },
-    { id: 'eng3a', to: '/eng3a', emoji: '📘', name: '三年级上册英语', status: `已读 ${eng3aDone}/${totalEngLessons} 课`, total: totalEngLessons, done: eng3aDone },
+    { id: 'chinese', to: '/chinese', emoji: '📚', name: '三年级上册语文', status: `已学完 ${completedChinese.length}/${totalChineseLessons} 课 · 已背 ${chineseRecited} 课`, total: totalChineseLessons, done: completedChinese.length },
+    { id: 'eng3a', to: '/eng3a', emoji: '📘', name: '三年级上册英语', status: `已学完 ${completedEng3a.length}/${totalEngLessons} 课 · 已读 ${eng3aRead} 课`, total: totalEngLessons, done: completedEng3a.length },
     { id: 'flyguy', to: '/flyguy', emoji: '🐝', name: 'Fly Guy 绘本闯关', status: `已通关 ${flyguyDone}/${flyGuyStoryCount} 关`, total: flyGuyStoryCount, done: flyguyDone },
     { id: 'rocketgirl', to: '/rocketgirl', emoji: '🚀', name: 'Rocket Girl 闯关', status: `已通关 ${rocketgirlDone}/${rocketGirlStoryCount} 关`, total: rocketGirlStoryCount, done: rocketgirlDone },
   ]

@@ -10,15 +10,17 @@ export default function Eng3aUnit() {
   const unit = getEngUnit(unitId)
   const recite = useCourseStore((s) => s.eng3aRecite)
   const quiz = useCourseStore((s) => s.eng3aQuiz)
+  const completed = useCourseStore((s) => s.completedEng3a)
 
   const mcStyle = moduleThemeVars(unit?.theme ?? { color: '#2563eb', colorSoft: '#dbeafe' })
 
   const stats = useMemo(() => {
-    if (!unit) return { read: 0, quizzed: 0 }
+    if (!unit) return { read: 0, quizzed: 0, done: 0 }
     const read = unit.lessons.filter((l) => (recite[l.slug]?.length ?? 0) > 0).length
     const quizzed = unit.lessons.filter((l) => quiz[l.slug]).length
-    return { read, quizzed }
-  }, [unit, recite, quiz])
+    const done = unit.lessons.filter((l) => completed.includes(l.slug)).length
+    return { read, quizzed, done }
+  }, [unit, recite, quiz, completed])
 
   if (!unit) {
     return (
@@ -45,6 +47,7 @@ export default function Eng3aUnit() {
 
       <div className="cn-unit-stat" style={mcStyle}>
         <span>📖 {unit.lessons.length} 课</span>
+        <span>🎓 已学完 {stats.done}</span>
         <span>✅ 已读 {stats.read}</span>
         <span>📝 已测 {stats.quizzed}</span>
       </div>
@@ -75,6 +78,7 @@ export default function Eng3aUnit() {
                   </div>
                 </div>
                 <div className="cn-lesson-status">
+                  {completed.includes(l.slug) && <span className="cn-done">🎓学</span>}
                   {read && <span className="cn-done">✅读</span>}
                   {q && <span className="cn-done">📝测</span>}
                   <span className="cn-lesson-arrow">›</span>

@@ -50,6 +50,13 @@ interface CourseStore {
   /** 自测成绩:lesson slug -> 最近一次 { score, total, date(dayStamp) } */
   eng3aQuiz: Record<string, { score: number; total: number; date: number }>
 
+  // 课级「学完」记录(与打卡/成绩解耦):自测 ≥80% 自动点亮,或手动标记。
+  // 与 Starlight 的 lessonCompleted 对齐,让全部模块共享同一套完成语义。
+  /** 语文已完成课 slug 列表 */
+  completedChinese: string[]
+  /** 英语3A 已完成课 slug 列表 */
+  completedEng3a: string[]
+
   // 动作
   markMastered: (en: string) => void
   unmarkMastered: (en: string) => void
@@ -72,6 +79,10 @@ interface CourseStore {
   markEng3aRecite: (slug: string) => void
   /** 三年级英语自测:记录最近一次成绩 */
   markEng3aQuiz: (slug: string, score: number, total: number) => void
+  /** 标记语文某课已学完(自测 ≥80% 自动触发 / 手动按钮触发) */
+  markChineseDone: (slug: string) => void
+  /** 标记英语3A 某课已学完(自测 ≥80% 自动触发 / 手动按钮触发) */
+  markEng3aDone: (slug: string) => void
   resetAll: () => void
 
   // SRS 智能复习相关
@@ -106,6 +117,8 @@ export const useCourseStore = create<CourseStore>()(
       chineseQuiz: {},
       eng3aRecite: {},
       eng3aQuiz: {},
+      completedChinese: [],
+      completedEng3a: [],
 
       markMastered: (en) =>
         set((s) =>
@@ -221,6 +234,20 @@ export const useCourseStore = create<CourseStore>()(
           },
         })),
 
+      markChineseDone: (slug) =>
+        set((s) =>
+          s.completedChinese.includes(slug)
+            ? s
+            : { completedChinese: [...s.completedChinese, slug] }
+        ),
+
+      markEng3aDone: (slug) =>
+        set((s) =>
+          s.completedEng3a.includes(slug)
+            ? s
+            : { completedEng3a: [...s.completedEng3a, slug] }
+        ),
+
       resetAll: () =>
         set({
           masteredWords: [],
@@ -235,6 +262,8 @@ export const useCourseStore = create<CourseStore>()(
           chineseQuiz: {},
           eng3aRecite: {},
           eng3aQuiz: {},
+          completedChinese: [],
+          completedEng3a: [],
         }),
 
       // ============ SRS ============
@@ -315,7 +344,7 @@ export const useCourseStore = create<CourseStore>()(
     }),
     {
       name: 'starlight-course',
-      version: 5,
+      version: 6,
       // 只持久化数据字段,避免函数/瞬态状态被写入 localStorage
       partialize: (state) => ({
         masteredWords: state.masteredWords,
@@ -330,6 +359,8 @@ export const useCourseStore = create<CourseStore>()(
         chineseQuiz: state.chineseQuiz,
         eng3aRecite: state.eng3aRecite,
         eng3aQuiz: state.eng3aQuiz,
+        completedChinese: state.completedChinese,
+        completedEng3a: state.completedEng3a,
       }),
       // 迁移：补上模块维度字段 + 拆分 completedPreviews 语义
       migrate: (persistedState: unknown, version: number) => {
@@ -339,8 +370,9 @@ export const useCourseStore = create<CourseStore>()(
         const today = dayStamp()
         // 已有 masteredWords 自动升级为 box 3(掌握级),下次复习为 7 天后
         const mastered: string[] = s.masteredWords ?? []
-        const existingCards: Record<string, any> = (s.srsCards ?? {}) as Record<string, any>
-        const srsCards: Record<string, any> = { ...existingCards }
+        type LegacyCard = Partial<SrsCard>
+        const existingCards = (s.srsCards ?? {}) as Record<string, LegacyCard>
+        const srsCards: Record<string, LegacyCard> = { ...existingCards }
         for (const en of mastered) {
           if (!srsCards[en]) {
             srsCards[en] = {
@@ -389,6 +421,8 @@ export const useCourseStore = create<CourseStore>()(
           completedPreviews,
           completedStories,
           lessonCompleted,
+          completedChinese: s.completedChinese ?? [],
+          completedEng3a: s.completedEng3a ?? [],
         } as CourseStore
       },
     }

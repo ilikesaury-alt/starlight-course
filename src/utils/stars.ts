@@ -6,3 +6,8 @@ export function quizStars(correct: number, total: number): number {
   if (correct >= total * 0.8) return 3
   return 1
 }
+
+/** 统一完成判定：正确率 ≥80% 视为通过(自动点亮「学完」),与星规同一阈值。 */
+export function isPassed(correct: number, total: number): boolean {
+  return total > 0 && correct >= Math.ceil(total * 0.8)
+}
