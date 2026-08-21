@@ -29,6 +29,14 @@ export default defineConfig({
   },
   build: {
     sourcemap: 'hidden',
+    rollupOptions: {
+      output: {
+        // 框架代码单独分包:业务页面迭代时 vendor chunk 哈希不变,客户端缓存命中率更高
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'react-router-dom', 'zustand', 'framer-motion', 'lucide-react'],
+        },
+      },
+    },
   },
   plugins: [
     react({

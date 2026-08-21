@@ -1,10 +1,63 @@
 import { Link } from 'react-router-dom'
-import { flyGuyStoryCount, flyGuyWordCount } from '@/data/flyguy'
-import { totalEngLessons, eng3aWordCount } from '@/data/eng3a'
+import { flyGuyStories, flyGuyStoryCount, flyGuyWordCount } from '@/data/flyguy'
+import { rocketGirlStories } from '@/data/rocketgirl'
+import { totalEngLessons, eng3aWordCount, eng3aUnits } from '@/data/eng3a'
+import { chineseUnits } from '@/data/chinese'
+import { modules as starlightModules } from '@/data/starlight'
+import { useCourseStore } from '@/store/useCourseStore'
+import type { ModuleId } from '@/data/modules'
 
 // 首页与「课程」页共用的模块入口宫格 + 快捷入口。
-// 抽成组件避免两处重复维护相同的 5 个模块入口。
+// 每张卡片带实时徽章：模块进度百分比 + 今日 SRS 到期数，让复习提醒在所有入口可见。
 export default function CourseEntries() {
+  const completedPreviews = useCourseStore((s) => s.completedPreviews)
+  const completedStories = useCourseStore((s) => s.completedStories)
+  const completedChinese = useCourseStore((s) => s.completedChinese)
+  const completedEng3a = useCourseStore((s) => s.completedEng3a)
+  const getTodayDueCount = useCourseStore((s) => s.getTodayDueCount)
+
+  const pct = (done: number, total: number) =>
+    total > 0 ? Math.round((done / total) * 100) : 0
+
+  const fgSlugs = new Set(flyGuyStories.map((s) => s.slug))
+  const rgSlugs = new Set(rocketGirlStories.map((s) => s.slug))
+  const chineseLessonTotal = chineseUnits.reduce((n, u) => n + u.lessons.length, 0)
+  const eng3aLessonTotal = eng3aUnits.reduce((n, u) => n + u.lessons.length, 0)
+
+  const badges = {
+    chinese: {
+      percent: pct(completedChinese.length, chineseLessonTotal),
+      due: getTodayDueCount('chinese'),
+    },
+    eng3a: {
+      percent: pct(completedEng3a.length, eng3aLessonTotal),
+      due: getTodayDueCount('eng3a'),
+    },
+    starlight: {
+      percent: pct(completedPreviews.length, starlightModules.length),
+      due: getTodayDueCount('starlight'),
+    },
+    rocketgirl: {
+      percent: pct(completedStories.filter((s) => rgSlugs.has(s)).length, rocketGirlStories.length),
+      due: getTodayDueCount('rocketgirl'),
+    },
+    flyguy: {
+      percent: pct(completedStories.filter((s) => fgSlugs.has(s)).length, flyGuyStories.length),
+      due: getTodayDueCount('flyguy'),
+    },
+  }
+
+  const Badge = ({ id }: { id: ModuleId }) => {
+    const b = badges[id as keyof typeof badges]
+    if (!b) return null
+    return (
+      <span className="home-entry-badge">
+        <span>📊 {b.percent}%</span>
+        {b.due > 0 && <span className="home-entry-due">🧠 {b.due} 待复习</span>}
+      </span>
+    )
+  }
+
   return (
     <>
       <div className="home-entries">
@@ -13,6 +66,7 @@ export default function CourseEntries() {
           <div className="cn-home-body">
             <div className="cn-home-title">三年级上册语文</div>
             <div className="cn-home-sub">人教版必背 · 8 单元 / 古诗词·课文·生字·日积月累</div>
+            <Badge id="chinese" />
           </div>
           <span className="cn-home-arrow">›</span>
         </Link>
@@ -21,6 +75,7 @@ export default function CourseEntries() {
           <div className="en3-home-body">
             <div className="en3-home-title">三年级上册英语</div>
             <div className="en3-home-sub">外研版（新标准 2024）· 6 单元 / {totalEngLessons} 课 / {eng3aWordCount} 词 · 听说启蒙</div>
+            <Badge id="eng3a" />
           </div>
           <span className="en3-home-arrow">›</span>
         </Link>
@@ -29,6 +84,7 @@ export default function CourseEntries() {
           <div className="sl-home-body">
             <div className="sl-home-title">Starlight 主课</div>
             <div className="sl-home-sub">牛津 Starlight 预备级 · 12 单元 / 96 课 / 全教材单词</div>
+            <Badge id="starlight" />
           </div>
           <span className="sl-home-arrow">›</span>
         </Link>
@@ -37,6 +93,7 @@ export default function CourseEntries() {
           <div className="rg-home-body">
             <div className="rg-home-title">Rocket Girl 英语闯关</div>
             <div className="rg-home-sub">宝贝最爱的动画片主题课 · 108 个故事关卡</div>
+            <Badge id="rocketgirl" />
           </div>
           <span className="rg-home-arrow">›</span>
         </Link>
@@ -45,6 +102,7 @@ export default function CourseEntries() {
           <div className="fg-home-body">
             <div className="fg-home-title">Fly Guy 英语绘本闯关</div>
             <div className="fg-home-sub">小男孩 Buzz 和宠物苍蝇的爆笑绘本 · {flyGuyStoryCount} 个故事 / {flyGuyWordCount} 词</div>
+            <Badge id="flyguy" />
           </div>
           <span className="fg-home-arrow">›</span>
         </Link>

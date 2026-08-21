@@ -12,9 +12,11 @@ npm run build        # Production build (tsc -b && vite build)
 npm run lint         # ESLint check
 npm run check        # TypeScript type check (no emit)
 npm run preview      # Preview production build on 0.0.0.0
+npm run test         # Vitest unit tests (see caveat below)
+npm run e2e          # Playwright E2E tests (tests/*.spec.ts)
 ```
 
-**No test framework exists** - project has no test scripts or test files.
+**Testing**: Unit tests use vitest (e.g. `src/data/srs.test.ts`); E2E uses Playwright (`tests/*.spec.ts`, `npm run e2e`). Caveat: `npm run test` (vitest) mistakenly collects `tests/*.spec.ts` and errors out — run unit tests with `npx vitest run src` instead.
 
 ## Architecture
 - **State**: Zustand store (`src/store/useCourseStore.ts`) with localStorage persistence
@@ -41,13 +43,16 @@ npm run preview      # Preview production build on 0.0.0.0
 - ESLint uses react-hooks and react-refresh plugins
 - `react-dev-locator` babel plugin included for development debugging
 - Speech synthesis uses browser API with Youdao TTS fallback (see `src/components/SpeakButton.tsx`)
+- Star rules: `src/utils/stars.ts` is the single source of truth — `quizStars` (all correct = 5, ≥80% = 3, participated = 1) and pass check (`isPassed`: ≥80%)
 
 ## File Structure
 ```
 src/
 ├── components/     # Layout, SpeakButton, SafeBoundary
 ├── pages/         # 14 page components (Home, Preview*, Review*, SmartReview, etc.)
+├── hooks/         # Shared React hooks (e.g. useSettleQuiz for unified quiz settle flow)
 ├── data/          # Course content (starlight.ts, lessons.ts) + SRS algorithm
+├── utils/         # stars.ts: app-wide star rules & completion checks
 └── store/         # Zustand state management
 ```
 

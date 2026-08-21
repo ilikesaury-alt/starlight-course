@@ -53,6 +53,21 @@
 // 菲教课堂用语入口：珊瑚粉主题（与老师对话场景呼应）
 @include home-entry('ph-home', var(--coral-soft), #fff1f2, var(--coral), #be185d, #9d174d, var(--coral), rgba(251, 113, 133, 0.25), rgba(251, 113, 133, 0.45));
 
+// 入口卡片进度/到期徽章（全部主题共用，挂在 -body 内）
+.home-entry-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 3px 10px;
+  border-radius: var(--r-pill);
+  background: rgba(255, 255, 255, 0.7);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  color: var(--ink-mute);
+  .home-entry-due { color: var(--no); }
+}
+
 // ---------- Rocket Girl / Fly Guy / Starlight 通用主题块 ----------
 .rg-progress-pill {
   text-align: center;
