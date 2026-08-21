@@ -7,7 +7,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import SpeakButton from '@/components/SpeakButton'
-import FcWord from '@/components/FcWord'
+import Flashcard from '@/components/Flashcard'
 import SafeBoundary from '@/components/SafeBoundary'
 import ConfirmDialog from '@/components/ConfirmDialog'
 import QuizEngine, { type QuizItem } from '@/components/QuizEngine'
@@ -16,11 +16,10 @@ import Breadcrumb from '@/components/Breadcrumb'
 import { getModule, STARLIGHT_THEME, type Sentence, type Word } from '@/data/starlight'
 import { getLessonBook } from '@/data/starlight-book'
 import { useCourseStore } from '@/store/useCourseStore'
+import { useSettleQuiz } from '@/hooks/useSettleQuiz'
 import { speakText } from '@/utils/speak'
 import { moduleThemeVars } from '@/utils/theme'
 import { buildClozeQuiz, buildListeningQuiz, buildWordQuiz } from '@/utils/bookQuiz'
-import { lookupZh, wordBase } from '@/utils/bookDict'
-import { quizStars } from '@/utils/stars'
 
 type Tab = 'vocab' | 'book' | 'quiz'
 
@@ -28,16 +27,17 @@ export default function LessonPreview() {
   const { unitId = '', lessonId = '' } = useParams()
   const mod = getModule(unitId)
   const seedCards = useCourseStore((s) => s.seedCards)
-  const addStars = useCourseStore((s) => s.addStars)
   const markQuizDone = useCourseStore((s) => s.markQuizDone)
   const markLessonDone = useCourseStore((s) => s.markLessonDone)
   const lessonCompleted = useCourseStore((s) => s.lessonCompleted)
-  const recordReview = useCourseStore((s) => s.recordReview)
-  const addWrongWord = useCourseStore((s) => s.addWrongWord)
   const [tab, setTab] = useState<Tab>('vocab')
   const [showLessonDone, setShowLessonDone] = useState(false)
-  // 一场测验内已结算过 SRS 的词集合:同一词被多题重复考时只结算一次,避免盒子抖动
-  const reviewedRef = useRef<Set<string>>(new Set())
+  // 统一结算编排:加星 + 错题入本 + SRS 记录(同词去重)
+  const { recordPick, restart, settle } = useSettleQuiz({
+    module: 'starlight',
+    from: mod ? `${mod.title} · Lesson ${lessonId}` : `Lesson ${lessonId}`,
+    fallbackEmoji: mod?.emoji,
+  })
 
   const lessons = mod?.lessons ?? []
   const lessonIdx = lessons.findIndex((l) => String(l.id) === lessonId)
@@ -195,36 +195,13 @@ export default function LessonPreview() {
                 <Link to="/smart" className="btn btn-soft">🧠 去复习</Link>
               </>
             }
-            onPick={({ en, correct }) => {
-              seedCards([en], 'starlight')
-              // 同词去重:cloze 挖空/干扰项可能让同一词在一场测验出现多次,
-              // 重复 recordReview 会来回升/降盒,导致 SRS 调度失真
-              if (reviewedRef.current.has(en)) return
-              reviewedRef.current.add(en)
-              recordReview(en, correct, 'starlight')
-            }}
-            onRestart={() => {
-              // 新一轮测验重新开始去重范围
-              reviewedRef.current = new Set()
-            }}
+            onPick={({ en, correct }) => recordPick(en, correct)}
+            onRestart={restart}
             onFinish={(correct, total, wrongEns) => {
-              const allRight = correct === total && total > 0
-              addStars(quizStars(correct, total))
-              markQuizDone(mod.slug)
-              // 闯关全对 ⇒ 自动标记本课完成
-              if (allRight) markLessonDone(mod.slug, lesson.id)
-              // 新一轮测验结束后清空去重范围
-              reviewedRef.current = new Set()
-              wrongEns.forEach((en) => {
-                const w = words.find((x) => x.en.toLowerCase() === en.toLowerCase())
-                addWrongWord({
-                  en: w?.en ?? en,
-                  // 词表里没有的课文词,用逐词词典兜底,避免错题本出现无释义裸词
-                  zh: w?.zh ?? lookupZh(wordBase(en)) ?? '',
-                  emoji: w?.emoji ?? mod.emoji,
-                  from: `${mod.title} · Lesson ${lesson.id}`,
-                  module: 'starlight',
-                })
+              settle(correct, total, wrongEns, words, () => {
+                markQuizDone(mod.slug)
+                // 闯关全对 ⇒ 自动标记本课完成
+                if (correct === total && total > 0) markLessonDone(mod.slug, lesson.id)
               })
             }}
           />
@@ -300,7 +277,6 @@ function VocabTab({ words, mcStyle }: { words: Word[]; mcStyle: React.CSSPropert
     }
     const cur = words[idx]
     if (cur) speakText(cur.en)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [idx, words])
 
   if (words.length === 0) {
@@ -313,27 +289,16 @@ function VocabTab({ words, mcStyle }: { words: Word[]; mcStyle: React.CSSPropert
 
   return (
     <>
-      <div className="flashcard" style={mcStyle}>
-        <div className="fc-emoji">{w.emoji}</div>
-        <div className="fc-word-row">
-          <FcWord text={w.en} lang="en" />
-        </div>
-        <div className="fc-audio">
-          <SpeakButton text={w.en} label={w.en} />
-          <SpeakButton text={w.en} label={`${w.en} 慢速`} slow />
-        </div>
-        {w.ipa && <div className="fc-ipa">{w.ipa}</div>}
-        {showZh ? (
-          <div className="fc-zh" onClick={() => setShowZh(false)} title="点击隐藏中文">
-            {w.zh}
-          </div>
-        ) : (
-          <button type="button" className="fc-reveal" onClick={() => setShowZh(true)}>
-            👀 显示中文
-          </button>
-        )}
-        {showZh &&
-          (selfChecked.has(w.en) ? (
+      <Flashcard
+        emoji={w.emoji}
+        en={w.en}
+        zh={w.zh}
+        ipa={w.ipa}
+        showZh={showZh}
+        onToggleZh={() => setShowZh((v) => !v)}
+        mcStyle={mcStyle}
+        footer={
+          selfChecked.has(w.en) ? (
             <p className="fc-self-done">⭐ 已记录，继续加油！</p>
           ) : (
             <div className="fc-self-check">
@@ -352,8 +317,9 @@ function VocabTab({ words, mcStyle }: { words: Word[]; mcStyle: React.CSSPropert
                 ✅ 我会了
               </button>
             </div>
-          ))}
-      </div>
+          )
+        }
+      />
 
       <div className="fc-progress">{idx + 1} / {words.length}</div>
       <div className="fc-dots">

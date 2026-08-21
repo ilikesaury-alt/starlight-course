@@ -2,17 +2,21 @@
 // 两个模块的差异（主题色、文案、emoji、底部导航布局）全部通过 props 注入，
 // 页面本身不重复实现任何逻辑。新增故事类模块 = 在 data 层注册 + 写一个 ~15 行薄壳。
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import SpeakButton from '@/components/SpeakButton'
+import Flashcard from '@/components/Flashcard'
 import SafeBoundary from '@/components/SafeBoundary'
+import ConfirmDialog from '@/components/ConfirmDialog'
 import QuizEngine from '@/components/QuizEngine'
 import BookTextView from '@/components/BookTextView'
 import { useCourseStore } from '@/store/useCourseStore'
+import { useSettleQuiz } from '@/hooks/useSettleQuiz'
 import { speakText } from '@/utils/speak'
 import { moduleThemeVars } from '@/utils/theme'
 import { cleanForSpeak } from '@/utils/bookDict'
 import { buildClozeQuiz, buildWordQuiz } from '@/utils/bookQuiz'
+import { isPassed } from '@/utils/stars'
 import type { ModuleId } from '@/data/modules'
 import type { Story, StoryWord } from '@/data/story-types'
 
@@ -41,13 +45,21 @@ export default function StoryPage({
   const story = getStory(slug)
 
   const seedCards = useCourseStore((s) => s.seedCards)
-  const addStars = useCourseStore((s) => s.addStars)
   const markStoryDone = useCourseStore((s) => s.markStoryDone)
-  const recordReview = useCourseStore((s) => s.recordReview)
-  const addWrongWord = useCourseStore((s) => s.addWrongWord)
+  const completedStories = useCourseStore((s) => s.completedStories)
+  // 统一结算编排:加星(quizStars 星规) + 错题全量入本 + SRS 记录(同词去重),
+  // 与 Starlight 主课闯关保持同一套激励与错题漏斗
+  const { recordPick, restart, settle } = useSettleQuiz({
+    module: moduleId,
+    from: story?.title ?? slug,
+    fallbackEmoji: moduleEmoji,
+  })
+  const storyDone = story ? completedStories.includes(story.slug) : false
 
   const [tab, setTab] = useState<Tab>('vocab')
-  const words = story?.words ?? []
+  const [showStoryDone, setShowStoryDone] = useState(false)
+  // useMemo 保证引用稳定,供下方 quiz useMemo 依赖
+  const words = useMemo(() => story?.words ?? [], [story])
 
   // 进入故事:把单词种子化进 SRS 调度池
   useEffect(() => {
@@ -55,6 +67,14 @@ export default function StoryPage({
     seedCards(words.map((w) => w.en), moduleId)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [story?.slug])
+
+  // 出题:有绘本原文用挖空题,否则用词义题(必须在 early return 之前调用,保证 hooks 顺序稳定)
+  const quiz = useMemo(
+    () => (story && story.bookText && story.bookText.length > 0
+      ? buildClozeQuiz(story.bookText, { vocab: words, source: `《${story.title}》`, emoji: story.emoji })
+      : buildWordQuiz(words, stories.flatMap((s) => s.words))),
+    [story, stories, words]
+  )
 
   if (!story) {
     return (
@@ -64,13 +84,6 @@ export default function StoryPage({
       </div>
     )
   }
-
-  const quiz = useMemo(
-    () => (story.bookText && story.bookText.length > 0
-      ? buildClozeQuiz(story.bookText, { vocab: words, source: `《${story.title}》`, emoji: story.emoji })
-      : buildWordQuiz(words, stories.flatMap((s) => s.words))),
-    [story.slug]
-  )
 
   const quizBadge = story.bookText && story.bookText.length > 0
     ? '📖 绘本选词填空 · 读原文选一选'
@@ -85,6 +98,7 @@ export default function StoryPage({
   const resultLinks = (
     <>
       <Link to="/wrong" className="btn btn-soft">📋 看错题本</Link>
+      <Link to="/smart" className="btn btn-soft">🧠 去复习</Link>
       <Link to={basePath} className="btn btn-soft">{moduleEmoji} 返回故事列表</Link>
     </>
   )
@@ -123,17 +137,12 @@ export default function StoryPage({
             badgeText={quizBadge}
             resultTitle="闯关完成！"
             resultLinks={resultLinks}
-            onPick={({ en, correct }) => {
-              seedCards([en], moduleId)
-              recordReview(en, correct, moduleId)
-            }}
+            onPick={({ en, correct }) => recordPick(en, correct)}
+            onRestart={restart}
             onFinish={(correct, total, wrongEns) => {
-              const stars = correct === total ? correct + 5 : correct
-              addStars(stars)
-              markStoryDone(story.slug)
-              wrongEns.forEach((en) => {
-                const w = words.find((x) => x.en === en)
-                if (w) addWrongWord({ en: w.en, zh: w.zh, emoji: w.emoji ?? moduleEmoji, from: story.title, module: moduleId })
+              settle(correct, total, wrongEns, words, () => {
+                // 统一完成判定:≥80% 自动通关(与主课闯关/自学课自测同一口径)
+                if (isPassed(correct, total)) markStoryDone(story.slug)
               })
             }}
           />
@@ -151,6 +160,30 @@ export default function StoryPage({
           )}
         </div>
       </div>
+
+      {/* 关卡完成:闯关 ≥80% 自动标记,或手动点「本关完成」(与主课同一套完成语义) */}
+      <div style={{ textAlign: 'center', marginTop: '18px' }}>
+        {storyDone ? (
+          <p style={{ color: 'var(--ok)', fontWeight: 600 }}>✅ 本关已完成学习</p>
+        ) : (
+          <button type="button" className="btn btn-soft" onClick={() => setShowStoryDone(true)}>
+            ✅ 标记本关完成
+          </button>
+        )}
+      </div>
+      <ConfirmDialog
+        open={showStoryDone}
+        emoji="✅"
+        title="学完这一关了吗？"
+        message="标记后这一关就算通关啦，可以在故事列表里看到进度。"
+        confirmText="完成啦"
+        cancelText="再学一会儿"
+        onConfirm={() => {
+          markStoryDone(story.slug)
+          setShowStoryDone(false)
+        }}
+        onCancel={() => setShowStoryDone(false)}
+      />
     </div>
   )
 }
@@ -158,12 +191,17 @@ export default function StoryPage({
 function VocabTab({ words, mc }: { words: StoryWord[]; mc: React.CSSProperties }) {
   const [idx, setIdx] = useState(0)
   const [showZh, setShowZh] = useState(true)
+  // 首卡/首次进入不自动发音(等用户点击),与 LessonPreview 单词卡行为对齐
+  const firstSpeakRef = useRef(true)
   useEffect(() => { setIdx(0); setShowZh(true) }, [words])
 
   useEffect(() => {
+    if (firstSpeakRef.current) {
+      firstSpeakRef.current = false
+      return
+    }
     const cur = words[idx]
     if (cur) speakText(cur.en)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [idx, words])
 
   if (words.length === 0) return <div className="empty"><p>这一关还没有单词。</p></div>
@@ -174,32 +212,25 @@ function VocabTab({ words, mc }: { words: StoryWord[]; mc: React.CSSProperties }
 
   return (
     <>
-      <div className="flashcard" style={mc}>
-        <div className="fc-emoji">{w.emoji ?? '✨'}</div>
-        <div className="fc-word-row">
-          <button type="button" className="fc-word" onClick={() => speakText(w.en)}>{w.en}</button>
-          <SpeakButton text={w.en} label={w.en} />
-          <SpeakButton text={w.en} label={`${w.en} 慢速`} slow />
-        </div>
-        {showZh ? (
-          <div className="fc-zh" onClick={() => setShowZh(false)} title="点击隐藏中文">
-            {w.zh}
-          </div>
-        ) : (
-          <button type="button" className="fc-reveal" onClick={() => setShowZh(true)}>
-            👀 显示中文
-          </button>
-        )}
-        {w.sentence && (
-          <div className="rg-sentence">
-            <span className="rg-sentence-en">“{w.sentence}”</span>
-            <span onClick={(e) => e.stopPropagation()}>
-              <SpeakButton text={w.sentence} label="听例句" />
-            </span>
-            {w.sentenceZh && <span className="rg-sentence-zh">{w.sentenceZh}</span>}
-          </div>
-        )}
-      </div>
+      <Flashcard
+        emoji={w.emoji}
+        en={w.en}
+        zh={w.zh}
+        showZh={showZh}
+        onToggleZh={() => setShowZh((v) => !v)}
+        mcStyle={mc}
+        extra={
+          w.sentence && (
+            <div className="rg-sentence">
+              <span className="rg-sentence-en">“{w.sentence}”</span>
+              <span onClick={(e) => e.stopPropagation()}>
+                <SpeakButton text={w.sentence} label="听例句" />
+              </span>
+              {w.sentenceZh && <span className="rg-sentence-zh">{w.sentenceZh}</span>}
+            </div>
+          )
+        }
+      />
 
       <div className="fc-progress">{idx + 1} / {words.length}</div>
       <div className="fc-dots">
