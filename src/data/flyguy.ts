@@ -11,27 +11,13 @@
 //      不再按单词列句;无 bookText 的故事则回退显示学法句型。
 //   以上原文均仅作合理使用展示,不内置整本受版权保护的书。
 
-import type { BookTextChapter } from './story-types'
+import type { BookTextChapter, Story, StoryWord } from './story-types'
+import { makeEmojiPicker, type EmojiRule } from '@/utils/storyEmoji'
 
-export interface FGWord {
-  en: string
-  zh: string
-  sentence?: string
-  sentenceZh?: string
-  bookSentence?: string
-  bookSentenceZh?: string
-  emoji?: string
-}
+// FGWord/FGStory 与共享的 StoryWord/Story 结构完全一致;保留类型别名以兼容既有引用
+export type FGWord = StoryWord
 
-export interface FGStory {
-  id: number
-  slug: string
-  title: string
-  emoji: string
-  words: FGWord[]
-  // 绘本原文(整段、按章节顺序);存在时「绘本原文」视图优先展示它
-  bookText?: BookTextChapter[]
-}
+export type FGStory = Story
 
 export interface FGBook {
   title: string
@@ -45,62 +31,59 @@ export const FG_THEME = {
 
 // ---- 故事 emoji:按标题关键词匹配,否则按索引轮询活泼图标 ----
 // 每个故事用唯一关键词匹配专属图标;通用 /fly/ 兜底已移除,否则所有标题都会被兜底成 🐝
-const STORY_EMOJI_RULES: [RegExp, string][] = [
-  [/hi! fly guy/i, '🐝'],                 // #1 Hi! Fly Guy
-  [/super fly/i, '💥'],                   // #2 Super Fly Guy
-  [/shoo/i, '🍔'],                       // #3 Shoo, Fly Guy!
-  [/fly high/i, '🌤️'],                   // #4 Fly High, Fly Guy!
-  [/hooray/i, '🎉'],                     // #5 Hooray for Fly Guy!
-  [/i spy/i, '🫣'],                      // #6 I Spy Fly Guy!
-  [/fly girl|meets/i, '🤝'],             // #7 Fly Guy Meets Fly Girl
-  [/buzz boy/i, '🦸'],                   // #8 Buzz Boy and Fly Guy
-  [/flyswatter|swatter/i, '🪤'],         // #9 Fly Guy vs. the Flyswatter!
-  [/ride/i, '🚗'],                       // #10 Ride, Fly Guy, Ride!
-  [/in my soup|soup/i, '🍲'],            // #11 There's a Fly Guy in My Soup
-  [/franken/i, '👹'],                    // #12 Fly Guy and the Frankenfly
-  [/pet for fly guy|pet for/i, '🐾'],    // #13 A Pet for Fly Guy
-  [/prince fly guy|prince/i, '👑'],      // #14 Prince Fly Guy
-  [/old lady|swallowed/i, '👵'],         // #15 There Was an Old Lady Who Swallowed Fly Guy
-  [/amazing tricks|tricks/i, '🎩'],      // #16 Fly Guy's Amazing Tricks
-  [/ninja|christmas/i, '🥷'],            // #17 Fly Guy's Ninja Christmas
-  [/big family|family/i, '👪'],          // #18 Fly Guy's Big Family
-  [/alien/i, '👽'],                      // #19 Fly Guy and the Alienzz
-  [/50-foot|attack/i, '🗼'],             // #20 Attack of the 50-Foot Fly Guy!
-  [/sharks/i, '🦈'],                     // #21 Fly Guy Presents: Sharks
-  [/dinosaurs|dino/i, '🦕'],             // #22 Fly Guy Presents: Dinosaurs
+const STORY_EMOJI_RULES: EmojiRule[] = [
+  { test: /hi! fly guy/i, emoji: '🐝' },                 // #1 Hi! Fly Guy
+  { test: /super fly/i, emoji: '💥' },                   // #2 Super Fly Guy
+  { test: /shoo/i, emoji: '🍔' },                       // #3 Shoo, Fly Guy!
+  { test: /fly high/i, emoji: '🌤️' },                   // #4 Fly High, Fly Guy!
+  { test: /hooray/i, emoji: '🎉' },                     // #5 Hooray for Fly Guy!
+  { test: /i spy/i, emoji: '🫣' },                      // #6 I Spy Fly Guy!
+  { test: /fly girl|meets/i, emoji: '🤝' },             // #7 Fly Guy Meets Fly Girl
+  { test: /buzz boy/i, emoji: '🦸' },                   // #8 Buzz Boy and Fly Guy
+  { test: /flyswatter|swatter/i, emoji: '🪤' },         // #9 Fly Guy vs. the Flyswatter!
+  { test: /ride/i, emoji: '🚗' },                       // #10 Ride, Fly Guy, Ride!
+  { test: /in my soup|soup/i, emoji: '🍲' },            // #11 There's a Fly Guy in My Soup
+  { test: /franken/i, emoji: '👹' },                    // #12 Fly Guy and the Frankenfly
+  { test: /pet for fly guy|pet for/i, emoji: '🐾' },    // #13 A Pet for Fly Guy
+  { test: /prince fly guy|prince/i, emoji: '👑' },      // #14 Prince Fly Guy
+  { test: /old lady|swallowed/i, emoji: '👵' },         // #15 There Was an Old Lady Who Swallowed Fly Guy
+  { test: /amazing tricks|tricks/i, emoji: '🎩' },      // #16 Fly Guy's Amazing Tricks
+  { test: /ninja|christmas/i, emoji: '🥷' },            // #17 Fly Guy's Ninja Christmas
+  { test: /big family|family/i, emoji: '👪' },          // #18 Fly Guy's Big Family
+  { test: /alien/i, emoji: '👽' },                      // #19 Fly Guy and the Alienzz
+  { test: /50-foot|attack/i, emoji: '🗼' },             // #20 Attack of the 50-Foot Fly Guy!
+  { test: /sharks/i, emoji: '🦈' },                     // #21 Fly Guy Presents: Sharks
+  { test: /dinosaurs|dino/i, emoji: '🦕' },             // #22 Fly Guy Presents: Dinosaurs
 ]
 const STORY_EMOJI_FALLBACK = ['🐝', '🟢', '✨', '🌟', '🍀', '💚', '🪁', '🐝']
 
+const matchStoryEmoji = makeEmojiPicker(STORY_EMOJI_RULES, STORY_EMOJI_FALLBACK)
+
 function pickStoryEmoji(title: string, idx: number): string {
-  for (const [re, emoji] of STORY_EMOJI_RULES) {
-    if (re.test(title)) return emoji
-  }
-  return STORY_EMOJI_FALLBACK[idx % STORY_EMOJI_FALLBACK.length]
+  return matchStoryEmoji(title, idx)
 }
 
 // ---- 单词 emoji:按英文/中文关键词匹配,否则用故事主题 emoji 兜底 ----
-const WORD_EMOJI_RULES: [RegExp, string][] = [
-  [/food|eat|lunch|dinner|breakfast|pizza|burger|cake|apple|banana|egg|rice|bread|soup|meat|milk|water|juice|snack|cookie|cheese|fruit|vegetable|drink|meal|bowl|spoon|cook|yum|food|吃|食物|蛋糕|汤|碗|勺子|做饭|好吃/i, '🍔'],
-  [/cat|dog|pet|animal|lion|tiger|bear|rabbit|bird|duck|pig|cow|sheep|horse|monkey|elephant|mouse|frog|bee|bug|fish|whale|shark|hamster|tail|狗|猫|动物|熊|兔|鸟|鱼|虫|仓鼠|尾巴|宠物/i, '🐾'],
-  [/red|blue|yellow|green|orange|purple|color|colour|pink|black|white|brown|颜色|绿色|红色|蓝色|黄色/i, '🌈'],
-  [/happy|sad|angry|scared|afraid|tired|excited|love|friend|smile|sweet|cute|like|sweet|高兴|害怕|生气|朋友|喜欢|可爱|爱|微笑/i, '😊'],
-  [/run|jump|fly|walk|swim|climb|dance|play|ride|drive|hide|seek|find|look|escape|feed|catch|stop|go|up|down|跑|跳|飞|走|玩|骑|躲|找|逃|喂|抓|停|上|下/i, '🏃'],
-  [/book|read|story|school|class|teacher|student|learn|write|pen|pencil|spy|书|读|学|写|老师|学校|寻找|看/i, '📚'],
-  [/sun|moon|star|sky|space|rocket|planet|night|day|cloud|wind|wind|太阳|月亮|星星|天空|夜|云|风|白天/i, '🌟'],
-  [/house|home|door|window|room|bed|tree|garden|park|city|street|table|castle|throne|房子|家|门|窗|树|公园|城市|街道|桌子|城堡|王座/i, '🏠'],
-  [/king|queen|prince|princess|castle|magic|wizard|witch|dragon|robot|alien|monster|ghost|franken|royal|rule|魔法|龙|机器|外星|怪物|皇家|统治/i, '🪄'],
-  [/big|small|little|tall|short|long|fast|slow|high|hot|cold|new|old|strong|brave|safe|quick|scary|spooky|big|大|小|高|矮|长|快|慢|新|旧|热|冷|强大|勇敢|安全|可怕/i, '📏'],
-  [/car|bus|train|boat|ship|plane|bike|truck|wheel|road|cape|mask|car|巴士|火车|船|飞机|自行车|轮子|路|披风|面具/i, '🚗'],
-  [/sing|cheer|gift|party|hooray|dance|fun|surprise|sing|唱|欢呼|礼物|派对|好玩|惊讶/i, '🎉'],
-  [/nose|eye|face|hand|body|鼻子|眼睛|脸|手|身体/i, '👃'],
+const WORD_EMOJI_RULES: EmojiRule[] = [
+  { test: /food|eat|lunch|dinner|breakfast|pizza|burger|cake|apple|banana|egg|rice|bread|soup|meat|milk|water|juice|snack|cookie|cheese|fruit|vegetable|drink|meal|bowl|spoon|cook|yum|food|吃|食物|蛋糕|汤|碗|勺子|做饭|好吃/i, emoji: '🍔' },
+  { test: /cat|dog|pet|animal|lion|tiger|bear|rabbit|bird|duck|pig|cow|sheep|horse|monkey|elephant|mouse|frog|bee|bug|fish|whale|shark|hamster|tail|狗|猫|动物|熊|兔|鸟|鱼|虫|仓鼠|尾巴|宠物/i, emoji: '🐾' },
+  { test: /red|blue|yellow|green|orange|purple|color|colour|pink|black|white|brown|颜色|绿色|红色|蓝色|黄色/i, emoji: '🌈' },
+  { test: /happy|sad|angry|scared|afraid|tired|excited|love|friend|smile|sweet|cute|like|sweet|高兴|害怕|生气|朋友|喜欢|可爱|爱|微笑/i, emoji: '😊' },
+  { test: /run|jump|fly|walk|swim|climb|dance|play|ride|drive|hide|seek|find|look|escape|feed|catch|stop|go|up|down|跑|跳|飞|走|玩|骑|躲|找|逃|喂|抓|停|上|下/i, emoji: '🏃' },
+  { test: /book|read|story|school|class|teacher|student|learn|write|pen|pencil|spy|书|读|学|写|老师|学校|寻找|看/i, emoji: '📚' },
+  { test: /sun|moon|star|sky|space|rocket|planet|night|day|cloud|wind|wind|太阳|月亮|星星|天空|夜|云|风|白天/i, emoji: '🌟' },
+  { test: /house|home|door|window|room|bed|tree|garden|park|city|street|table|castle|throne|房子|家|门|窗|树|公园|城市|街道|桌子|城堡|王座/i, emoji: '🏠' },
+  { test: /king|queen|prince|princess|castle|magic|wizard|witch|dragon|robot|alien|monster|ghost|franken|royal|rule|魔法|龙|机器|外星|怪物|皇家|统治/i, emoji: '🪄' },
+  { test: /big|small|little|tall|short|long|fast|slow|high|hot|cold|new|old|strong|brave|safe|quick|scary|spooky|big|大|小|高|矮|长|快|慢|新|旧|热|冷|强大|勇敢|安全|可怕/i, emoji: '📏' },
+  { test: /car|bus|train|boat|ship|plane|bike|truck|wheel|road|cape|mask|car|巴士|火车|船|飞机|自行车|轮子|路|披风|面具/i, emoji: '🚗' },
+  { test: /sing|cheer|gift|party|hooray|dance|fun|surprise|sing|唱|欢呼|礼物|派对|好玩|惊讶/i, emoji: '🎉' },
+  { test: /nose|eye|face|hand|body|鼻子|眼睛|脸|手|身体/i, emoji: '👃' },
 ]
 
+const matchWordEmoji = makeEmojiPicker(WORD_EMOJI_RULES, '')
+
 function pickWordEmoji(en: string, zh: string, fallback: string): string {
-  const text = `${en} ${zh}`
-  for (const [re, emoji] of WORD_EMOJI_RULES) {
-    if (re.test(text)) return emoji
-  }
-  return fallback
+  return matchWordEmoji(`${en} ${zh}`) || fallback
 }
 
 interface RawStory {
