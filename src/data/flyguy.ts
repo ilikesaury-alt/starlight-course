@@ -24,10 +24,7 @@ export interface FGBook {
 }
 
 // Fly Guy 专属主题色(鲜绿 + 柔绿),区别于 Starlight 天蓝与 Rocket Girl 紫罗兰
-export const FG_THEME = {
-  color: '#16a34a',
-  colorSoft: '#dcfce7',
-} as const
+export { FG_THEME } from './story-themes'
 
 // ---- 故事 emoji:按标题关键词匹配,否则按索引轮询活泼图标 ----
 // 每个故事用唯一关键词匹配专属图标;通用 /fly/ 兜底已移除,否则所有标题都会被兜底成 🐝

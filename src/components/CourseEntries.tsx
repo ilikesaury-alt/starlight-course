@@ -1,6 +1,5 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { flyGuyStories, flyGuyStoryCount, flyGuyWordCount } from '@/data/flyguy'
-import { rocketGirlStories } from '@/data/rocketgirl'
 import { totalEngLessons, eng3aWordCount, eng3aUnits } from '@/data/eng3a'
 import { chineseUnits } from '@/data/chinese'
 import { modules as starlightModules } from '@/data/starlight'
@@ -9,6 +8,7 @@ import type { ModuleId } from '@/data/modules'
 
 // 首页与「课程」页共用的模块入口宫格 + 快捷入口。
 // 每张卡片带实时徽章：模块进度百分比 + 今日 SRS 到期数，让复习提醒在所有入口可见。
+// 故事类词表体积大,统计数字经 import() 动态获取,不进首屏 chunk。
 export default function CourseEntries() {
   const completedPreviews = useCourseStore((s) => s.completedPreviews)
   const completedStories = useCourseStore((s) => s.completedStories)
@@ -16,15 +16,33 @@ export default function CourseEntries() {
   const completedEng3a = useCourseStore((s) => s.completedEng3a)
   const getTodayDueCount = useCourseStore((s) => s.getTodayDueCount)
 
-  const pct = (done: number, total: number) =>
-    total > 0 ? Math.round((done / total) * 100) : 0
+  // 故事模块动态统计:总数(进度%)与 Fly Guy 文案用数字
+  const [fgStats, setFgStats] = useState<{ stories: number; words: number } | null>(null)
+  const [storyTotals, setStoryTotals] = useState<{ flyguy?: number; rocketgirl?: number }>({})
 
-  const fgSlugs = new Set(flyGuyStories.map((s) => s.slug))
-  const rgSlugs = new Set(rocketGirlStories.map((s) => s.slug))
+  useEffect(() => {
+    let alive = true
+    void import('@/data/flyguy').then((m) => {
+      if (!alive) return
+      setFgStats({ stories: m.flyGuyStoryCount, words: m.flyGuyWordCount })
+      setStoryTotals((s) => ({ ...s, flyguy: m.flyGuyStories.length }))
+    })
+    void import('@/data/rocketgirl').then((m) => {
+      if (!alive) return
+      setStoryTotals((s) => ({ ...s, rocketgirl: m.rocketGirlStories.length }))
+    })
+    return () => {
+      alive = false
+    }
+  }, [])
+
+  const pct = (done: number, total?: number) =>
+    total && total > 0 ? Math.round((done / total) * 100) : undefined
+
   const chineseLessonTotal = chineseUnits.reduce((n, u) => n + u.lessons.length, 0)
   const eng3aLessonTotal = eng3aUnits.reduce((n, u) => n + u.lessons.length, 0)
 
-  const badges = {
+  const badges: Partial<Record<ModuleId, { percent?: number; due: number }>> = {
     chinese: {
       percent: pct(completedChinese.length, chineseLessonTotal),
       due: getTodayDueCount('chinese'),
@@ -38,21 +56,27 @@ export default function CourseEntries() {
       due: getTodayDueCount('starlight'),
     },
     rocketgirl: {
-      percent: pct(completedStories.filter((s) => rgSlugs.has(s)).length, rocketGirlStories.length),
+      percent: pct(
+        completedStories.filter((s) => s.startsWith('rg-')).length,
+        storyTotals.rocketgirl
+      ),
       due: getTodayDueCount('rocketgirl'),
     },
     flyguy: {
-      percent: pct(completedStories.filter((s) => fgSlugs.has(s)).length, flyGuyStories.length),
+      percent: pct(
+        completedStories.filter((s) => !s.startsWith('rg-')).length,
+        storyTotals.flyguy
+      ),
       due: getTodayDueCount('flyguy'),
     },
   }
 
   const Badge = ({ id }: { id: ModuleId }) => {
-    const b = badges[id as keyof typeof badges]
-    if (!b) return null
+    const b = badges[id]
+    if (!b || (b.percent === undefined && b.due === 0)) return null
     return (
       <span className="home-entry-badge">
-        <span>📊 {b.percent}%</span>
+        {b.percent !== undefined && <span>📊 {b.percent}%</span>}
         {b.due > 0 && <span className="home-entry-due">🧠 {b.due} 待复习</span>}
       </span>
     )
@@ -101,7 +125,7 @@ export default function CourseEntries() {
           <span className="fg-home-emoji">🐝</span>
           <div className="fg-home-body">
             <div className="fg-home-title">Fly Guy 英语绘本闯关</div>
-            <div className="fg-home-sub">小男孩 Buzz 和宠物苍蝇的爆笑绘本 · {flyGuyStoryCount} 个故事 / {flyGuyWordCount} 词</div>
+            <div className="fg-home-sub">小男孩 Buzz 和宠物苍蝇的爆笑绘本 · {fgStats ? `${fgStats.stories} 个故事 / ${fgStats.words} 词` : '分级绘本闯关'}</div>
             <Badge id="flyguy" />
           </div>
           <span className="fg-home-arrow">›</span>

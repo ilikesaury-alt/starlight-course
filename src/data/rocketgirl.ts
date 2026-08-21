@@ -20,10 +20,7 @@ export interface RGBook {
 }
 
 // Rocket Girl 专属主题色(紫罗兰 + 柔紫),区别于 Starlight 的天蓝
-export const RG_THEME = {
-  color: '#7c3aed',
-  colorSoft: '#ede9fe',
-} as const
+export { RG_THEME } from './story-themes'
 
 // ---- 故事 emoji:按标题关键词匹配,否则按索引轮询活泼图标 ----
 const STORY_EMOJI_RULES: EmojiRule[] = [

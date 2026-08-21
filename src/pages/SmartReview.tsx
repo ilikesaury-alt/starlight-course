@@ -12,7 +12,8 @@ import { speakText } from '../utils/speak'
 import { moduleThemeVars } from '../utils/theme'
 import { quizStars } from '../utils/stars'
 
-// 建一份 en → 内容元信息的索引,供卡片渲染时取 emoji/zh/ipa（单词和句型都索引）
+// 建一份 en → 内容元信息的索引,供卡片渲染时取 emoji/zh/ipa（单词和句型都索引）。
+// 故事类模块词表经 load() 动态加载,因此索引为异步构建;组件在 ready 前不进入会话。
 interface ContentMeta {
   en: string
   zh: string
@@ -22,12 +23,14 @@ interface ContentMeta {
   type: 'word' | 'sentence'
   hint?: string
 }
-const CONTENT_INDEX: Record<string, ContentMeta> = (() => {
+let contentIndex: Record<string, ContentMeta> = {}
+const contentIndexReady = (async () => {
   const idx: Record<string, ContentMeta> = {}
-  // 三个模块的单词（含故事类）
+  // 五个模块的单词（含故事类,故事词表按需下载）
   for (const m of MODULE_LIST) {
-    for (const it of m.items) {
-      for (const w of m.getWords(it.id)) {
+    const { items, getWords } = await m.load()
+    for (const it of items) {
+      for (const w of getWords(it.id)) {
         if (!idx[w.en]) {
           idx[w.en] = {
             en: w.en,
@@ -56,7 +59,7 @@ const CONTENT_INDEX: Record<string, ContentMeta> = (() => {
       }
     }
   }
-  return idx
+  contentIndex = idx
 })()
 
 interface SessionStats {
@@ -82,6 +85,11 @@ export default function SmartReview() {
   const [revealed, setRevealed] = useState(false)
   const [session, setSession] = useState<SessionStats>({ correct: 0, wrong: 0, wrongWords: [] })
   const [done, setDone] = useState(false)
+  // 内容索引(含故事词表动态下载)就绪前不进入会话,避免卡片缺中文释义
+  const [metaReady, setMetaReady] = useState(false)
+  useEffect(() => {
+    void contentIndexReady.then(() => setMetaReady(true))
+  }, [])
 
   const total = queue.length
   const cur = queue[idx]
@@ -126,6 +134,29 @@ export default function SmartReview() {
   }
 
   // 队列为空
+  if (!metaReady) {
+    return (
+      <div className="page smart-review" style={mcStyle}>
+        <div className="page-head" style={mcStyle}>
+          <span className="page-emoji">🎯</span>
+          <div>
+            <div className="page-kicker">智能复习</div>
+            <h1 className="page-title">今日复习</h1>
+          </div>
+        </div>
+        <SafeBoundary label="智能复习">
+          <div className="smart-empty">
+            <div className="smart-empty-emoji">⏳</div>
+            <h2 className="smart-empty-title">正在准备复习内容…</h2>
+          </div>
+        </SafeBoundary>
+        <div className="page-nav">
+          <Link to="/" className="back-link">← 返回首页</Link>
+        </div>
+      </div>
+    )
+  }
+
   if (total === 0) {
     return (
       <div className="page smart-review" style={mcStyle}>
@@ -246,7 +277,7 @@ export default function SmartReview() {
     if (!cur) return
     recordReview(cur.en, correct, curModule)
     // 答错自动加入错题本,答对则从错题本移除(已确认掌握)
-    const w = CONTENT_INDEX[cur.en]
+    const w = contentIndex[cur.en]
     const newWrong = !correct && w
       ? [...session.wrongWords, { en: w.en, zh: w.zh, emoji: w.emoji ?? '❓', from: w.from }]
       : session.wrongWords
@@ -274,7 +305,7 @@ export default function SmartReview() {
   }
 
   const boxInfo = cur ? `${boxEmoji(cur.box)} ${boxLabel(cur.box)} · 盒 ${cur.box}` : ''
-  const remainMeta = cur ? CONTENT_INDEX[cur.en] : undefined
+  const remainMeta = cur ? contentIndex[cur.en] : undefined
 
   return (
     <div className="page smart-review" style={mcStyle}>

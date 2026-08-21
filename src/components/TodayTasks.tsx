@@ -1,14 +1,14 @@
 // 首页「今日任务」聚合卡：把「现在该做什么」的决策统一到一处。
 // 内容 = 今日到期复习(如有) + 按模块顺序推荐的前 2 条未完成课；
 // 全部完成时显示鼓励态。取数全部来自 store 现有完成记录,无新增字段。
+// 故事类词表体积大,经 import() 动态获取,不拖慢首屏。
 
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useCourseStore } from '@/store/useCourseStore'
 import { modules as starlightModules } from '@/data/starlight'
 import { chineseUnits } from '@/data/chinese'
 import { eng3aUnits } from '@/data/eng3a'
-import { flyGuyStories } from '@/data/flyguy'
-import { rocketGirlStories } from '@/data/rocketgirl'
 
 interface Task {
   emoji: string
@@ -23,6 +23,27 @@ export default function TodayTasks() {
   const completedStories = useCourseStore((s) => s.completedStories)
   const completedChinese = useCourseStore((s) => s.completedChinese)
   const completedEng3a = useCourseStore((s) => s.completedEng3a)
+
+  const [storyTasks, setStoryTasks] = useState<Task[]>([])
+
+  // 故事类下一关:动态加载数据后计算(避免首屏拉起大词表 chunk)
+  useEffect(() => {
+    let alive = true
+    void Promise.all([import('@/data/flyguy'), import('@/data/rocketgirl')]).then(
+      ([fg, rg]) => {
+        if (!alive) return
+        const t: Task[] = []
+        const fgNext = fg.flyGuyStories.find((s) => !completedStories.includes(s.slug))
+        if (fgNext) t.push({ emoji: '🐝', module: 'Fly Guy', label: fgNext.title, to: `/flyguy/${fgNext.slug}` })
+        const rgNext = rg.rocketGirlStories.find((s) => !completedStories.includes(s.slug))
+        if (rgNext) t.push({ emoji: '🚀', module: 'Rocket Girl', label: rgNext.title, to: `/rocketgirl/${rgNext.slug}` })
+        setStoryTasks(t)
+      }
+    )
+    return () => {
+      alive = false
+    }
+  }, [completedStories])
 
   const tasks: Task[] = []
 
@@ -65,11 +86,7 @@ export default function TodayTasks() {
     })
   }
 
-  // 故事关:各找第一个未通关
-  const fgNext = flyGuyStories.find((s) => !completedStories.includes(s.slug))
-  if (fgNext) tasks.push({ emoji: '🐝', module: 'Fly Guy', label: fgNext.title, to: `/flyguy/${fgNext.slug}` })
-  const rgNext = rocketGirlStories.find((s) => !completedStories.includes(s.slug))
-  if (rgNext) tasks.push({ emoji: '🚀', module: 'Rocket Girl', label: rgNext.title, to: `/rocketgirl/${rgNext.slug}` })
+  tasks.push(...storyTasks)
 
   const shown = tasks.slice(0, 2)
   const allDone = todayDue === 0 && shown.length === 0

@@ -1,12 +1,16 @@
-// 模块注册表：把三个“预习模块”（Starlight 主课 / Fly Guy / Rocket Girl）
+// 模块注册表：把五个「预习模块」（Starlight 主课 / Fly Guy / Rocket Girl / 语文 / 英语3A）
 // 统一抽象为一个可枚举的注册表，供复习系统按模块筛选与导航。
-// 每个模块声明自己的复习项（Starlight = 单元，故事类 = 故事）与取词函数。
+//
+// 数据加载策略：
+//   - 单元类模块（starlight/chinese/eng3a）的元数据与取词同步可得；
+//   - 故事类模块（flyguy/rocketgirl）词表体积大(合计 ~600KB 源码)，经 load() 动态
+//     import() 按需加载，避免被打进首屏 chunk；注册表只保留主题与标签等轻量字段。
+//   - 同步的 items/getWords 对故事类返回空壳,完整数据一律走 load()。
 
 import { modules as starlightModules, getModule, STARLIGHT_THEME } from './starlight'
-import { flyGuyStories, FG_THEME } from './flyguy'
-import { rocketGirlStories, RG_THEME } from './rocketgirl'
 import { chineseUnits, CHINESE_THEME } from './chinese'
 import { eng3aUnits, ENG3A_THEME } from './eng3a'
+import { FG_THEME, RG_THEME } from './story-themes'
 
 export type ModuleId = 'starlight' | 'flyguy' | 'rocketgirl' | 'chinese' | 'eng3a'
 
@@ -24,6 +28,12 @@ export interface ReviewWord {
   emoji?: string
 }
 
+/** 模块完整数据：复习项列表 + 取词函数 */
+export interface ModuleData {
+  items: ReviewItem[]
+  getWords: (itemId: string) => ReviewWord[]
+}
+
 export interface ModuleMeta {
   id: ModuleId
   label: string
@@ -32,9 +42,12 @@ export interface ModuleMeta {
   colorSoft: string
   /** unit = 按单元组织（Starlight）；story = 按故事组织（Fly Guy / Rocket Girl） */
   kind: 'unit' | 'story'
+  /** 同步可得的复习项;故事类为空数组(数据在 load 后才有) */
   items: ReviewItem[]
-  /** 取某复习项下的全部单词（用于词汇复习 / 播种） */
+  /** 同步取词;故事类未 load 时返回空 */
   getWords: (itemId: string) => ReviewWord[]
+  /** 动态加载模块完整数据(故事类触发按需 chunk 下载) */
+  load: () => Promise<ModuleData>
 }
 
 const starlightMeta: ModuleMeta = {
@@ -55,44 +68,7 @@ const starlightMeta: ModuleMeta = {
     if (!mod) return []
     return mod.lessons.flatMap((l) => l.words).map((w) => ({ en: w.en, zh: w.zh, emoji: w.emoji }))
   },
-}
-
-const flyGuyMeta: ModuleMeta = {
-  id: 'flyguy',
-  label: 'Fly Guy',
-  labelZh: '苍蝇小子',
-  color: FG_THEME.color,
-  colorSoft: FG_THEME.colorSoft,
-  kind: 'story',
-  items: flyGuyStories.map((s) => ({
-    id: s.slug,
-    title: s.title,
-    titleZh: '',
-    emoji: s.emoji,
-  })),
-  getWords: (itemId) => {
-    const st = flyGuyStories.find((s) => s.slug === itemId)
-    return st ? st.words.map((w) => ({ en: w.en, zh: w.zh, emoji: w.emoji })) : []
-  },
-}
-
-const rocketGirlMeta: ModuleMeta = {
-  id: 'rocketgirl',
-  label: 'Rocket Girl',
-  labelZh: '火箭女孩',
-  color: RG_THEME.color,
-  colorSoft: RG_THEME.colorSoft,
-  kind: 'story',
-  items: rocketGirlStories.map((s) => ({
-    id: s.slug,
-    title: s.title,
-    titleZh: '',
-    emoji: s.emoji,
-  })),
-  getWords: (itemId) => {
-    const st = rocketGirlStories.find((s) => s.slug === itemId)
-    return st ? st.words.map((w) => ({ en: w.en, zh: w.zh, emoji: w.emoji })) : []
-  },
+  load: async () => ({ items: starlightMeta.items, getWords: starlightMeta.getWords }),
 }
 
 // 语文模块（三年级上册）：生字（汉字）作为 SRS 记忆卡，key = 汉字，zh = 拼音 · 组词，
@@ -125,6 +101,7 @@ const chineseMeta: ModuleMeta = {
     }
     return out
   },
+  load: async () => ({ items: chineseMeta.items, getWords: chineseMeta.getWords }),
 }
 
 // 三年级上册英语（外研版）：单词作为 SRS 记忆卡,key = 单词英文,zh = 中文释义,
@@ -155,6 +132,61 @@ const eng3aMeta: ModuleMeta = {
       }
     }
     return out
+  },
+  load: async () => ({ items: eng3aMeta.items, getWords: eng3aMeta.getWords }),
+}
+
+// ---- 故事类模块:轻量壳 + 动态加载数据 ----
+
+const flyGuyMeta: ModuleMeta = {
+  id: 'flyguy',
+  label: 'Fly Guy',
+  labelZh: '苍蝇小子',
+  color: FG_THEME.color,
+  colorSoft: FG_THEME.colorSoft,
+  kind: 'story',
+  items: [],
+  getWords: () => [],
+  load: async () => {
+    const { flyGuyStories } = await import('./flyguy')
+    return {
+      items: flyGuyStories.map((s) => ({
+        id: s.slug,
+        title: s.title,
+        titleZh: '',
+        emoji: s.emoji,
+      })),
+      getWords: (itemId) => {
+        const st = flyGuyStories.find((s) => s.slug === itemId)
+        return st ? st.words.map((w) => ({ en: w.en, zh: w.zh, emoji: w.emoji })) : []
+      },
+    }
+  },
+}
+
+const rocketGirlMeta: ModuleMeta = {
+  id: 'rocketgirl',
+  label: 'Rocket Girl',
+  labelZh: '火箭女孩',
+  color: RG_THEME.color,
+  colorSoft: RG_THEME.colorSoft,
+  kind: 'story',
+  items: [],
+  getWords: () => [],
+  load: async () => {
+    const { rocketGirlStories } = await import('./rocketgirl')
+    return {
+      items: rocketGirlStories.map((s) => ({
+        id: s.slug,
+        title: s.title,
+        titleZh: '',
+        emoji: s.emoji,
+      })),
+      getWords: (itemId) => {
+        const st = rocketGirlStories.find((s) => s.slug === itemId)
+        return st ? st.words.map((w) => ({ en: w.en, zh: w.zh, emoji: w.emoji })) : []
+      },
+    }
   },
 }
 
