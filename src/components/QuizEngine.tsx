@@ -15,6 +15,8 @@ export interface QuizItem {
   explain: string
   speakText: string
   emoji?: string
+  /** 选项/题干发音语言,缺省 'en';语文汉字题传 'zh' */
+  lang?: 'en' | 'zh'
   /** Starlight 听力测验专用：标注该题来自第几课 */
   lessonId?: number
   /** 听力题：进入题目时自动朗读 speakText,用户听后选择 */
@@ -71,7 +73,7 @@ export default function QuizEngine({
   // 听力题:进入题目自动朗读一遍 prompt(点选项发音钮可反复听)
   useEffect(() => {
     if (!done && cur?.listen && cur.speakText) {
-      speakText(cur.speakText)
+      speakText(cur.speakText, { lang: cur.lang ?? 'en' })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [idx, done])
@@ -101,7 +103,7 @@ export default function QuizEngine({
     })
     const correct = i === cur.answer
     onPick({ en: cur.speakText, picked: cur.options[i], correct })
-    speakText(cur.options[i])
+    speakText(cur.options[i], { lang: cur.lang ?? 'en' })
   }
 
   const goNext = () => {
@@ -172,7 +174,7 @@ export default function QuizEngine({
               ) : (
                 <>
                   <span>{cur.emoji ? `${cur.emoji} ` : ''}{cur.q}</span>
-                  <SpeakButton text={cur.speakText ?? cur.q} label="听发音" />
+                  <SpeakButton text={cur.speakText ?? cur.q} label="听发音" lang={cur.lang ?? 'en'} />
                 </>
               )}
             </div>

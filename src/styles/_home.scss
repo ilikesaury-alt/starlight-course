@@ -332,3 +332,50 @@ a.lesson-link {
   .feature-grid { grid-template-columns: 1fr 1fr; }
   .hero-title { font-size: var(--fs-4xl); }
 }
+
+// ============================================================
+//  今日任务聚合卡（首页）：到期复习 + 各模块推荐下一课
+// ============================================================
+.today-card {
+  background: var(--card);
+  border: 2px solid var(--line-2);
+  border-radius: var(--r-lg);
+  padding: 14px;
+  margin-bottom: 18px;
+  box-shadow: var(--shadow-pop);
+}
+.today-head {
+  font-size: var(--fs-md);
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+.today-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--r-md);
+  background: var(--bg-3);
+  margin-top: 8px;
+  text-decoration: none;
+  color: var(--ink);
+  transition: transform 0.15s;
+  &:active { transform: scale(0.98); }
+}
+.today-emoji { font-size: 22px; line-height: 1; }
+.today-body { flex: 1; min-width: 0; }
+.today-module { font-size: var(--fs-xs); color: var(--ink-mute); }
+.today-label {
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.today-arrow { color: var(--ink-mute); font-size: 18px; }
+.today-done {
+  text-align: center;
+  color: var(--ok);
+  font-weight: 700;
+  padding: 10px 0 4px;
+}

@@ -1,10 +1,7 @@
-import { Link } from 'react-router-dom'
-import { useCourseStore } from '@/store/useCourseStore'
 import CourseEntries from '@/components/CourseEntries'
+import TodayTasks from '@/components/TodayTasks'
 
 export default function Home() {
-  const todayDue = useCourseStore((s) => s.getTodayDueCount())
-
   return (
     <div className="home">
       <section className="hero">
@@ -21,19 +18,7 @@ export default function Home() {
         </div>
       </section>
 
-      {todayDue > 0 && (
-        <Link to="/smart" className="smart-hero-entry">
-          <span className="smart-hero-emoji">🎯</span>
-          <div className="smart-hero-body">
-            <div className="smart-hero-title">今日复习 · 大脑健身</div>
-            <div className="smart-hero-sub">
-              科学记忆编排，<b>{todayDue}</b> 个单词到期，几分钟就练完
-            </div>
-          </div>
-          <span className="smart-hero-badge">{todayDue}</span>
-          <span className="smart-hero-arrow">›</span>
-        </Link>
-      )}
+      <TodayTasks />
 
       <h2 className="section-title">⚡ 课程入口</h2>
       <CourseEntries />
