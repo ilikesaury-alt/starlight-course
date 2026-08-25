@@ -25,7 +25,6 @@ export interface WrongWord {
 
 interface CourseStore {
   // 状态
-  masteredWords: string[]
   wrongWords: WrongWord[]
   totalStars: number
   completedPreviews: string[]
@@ -39,6 +38,8 @@ interface CourseStore {
   srsCards: Record<string, SrsCard>
 
   // 中文课程(三年级上册语文)进度——独立于英语 SRS,仅做打卡/自测记录
+  // 打卡记录设计取舍:不做历史裁剪。按每天多次打卡估算每年仅增长约 10KB(localStorage 预算内),
+  // 而裁剪会破坏「累计打卡次数」与「连续打卡天数」的统计口径,得不偿失。
   /** 背诵打卡:lesson slug -> 已打卡日期戳(dayStamp 整数)列表 */
   reciteCheckins: Record<string, number[]>
   /** 自测成绩:lesson slug -> 最近一次 { score, total, date(dayStamp) } */
@@ -58,8 +59,6 @@ interface CourseStore {
   completedEng3a: string[]
 
   // 动作
-  markMastered: (en: string) => void
-  unmarkMastered: (en: string) => void
   addWrongWord: (w: WrongWord) => void
   removeWrongWord: (en: string, module?: ModuleId) => void
   clearWrongWords: () => void
@@ -105,7 +104,6 @@ interface CourseStore {
 export const useCourseStore = create<CourseStore>()(
   persist(
     (set, get) => ({
-      masteredWords: [],
       wrongWords: [],
       totalStars: 0,
       completedPreviews: [],
@@ -119,18 +117,6 @@ export const useCourseStore = create<CourseStore>()(
       eng3aQuiz: {},
       completedChinese: [],
       completedEng3a: [],
-
-      markMastered: (en) =>
-        set((s) =>
-          s.masteredWords.includes(en)
-            ? s
-            : { masteredWords: [...s.masteredWords, en] }
-        ),
-
-      unmarkMastered: (en) =>
-        set((s) => ({
-          masteredWords: s.masteredWords.filter((w) => w !== en),
-        })),
 
       addWrongWord: (w) =>
         set((s) =>
@@ -250,7 +236,6 @@ export const useCourseStore = create<CourseStore>()(
 
       resetAll: () =>
         set({
-          masteredWords: [],
           wrongWords: [],
           totalStars: 0,
           completedPreviews: [],
@@ -347,7 +332,6 @@ export const useCourseStore = create<CourseStore>()(
       version: 6,
       // 只持久化数据字段,避免函数/瞬态状态被写入 localStorage
       partialize: (state) => ({
-        masteredWords: state.masteredWords,
         wrongWords: state.wrongWords,
         totalStars: state.totalStars,
         completedPreviews: state.completedPreviews,
@@ -366,9 +350,12 @@ export const useCourseStore = create<CourseStore>()(
       migrate: (persistedState: unknown, version: number) => {
         // version 由 zustand 注入,这里仅用于触发迁移逻辑
         void version
-        const s = (persistedState ?? {}) as Partial<CourseStore>
+        const s = (persistedState ?? {}) as Partial<CourseStore> & {
+          // 遗留字段(已从状态中移除),仅在迁移旧数据时读取
+          masteredWords?: string[]
+        }
         const today = dayStamp()
-        // 已有 masteredWords 自动升级为 box 3(掌握级),下次复习为 7 天后
+        // 旧版 masteredWords 自动升级为 box 3(掌握级),下次复习为 7 天后
         const mastered: string[] = s.masteredWords ?? []
         type LegacyCard = Partial<SrsCard>
         const existingCards = (s.srsCards ?? {}) as Record<string, LegacyCard>

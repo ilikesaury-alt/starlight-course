@@ -8,19 +8,16 @@ import SelfStudyLesson from '@/components/SelfStudyLesson'
 import { getEngLesson, type EngLesson as Lesson } from '@/data/eng3a'
 import { useCourseStore } from '@/store/useCourseStore'
 import { speakText } from '@/utils/speak'
-import { quizStars, isPassed } from '@/utils/stars'
+import { useSettleSelfStudy } from '@/hooks/useSettleQuiz'
 
 export default function Eng3aLesson() {
   const { unitId = '', lessonId = '' } = useParams()
   const found = getEngLesson(unitId, lessonId)
   const markRecite = useCourseStore((s) => s.markEng3aRecite)
   const markQuiz = useCourseStore((s) => s.markEng3aQuiz)
-  const addStars = useCourseStore((s) => s.addStars)
   const markDone = useCourseStore((s) => s.markEng3aDone)
   const completed = useCourseStore((s) => s.completedEng3a)
   const seedCards = useCourseStore((s) => s.seedCards)
-  const addWrongWord = useCourseStore((s) => s.addWrongWord)
-  const recordReview = useCourseStore((s) => s.recordReview)
   const reciteDays = useCourseStore((s) => (found ? s.eng3aRecite[found.lesson.slug] : undefined)) ?? []
   const quizResult = useCourseStore((s) =>
     found ? s.eng3aQuiz[found.lesson.slug] : undefined,
@@ -33,6 +30,13 @@ export default function Eng3aLesson() {
     if (ens.length) seedCards(ens, 'eng3a')
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [found?.lesson.slug])
+
+  // 自测交卷统一结算:星规加星 / ≥80% 自动完成 / 错题(key 题)入错题本并记 SRS(hook 内统一口径)
+  const settleQuiz = useSettleSelfStudy({
+    module: 'eng3a',
+    from: `${found?.unit.title ?? ''} · ${found?.lesson.title ?? ''}`,
+    fallbackEmoji: found?.lesson.emoji,
+  })
 
   if (!found) {
     return (
@@ -51,20 +55,11 @@ export default function Eng3aLesson() {
     '--mc-soft': unit.theme.colorSoft,
   } as React.CSSProperties
 
-  // 自测交卷统一结算：存成绩 + 统一星规 + ≥80% 自动完成 + 错题(key 题)入错题本并进 SRS
+  // 自测交卷:存成绩由页面注入,其余走共享结算
   const handleSubmitQuiz = (score: number, total: number, wrongKeys: { en: string; zh: string }[]) => {
-    markQuiz(lesson.slug, score, total)
-    addStars(quizStars(score, total))
-    if (isPassed(score, total)) markDone(lesson.slug)
-    wrongKeys.forEach(({ en, zh }) => {
-      addWrongWord({
-        en,
-        zh,
-        emoji: lesson.emoji,
-        from: `${unit.title} · ${lesson.title}`,
-        module: 'eng3a',
-      })
-      recordReview(en, false, 'eng3a')
+    settleQuiz(score, total, wrongKeys, {
+      onSubmitted: () => markQuiz(lesson.slug, score, total),
+      onPass: () => markDone(lesson.slug),
     })
   }
 

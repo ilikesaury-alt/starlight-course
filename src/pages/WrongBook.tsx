@@ -17,7 +17,6 @@ const mcStyle = moduleThemeVars(STARLIGHT_THEME)
 export default function WrongBook() {
   const wrongWords = useCourseStore((s) => s.wrongWords)
   const removeWrongWord = useCourseStore((s) => s.removeWrongWord)
-  const markMastered = useCourseStore((s) => s.markMastered)
   const clearWrongWords = useCourseStore((s) => s.clearWrongWords)
   const recordReview = useCourseStore((s) => s.recordReview)
   const addStars = useCourseStore((s) => s.addStars)
@@ -135,7 +134,6 @@ export default function WrongBook() {
                       type="button"
                       className="mastery-btn mastered"
                       onClick={() => {
-                        markMastered(w.en)
                         removeWrongWord(w.en, w.module)
                         // 同步 SRS:答对一次,升盒,避免今日复习反复考
                         recordReview(w.en, true, w.module)

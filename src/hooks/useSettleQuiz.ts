@@ -6,7 +6,7 @@
 
 import { useRef } from 'react'
 import { useCourseStore } from '@/store/useCourseStore'
-import { quizStars } from '@/utils/stars'
+import { quizStars, isPassed } from '@/utils/stars'
 import { lookupZh, wordBase } from '@/utils/bookDict'
 import type { ModuleId } from '@/data/modules'
 
@@ -77,4 +77,37 @@ export function useSettleQuiz({ module, from, fallbackEmoji = '📖' }: SettleQu
   }
 
   return { recordPick, restart, settle }
+}
+
+/**
+ * 自测型课程(语文/英语3A)的交卷结算 hook。
+ * 与 useSettleQuiz 的差异:错题在交卷时一次性收集(SelfStudyLesson.QuizTab 按 key 收集),
+ * 而非逐题记录 SRS;存成绩/标记完成是模块专属 store 动作,由页面通过回调注入。
+ * 统一承载:星规加星 / ≥80% 完成判定(isPassed) / 错题(key 题)入错题本并记 SRS 答错。
+ */
+export function useSettleSelfStudy({ module, from, fallbackEmoji = '📖' }: SettleQuizOptions) {
+  const addStars = useCourseStore((s) => s.addStars)
+  const addWrongWord = useCourseStore((s) => s.addWrongWord)
+  const recordReview = useCourseStore((s) => s.recordReview)
+
+  return (
+    score: number,
+    total: number,
+    wrongKeys: { en: string; zh: string }[],
+    hooks: {
+      /** 存本次成绩(如 markChineseQuiz / markEng3aQuiz),在加星后、完成判定前执行 */
+      onSubmitted: () => void
+      /** 通过判定(≥80%)后的完成标记(如 markChineseDone / markEng3aDone) */
+      onPass?: () => void
+    },
+  ) => {
+    addStars(quizStars(score, total))
+    hooks.onSubmitted()
+    if (isPassed(score, total)) hooks.onPass?.()
+    wrongKeys.forEach(({ en, zh }) => {
+      addWrongWord({ en, zh, emoji: fallbackEmoji, from, module })
+      // 错题同步记一次 SRS 答错,让该词进入到期重练调度
+      recordReview(en, false, module)
+    })
+  }
 }

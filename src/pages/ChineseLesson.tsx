@@ -8,14 +8,13 @@ import SelfStudyLesson from '@/components/SelfStudyLesson'
 import { getChineseLesson, type ChineseLesson as Lesson } from '@/data/chinese'
 import { useCourseStore } from '@/store/useCourseStore'
 import { speakText } from '@/utils/speak'
-import { quizStars, isPassed } from '@/utils/stars'
+import { useSettleSelfStudy } from '@/hooks/useSettleQuiz'
 
 export default function ChineseLesson() {
   const { unitId = '', lessonId = '' } = useParams()
   const found = getChineseLesson(unitId, lessonId)
   const markRecite = useCourseStore((s) => s.markRecite)
   const markQuiz = useCourseStore((s) => s.markChineseQuiz)
-  const addStars = useCourseStore((s) => s.addStars)
   const markDone = useCourseStore((s) => s.markChineseDone)
   const completed = useCourseStore((s) => s.completedChinese)
   const seedCards = useCourseStore((s) => s.seedCards)
@@ -31,6 +30,14 @@ export default function ChineseLesson() {
     if (chars.length) seedCards(chars, 'chinese')
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [found?.lesson.slug])
+
+  // 自测交卷统一结算:星规加星 / ≥80% 自动完成(hook 内统一口径)。
+  // 注:语文自测为阅读理解题,无对应记忆卡(key 为空),错题不入词卡式错题本。
+  const settleQuiz = useSettleSelfStudy({
+    module: 'chinese',
+    from: `${found?.unit.title ?? ''} · ${found?.lesson.title ?? ''}`,
+    fallbackEmoji: found?.lesson.emoji,
+  })
 
   if (!found) {
     return (
@@ -49,12 +56,12 @@ export default function ChineseLesson() {
     '--mc-soft': unit.theme.colorSoft,
   } as React.CSSProperties
 
-  // 自测交卷统一结算:存成绩 + 统一星规 + ≥80% 自动完成。
-  // 注:语文自测为阅读理解题,无对应记忆卡(key 为空),错题不入词卡式错题本。
+  // 自测交卷:存成绩由页面注入,其余走共享结算
   const handleSubmitQuiz = (score: number, total: number) => {
-    markQuiz(lesson.slug, score, total)
-    addStars(quizStars(score, total))
-    if (isPassed(score, total)) markDone(lesson.slug)
+    settleQuiz(score, total, [], {
+      onSubmitted: () => markQuiz(lesson.slug, score, total),
+      onPass: () => markDone(lesson.slug),
+    })
   }
 
   return (
