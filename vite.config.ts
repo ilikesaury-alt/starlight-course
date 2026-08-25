@@ -1,8 +1,10 @@
+/// <reference types="vitest/config" />
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tsconfigPaths from "vite-tsconfig-paths";
 import { VitePWA } from 'vite-plugin-pwa'
 import { fileURLToPath, URL } from 'node:url'
+
 
 // GitHub Pages 部署时自动设置子路径,本地开发/Cloudflare Pages 用根路径
 // GITHUB_REPOSITORY 格式为 "用户名/仓库名",提取仓库名作为 base
@@ -13,6 +15,10 @@ const base = repoName && repoName !== `${process.env.GITHUB_REPOSITORY?.split('/
 
 // https://vite.dev/config/
 export default defineConfig({
+  // 只收集 src 下的单元测试,避免 vitest 误跑 Playwright 的 tests/*.spec.ts
+  test: {
+    include: ['src/**/*.{test,spec}.{ts,tsx}'],
+  },
   base,
   resolve: {
     alias: {

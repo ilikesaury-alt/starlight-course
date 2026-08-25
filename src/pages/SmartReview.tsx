@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import SpeakButton from '../components/SpeakButton'
 import FcWord from '../components/FcWord'
@@ -10,7 +10,7 @@ import { useCourseStore } from '../store/useCourseStore'
 import { boxLabel, boxEmoji, type SrsCard } from '../data/srs'
 import { speakText } from '../utils/speak'
 import { moduleThemeVars } from '../utils/theme'
-import { quizStars } from '../utils/stars'
+import { quizStars, isPassed } from '../utils/stars'
 
 // 建一份 en → 内容元信息的索引,供卡片渲染时取 emoji/zh/ipa（单词和句型都索引）。
 // 故事类模块词表经 load() 动态加载,因此索引为异步构建;组件在 ready 前不进入会话。
@@ -24,42 +24,47 @@ interface ContentMeta {
   hint?: string
 }
 let contentIndex: Record<string, ContentMeta> = {}
+// 失败时降级为空索引(卡片缺释义仍可复习),不让 Promise 变成 unhandled rejection
 const contentIndexReady = (async () => {
   const idx: Record<string, ContentMeta> = {}
-  // 五个模块的单词（含故事类,故事词表按需下载）
-  for (const m of MODULE_LIST) {
-    const { items, getWords } = await m.load()
-    for (const it of items) {
-      for (const w of getWords(it.id)) {
-        if (!idx[w.en]) {
-          idx[w.en] = {
-            en: w.en,
-            zh: w.zh,
-            emoji: w.emoji,
-            from: `${m.labelZh} · ${it.title || it.id}`,
-            type: 'word',
+  try {
+    // 五个模块的单词（含故事类,故事词表按需下载）
+    for (const m of MODULE_LIST) {
+      const { items, getWords } = await m.load()
+      for (const it of items) {
+        for (const w of getWords(it.id)) {
+          if (!idx[w.en]) {
+            idx[w.en] = {
+              en: w.en,
+              zh: w.zh,
+              emoji: w.emoji,
+              from: `${m.labelZh} · ${it.title || it.id}`,
+              type: 'word',
+            }
           }
         }
       }
     }
-  }
-  // Starlight 句型也加入索引
-  for (const m of modules) {
-    for (const l of m.lessons) {
-      for (const s of l.sentences) {
-        if (!idx[s.en]) {
-          idx[s.en] = {
-            en: s.en,
-            zh: s.zh,
-            from: `${m.title} · L${l.id}`,
-            type: 'sentence',
-            hint: s.hint,
+    // Starlight 句型也加入索引
+    for (const m of modules) {
+      for (const l of m.lessons) {
+        for (const s of l.sentences) {
+          if (!idx[s.en]) {
+            idx[s.en] = {
+              en: s.en,
+              zh: s.zh,
+              from: `${m.title} · L${l.id}`,
+              type: 'sentence',
+              hint: s.hint,
+            }
           }
         }
       }
     }
+    contentIndex = idx
+  } catch {
+    console.error('[SmartReview] 内容索引构建失败,降级为空索引')
   }
-  contentIndex = idx
 })()
 
 interface SessionStats {
@@ -85,10 +90,25 @@ export default function SmartReview() {
   const [revealed, setRevealed] = useState(false)
   const [session, setSession] = useState<SessionStats>({ correct: 0, wrong: 0, wrongWords: [] })
   const [done, setDone] = useState(false)
+  // 防连点:同一张卡在一次渲染周期内只结算一次,避免儿童快速双击导致 SRS 重复调度/进度跳两格
+  const answeredRef = useRef(false)
   // 内容索引(含故事词表动态下载)就绪前不进入会话,避免卡片缺中文释义
   const [metaReady, setMetaReady] = useState(false)
   useEffect(() => {
-    void contentIndexReady.then(() => setMetaReady(true))
+    let cancelled = false
+    // 兜底超时:词表动态下载挂死/失败时也能进入会话(降级为无释义卡片),避免永久卡加载
+    const timer = setTimeout(() => {
+      if (!cancelled) setMetaReady(true)
+    }, 8000)
+    contentIndexReady.finally(() => {
+      if (cancelled) return
+      clearTimeout(timer)
+      setMetaReady(true)
+    })
+    return () => {
+      cancelled = true
+      clearTimeout(timer)
+    }
   }, [])
 
   const total = queue.length
@@ -110,6 +130,7 @@ export default function SmartReview() {
   // 切换复习卡（进入/下一题/再复习一轮）时自动朗读单词,作为回忆提示
   // 语文卡片(汉字)用中文嗓音朗读
   useEffect(() => {
+    answeredRef.current = false
     if (cur) speakText(cur.en, { lang: cur.modules.includes('chinese') ? 'zh' : 'en' })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [idx, queue])
@@ -195,7 +216,8 @@ export default function SmartReview() {
   // 完成页
   if (done) {
     const allRight = session.correct === total
-    const mostlyRight = session.correct >= total * 0.8
+    // 统一星规口径(与 utils/stars.ts 的 isPassed 同阈值)
+    const mostlyRight = isPassed(session.correct, total)
     const tomorrowCount = getTomorrowDueCount()
     return (
       <div className="page smart-review" style={mcStyle}>
@@ -274,7 +296,8 @@ export default function SmartReview() {
   const curModule: ModuleId = filter !== 'all' ? filter : cur.modules[0] ?? 'starlight'
 
   const answer = (correct: boolean) => {
-    if (!cur) return
+    if (!cur || answeredRef.current) return
+    answeredRef.current = true
     recordReview(cur.en, correct, curModule)
     // 答错自动加入错题本,答对则从错题本移除(已确认掌握)
     const w = contentIndex[cur.en]

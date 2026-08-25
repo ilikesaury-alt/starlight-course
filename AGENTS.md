@@ -12,11 +12,11 @@ npm run build        # Production build (tsc -b && vite build)
 npm run lint         # ESLint check
 npm run check        # TypeScript type check (no emit)
 npm run preview      # Preview production build on 0.0.0.0
-npm run test         # Vitest unit tests (see caveat below)
+npm run test         # Vitest unit tests (src/**/*.test.ts only)
 npm run e2e          # Playwright E2E tests (tests/*.spec.ts)
 ```
 
-**Testing**: Unit tests use vitest (e.g. `src/data/srs.test.ts`); E2E uses Playwright (`tests/*.spec.ts`, `npm run e2e`). Caveat: `npm run test` (vitest) mistakenly collects `tests/*.spec.ts` and errors out — run unit tests with `npx vitest run src` instead.
+**Testing**: Unit tests use vitest (e.g. `src/data/srs.test.ts`); E2E uses Playwright (`tests/*.spec.ts`, `npm run e2e`). Vitest is configured in `vite.config.ts` (`test.include: src/**`) so it never collects the Playwright specs.
 
 ## Architecture
 - **State**: Zustand store (`src/store/useCourseStore.ts`) with localStorage persistence
