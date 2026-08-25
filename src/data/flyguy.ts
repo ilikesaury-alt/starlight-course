@@ -11,12 +11,10 @@
 //      不再按单词列句;无 bookText 的故事则回退显示学法句型。
 //   以上原文均仅作合理使用展示,不内置整本受版权保护的书。
 
-import type { BookTextChapter, Story, StoryWord } from './story-types'
+import type { BookTextChapter, Story } from './story-types'
 import { makeEmojiPicker, type EmojiRule } from '@/utils/storyEmoji'
 
-// FGWord/FGStory 与共享的 StoryWord/Story 结构完全一致;保留类型别名以兼容既有引用
-export type FGWord = StoryWord
-
+// FGStory 与共享的 Story 结构完全一致;保留类型别名以兼容既有引用
 export type FGStory = Story
 
 export interface FGBook {

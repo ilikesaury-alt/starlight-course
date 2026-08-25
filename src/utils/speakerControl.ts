@@ -24,7 +24,7 @@ type StopFn = () => void
 let activeStop: StopFn | null = null
 
 /** 开始一个新的发声者：强制结束上一个仍在播放的（动画 + 音频）。 */
-export function stopOtherSpeakers(self: StopFn) {
+function stopOtherSpeakers(self: StopFn) {
   if (activeStop && activeStop !== self) {
     try {
       activeStop()
@@ -36,7 +36,7 @@ export function stopOtherSpeakers(self: StopFn) {
 }
 
 /** 当前发声者结束/卸载时，清空全局引用（仅当仍是自己）。 */
-export function clearSpeaker(self: StopFn) {
+function clearSpeaker(self: StopFn) {
   if (activeStop === self) activeStop = null
 }
 

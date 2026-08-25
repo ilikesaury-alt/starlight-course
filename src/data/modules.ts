@@ -11,6 +11,7 @@ import { modules as starlightModules, getModule, STARLIGHT_THEME } from './starl
 import { chineseUnits, CHINESE_THEME } from './chinese'
 import { eng3aUnits, ENG3A_THEME } from './eng3a'
 import { FG_THEME, RG_THEME } from './story-themes'
+import type { Story } from './story-types'
 
 export type ModuleId = 'starlight' | 'flyguy' | 'rocketgirl' | 'chinese' | 'eng3a'
 
@@ -50,6 +51,66 @@ export interface ModuleMeta {
   load: () => Promise<ModuleData>
 }
 
+// ---- 公共模板 ----
+
+/** 遍历单元课程并按 key 去重取词的公共模板(语文生字/英语单词共用) */
+function collectUnitWords<L, W>(
+  units: { slug: string; lessons: L[] }[],
+  unitSlug: string,
+  getLessonItems: (lesson: L) => W[] | undefined,
+  wordKey: (w: W) => string,
+  toReviewWord: (w: W) => ReviewWord,
+): ReviewWord[] {
+  const u = units.find((x) => x.slug === unitSlug)
+  if (!u) return []
+  const seen = new Set<string>()
+  const out: ReviewWord[] = []
+  for (const lesson of u.lessons) {
+    for (const w of getLessonItems(lesson) ?? []) {
+      const k = wordKey(w)
+      if (seen.has(k)) continue
+      seen.add(k)
+      out.push(toReviewWord(w))
+    }
+  }
+  return out
+}
+
+/** 故事类模块的轻量注册壳:词表大,数据一律经 load() 动态 import 按需加载 */
+function makeStoryMeta(
+  id: Extract<ModuleId, 'flyguy' | 'rocketgirl'>,
+  label: string,
+  labelZh: string,
+  theme: { color: string; colorSoft: string },
+  loadStories: () => Promise<Story[]>,
+): ModuleMeta {
+  return {
+    id,
+    label,
+    labelZh,
+    color: theme.color,
+    colorSoft: theme.colorSoft,
+    kind: 'story',
+    items: [],
+    getWords: () => [],
+    load: async () => {
+      const stories = await loadStories()
+      return {
+        items: stories.map((s) => ({
+          id: s.slug,
+          title: s.title,
+          titleZh: '',
+          emoji: s.emoji,
+        })),
+        getWords: (itemId) => {
+          const st = stories.find((s) => s.slug === itemId)
+          return st ? st.words.map((w) => ({ en: w.en, zh: w.zh, emoji: w.emoji })) : []
+        },
+      }
+    },
+  }
+}
+
 const starlightMeta: ModuleMeta = {
   id: 'starlight',
   label: 'Starlight',
@@ -87,20 +148,14 @@ const chineseMeta: ModuleMeta = {
     titleZh: u.titleZh,
     emoji: u.emoji,
   })),
-  getWords: (unitSlug) => {
-    const u = chineseUnits.find((x) => x.slug === unitSlug)
-    if (!u) return []
-    const seen = new Set<string>()
-    const out: ReviewWord[] = []
-    for (const lesson of u.lessons) {
-      for (const h of lesson.hanzi ?? []) {
-        if (seen.has(h.char)) continue
-        seen.add(h.char)
-        out.push({ en: h.char, zh: `${h.pinyin} · ${h.group.join('、')}`, emoji: '🔤' })
-      }
-    }
-    return out
-  },
+  getWords: (unitSlug) =>
+    collectUnitWords(
+      chineseUnits,
+      unitSlug,
+      (l) => l.hanzi,
+      (h) => h.char,
+      (h) => ({ en: h.char, zh: `${h.pinyin} · ${h.group.join('、')}`, emoji: '🔤' }),
+    ),
   load: async () => ({ items: chineseMeta.items, getWords: chineseMeta.getWords }),
 }
 
@@ -119,76 +174,34 @@ const eng3aMeta: ModuleMeta = {
     titleZh: u.titleZh,
     emoji: u.emoji,
   })),
-  getWords: (unitSlug) => {
-    const u = eng3aUnits.find((x) => x.slug === unitSlug)
-    if (!u) return []
-    const seen = new Set<string>()
-    const out: ReviewWord[] = []
-    for (const lesson of u.lessons) {
-      for (const w of lesson.words ?? []) {
-        if (seen.has(w.en)) continue
-        seen.add(w.en)
-        out.push({ en: w.en, zh: w.zh, emoji: w.emoji ?? '🔤' })
-      }
-    }
-    return out
-  },
+  getWords: (unitSlug) =>
+    collectUnitWords(
+      eng3aUnits,
+      unitSlug,
+      (l) => l.words,
+      (w) => w.en,
+      (w) => ({ en: w.en, zh: w.zh, emoji: w.emoji ?? '🔤' }),
+    ),
   load: async () => ({ items: eng3aMeta.items, getWords: eng3aMeta.getWords }),
 }
 
 // ---- 故事类模块:轻量壳 + 动态加载数据 ----
 
-const flyGuyMeta: ModuleMeta = {
-  id: 'flyguy',
-  label: 'Fly Guy',
-  labelZh: '苍蝇小子',
-  color: FG_THEME.color,
-  colorSoft: FG_THEME.colorSoft,
-  kind: 'story',
-  items: [],
-  getWords: () => [],
-  load: async () => {
-    const { flyGuyStories } = await import('./flyguy')
-    return {
-      items: flyGuyStories.map((s) => ({
-        id: s.slug,
-        title: s.title,
-        titleZh: '',
-        emoji: s.emoji,
-      })),
-      getWords: (itemId) => {
-        const st = flyGuyStories.find((s) => s.slug === itemId)
-        return st ? st.words.map((w) => ({ en: w.en, zh: w.zh, emoji: w.emoji })) : []
-      },
-    }
-  },
-}
+const flyGuyMeta: ModuleMeta = makeStoryMeta(
+  'flyguy',
+  'Fly Guy',
+  '苍蝇小子',
+  FG_THEME,
+  async () => (await import('./flyguy')).flyGuyStories,
+)
 
-const rocketGirlMeta: ModuleMeta = {
-  id: 'rocketgirl',
-  label: 'Rocket Girl',
-  labelZh: '火箭女孩',
-  color: RG_THEME.color,
-  colorSoft: RG_THEME.colorSoft,
-  kind: 'story',
-  items: [],
-  getWords: () => [],
-  load: async () => {
-    const { rocketGirlStories } = await import('./rocketgirl')
-    return {
-      items: rocketGirlStories.map((s) => ({
-        id: s.slug,
-        title: s.title,
-        titleZh: '',
-        emoji: s.emoji,
-      })),
-      getWords: (itemId) => {
-        const st = rocketGirlStories.find((s) => s.slug === itemId)
-        return st ? st.words.map((w) => ({ en: w.en, zh: w.zh, emoji: w.emoji })) : []
-      },
-    }
-  },
-}
+const rocketGirlMeta: ModuleMeta = makeStoryMeta(
+  'rocketgirl',
+  'Rocket Girl',
+  '火箭女孩',
+  RG_THEME,
+  async () => (await import('./rocketgirl')).rocketGirlStories,
+)
 
 export const MODULES: Record<ModuleId, ModuleMeta> = {
   starlight: starlightMeta,

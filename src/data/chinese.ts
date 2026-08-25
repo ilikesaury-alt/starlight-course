@@ -9,6 +9,7 @@
 //  主题色采用「中国红」基调，各单元略有传统色变化。
 // ============================================================
 import type { ModuleTheme } from '@/utils/theme'
+import type { QuizQuestion } from './quiz-types'
 
 export interface Hanzi {
   /** 生字（会写字） */
@@ -58,19 +59,6 @@ export interface IdiomSet {
   items: IdiomItem[]
 }
 
-export interface QuizItem {
-  /** 题干 */
-  q: string
-  options: string[]
-  /** 正确选项下标 */
-  answer: number
-  explain?: string
-  /** 错题关联的记忆卡 key(如生字);缺省时该题错题不入错题本(阅读理解题无对应记忆卡) */
-  key?: string
-  /** 记忆卡中文释义;缺省时用正确选项文本 */
-  keyZh?: string
-}
-
 export interface ChineseLesson {
   id: number
   slug: string
@@ -80,7 +68,7 @@ export interface ChineseLesson {
   passages?: Passage[]
   hanzi?: Hanzi[]
   idioms?: IdiomSet[]
-  quiz: QuizItem[]
+  quiz: QuizQuestion[]
 }
 
 export interface ChineseUnit {

@@ -1,5 +1,5 @@
 // 故事类模块（Fly Guy / Rocket Girl 等）共享的数据结构。
-// FGWord/RGWord 与 FGStory/RGStory 结构与此一致，可被 StoryPage 直接复用。
+// flyguy.FGStory / rocketgirl.RGStory 均为 Story 的类型别名，可被 StoryPage 直接复用。
 
 export interface StoryWord {
   en: string

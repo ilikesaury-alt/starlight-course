@@ -9,18 +9,7 @@ import SafeBoundary from '@/components/SafeBoundary'
 import ConfirmDialog from '@/components/ConfirmDialog'
 import { dayStamp } from '@/data/srs'
 import { quizStars, isPassed } from '@/utils/stars'
-
-/** 自测题结构化类型：chinese.QuizItem 与 eng3a.EngExercise 均可赋值 */
-export interface SelfQuizItem {
-  q: string
-  options: string[]
-  answer: number
-  explain?: string
-  /** 错题关联的记忆卡 key(英文词/句);缺省时该题错题不入错题本 */
-  key?: string
-  /** 记忆卡中文释义;缺省时用正确选项文本 */
-  keyZh?: string
-}
+import type { QuizQuestion } from '@/data/quiz-types'
 
 export interface SelfStudyLessonProps {
   moduleId: string
@@ -41,7 +30,7 @@ export interface SelfStudyLessonProps {
   reciteDays: number[]
   onCheckin: () => void
   // ---- 自测 tab ----
-  quiz: SelfQuizItem[]
+  quiz: QuizQuestion[]
   lastResult?: { score: number; total: number; date: number }
   /** 交卷回调:score/total 为成绩,wrongKeys 为可入错题本的错题(key 非空的题) */
   onSubmitQuiz: (score: number, total: number, wrongKeys: { en: string; zh: string }[]) => void
@@ -235,7 +224,7 @@ function QuizTab({
   onSubmit,
   mcStyle,
 }: {
-  quiz: SelfQuizItem[]
+  quiz: QuizQuestion[]
   lastResult?: { score: number; total: number; date: number }
   onSubmit: (score: number, total: number, wrongKeys: { en: string; zh: string }[]) => void
   mcStyle: React.CSSProperties

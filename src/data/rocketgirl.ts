@@ -6,12 +6,10 @@
 import wordsData from './rocketgirl-words.json'
 import booksData from './rocketgirl-books.json'
 
-import type { Story, StoryWord } from './story-types'
+import type { Story } from './story-types'
 import { makeEmojiPicker, type EmojiRule } from '@/utils/storyEmoji'
 
-// RGWord/RGStory 与共享的 StoryWord/Story 结构一致(bookText 为可选字段);保留类型别名以兼容既有引用
-export type RGWord = StoryWord
-
+// RGStory 与共享的 Story 结构一致;保留类型别名以兼容既有引用
 export type RGStory = Story
 
 export interface RGBook {

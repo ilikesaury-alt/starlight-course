@@ -13,6 +13,7 @@
 //  英文朗读默认 lang='en'（SpeakButton 默认即英文），无需显式传 lang。
 // ============================================================
 import type { ModuleTheme } from '@/utils/theme'
+import type { QuizQuestion } from './quiz-types'
 
 // ---- 教材插图：Vite 在构建期按 glob 静态分析并套用 base 路径（GitHub Pages 友好）----
 const imgMap = import.meta.glob('./eng3a/img/*.jpg', {
@@ -47,16 +48,8 @@ export interface EngChant {
   zh?: string
 }
 
-export interface EngExercise {
-  q: string
-  options: string[]
-  answer: number
-  explain?: string
-  /** 错题关联的记忆卡 key(考的词/句);缺省时该题错题不入错题本 */
-  key?: string
-  /** 记忆卡中文释义;缺省时用正确选项文本 */
-  keyZh?: string
-}
+/** 综合练习题(与语文自测共用 QuizQuestion 结构) */
+export type EngExercise = QuizQuestion
 
 export interface EngLesson {
   id: number
