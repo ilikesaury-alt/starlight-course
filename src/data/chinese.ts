@@ -1,31 +1,31 @@
 // ============================================================
-//  三年级上册语文（人教版 / 统编版）必背知识点数据
+//  三年级上册语文（人教版 / 统编版 · 2024/2026 修订版）课程数据
 //  ------------------------------------------------------------
-//  按单元组织，每单元含若干「课」：
-//    · 课文重点段落 / 古诗词（知识点展示）
-//    · 写字表生字（拼音 + 组词）（知识点展示）
-//    · 语文园地·日积月累（俗语 / 成语 / 格言）（知识点展示）
-//    · quiz 自测练习（背诵打卡 + 自测在页面层实现）
-//  主题色采用「中国红」基调，各单元略有传统色变化。
+//  数据流：基于真实教材 PDF OCR 提取 + 人工校对后由脚本生成。
+//  本文件为生成产物，如需修改请改 scripts/build_chinese_data.py 后重跑。
 // ============================================================
 import type { ModuleTheme } from '@/utils/theme'
 import type { QuizQuestion } from './quiz-types'
 
+export type LessonKind =
+  | 'reading'
+  | 'poetry'
+  | 'speaking'
+  | 'writing'
+  | 'example'
+  | 'park'
+  | 'reading-club'
+  | 'appendix'
+
 export interface Hanzi {
-  /** 生字（会写字） */
   char: string
-  /** 拼音（带声调） */
   pinyin: string
-  /** 组词 */
   group: string[]
-  /** 释义（面向小朋友的简明白话解释） */
   mean?: string
 }
 
 export interface PoemLine {
-  /** 原句 */
   text: string
-  /** 逐句白话译文（面向小朋友） */
   explain?: string
 }
 
@@ -33,29 +33,24 @@ export interface Poem {
   title: string
   author: string
   dynasty: string
-  /** 诗句逐句（含白话译文） */
   lines: PoemLine[]
 }
 
 export interface Passage {
   title?: string
   text: string
-  /** 段落说明 / 背诵提示 */
   note?: string
 }
 
 export interface IdiomItem {
-  /** 词语 / 俗语 / 格言原文 */
   term: string
-  /** 出处 */
   source?: string
-  /** 释义（面向小朋友的简明白话解释） */
   meaning?: string
 }
 
 export interface IdiomSet {
   title: string
-  kind: 'idioms' | 'proverbs' | 'sayings'
+  kind: 'idioms' | 'proverbs' | 'sayings' | 'quotes' | 'poem'
   items: IdiomItem[]
 }
 
@@ -64,9 +59,12 @@ export interface ChineseLesson {
   slug: string
   title: string
   emoji: string
+  kind?: LessonKind
+  hint?: string
   poems?: Poem[]
   passages?: Passage[]
   hanzi?: Hanzi[]
+  words?: string[]
   idioms?: IdiomSet[]
   quiz: QuizQuestion[]
 }
@@ -81,1733 +79,1973 @@ export interface ChineseUnit {
   lessons: ChineseLesson[]
 }
 
-/** 全局中国红主题（页面根容器统一挂载） */
 export const CHINESE_THEME: ModuleTheme = { color: '#dc2626', colorSoft: '#fee2e2' }
 
-export const chineseUnits: ChineseUnit[] = [
-  // ============================== 第一单元 ==============================
-  {
-    id: 1,
-    slug: 'u1',
-    title: '第一单元',
-    titleZh: '多姿多彩的校园',
-    emoji: '🌱',
-    theme: { color: '#dc2626', colorSoft: '#fee2e2' },
-    lessons: [
-      {
-        id: 1,
-        slug: 'u1-1',
-        title: '大青树下的小学',
-        emoji: '🏫',
-        passages: [
-          {
-            title: '第 1 自然段（背诵）',
-            text: '早晨，从山坡上，从坪坝里，从一条条开着绒球花和太阳花的小路上，走来了许多小学生，有汉族的，有傣族的，有景颇族的，还有阿昌族和德昂族的。大家穿戴不同，来到学校，都成了好朋友。那鲜艳的服装，把学校打扮得绚丽多彩。',
-            note: '写各民族小学生一起上学的欢乐场景，注意「穿戴」「绚丽多彩」等词语。',
-          },
-        ],
-        quiz: [
-          {
-            q: '「从一条条开着绒球花和太阳花的小路上」，这句话运用了什么修辞手法？',
-            options: ['排比', '比喻', '夸张', '反问'],
-            answer: 0,
-            explain: '「从……从……从……」三个相同结构连用，是排比。',
-          },
-          {
-            q: '大青树下的小学里，小学生来自哪些民族？（多选概念，选「都包含」的一项）',
-            options: ['只有汉族', '汉族、傣族、景颇族、阿昌族、德昂族等', '只有傣族', '只有少数民族'],
-            answer: 1,
-            explain: '课文写到汉族、傣族、景颇族、阿昌族和德昂族的小朋友。',
-          },
-        ],
-      },
-      {
-        id: 2,
-        slug: 'u1-2',
-        title: '花的学校',
-        emoji: '🌸',
-        passages: [
-          {
-            title: '第 2 自然段（背诵）',
-            text: '当雷云在天上轰响，六月的阵雨落下的时候，润湿的东风走过荒野，在竹林中吹着口笛。于是，一群一群的花从无人知道的地方突然跑出来，在绿草上跳舞、狂欢。',
-            note: '把「东风」「花」当成人来写，是拟人句。',
-          },
-        ],
-        quiz: [
-          {
-            q: '「润湿的东风走过荒野，在竹林中吹着口笛」运用了什么写法？',
-            options: ['拟人', '比喻', '排比', '设问'],
-            answer: 0,
-            explain: '东风「走过」「吹着口笛」是人的动作，属于拟人。',
-          },
-          {
-            q: '「一群一群的花从无人知道的地方突然跑出来」，花是在什么时候跑出来的？',
-            options: ['六月阵雨落下时', '冬天', '晴天中午', '夜晚'],
-            answer: 0,
-            explain: '课文写「六月的阵雨落下的时候」花跑了出来。',
-          },
-        ],
-      },
-      {
-        id: 3,
-        slug: 'u1-3',
-        title: '语文园地一 · 日积月累',
-        emoji: '📜',
-        poems: [
-          {
-            title: '所见',
-            author: '袁枚',
-            dynasty: '清',
-            lines: [
-              { text: '牧童骑黄牛，', explain: '牧童骑在黄牛背上，' },
-              { text: '歌声振林樾。', explain: '嘹亮的歌声在树林中回荡。' },
-              { text: '意欲捕鸣蝉，', explain: '心里想捉树上鸣叫的蝉，' },
-              { text: '忽然闭口立。', explain: '忽然闭嘴站住不动了。' },
-            ],
-          },
-        ],
-        quiz: [
-          {
-            q: '《所见》的作者是哪个朝代的？',
-            options: ['唐', '宋', '清', '元'],
-            answer: 2,
-            explain: '《所见》是清代诗人袁枚所作。',
-          },
-          {
-            q: '「意欲捕鸣蝉，忽然闭口立」中，牧童为什么忽然闭口？',
-            options: ['想捉蝉怕惊飞它', '睡着了', '生气了', '唱歌累了'],
-            answer: 0,
-            explain: '牧童想要捕捉鸣叫的蝉，所以闭上嘴站着不动。',
-          },
-        ],
-      },
-      {
-        id: 4,
-        slug: 'u1-4',
-        title: '第一单元 · 生字词',
-        emoji: '✍️',
-        hanzi: [
-          {
-  char: '晨', pinyin: 'chén', group: ['早晨', '晨光'],
-  mean: '清早；天刚亮。'
-},
-          {
-  char: '绒', pinyin: 'róng', group: ['绒毛', '绒球'],
-  mean: '柔软细小的毛。'
-},
-          {
-  char: '球', pinyin: 'qiú', group: ['皮球', '足球'],
-  mean: '圆形的立体物；体育用品。'
-},
-          {
-  char: '汉', pinyin: 'hàn', group: ['汉族', '汉字'],
-  mean: '汉族；男子。'
-},
-          {
-  char: '艳', pinyin: 'yàn', group: ['鲜艳', '艳丽'],
-  mean: '色彩鲜明好看。'
-},
-          {
-  char: '服', pinyin: 'fú', group: ['衣服', '服务'],
-  mean: '衣裳；担任。'
-},
-          {
-  char: '装', pinyin: 'zhuāng', group: ['服装', '化妆'],
-  mean: '衣裳；打扮。'
-},
-          {
-  char: '扮', pinyin: 'bàn', group: ['打扮', '扮演'],
-  mean: '装饰；表演。'
-},
-          {
-  char: '读', pinyin: 'dú', group: ['读书', '朗读'],
-  mean: '看着文字念；学习。'
-},
-          {
-  char: '静', pinyin: 'jìng', group: ['安静', '平静'],
-  mean: '没有声音；不动。'
-},
-          {
-  char: '停', pinyin: 'tíng', group: ['停止', '停车'],
-  mean: '止住；留下。'
-},
-          {
-  char: '粗', pinyin: 'cū', group: ['粗心', '粗壮'],
-  mean: '不细心；条状物粗大。'
-},
-          {
-  char: '影', pinyin: 'yǐng', group: ['影子', '电影'],
-  mean: '物体挡光形成的暗像。'
-},
-          {
-  char: '落', pinyin: 'luò', group: ['落下', '落叶'],
-  mean: '掉下；下降。'
-},
-          {
-  char: '荒', pinyin: 'huāng', group: ['荒野', '荒凉'],
-  mean: '没人耕种；冷清。'
-},
-          {
-  char: '笛', pinyin: 'dí', group: ['笛子', '口笛'],
-  mean: '一种管乐器。'
-},
-          {
-  char: '舞', pinyin: 'wǔ', group: ['跳舞', '舞蹈'],
-  mean: '跳舞。'
-},
-          {
-  char: '狂', pinyin: 'kuáng', group: ['狂欢', '狂风'],
-  mean: '猛烈；发疯。'
-},
-          {
-  char: '罚', pinyin: 'fá', group: ['罚站', '惩罚'],
-  mean: '处罚。'
-},
-          {
-  char: '假', pinyin: 'jià', group: ['放假', '假期'],
-  mean: '放假；休息的日子。'
-},
-          {
-  char: '互', pinyin: 'hù', group: ['互相', '互动'],
-  mean: '彼此；交替。'
-},
-          {
-  char: '所', pinyin: 'suǒ', group: ['所以', '场所'],
-  mean: '地方；原因。'
-},
-          {
-  char: '够', pinyin: 'gòu', group: ['足够', '能够'],
-  mean: '充足；达到。'
-},
-          {
-  char: '猜', pinyin: 'cāi', group: ['猜想', '猜测'],
-  mean: '推测；估摸。'
-},
-          {
-  char: '扬', pinyin: 'yáng', group: ['飞扬', '表扬'],
-  mean: '高举；飘起。'
-},
-          {
-  char: '臂', pinyin: 'bì', group: ['手臂', '双臂'],
-  mean: '胳膊。'
-},
-        ],
-        quiz: [
-          {
-            q: '「晨」的拼音是？',
-            options: ['chén', 'chéng', 'cén', 'chěn'],
-            answer: 0,
-            explain: '晨 = chén（早晨）。',
-          },
-          {
-            q: '「舞」可以组词？',
-            options: ['跳舞', '午饭', '武器', '财产'],
-            answer: 0,
-            explain: '舞 → 跳舞、舞蹈。',
-          },
-          {
-            q: '「假」在「放假」中读？',
-            options: ['jià', 'jiǎ', 'xià', 'há'],
-            answer: 0,
-            explain: '放假、假期读 jià；真假读 jiǎ。',
-          },
-        ],
-      },
-    ],
-  },
+const u1: ChineseUnit = {
+  id: 1,
+  slug: 'u1',
+  title: '第一单元',
+  titleZh: '多姿多彩的校园',
+  emoji: '🌱',
+  theme: { color: '#dc2626', colorSoft: '#fee2e2' },
+  lessons: [
+    {
+      id: 1,
+      slug: 'u1-1',
+      title: '大青树下的小学',
+      emoji: '🏫',
+      kind: 'reading',
+      passages: [
+        {
+          title: '第 1 自然段（背诵）',
+          text: '早晨，从山坡上，从坪坝里，从一条条开着绒球花和太阳花的小路上，走来了许多小学生，有汉族的，有傣族的，有景颇族的，还有阿昌族和德昂族的。大家穿戴不同，来到学校，都成了好朋友。',
+          note: '写各民族小学生一起上学的欢乐场景。',
+        },
+      ],
+      hanzi: [
+        { char: '晨', pinyin: 'chén', group: ['早晨', '晨光'], mean: '清早，天刚亮。' },
+        { char: '绒', pinyin: 'róng', group: ['绒毛', '绒球'], mean: '柔软细小的毛。' },
+        { char: '球', pinyin: 'qiú', group: ['皮球', '足球'], mean: '圆形的立体物。' },
+        { char: '汉', pinyin: 'hàn', group: ['汉族', '汉字'], mean: '汉族；男子。' },
+        { char: '艳', pinyin: 'yàn', group: ['鲜艳', '艳丽'], mean: '色彩鲜明好看。' },
+        { char: '服', pinyin: 'fú', group: ['衣服', '服务'], mean: '衣裳；担任。' },
+        { char: '装', pinyin: 'zhuāng', group: ['服装', '化妆'], mean: '衣裳；打扮。' },
+        { char: '扮', pinyin: 'bàn', group: ['打扮', '扮演'], mean: '装饰；表演。' },
+        { char: '读', pinyin: 'dú', group: ['读书', '朗读'], mean: '看着文字念；学习。' },
+        { char: '静', pinyin: 'jìng', group: ['安静', '平静'], mean: '没有声音；不动。' },
+        { char: '停', pinyin: 'tíng', group: ['停止', '停车'], mean: '止住；留下。' },
+        { char: '粗', pinyin: 'cū', group: ['粗心', '粗壮'], mean: '不细心；条状物粗大。' },
+        { char: '影', pinyin: 'yǐng', group: ['影子', '电影'], mean: '物体挡光形成的暗像。' },
+      ],
+      quiz: [
+        { q: '「从一条条开着绒球花和太阳花的小路上」运用了什么修辞手法？', options: ['排比', '比喻', '夸张', '反问'], answer: 0, explain: '「从……从……从……」三个相同结构连用，是排比。' },
+        { q: '大青树下的小学里，小学生来自哪些民族？', options: ['只有汉族', '汉族、傣族、景颇族、阿昌族、德昂族等', '只有傣族', '只有少数民族'], answer: 1, explain: '课文写到汉族、傣族、景颇族、阿昌族和德昂族的小朋友。' },
+      ],
+    },
+    {
+      id: 2,
+      slug: 'u1-2',
+      title: '花的学校',
+      emoji: '🌸',
+      kind: 'reading',
+      passages: [
+        {
+          title: '第 2 自然段（背诵）',
+          text: '当雷云在天上轰响，六月的阵雨落下的时候，润湿的东风走过荒野，在竹林中吹着口笛。于是，一群一群的花从无人知道的地方突然跑出来，在绿草上跳舞、狂欢。',
+          note: '把「东风」「花」当成人来写，是拟人句。',
+        },
+      ],
+      hanzi: [
+        { char: '落', pinyin: 'luò', group: ['落下', '落叶'], mean: '掉下；下降。' },
+        { char: '荒', pinyin: 'huāng', group: ['荒野', '荒凉'], mean: '没人耕种；冷清。' },
+        { char: '笛', pinyin: 'dí', group: ['笛子', '口笛'], mean: '管乐器。' },
+        { char: '舞', pinyin: 'wǔ', group: ['跳舞', '舞蹈'], mean: '摇动身体表演。' },
+        { char: '狂', pinyin: 'kuáng', group: ['狂欢', '疯狂'], mean: '猛烈；纵情。' },
+        { char: '罚', pinyin: 'fá', group: ['处罚', '惩罚'], mean: '处分；惩治。' },
+        { char: '互', pinyin: 'hù', group: ['互相', '互助'], mean: '彼此。' },
+        { char: '所', pinyin: 'suǒ', group: ['所以', '住所'], mean: '地方；助词。' },
+        { char: '够', pinyin: 'gòu', group: ['足够', '能够'], mean: '达到某种程度。' },
+        { char: '猜', pinyin: 'cāi', group: ['猜测', '猜想'], mean: '推测；疑心。' },
+        { char: '扬', pinyin: 'yáng', group: ['飘扬', '表扬'], mean: '高举；传播。' },
+        { char: '臂', pinyin: 'bì', group: ['手臂', '双臂'], mean: '胳膊。' },
+      ],
+      quiz: [
+        { q: '「润湿的东风走过荒野，在竹林中吹着口笛」运用了什么写法？', options: ['拟人', '比喻', '排比', '设问'], answer: 0, explain: '东风「走过」「吹着口笛」是人的动作，属于拟人。' },
+        { q: '花是在什么时候「跑出来」的？', options: ['六月阵雨落下时', '冬天', '晴天中午', '夜晚'], answer: 0, explain: '课文写「六月的阵雨落下的时候」花跑了出来。' },
+      ],
+    },
+    {
+      id: 3,
+      slug: 'u1-3',
+      title: '不懂就要问',
+      emoji: '💡',
+      kind: 'reading',
+      passages: [
+        {
+          title: '孙中山的话（背诵）',
+          text: '学问学问，不懂就要问。为了弄清楚道理，就是挨打也值得。',
+          note: '体现孙中山勤学好问的精神。',
+        },
+      ],
+      hanzi: [
+        { char: '诵', pinyin: 'sòng', group: ['背诵', '诵读'], mean: '读出声音来。' },
+        { char: '例', pinyin: 'lì', group: ['例子', '例如'], mean: '可以做依据的事物。' },
+        { char: '糊', pinyin: 'hú', group: ['糊涂', '糊口'], mean: '不明事理；勉强维持。' },
+        { char: '涂', pinyin: 'tú', group: ['涂抹', '糊涂'], mean: '使颜色、油漆等附着在物体上。' },
+        { char: '厉', pinyin: 'lì', group: ['厉害', '严厉'], mean: '严格；猛烈。' },
+        { char: '详', pinyin: 'xiáng', group: ['详细', '端详'], mean: '细密；完备。' },
+        { char: '挨', pinyin: 'ái', group: ['挨打', '挨饿'], mean: '遭受；忍受。' },
+      ],
+      quiz: [
+        { q: '孙中山为什么宁愿挨打也要问问题？', options: ['想弄清楚道理', '喜欢被打', '先生要求他问', '同学让他问'], answer: 0, explain: '他认为「学问学问，不懂就要问」，为了弄清楚道理值得。' },
+        { q: '「私塾」里先生是怎样上课的？', options: ['只讲意思不读书', '先生念学生跟着念，读熟后背诵', '学生自学', '只做游戏'], answer: 1, explain: '课文写先生念，学生跟着念，读熟后背诵，先生很少讲意思。' },
+      ],
+    },
+    {
+      id: 4,
+      slug: 'u1-4',
+      title: '口语交际 · 我的暑假生活',
+      emoji: '🗣️',
+      kind: 'speaking',
+      hint: '选择暑假中新鲜、有趣或印象深刻的事情，讲清楚时间、地点、人物和经过，听的同学可以提问、补充。',
+      quiz: [],
+    },
+    {
+      id: 5,
+      slug: 'u1-5',
+      title: '习作 · 猜猜他是谁',
+      emoji: '✏️',
+      kind: 'writing',
+      hint: '选择一个同学，用几句话或一段话写一写他。文中不能出现他的名字，但要让别人读了能猜出你写的是谁。注意一段话开头空两格。',
+      quiz: [],
+    },
+    {
+      id: 6,
+      slug: 'u1-6',
+      title: '语文园地一',
+      emoji: '📜',
+      kind: 'park',
+      idioms: [
+        {
+          title: '日积月累 · 《所见》',
+          kind: 'poem',
+          items: [{ term: '牧童骑黄牛，歌声振林樾。意欲捕鸣蝉，忽然闭口立。', source: '清 · 袁枚', meaning: '牧童骑在黄牛背上唱歌，忽然想捉树上鸣叫的蝉，于是闭上嘴静静地站着。' }],
+        },
+        {
+          title: '词句段运用 · 身体部位成语',
+          kind: 'idioms',
+          items: [
+            { term: '摇头晃脑', meaning: '形容自得其乐或读书时吟诵的样子。' },
+            { term: '披头散发', meaning: '形容头发散乱，仪容不整。' },
+            { term: '张牙舞爪', meaning: '形容猛兽凶恶可怕，也比喻猖狂凶恶。' },
+            { term: '提心吊胆', meaning: '形容十分担心或害怕。' },
+            { term: '面红耳赤', meaning: '形容因急躁、害羞等脸上发红的样子。' },
+            { term: '手忙脚乱', meaning: '形容做事慌张而没有条理。' },
+            { term: '手疾眼快', meaning: '形容做事机警敏捷。' },
+            { term: '口干舌燥', meaning: '口舌都干了，形容说话太多。' },
+          ],
+        },
+      ],
+      quiz: [
+        { q: '《所见》的作者是谁？', options: ['唐·李白', '清·袁枚', '宋·叶绍翁', '唐·杜牧'], answer: 1, explain: '《所见》是清代诗人袁枚所作。' },
+        { q: '「张牙舞爪」通常用来形容什么？', options: ['高兴', '凶猛或猖狂', '安静', '整洁'], answer: 1, explain: '张牙舞爪形容猛兽凶恶，也比喻猖狂凶恶。' },
+      ],
+    },
+  ],
+}
 
-  // ============================== 第二单元 ==============================
-  {
-    id: 2,
-    slug: 'u2',
-    title: '第二单元',
-    titleZh: '金秋时节',
-    emoji: '🍂',
-    theme: { color: '#ea580c', colorSoft: '#ffedd5' },
-    lessons: [
-      {
-        id: 1,
-        slug: 'u2-1',
-        title: '古诗三首',
-        emoji: '📜',
-        poems: [
-          {
-            title: '山行',
-            author: '杜牧',
-            dynasty: '唐',
-            lines: [
-              { text: '远上寒山石径斜，', explain: '弯弯曲曲的石头小路伸向远处的秋山，' },
-              { text: '白云生处有人家。', explain: '白云升起的地方隐隐约约住着人家。' },
-              { text: '停车坐爱枫林晚，', explain: '因为喜爱傍晚的枫林而停下车来，' },
-              { text: '霜叶红于二月花。', explain: '经霜的枫叶比二月的春花还要红。' },
-            ],
-          },
-          {
-            title: '赠刘景文',
-            author: '苏轼',
-            dynasty: '宋',
-            lines: [
-              { text: '荷尽已无擎雨盖，', explain: '荷花谢了，再没有像伞一样撑开的荷叶，' },
-              { text: '菊残犹有傲霜枝。', explain: '菊花虽残，却还有傲视寒霜的枝条。' },
-              { text: '一年好景君须记，', explain: '一年中最美的景色你可要记住，' },
-              { text: '最是橙黄橘绿时。', explain: '正是橙子黄、橘子绿的秋末冬初。' },
-            ],
-          },
-          {
-            title: '夜书所见',
-            author: '叶绍翁',
-            dynasty: '宋',
-            lines: [
-              { text: '萧萧梧叶送寒声，', explain: '梧桐叶沙沙作响，送来阵阵寒意，' },
-              { text: '江上秋风动客情。', explain: '江上的秋风触动了游子的思乡之情。' },
-              { text: '知有儿童挑促织，', explain: '知道有孩童在拨弄蟋蟀，' },
-              { text: '夜深篱落一灯明。', explain: '深夜里篱笆边有一盏灯火明亮。' },
-            ],
-          },
-        ],
-        quiz: [
-          {
-            q: '「停车坐爱枫林晚」中「坐」的意思是？',
-            options: ['因为', '坐下', '座位', '乘着'],
-            answer: 0,
-            explain: '古文中「坐」常作「因为」讲：因为喜爱傍晚的枫林而停车。',
-          },
-          {
-            q: '《赠刘景文》中「最是橙黄橘绿时」写的是哪个季节？',
-            options: ['秋末冬初', '春天', '盛夏', '深冬'],
-            answer: 0,
-            explain: '橙子黄、橘子绿，是秋末冬初的好景。',
-          },
-          {
-            q: '《夜书所见》「知有儿童挑促织」中「促织」指？',
-            options: ['蟋蟀（蛐蛐）', '蝴蝶', '蚂蚁', '蜜蜂'],
-            answer: 0,
-            explain: '促织即蟋蟀，儿童夜里拨弄蟋蟀玩耍。',
-          },
-        ],
-      },
-      {
-        id: 2,
-        slug: 'u2-2',
-        title: '秋天的雨（第 2 段）',
-        emoji: '🍁',
-        passages: [
-          {
-            title: '第 2 自然段（背诵）',
-            text: '秋天的雨，有一盒五彩缤纷的颜料。你看，它把黄色给了银杏树，黄黄的叶子像一把把小扇子，扇哪扇哪，扇走了夏天的炎热。它把红色给了枫树，红红的枫叶像一枚枚邮票，飘哇飘哇，邮来了秋天的凉爽。金黄色是给田野的，看，田野像金色的海洋。橙红色是给果树的，橘子、柿子你挤我碰，争着要人们去摘呢！菊花仙子得到的颜色就更多了，紫红的、淡黄的、雪白的……美丽的菊花在秋雨里频频点头。',
-            note: '比喻句：叶子像小扇子、枫叶像邮票、田野像海洋。',
-          },
-        ],
-        quiz: [
-          {
-            q: '「黄黄的叶子像一把把小扇子」是哪种修辞手法？',
-            options: ['比喻', '拟人', '夸张', '排比'],
-            answer: 0,
-            explain: '把叶子比作小扇子，是比喻。',
-          },
-          {
-            q: '「橘子、柿子你挤我碰，争着要人们去摘呢」用了什么写法？',
-            options: ['拟人', '比喻', '设问', '对偶'],
-            answer: 0,
-            explain: '果子「你挤我碰」「争着」像人一样，是拟人。',
-          },
-        ],
-      },
-      {
-        id: 3,
-        slug: 'u2-3',
-        title: '语文园地二 · 日积月累',
-        emoji: '🍃',
-        idioms: [
-          {
-            title: '描写秋天的成语',
-            kind: 'idioms',
-            items: [
-              { term: '秋高气爽', meaning: '秋天天空晴朗，气候凉爽宜人。' },
-              { term: '天高云淡', meaning: '天空高远，云彩稀薄。' },
-              { term: '秋风习习', meaning: '秋风轻轻地吹。' },
-              { term: '一叶知秋', meaning: '看到一片落叶就知道秋天到了，比喻由小见大。' },
-              { term: '金桂飘香', meaning: '金色的桂花散发香气。' },
-              { term: '层林尽染', meaning: '层层树林都被秋色染成各种颜色。' },
-              { term: '五谷丰登', meaning: '五谷都丰收了。' },
-              { term: '果实累累', meaning: '树上结的果子很多。' },
-              { term: '春华秋实', meaning: '春天开花，秋天结果，比喻有付出才有收获。' },
-            ],
-          },
-        ],
-        quiz: [
-          {
-            q: '下列哪个成语不是描写秋天的？',
-            options: ['秋高气爽', '金桂飘香', '春华秋实', '骄阳似火'],
-            answer: 3,
-            explain: '骄阳似火描写夏天炎热；其余都和秋天有关。',
-          },
-          {
-            q: '「一叶知秋」的意思最接近？',
-            options: ['看到一片落叶就知道秋天来了', '树叶很多', '秋天很长', '风很大'],
-            answer: 0,
-            explain: '比喻通过细微迹象可以推测事物的发展趋向。',
-          },
-        ],
-      },
-      {
-        id: 4,
-        slug: 'u2-4',
-        title: '第二单元 · 生字词',
-        emoji: '✍️',
-        hanzi: [
-          {
-  char: '寒', pinyin: 'hán', group: ['寒冷', '寒风'],
-  mean: '冷。'
-},
-          {
-  char: '径', pinyin: 'jìng', group: ['小径', '路径'],
-  mean: '小路。'
-},
-          {
-  char: '斜', pinyin: 'xié', group: ['斜阳', '倾斜'],
-  mean: '不正；歪。'
-},
-          {
-  char: '霜', pinyin: 'shuāng', group: ['秋霜', '冰霜'],
-  mean: '水汽遇冷凝结的白冰晶。'
-},
-          {
-  char: '赠', pinyin: 'zèng', group: ['赠送', '赠品'],
-  mean: '送。'
-},
-          {
-  char: '刘', pinyin: 'liú', group: ['姓刘', '刘海'],
-  mean: '姓氏。'
-},
-          {
-  char: '盖', pinyin: 'gài', group: ['盖子', '锅盖'],
-  mean: '器物上部遮挡的东西。'
-},
-          {
-  char: '菊', pinyin: 'jú', group: ['菊花', '秋菊'],
-  mean: '菊花。'
-},
-          {
-  char: '残', pinyin: 'cán', group: ['残菊', '残月'],
-  mean: '不完整；剩余。'
-},
-          {
-  char: '君', pinyin: 'jūn', group: ['君子', '诸君'],
-  mean: '对人的尊称。'
-},
-          {
-  char: '橙', pinyin: 'chéng', group: ['橙子', '橙色'],
-  mean: '橙子；橙黄色。'
-},
-          {
-  char: '送', pinyin: 'sòng', group: ['送给', '送别'],
-  mean: '把东西给人；送行。'
-},
-          {
-  char: '挑', pinyin: 'tiāo', group: ['挑选', '挑食'],
-  mean: '选；用肩担。'
-},
-          {
-  char: '铺', pinyin: 'pū', group: ['铺满', '床铺'],
-  mean: '把东西展开摆好。'
-},
-          {
-  char: '泥', pinyin: 'ní', group: ['泥土', '水泥'],
-  mean: '水和土的混合。'
-},
-          {
-  char: '晶', pinyin: 'jīng', group: ['水晶', '亮晶晶'],
-  mean: '光亮透明的东西。'
-},
-          {
-  char: '紧', pinyin: 'jǐn', group: ['紧张', '抓紧'],
-  mean: '密切合拢；急。'
-},
-          {
-  char: '院', pinyin: 'yuàn', group: ['院子', '庭院'],
-  mean: '院子；场所。'
-},
-          {
-  char: '印', pinyin: 'yìn', group: ['印象', '脚印'],
-  mean: '痕迹；图章。'
-},
-          {
-  char: '排', pinyin: 'pái', group: ['排队', '排列'],
-  mean: '摆成行列。'
-},
-          {
-  char: '列', pinyin: 'liè', group: ['排列', '列车'],
-  mean: '行列。'
-},
-          {
-  char: '规', pinyin: 'guī', group: ['规则', '规定'],
-  mean: '法则；圆规。'
-},
-          {
-  char: '则', pinyin: 'zé', group: ['法则', '否则'],
-  mean: '规范；就。'
-},
-          {
-  char: '乱', pinyin: 'luàn', group: ['杂乱', '凌乱'],
-  mean: '没有秩序。'
-},
-          {
-  char: '棕', pinyin: 'zōng', group: ['棕色', '棕树'],
-  mean: '棕树；棕毛色。'
-},
-          {
-  char: '迟', pinyin: 'chí', group: ['迟到', '迟延'],
-  mean: '慢；晚。'
-},
-          {
-  char: '盒', pinyin: 'hé', group: ['盒子', '文具盒'],
-  mean: '盛东西的器物。'
-},
-          {
-  char: '颜', pinyin: 'yán', group: ['颜色', '容颜'],
-  mean: '色彩；脸面。'
-},
-          {
-  char: '料', pinyin: 'liào', group: ['颜料', '材料'],
-  mean: '材料；推测。'
-},
-          {
-  char: '票', pinyin: 'piào', group: ['邮票', '车票'],
-  mean: '票据。'
-},
-          {
-  char: '飘', pinyin: 'piāo', group: ['飘扬', '飘落'],
-  mean: '随风飞动。'
-},
-          {
-  char: '争', pinyin: 'zhēng', group: ['争论', '争取'],
-  mean: '抢；力求。'
-},
-          {
-  char: '仙', pinyin: 'xiān', group: ['神仙', '仙女'],
-  mean: '神仙。'
-},
-          {
-  char: '闻', pinyin: 'wén', group: ['新闻', '见闻'],
-  mean: '听见；消息。'
-},
-          {
-  char: '梨', pinyin: 'lí', group: ['梨子', '梨花'],
-  mean: '梨树；梨子。'
-},
-          {
-  char: '淡', pinyin: 'dàn', group: ['平淡', '冷淡'],
-  mean: '味道不浓；颜色浅。'
-},
-        ],
-        quiz: [
-          {
-            q: '「径」的拼音是？',
-            options: ['jìng', 'jīng', 'jìn', 'jíng'],
-            answer: 0,
-            explain: '径 = jìng（小径、路径）。',
-          },
-          {
-            q: '「橙」可以组词？',
-            options: ['橙色', '澄清', '城市', '成功'],
-            answer: 0,
-            explain: '橙 → 橙子、橙色。',
-          },
-        ],
-      },
-    ],
-  },
+const u2: ChineseUnit = {
+  id: 2,
+  slug: 'u2',
+  title: '第二单元',
+  titleZh: '金秋时节',
+  emoji: '🍂',
+  theme: { color: '#ea580c', colorSoft: '#ffedd5' },
+  lessons: [
+    {
+      id: 1,
+      slug: 'u2-1',
+      title: '古诗三首',
+      emoji: '📜',
+      kind: 'poetry',
+      poems: [
+        {
+          title: '望洞庭',
+          author: '刘禹锡',
+          dynasty: '唐',
+          lines: [
+            { text: '湖光秋月两相和，', explain: '洞庭湖水光与秋月交相辉映，和谐宁静。' },
+            { text: '潭面无风镜未磨。', explain: '湖面没有风，就像一面没有打磨过的铜镜。' },
+            { text: '遥望洞庭山水翠，', explain: '远远望去，洞庭湖的山水一片翠绿。' },
+            { text: '白银盘里一青螺。', explain: '洞庭湖像白银盘，君山就像盘中的一只青螺。' },
+          ],
+        },
+        {
+          title: '山行',
+          author: '杜牧',
+          dynasty: '唐',
+          lines: [
+            { text: '远上寒山石径斜，', explain: '沿着弯弯曲曲的小路登上深秋的山。' },
+            { text: '白云生处有人家。', explain: '白云缭绕的地方隐约有几户人家。' },
+            { text: '停车坐爱枫林晚，', explain: '我停下车来，是因为喜爱傍晚时分的枫树林。' },
+            { text: '霜叶红于二月花。', explain: '经霜打过的枫叶，比二月盛开的鲜花还要红艳。' },
+          ],
+        },
+        {
+          title: '夜书所见',
+          author: '叶绍翁',
+          dynasty: '宋',
+          lines: [
+            { text: '萧萧梧叶送寒声，', explain: '瑟瑟的秋风吹动梧桐叶，送来阵阵寒意。' },
+            { text: '江上秋风动客情。', explain: '江上的秋风触动了游子的思乡之情。' },
+            { text: '知有儿童挑促织，', explain: '料想是孩子们在捉蟋蟀。' },
+            { text: '夜深篱落一灯明。', explain: '夜深了，远处篱笆下还亮着一盏灯。' },
+          ],
+        },
+      ],
+      hanzi: [
+        { char: '庭', pinyin: 'tíng', group: ['庭院', '家庭'], mean: '院子；厅堂。' },
+        { char: '未', pinyin: 'wèi', group: ['未来', '未必'], mean: '没有；不。' },
+        { char: '磨', pinyin: 'mó', group: ['磨练', '磨刀'], mean: '摩擦；打磨。' },
+        { char: '寒', pinyin: 'hán', group: ['寒冷', '寒冬'], mean: '冷。' },
+        { char: '径', pinyin: 'jìng', group: ['石径', '小径'], mean: '小路。' },
+        { char: '斜', pinyin: 'xié', group: ['斜坡', '歪斜'], mean: '不正；弯曲。' },
+        { char: '枫', pinyin: 'fēng', group: ['枫叶', '枫树'], mean: '落叶乔木，叶子秋季变红。' },
+        { char: '霜', pinyin: 'shuāng', group: ['霜冻', '秋霜'], mean: '气温降到零度以下时，地面凝结成的白色冰晶。' },
+        { char: '挑', pinyin: 'tiǎo', group: ['挑动', '挑战'], mean: '用细长的东西拨弄。' },
+        { char: '促', pinyin: 'cù', group: ['促进', '促使'], mean: '推动；靠近。' },
+      ],
+      quiz: [
+        { q: '《山行》中「霜叶红于二月花」写出了枫叶的什么特点？', options: ['很香', '比春花还红', '很多', '很小'], answer: 1, explain: '经霜的枫叶比二月的花还要红艳。' },
+        { q: '《望洞庭》把君山比作什么？', options: ['青螺', '白银盘', '镜子', '玉石'], answer: 0, explain: '「白银盘里一青螺」把君山比作青螺。' },
+        { q: '《夜书所见》的作者是哪个朝代的？', options: ['唐', '宋', '清', '明'], answer: 1, explain: '《夜书所见》是宋代诗人叶绍翁所作。' },
+      ],
+    },
+    {
+      id: 2,
+      slug: 'u2-2',
+      title: '铺满金色巴掌的水泥道',
+      emoji: '🍁',
+      kind: 'reading',
+      passages: [
+        {
+          title: '重点段落（背诵）',
+          text: '道路两旁的法国梧桐树，掉下了一片片金黄金黄的叶子。这一片片闪着雨珠的叶子，一掉下来，便紧紧地粘在湿漉漉的水泥道上了。',
+          note: '把梧桐落叶比作「金色巴掌」，充满秋意。',
+        },
+      ],
+      hanzi: [
+        { char: '铺', pinyin: 'pū', group: ['铺开', '铺路'], mean: '把东西展开或摊平。' },
+        { char: '晶', pinyin: 'jīng', group: ['晶莹', '水晶'], mean: '光亮透明。' },
+        { char: '紧', pinyin: 'jǐn', group: ['紧张', '抓紧'], mean: '密切合拢；不放松。' },
+        { char: '印', pinyin: 'yìn', group: ['脚印', '印象'], mean: '痕迹；留下痕迹。' },
+        { char: '案', pinyin: 'àn', group: ['图案', '方案'], mean: '长条的桌子；计划。' },
+        { char: '排', pinyin: 'pái', group: ['排列', '排队'], mean: '按顺序摆；行列。' },
+        { char: '规', pinyin: 'guī', group: ['规则', '规矩'], mean: '画圆形的工具；法则。' },
+        { char: '则', pinyin: 'zé', group: ['规则', '原则'], mean: '模范；规程。' },
+        { char: '乱', pinyin: 'luàn', group: ['凌乱', '杂乱'], mean: '没有秩序。' },
+        { char: '棕', pinyin: 'zōng', group: ['棕色', '棕熊'], mean: '棕毛的颜色。' },
+        { char: '迟', pinyin: 'chí', group: ['迟到', '推迟'], mean: '慢；比规定时间晚。' },
+      ],
+      quiz: [
+        { q: '「金色巴掌」指的是什么？', options: ['梧桐树叶', '手掌', '金币', '菊花'], answer: 0, explain: '作者把金黄的梧桐落叶比作金色巴掌。' },
+        { q: '水泥道为什么是「湿漉漉」的？', options: ['下过雨', '有人洒水', '河水涨了', '天气潮湿'], answer: 0, explain: '课文写雨后落叶粘在湿漉漉的水泥道上。' },
+      ],
+    },
+    {
+      id: 3,
+      slug: 'u2-3',
+      title: '秋天的雨',
+      emoji: '🌧️',
+      kind: 'reading',
+      passages: [
+        {
+          title: '第 2 自然段（背诵）',
+          text: '秋天的雨，有一盒五彩缤纷的颜料。你看，它把黄色给了银杏树，黄黄的叶子像一把把小扇子，扇哪扇哪，扇走了夏天的炎热。它把红色给了枫树，红红的枫叶像一枚枚邮票，飘哇飘哇，邮来了秋天的凉爽。',
+          note: '用比喻和拟人写秋天的色彩。',
+        },
+      ],
+      hanzi: [
+        { char: '盒', pinyin: 'hé', group: ['盒子', '铅笔盒'], mean: '盛东西的器物。' },
+        { char: '颜', pinyin: 'yán', group: ['颜色', '颜料'], mean: '色彩。' },
+        { char: '料', pinyin: 'liào', group: ['材料', '颜料'], mean: '原料；资料。' },
+        { char: '票', pinyin: 'piào', group: ['邮票', '车票'], mean: '作为凭证的纸片。' },
+        { char: '飘', pinyin: 'piāo', group: ['飘扬', '飘落'], mean: '随风摇动或飞扬。' },
+        { char: '争', pinyin: 'zhēng', group: ['争夺', '争吵'], mean: '力求得到；竞争。' },
+        { char: '仙', pinyin: 'xiān', group: ['仙女', '神仙'], mean: '神话中长生不老的人。' },
+        { char: '淡', pinyin: 'dàn', group: ['淡水', '平淡'], mean: '含某种成分少；不浓。' },
+        { char: '闻', pinyin: 'wén', group: ['新闻', '闻名'], mean: '听见；用鼻子嗅。' },
+        { char: '梨', pinyin: 'lí', group: ['梨树', '鸭梨'], mean: '梨树；梨的果实。' },
+        { char: '勾', pinyin: 'gōu', group: ['勾住', '勾引'], mean: '牵引；招引。' },
+        { char: '曲', pinyin: 'qǔ', group: ['歌曲', '乐曲'], mean: '能唱的文词；歌谱。' },
+        { char: '丰', pinyin: 'fēng', group: ['丰收', '丰富'], mean: '多；大。' },
+      ],
+      quiz: [
+        { q: '秋天的雨被比作什么？', options: ['五彩缤纷的颜料', '一把钥匙', '金色巴掌', '小喇叭'], answer: 0, explain: '课文写秋天的雨有一盒五彩缤纷的颜料。' },
+        { q: '「红红的枫叶像一枚枚邮票」运用了什么修辞？', options: ['比喻', '拟人', '排比', '夸张'], answer: 0, explain: '把枫叶比作邮票，是比喻。' },
+      ],
+    },
+    {
+      id: 4,
+      slug: 'u2-4',
+      title: '听听，秋的声音',
+      emoji: '🍃',
+      kind: 'reading',
+      passages: [
+        {
+          title: '秋的声音',
+          text: '大树抖抖手臂，「刷刷」，是黄叶道别的话音。蟋蟀振动翅膀，「㘗㘗」，是和阳台告别的歌韵。',
+          note: '用拟声词和拟人写秋天的声音。',
+        },
+      ],
+      hanzi: [
+        { char: '抖', pinyin: 'dǒu', group: ['抖动', '发抖'], mean: '颤动；哆嗦。' },
+        { char: '振', pinyin: 'zhèn', group: ['振动', '振兴'], mean: '摇动；奋起。' },
+        { char: '韵', pinyin: 'yùn', group: ['歌韵', '韵味'], mean: '好听的声音；情趣。' },
+        { char: '辽', pinyin: 'liáo', group: ['辽阔', '辽宁'], mean: '远；广阔。' },
+        { char: '阔', pinyin: 'kuò', group: ['宽阔', '辽阔'], mean: '宽广。' },
+      ],
+      quiz: [
+        { q: '黄叶「刷刷」的声音是在做什么？', options: ['道别', '唱歌', '哭泣', '跳舞'], answer: 0, explain: '课文写黄叶「刷刷」是道别的话音。' },
+        { q: '秋的声音里有哪些事物？', options: ['黄叶、蟋蟀、大雁、秋风', '春雨、夏花、冬雪', '只有小鸟', '只有风声'], answer: 0, explain: '课文写了黄叶、蟋蟀、大雁、秋风等秋天的声音。' },
+      ],
+    },
+    {
+      id: 5,
+      slug: 'u2-5',
+      title: '习作 · 写日记',
+      emoji: '📓',
+      kind: 'writing',
+      hint: '选择一天中印象深刻的事，用日记格式写下来。注意写清楚时间、地点、人物和经过，写上自己的感受。',
+      quiz: [],
+    },
+    {
+      id: 6,
+      slug: 'u2-6',
+      title: '语文园地二',
+      emoji: '📜',
+      kind: 'park',
+      idioms: [
+        {
+          title: '日积月累 · 《舟夜书所见》',
+          kind: 'poem',
+          items: [{ term: '月黑见渔灯，孤光一点萤。微微风簇浪，散作满河星。', source: '清 · 查慎行', meaning: '漆黑的夜晚，看见渔船上的灯火像萤火虫一样；微风吹起细浪，灯光散开像满河的星星。' }],
+        },
+      ],
+      quiz: [
+        { q: '《舟夜书所见》的作者是谁？', options: ['唐·李白', '清·查慎行', '宋·叶绍翁', '唐·王昌龄'], answer: 1, explain: '《舟夜书所见》是清代诗人查慎行所作。' },
+        { q: '诗中「孤光一点萤」把什么比作萤火虫？', options: ['渔灯', '月亮', '星星', '浪花'], answer: 0, explain: '漆黑的夜里，渔船上的灯火像萤火虫一样微弱。' },
+      ],
+    },
+  ],
+}
 
-  // ============================== 第三单元 ==============================
-  {
-    id: 3,
-    slug: 'u3',
-    title: '第三单元',
-    titleZh: '童话世界',
-    emoji: '🧚',
-    theme: { color: '#16a34a', colorSoft: '#dcfce7' },
-    lessons: [
-      {
-        id: 1,
-        slug: 'u3-1',
-        title: '在牛肚子里旅行（要点）',
-        emoji: '🐄',
-        passages: [
-          {
-            title: '课文要点（熟读理解）',
-            text: '红头和青头是一对好朋友。红头不小心被牛吃进肚子里，青头隔着牛肚皮鼓励它，告诉它牛有四个胃、会反刍。红头随着草一起移动，最后在牛打喷嚏时喷了出来，脱离了危险。',
-            note: '科学知识：牛有四个胃，吃草后会把草送回嘴里重新咀嚼（反刍）。',
-          },
-        ],
-        quiz: [
-          {
-            q: '牛有几个胃？',
-            options: ['四个', '一个', '两个', '八个'],
-            answer: 0,
-            explain: '课文里青头告诉红头，牛有四个胃。',
-          },
-          {
-            q: '红头最后是怎么出来的？',
-            options: ['牛打喷嚏喷出来', '自己爬出来', '青头拉出来', '被人救出'],
-            answer: 0,
-            explain: '红头在牛打喷嚏时被喷了出来。',
-          },
-        ],
-      },
-      {
-        id: 2,
-        slug: 'u3-2',
-        title: '语文园地三 · 日积月累',
-        emoji: '💡',
-        idioms: [
-          {
-            title: '关于道理的俗语',
-            kind: 'proverbs',
-            items: [
-              { term: '灯不拨不亮，理不辩不明。', meaning: '油灯不拨不亮，道理不辩论不清，说明道理越辩越明。' },
-              { term: '有理走遍天下，无理寸步难行。', meaning: '只要有道理，到哪儿都行得通；没道理，一步也走不了。' },
-              { term: '一时强弱在于力，万古胜负在于理。', meaning: '一时的强弱靠力气，长远的胜负靠道理。' },
-            ],
-          },
-        ],
-        quiz: [
-          {
-            q: '「有理走遍天下」的下一句是？',
-            options: ['无理寸步难行', '无理也行', '有力走天下', '无理天下行'],
-            answer: 0,
-            explain: '完整俗语：有理走遍天下，无理寸步难行。',
-          },
-          {
-            q: '「一时强弱在于力」强调什么更重要？',
-            options: ['道理（理）', '力气', '速度', '运气'],
-            answer: 0,
-            explain: '下一句「万古胜负在于理」，强调道理才能决定长远胜负。',
-          },
-        ],
-      },
-      {
-        id: 3,
-        slug: 'u3-3',
-        title: '第三单元 · 生字词',
-        emoji: '✍️',
-        hanzi: [
-          {
-  char: '旅', pinyin: 'lǚ', group: ['旅行', '旅游'],
-  mean: '出行；在外。'
-},
-          {
-  char: '咱', pinyin: 'zán', group: ['咱们', '咱家'],
-  mean: '“我们”的口语说法。'
-},
-          {
-  char: '救', pinyin: 'jiù', group: ['救命', '抢救'],
-  mean: '帮助脱离危险。'
-},
-          {
-  char: '命', pinyin: 'mìng', group: ['生命', '命令'],
-  mean: '生命；指派。'
-},
-          {
-  char: '拼', pinyin: 'pīn', group: ['拼命', '拼写'],
-  mean: '尽全力；连合。'
-},
-          {
-  char: '扫', pinyin: 'sǎo', group: ['打扫', '扫地'],
-  mean: '用扫帚清除。'
-},
-          {
-  char: '胃', pinyin: 'wèi', group: ['胃口', '肠胃'],
-  mean: '消化食物的器官。'
-},
-          {
-  char: '管', pinyin: 'guǎn', group: ['保管', '管理'],
-  mean: '负责；看管。'
-},
-          {
-  char: '等', pinyin: 'děng', group: ['等待', '等于'],
-  mean: '等候；等同。'
-},
-          {
-  char: '流', pinyin: 'liú', group: ['流水', '流泪'],
-  mean: '液体移动；流动。'
-},
-          {
-  char: '算', pinyin: 'suàn', group: ['计算', '打算'],
-  mean: '核算数目；计划。'
-},
-          {
-  char: '泪', pinyin: 'lèi', group: ['眼泪', '泪水'],
-  mean: '眼睛里流出的水。'
-},
-          {
-  char: '富', pinyin: 'fù', group: ['富有', '丰富'],
-  mean: '财物多；充足。'
-},
-        ],
-        quiz: [
-          {
-            q: '「旅」的拼音是？',
-            options: ['lǚ', 'lǔ', 'nǚ', 'lú'],
-            answer: 0,
-            explain: '旅 = lǚ（旅行）。',
-          },
-          {
-            q: '「命」可以组词？',
-            options: ['生命', '名字', '明天', '民众'],
-            answer: 0,
-            explain: '命 → 生命、命令。',
-          },
-        ],
-      },
-    ],
-  },
+const u3: ChineseUnit = {
+  id: 3,
+  slug: 'u3',
+  title: '第三单元',
+  titleZh: '预测与猜想',
+  emoji: '🔮',
+  theme: { color: '#7c3aed', colorSoft: '#ede9fe' },
+  lessons: [
+    {
+      id: 1,
+      slug: 'u3-1',
+      title: '总也倒不了的老屋',
+      emoji: '🏠',
+      kind: 'reading',
+      passages: [
+        {
+          title: '老屋的话',
+          text: '好了，我到了倒下的时候了！',
+          note: '老屋每次想倒下时，都有小动物来求助，推动故事发展。',
+        },
+      ],
+      hanzi: [
+        { char: '洞', pinyin: 'dòng', group: ['山洞', '洞口'], mean: '窟窿；深入的地方。' },
+        { char: '准', pinyin: 'zhǔn', group: ['准备', '准时'], mean: '允许；依照。' },
+        { char: '备', pinyin: 'bèi', group: ['准备', '备用'], mean: '预备；具有。' },
+        { char: '暴', pinyin: 'bào', group: ['暴雨', '暴力'], mean: '突然而猛烈。' },
+        { char: '墙', pinyin: 'qiáng', group: ['墙壁', '围墙'], mean: '房屋等的四围。' },
+        { char: '壁', pinyin: 'bì', group: ['墙壁', '隔壁'], mean: '墙。' },
+        { char: '饿', pinyin: 'è', group: ['饥饿', '饿死'], mean: '肚子空，想吃东西。' },
+        { char: '蜘', pinyin: 'zhī', group: ['蜘蛛', '蜘蛛网'], mean: '蜘蛛，节肢动物。' },
+        { char: '蛛', pinyin: 'zhū', group: ['蜘蛛', '蛛丝'], mean: '蜘蛛。' },
+        { char: '漂', pinyin: 'piào', group: ['漂亮', '漂流'], mean: '好看；浮在液体表面移动。' },
+        { char: '撞', pinyin: 'zhuàng', group: ['撞击', '碰撞'], mean: '猛然碰上。' },
+        { char: '饱', pinyin: 'bǎo', group: ['吃饱', '饱满'], mean: '吃足了；充实。' },
+        { char: '晒', pinyin: 'shài', group: ['晒太阳', '晾晒'], mean: '在阳光下吸收光和热。' },
+      ],
+      quiz: [
+        { q: '老屋帮助了哪些小动物？', options: ['小猫、老母鸡、小蜘蛛', '小狗、小鸟、小兔', '小鸡、小鸭、小鹅', '只有小猫'], answer: 0, explain: '老屋帮助了小猫、老母鸡和小蜘蛛。' },
+        { q: '读到「好了，我到了倒下的时候了」，你可以预测什么？', options: ['会有小动物来求助', '老屋马上倒下', '故事结束', '下雨了'], answer: 0, explain: '根据前文规律，每次老屋想倒下时都会有小动物来求助。' },
+      ],
+    },
+    {
+      id: 2,
+      slug: 'u3-2',
+      title: '犟龟',
+      emoji: '🐢',
+      kind: 'reading',
+      passages: [
+        {
+          title: '故事启示',
+          text: '只要坚持一步一步走，乌龟也能赶上狮王的婚礼。',
+          note: '告诉我们认准目标、坚持不懈就能成功。',
+        },
+      ],
+      hanzi: [
+        { char: '犟', pinyin: 'jiàng', group: ['犟龟', '倔强'], mean: '固执；不服劝导。' },
+        { char: '陶', pinyin: 'táo', group: ['陶醉', '陶瓷'], mean: '快乐；用黏土烧制的器物。' },
+        { char: '适', pinyin: 'shì', group: ['合适', '舒适'], mean: '切合；舒服。' },
+        { char: '谈', pinyin: 'tán', group: ['谈话', '交谈'], mean: '说话；讨论。' },
+        { char: '婚', pinyin: 'hūn', group: ['结婚', '婚礼'], mean: '男女结为夫妻。' },
+        { char: '庆', pinyin: 'qìng', group: ['庆祝', '喜庆'], mean: '祝贺；值得庆祝的事。' },
+        { char: '典', pinyin: 'diǎn', group: ['典礼', '经典'], mean: '郑重举行的仪式；标准。' },
+        { char: '途', pinyin: 'tú', group: ['路途', '前途'], mean: '道路。' },
+        { char: '括', pinyin: 'kuò', group: ['包括', '括号'], mean: '包容；包括。' },
+        { char: '史', pinyin: 'shǐ', group: ['历史', '史书'], mean: '过去的事实；记载。' },
+        { char: '倍', pinyin: 'bèi', group: ['加倍', '倍数'], mean: '照原数增加一次。' },
+        { char: '几', pinyin: 'jī', group: ['几乎', '茶几'], mean: '将近；小桌子。' },
+        { char: '持', pinyin: 'chí', group: ['坚持', '支持'], mean: '拿着；保持。' },
+        { char: '官', pinyin: 'guān', group: ['官员', '军官'], mean: '政府机关或军队中担任一定职务的人。' },
+      ],
+      quiz: [
+        { q: '「犟龟」最大的特点是什么？', options: ['固执地坚持目标', '跑得很快', '不爱说话', '喜欢睡觉'], answer: 0, explain: '犟龟认准参加狮王婚礼的目标，一直坚持走下去。' },
+        { q: '这个故事告诉我们什么道理？', options: ['坚持就能成功', '乌龟跑得最快', '不要参加婚礼', '遇到困难就放弃'], answer: 0, explain: '故事表现只要坚持，乌龟也能成功到达。' },
+      ],
+    },
+    {
+      id: 3,
+      slug: 'u3-3',
+      title: '小狗学叫',
+      emoji: '🐶',
+      kind: 'reading',
+      passages: [
+        {
+          title: '故事主题',
+          text: '小狗不会叫，它向小公鸡、杜鹃学习，经历了许多有趣的事。',
+          note: '预测故事结局，体会做自己最好的道理。',
+        },
+      ],
+      hanzi: [
+        { char: '汪', pinyin: 'wāng', group: ['汪汪', '水汪'], mean: '狗叫声；液体聚集。' },
+        { char: '搞', pinyin: 'gǎo', group: ['搞笑', '搞定'], mean: '做；弄。' },
+        { char: '恒', pinyin: 'héng', group: ['恒心', '永恒'], mean: '长久；持久。' },
+        { char: '圣', pinyin: 'shèng', group: ['神圣', '圣人'], mean: '最崇高的；称学问或技术有极高成就的人。' },
+        { char: '萌', pinyin: 'méng', group: ['萌发', '萌芽'], mean: '草木发芽；开始发生。' },
+        { char: '妥', pinyin: 'tuǒ', group: ['妥当', '稳妥'], mean: '适当；稳当。' },
+        { char: '轴', pinyin: 'zhóu', group: ['车轴', '卷轴'], mean: '穿在轮子中间的圆柱形零件。' },
+        { char: '阁', pinyin: 'gé', group: ['阁楼', '楼阁'], mean: '一种建筑物。' },
+        { char: '培', pinyin: 'péi', group: ['培养', '培育'], mean: '为保护植物等而垒土；培育。' },
+        { char: '厘', pinyin: 'lí', group: ['厘米', '毫厘'], mean: '长度单位；计量单位。' },
+      ],
+      quiz: [
+        { q: '小狗先后向谁学叫？', options: ['小公鸡、杜鹃', '小猫、小鸭', '小羊、小牛', '小鸟、小鸡'], answer: 0, explain: '小狗向小公鸡学了喔喔叫，又向杜鹃学了咕咕叫。' },
+        { q: '这个故事的结局可能有几种？', options: ['一种', '两种', '三种', '四种'], answer: 2, explain: '课文后面给出了三种可能的结局让大家续编。' },
+      ],
+    },
+    {
+      id: 4,
+      slug: 'u3-4',
+      title: '口语交际 · 名字里的故事',
+      emoji: '🗣️',
+      kind: 'speaking',
+      hint: '说说自己名字的含义或来历，也可以讲讲家人、名人名字的故事。听的同学可以提问或补充。',
+      quiz: [],
+    },
+    {
+      id: 5,
+      slug: 'u3-5',
+      title: '习作 · 续写故事',
+      emoji: '✏️',
+      kind: 'writing',
+      hint: '根据插图提供的线索，预测故事接下来会发生什么，把故事续写完整。注意把情节写清楚、写连贯。',
+      quiz: [],
+    },
+    {
+      id: 6,
+      slug: 'u3-6',
+      title: '语文园地三',
+      emoji: '📜',
+      kind: 'park',
+      idioms: [
+        {
+          title: '日积月累 · 关于仁爱的名言',
+          kind: 'quotes',
+          items: [
+            { term: '不迁怒，不贰过。', source: '《论语》', meaning: '不把自己的怒气发泄到别人身上，不重复犯同样的错误。' },
+            { term: '爱人若爱其身。', source: '《墨子》', meaning: '爱别人就像爱自己一样。' },
+            { term: '仁者爱人，有礼者敬人。', source: '《孟子》', meaning: '有仁德的人关爱别人，懂礼貌的人尊敬别人。' },
+            { term: '与人善言，暖于布帛；伤人以言，深于矛戟。', source: '《荀子》', meaning: '对人说善意的话，比穿上衣服还温暖；用言语伤害人，比矛戟刺得还深。' },
+          ],
+        },
+      ],
+      quiz: [
+        { q: '「爱人若爱其身」出自哪部经典？', options: ['《论语》', '《墨子》', '《孟子》', '《荀子》'], answer: 1, explain: '「爱人若爱其身」出自《墨子》。' },
+        { q: '「与人善言，暖于布帛」告诉我们什么？', options: ['善意的语言很温暖', '布帛很暖和', '要多穿衣服', '语言没有力量'], answer: 0, explain: '善意的话语能给人带来温暖。' },
+      ],
+    },
+  ],
+}
 
-  // ============================== 第四单元 ==============================
-  {
-    id: 4,
-    slug: 'u4',
-    title: '第四单元',
-    titleZh: '预测与猜想',
-    emoji: '🔮',
-    theme: { color: '#b45309', colorSoft: '#fef3c7' },
-    lessons: [
-      {
-        id: 1,
-        slug: 'u4-1',
-        title: '总也倒不了的老屋（要点）',
-        emoji: '🏚️',
-        passages: [
-          {
-            title: '课文要点（熟读理解）',
-            text: '老屋已经活了一百多岁，准备倒下，却一次次因为小猫、老母鸡、小蜘蛛的请求而继续站立，帮助了它们。故事鼓励我们一边读一边预测，并根据课文内容修正自己的猜测。',
-            note: '本单元是「阅读策略」单元，重点学习「预测」。',
-          },
-        ],
-        quiz: [
-          {
-            q: '老屋为什么总也倒不了？',
-            options: ['它一次次帮助小动物，被请求留下', '它很坚固', '没人推它', '它怕黑'],
-            answer: 0,
-            explain: '小猫、老母鸡、小蜘蛛的请求让老屋继续站立帮忙。',
-          },
-          {
-            q: '第四单元学习的阅读策略主要是？',
-            options: ['预测', '默读', '查字典', '速读'],
-            answer: 0,
-            explain: '本单元是「预测」策略单元。',
-          },
-        ],
-      },
-      {
-        id: 2,
-        slug: 'u4-2',
-        title: '语文园地四 · 日积月累',
-        emoji: '🤝',
-        idioms: [
-          {
-            title: '关于团结的俗语',
-            kind: 'proverbs',
-            items: [
-              { term: '人心齐，泰山移。', meaning: '大家心齐，连泰山也能移动，比喻团结力量大。' },
-              { term: '二人同心，其利断金。', meaning: '两人一条心，力量能切断金属，比喻同心协力。' },
-              { term: '三个臭皮匠，顶个诸葛亮。', meaning: '三个人合计，智慧能抵上诸葛亮，比喻集思广益。' },
-              { term: '一个篱笆三个桩，一个好汉三个帮。', meaning: '篱笆要三个桩才稳，好汉也需别人帮助，比喻人离不开互助。' },
-            ],
-          },
-        ],
-        quiz: [
-          {
-            q: '「人心齐，泰山移」讲的是？',
-            options: ['团结力量大', '山很高', '人多热闹', '泰山很美'],
-            answer: 0,
-            explain: '大家心往一处想，连泰山也能移动，比喻团结力量大。',
-          },
-          {
-            q: '「三个臭皮匠，顶个诸葛亮」意思是？',
-            options: ['多人智慧合起来能胜过聪明人', '皮匠很聪明', '诸葛亮不聪明', '三个人就够了'],
-            answer: 0,
-            explain: '比喻集思广益，集体的智慧很强。',
-          },
-        ],
-      },
-      {
-        id: 3,
-        slug: 'u4-3',
-        title: '第四单元 · 生字词',
-        emoji: '✍️',
-        hanzi: [
-          {
-  char: '暴', pinyin: 'bào', group: ['暴雨', '暴力'],
-  mean: '突然猛烈；凶狠。'
-},
-          {
-  char: '准', pinyin: 'zhǔn', group: ['准备', '准确'],
-  mean: '正确；准许。'
-},
-          {
-  char: '备', pinyin: 'bèi', group: ['准备', '备用'],
-  mean: '具备；防备。'
-},
-          {
-  char: '睡', pinyin: 'shuì', group: ['睡觉', '睡眠'],
-  mean: '闭眼休息。'
-},
-          {
-  char: '砍', pinyin: 'kǎn', group: ['砍柴', '砍树'],
-  mean: '用刀斧劈。'
-},
-          {
-  char: '蜘', pinyin: 'zhī', group: ['蜘蛛'],
-  mean: '蜘蛛（一种会结网的虫）。'
-},
-          {
-  char: '蛛', pinyin: 'zhū', group: ['蜘蛛', '蛛丝'],
-  mean: '蜘蛛（一种会结网的虫）。'
-},
-          {
-  char: '撞', pinyin: 'zhuàng', group: ['撞上', '撞击'],
-  mean: '碰；击。'
-},
-          {
-  char: '晒', pinyin: 'shài', group: ['晒太阳', '晾晒'],
-  mean: '太阳照；晾干。'
-},
-          {
-  char: '壁', pinyin: 'bì', group: ['墙壁', '壁画'],
-  mean: '墙。'
-},
-          {
-  char: '漂', pinyin: 'piào', group: ['漂亮', '漂泊'],
-  mean: '好看；美丽。'
-},
-          {
-  char: '饱', pinyin: 'bǎo', group: ['吃饱', '饱满'],
-  mean: '吃足了；充实。'
-},
-        ],
-        quiz: [
-          {
-            q: '「暴」的拼音是？',
-            options: ['bào', 'bāo', 'pào', 'pù'],
-            answer: 0,
-            explain: '暴 = bào（暴雨、暴力）。',
-          },
-          {
-            q: '「漂」在「漂亮」中读？',
-            options: ['piào', 'piāo', 'piǎo', 'biào'],
-            answer: 0,
-            explain: '漂亮读 piào liang；漂流读 piāo。',
-          },
-        ],
-      },
-    ],
-  },
+const u4: ChineseUnit = {
+  id: 4,
+  slug: 'u4',
+  title: '第四单元',
+  titleZh: '童话世界',
+  emoji: '🏰',
+  theme: { color: '#db2777', colorSoft: '#fce7f3' },
+  lessons: [
+    {
+      id: 1,
+      slug: 'u4-1',
+      title: '宝葫芦的秘密（节选）',
+      emoji: '🪄',
+      kind: 'reading',
+      passages: [
+        {
+          title: '故事开头',
+          text: '我来给你们讲个故事。可是我先得介绍一下我自己：我姓王，叫王葆。我要讲的，正是我自己的一件事情，是我和宝葫芦的故事。',
+          note: '宝葫芦能满足一切愿望，但要靠劳动获得真正的幸福。',
+        },
+      ],
+      hanzi: [
+        { char: '葫', pinyin: 'hú', group: ['葫芦', '葫芦丝'], mean: '一年生草本植物。' },
+        { char: '芦', pinyin: 'lú', group: ['芦苇', '葫芦'], mean: '芦苇；葫芦。' },
+        { char: '错', pinyin: 'cuò', group: ['错误', '错过'], mean: '不正确；交叉。' },
+        { char: '普', pinyin: 'pǔ', group: ['普通', '普遍'], mean: '全；广。' },
+        { char: '宫', pinyin: 'gōng', group: ['宫殿', '皇宫'], mean: '帝王的住所；庙宇。' },
+        { char: '肯', pinyin: 'kěn', group: ['肯定', '不肯'], mean: '愿意；许可。' },
+        { char: '冒', pinyin: 'mào', group: ['冒险', '冒雨'], mean: '向外透；不顾危险。' },
+        { char: '式', pinyin: 'shì', group: ['方式', '形式'], mean: '样子；格式。' },
+        { char: '怜', pinyin: 'lián', group: ['可怜', '怜爱'], mean: '同情；爱。' },
+      ],
+      quiz: [
+        { q: '《宝葫芦的秘密》的主人公是谁？', options: ['王葆', '司马光', '孙中山', '童第周'], answer: 0, explain: '故事的主人公叫王葆。' },
+        { q: '宝葫芦能满足人的什么？', options: ['一切愿望', '只有食物', '只有玩具', '只有书本'], answer: 0, explain: '传说宝葫芦能满足人的一切愿望。' },
+      ],
+    },
+    {
+      id: 2,
+      slug: 'u4-2',
+      title: '在牛肚子里旅行',
+      emoji: '🐄',
+      kind: 'reading',
+      passages: [
+        {
+          title: '青头救红头',
+          text: '青头又跳到牛身上，隔着肚皮和红头说话：「红头！不要怕，你会出来的。我听说牛的胃有四个胃室，前三个主要是储存食物的，第四个才是管消化的！」',
+          note: '了解牛「反刍」的科学知识，感受朋友间的互助。',
+        },
+      ],
+      hanzi: [
+        { char: '旅', pinyin: 'lǚ', group: ['旅行', '旅游'], mean: '外出；出门在外。' },
+        { char: '另', pinyin: 'lìng', group: ['另外', '另一个'], mean: '别的；以外。' },
+        { char: '晴', pinyin: 'qíng', group: ['晴天', '晴朗'], mean: '天空无云或云很少。' },
+        { char: '及', pinyin: 'jí', group: ['及时', '来不及'], mean: '赶上；达到。' },
+        { char: '卷', pinyin: 'juǎn', group: ['卷起来', '卷入'], mean: '把东西弯转裹成圆筒形。' },
+        { char: '救', pinyin: 'jiù', group: ['救命', '抢救'], mean: '援助使脱离危险。' },
+        { char: '命', pinyin: 'mìng', group: ['生命', '命令'], mean: '生命；指示。' },
+        { char: '尾', pinyin: 'wěi', group: ['尾巴', '结尾'], mean: '动物身体后端的部分。' },
+        { char: '齿', pinyin: 'chǐ', group: ['牙齿', '齿轮'], mean: '人和动物嘴里咀嚼食物的器官。' },
+        { char: '胃', pinyin: 'wèi', group: ['胃口', '肠胃'], mean: '消化器官。' },
+        { char: '管', pinyin: 'guǎn', group: ['管理', '管道'], mean: '负责；圆筒形的东西。' },
+        { char: '刚', pinyin: 'gāng', group: ['刚才', '刚好'], mean: '恰好；才。' },
+        { char: '咬', pinyin: 'yǎo', group: ['咬人', '咬紧'], mean: '上下牙齿对着用力夹住或弄碎东西。' },
+      ],
+      quiz: [
+        { q: '红头进了牛的哪里？', options: ['肚子里', '鼻子里', '耳朵里', '尾巴里'], answer: 0, explain: '红头被牛吞进了肚子里。' },
+        { q: '牛有几个胃室？', options: ['两个', '三个', '四个', '五个'], answer: 2, explain: '课文说牛的胃有四个胃室。' },
+      ],
+    },
+    {
+      id: 3,
+      slug: 'u4-3',
+      title: '一块奶酪',
+      emoji: '🧀',
+      kind: 'reading',
+      passages: [
+        {
+          title: '蚂蚁队长的选择',
+          text: '蚂蚁队长命令年龄最小的一只蚂蚁：「这点儿奶酪渣是刚才弄掉的，丢了可惜，你吃掉它吧！」',
+          note: '蚂蚁队长严于律己、关爱弱小，令人敬佩。',
+        },
+      ],
+      hanzi: [
+        { char: '舱', pinyin: 'cāng', group: ['船舱', '机舱'], mean: '船或飞机中分隔开的部分。' },
+        { char: '啦', pinyin: 'la', group: ['好啦', '走啦'], mean: '语气助词。' },
+        { char: '鹦', pinyin: 'yīng', group: ['鹦鹉', '鹦哥'], mean: '鹦鹉，羽毛美丽的鸟。' },
+        { char: '鹉', pinyin: 'wǔ', group: ['鹦鹉'], mean: '鹦鹉。' },
+        { char: '衔', pinyin: 'xián', group: ['衔泥', '衔接'], mean: '用嘴含；相连接。' },
+        { char: '耍', pinyin: 'shuǎ', group: ['玩耍', '耍闹'], mean: '玩；玩弄。' },
+        { char: '绒', pinyin: 'róng', group: ['绒毛', '绒球'], mean: '柔软细小的毛。' },
+        { char: '欠', pinyin: 'qiàn', group: ['哈欠', '欠债'], mean: '困倦时张口出气；借别人的钱物未还。' },
+        { char: '拢', pinyin: 'lǒng', group: ['合拢', '聚拢'], mean: '合上；靠近。' },
+        { char: '饶', pinyin: 'ráo', group: ['求饶', '富饶'], mean: '宽恕；多。' },
+        { char: '优', pinyin: 'yōu', group: ['优秀', '优美'], mean: '好；充足。' },
+      ],
+      quiz: [
+        { q: '蚂蚁队长把奶酪渣让给了谁？', options: ['年龄最小的蚂蚁', '自己', '最大的蚂蚁', '猫'], answer: 0, explain: '蚂蚁队长让年龄最小的蚂蚁吃掉奶酪渣。' },
+        { q: '从蚂蚁队长身上我们学到了什么？', options: ['严于律己', '自私自利', '胆小怕事', '不爱劳动'], answer: 0, explain: '蚂蚁队长能严格要求自己，关心弱小。' },
+      ],
+    },
+    {
+      id: 4,
+      slug: 'u4-4',
+      title: '习作 · 我来编童话',
+      emoji: '✏️',
+      kind: 'writing',
+      hint: '从给出的角色、时间、地点中选择一组，发挥想象编一个童话故事。写清楚角色、时间、地点和发生的事，给故事加一个题目。',
+      quiz: [],
+    },
+    {
+      id: 5,
+      slug: 'u4-5',
+      title: '语文园地四',
+      emoji: '📜',
+      kind: 'park',
+      idioms: [
+        {
+          title: '日积月累 · 团结合作谚语',
+          kind: 'proverbs',
+          items: [
+            { term: '人心齐，泰山移。', meaning: '大家团结一心，就能发挥出移山的力量。' },
+            { term: '二人同心，其利断金。', meaning: '两个人一条心，力量可以斩断金属。' },
+            { term: '三个臭皮匠，顶个诸葛亮。', meaning: '人多智慧多，大家一起想办法比一个人强。' },
+            { term: '一个篱笆三个桩，一个好汉三个帮。', meaning: '一个人要想成功，离不开别人的帮助。' },
+          ],
+        },
+      ],
+      quiz: [
+        { q: '「人心齐，泰山移」说的是什么道理？', options: ['团结力量大', '泰山很高', '人心可怕', '搬家很辛苦'], answer: 0, explain: '大家齐心合力，就能完成艰巨的事。' },
+        { q: '「三个臭皮匠，顶个诸葛亮」强调什么？', options: ['人多智慧多', '诸葛亮不聪明', '皮匠比诸葛亮厉害', '只要三个人'], answer: 0, explain: '大家一起出主意，智慧会超过一个人。' },
+      ],
+    },
+    {
+      id: 6,
+      slug: 'u4-6',
+      title: '快乐读书吧 · 在那奇妙的王国里',
+      emoji: '📚',
+      kind: 'reading-club',
+      passages: [
+        {
+          title: '推荐书目',
+          text: '《安徒生童话》创造了一个奇妙的童话王国，这是丹麦作家安徒生送给全世界孩子和大人共同的礼物。翻开德国格林兄弟搜集整理的《格林童话》，你能从一个个妙趣横生的故事中，感悟生活的真谛和做人的道理。当你走进叶圣陶笔下《稻草人》的世界，你会知道在夜间的田野，星星怎样眨眼，月亮怎样微笑。',
+          note: '多读童话，发挥想象，感受真善美。',
+        },
+      ],
+      quiz: [
+        { q: '《安徒生童话》的作者来自哪个国家？', options: ['丹麦', '德国', '中国', '英国'], answer: 0, explain: '《安徒生童话》是丹麦作家安徒生写的。' },
+        { q: '《稻草人》是谁写的？', options: ['叶圣陶', '安徒生', '格林兄弟', '鲁迅'], answer: 0, explain: '《稻草人》是中国作家叶圣陶的童话。' },
+      ],
+    },
+  ],
+}
+const u5: ChineseUnit = {
+  id: 5,
+  slug: 'u5',
+  title: '第五单元',
+  titleZh: '观察与发现',
+  emoji: '🔍',
+  theme: { color: '#16a34a', colorSoft: '#dcfce7' },
+  lessons: [
+    {
+      id: 1,
+      slug: 'u5-1',
+      title: '搭船的鸟',
+      emoji: '🐦',
+      kind: 'reading',
+      passages: [
+        {
+          title: '翠鸟捕鱼',
+          text: '我正想着，它一下子冲进水里，不见了。可是，没一会儿，它飞起来了，红色的长嘴衔着一条小鱼。它站在船头，一口把小鱼吞了下去。',
+          note: '抓住翠鸟捕鱼时「冲、飞、衔、站、吞」的动作，写得生动传神。',
+        },
+      ],
+      hanzi: [
+        { char: '搭', pinyin: 'dā', group: ['搭船', '搭配'], mean: '乘；连接。' },
+        { char: '亲', pinyin: 'qīn', group: ['父亲', '母亲'], mean: '有血统或婚姻关系的；接近。' },
+        { char: '祖', pinyin: 'zǔ', group: ['祖父', '祖国'], mean: '父亲的上一辈；先代。' },
+        { char: '披', pinyin: 'pī', group: ['披着', '披风'], mean: '覆盖或搭在肩背上。' },
+        { char: '摇', pinyin: 'yáo', group: ['摇动', '摇晃'], mean: '摆动。' },
+        { char: '停', pinyin: 'tíng', group: ['停止', '停车'], mean: '止住；留下。' },
+        { char: '羽', pinyin: 'yǔ', group: ['羽毛', '羽绒'], mean: '鸟身上的毛。' },
+        { char: '翠', pinyin: 'cuì', group: ['翠绿', '翠鸟'], mean: '青绿色。' },
+        { char: '蓝', pinyin: 'lán', group: ['蓝天', '蓝色'], mean: '像晴天天空的颜色。' },
+        { char: '静', pinyin: 'jìng', group: ['安静', '平静'], mean: '没有声音；不动。' },
+        { char: '悄', pinyin: 'qiāo', group: ['悄悄', '静悄悄'], mean: '没有声音或声音很低。' },
+        { char: '吞', pinyin: 'tūn', group: ['吞下', '吞没'], mean: '不嚼或不细嚼而咽入。' },
+        { char: '捕', pinyin: 'bǔ', group: ['捕鱼', '捕捉'], mean: '捉；逮。' },
+      ],
+      quiz: [
+        { q: '搭船的鸟是什么鸟？', options: ['翠鸟', '麻雀', '燕子', '喜鹊'], answer: 0, explain: '课文写的是一只翠鸟搭船捕鱼。' },
+        { q: '翠鸟捕鱼时的动作依次是？', options: ['冲、飞、衔、站、吞', '飞、冲、站、吞、衔', '站、飞、冲、衔、吞', '衔、飞、冲、站、吞'], answer: 0, explain: '课文描写翠鸟「冲、飞、衔、站、吞」一气呵成。' },
+      ],
+    },
+    {
+      id: 2,
+      slug: 'u5-2',
+      title: '金色的草地',
+      emoji: '🌿',
+      kind: 'reading',
+      passages: [
+        {
+          title: '草地变色的秘密',
+          text: '原来，蒲公英的花就像我们的手掌，可以张开、合上。花朵张开时，花瓣是金色的，草地也是金色的；花朵合拢时，金色的花瓣被包住了，草地就变成绿色的了。',
+          note: '观察蒲公英花瓣的张合，发现草地变色的原因。',
+        },
+      ],
+      hanzi: [
+        { char: '蒲', pinyin: 'pú', group: ['蒲公英', '蒲扇'], mean: '多年生草本植物。' },
+        { char: '英', pinyin: 'yīng', group: ['英雄', '英国'], mean: '花；才能出众的人。' },
+        { char: '盛', pinyin: 'shèng', group: ['盛开', '盛大'], mean: '兴旺；热烈。' },
+        { char: '耍', pinyin: 'shuǎ', group: ['玩耍', '耍闹'], mean: '玩。' },
+        { char: '劲', pinyin: 'jìn', group: ['使劲', '干劲'], mean: '力气；精神。' },
+        { char: '脸', pinyin: 'liǎn', group: ['笑脸', '脸色'], mean: '头的前部。' },
+        { char: '朝', pinyin: 'cháo', group: ['朝向', '朝代'], mean: '向着；朝代。' },
+        { char: '钓', pinyin: 'diào', group: ['钓鱼', '钓竿'], mean: '用饵诱鱼上钩。' },
+        { char: '察', pinyin: 'chá', group: ['观察', '考察'], mean: '仔细看；调查。' },
+        { char: '拢', pinyin: 'lǒng', group: ['合拢', '聚拢'], mean: '合上；靠近。' },
+        { char: '喜', pinyin: 'xǐ', group: ['喜欢', '高兴'], mean: '快乐；爱好。' },
+      ],
+      quiz: [
+        { q: '草地为什么会变成金色？', options: ['蒲公英花朵张开了', '太阳照在草地上', '草变黄了', '落叶铺在地上'], answer: 0, explain: '蒲公英花朵张开时，金色的花瓣让草地看起来也是金色的。' },
+        { q: '草地什么时候变成绿色？', options: ['蒲公英花朵合拢时', '下雨后', '早上', '晚上'], answer: 0, explain: '花朵合拢时，金色的花瓣被包住，草地变成绿色。' },
+      ],
+    },
+    {
+      id: 3,
+      slug: 'u5-3',
+      title: '习作 · 我们眼中的缤纷世界',
+      emoji: '✏️',
+      kind: 'writing',
+      hint: '观察一种动物、植物或一处场景，把观察中的新发现和感受写下来。注意写清楚事物的外形、颜色、动作或变化。',
+      quiz: [],
+    },
+    {
+      id: 4,
+      slug: 'u5-4',
+      title: '例文 · 我家的小狗',
+      emoji: '🐕',
+      kind: 'example',
+      hint: '例文展示了怎样观察动物：从小狗的外形、习性、有趣的事等方面写，把自己的喜爱之情表达出来。',
+      quiz: [],
+    },
+    {
+      id: 5,
+      slug: 'u5-5',
+      title: '例文 · 我爱故乡的杨梅',
+      emoji: '杨梅',
+      kind: 'example',
+      hint: '例文展示了怎样观察植物：从杨梅的外形、颜色、味道等角度写，写出自己的观察和感受。',
+      quiz: [],
+    },
+  ],
+}
 
-  // ============================== 第五单元 ==============================
-  {
-    id: 5,
-    slug: 'u5',
-    title: '第五单元',
-    titleZh: '观察与发现',
-    emoji: '🔍',
-    theme: { color: '#0d9488', colorSoft: '#ccfbf1' },
-    lessons: [
-      {
-        id: 1,
-        slug: 'u5-1',
-        title: '金色的草地（第 3 段）',
-        emoji: '🌿',
-        passages: [
-          {
-            title: '第 3 自然段（背诵）',
-            text: '有一天，我起得很早去钓鱼，发现草地并不是金色的，而是绿色的。中午回家的时候，我看见草地是金色的。傍晚的时候，草地又变绿了。这是为什么呢？我来到草地上，仔细观察，发现蒲公英的花瓣是合拢的。原来，蒲公英的花就像我们的手掌，可以张开、合上。花朵张开时，花瓣是金色的，草地也是金色的；花朵合拢时，金色的花瓣被包住了，草地就变成绿色的了。',
-            note: '蒲公英的花像手掌，张开时草地金色，合拢时草地绿色。',
-          },
-        ],
-        quiz: [
-          {
-            q: '草地早上和中午颜色不同，是因为？',
-            options: ['蒲公英花朵张开与合拢', '太阳颜色变了', '下雨了', '草长高了'],
-            answer: 0,
-            explain: '蒲公英花张开→金色，合拢→绿色。',
-          },
-          {
-            q: '「蒲公英的花就像我们的手掌」是哪种修辞？',
-            options: ['比喻', '拟人', '夸张', '反问'],
-            answer: 0,
-            explain: '把花比作手掌，是比喻。',
-          },
-        ],
-      },
-      {
-        id: 2,
-        slug: 'u5-2',
-        title: '搭船的鸟（要点）',
-        emoji: '🐦',
-        passages: [
-          {
-            title: '课文要点（细致观察）',
-            text: '下雨天，一只彩色的小鸟站在船头。作者仔细观察了它的羽毛、翅膀和长嘴，后来看到它冲进水里，叼起一条小鱼飞走了。课文教我们：要留心观察周围的事物。',
-            note: '翠鸟：羽毛翠绿、翅膀带蓝色、红色长嘴。',
-          },
-        ],
-        quiz: [
-          {
-            q: '搭船的鸟是什么鸟？',
-            options: ['翠鸟', '麻雀', '乌鸦', '鸽子'],
-            answer: 0,
-            explain: '那只彩色的小鸟是翠鸟。',
-          },
-          {
-            q: '作者通过观察发现了翠鸟的什么特点？',
-            options: ['羽毛翠绿、长嘴红、会捕鱼', '不会飞', '很大', '是白色的'],
-            answer: 0,
-            explain: '翠鸟羽毛翠绿、红色长嘴，并能冲进水里捉鱼。',
-          },
-        ],
-      },
-      {
-        id: 3,
-        slug: 'u5-3',
-        title: '第五单元 · 生字词',
-        emoji: '✍️',
-        hanzi: [
-          {
-  char: '搭', pinyin: 'dā', group: ['搭船', '搭车'],
-  mean: '乘；支起。'
-},
-          {
-  char: '亲', pinyin: 'qīn', group: ['亲人', '亲密'],
-  mean: '家人；近。'
-},
-          {
-  char: '父', pinyin: 'fù', group: ['父亲', '父母'],
-  mean: '爸爸。'
-},
-          {
-  char: '沙', pinyin: 'shā', group: ['沙子', '沙滩'],
-  mean: '细碎的石粒。'
-},
-          {
-  char: '啦', pinyin: 'la', group: ['哗啦', '呼啦'],
-  mean: '用在句末的语气词。'
-},
-          {
-  char: '响', pinyin: 'xiǎng', group: ['响亮', '响声'],
-  mean: '声音大；发出声。'
-},
-          {
-  char: '羽', pinyin: 'yǔ', group: ['羽毛', '羽翼'],
-  mean: '鸟的毛。'
-},
-          {
-  char: '翠', pinyin: 'cuì', group: ['翠绿', '翠鸟'],
-  mean: '绿而明亮。'
-},
-          {
-  char: '嘴', pinyin: 'zuǐ', group: ['嘴巴', '嘴角'],
-  mean: '口。'
-},
-          {
-  char: '吞', pinyin: 'tūn', group: ['吞下', '吞吐'],
-  mean: '不嚼就咽下。'
-},
-          {
-  char: '捕', pinyin: 'bǔ', group: ['捕鱼', '捕捉'],
-  mean: '捉；逮。'
-},
-          {
-  char: '蒲', pinyin: 'pú', group: ['蒲公英', '蒲扇'],
-  mean: '蒲公英（一种草）。'
-},
-          {
-  char: '英', pinyin: 'yīng', group: ['英雄', '英语'],
-  mean: '才能出众的人；花。'
-},
-          {
-  char: '盛', pinyin: 'shèng', group: ['盛开', '盛大'],
-  mean: '兴旺；隆重。'
-},
-          {
-  char: '耍', pinyin: 'shuǎ', group: ['玩耍', '戏耍'],
-  mean: '玩。'
-},
-          {
-  char: '喊', pinyin: 'hǎn', group: ['喊叫', '呼喊'],
-  mean: '大声叫。'
-},
-          {
-  char: '欠', pinyin: 'qiàn', group: ['哈欠', '欠身'],
-  mean: '不足；身体稍稍弯下。'
-},
-          {
-  char: '钓', pinyin: 'diào', group: ['钓鱼', '钓竿'],
-  mean: '用饵捕鱼。'
-},
-          {
-  char: '而', pinyin: 'ér', group: ['而且', '然而'],
-  mean: '并且；但是。'
-},
-          {
-  char: '察', pinyin: 'chá', group: ['观察', '察觉'],
-  mean: '仔细看；发现。'
-},
-          {
-  char: '拢', pinyin: 'lǒng', group: ['合拢', '拉拢'],
-  mean: '合上；靠近。'
-},
-          {
-  char: '趣', pinyin: 'qù', group: ['有趣', '趣味'],
-  mean: '趣味；有意思。'
-},
-          {
-  char: '喜', pinyin: 'xǐ', group: ['喜欢', '欢喜'],
-  mean: '高兴；爱好。'
-},
-        ],
-        quiz: [
-          {
-            q: '「翠」的拼音是？',
-            options: ['cuì', 'chuì', 'cùi', 'cuī'],
-            answer: 0,
-            explain: '翠 = cuì（翠绿、翠鸟）。',
-          },
-          {
-            q: '「察」可以组词？',
-            options: ['观察', '喝茶', '检查', '茶叶'],
-            answer: 0,
-            explain: '察 → 观察、察觉。',
-          },
-        ],
-      },
-    ],
-  },
+const u6: ChineseUnit = {
+  id: 6,
+  slug: 'u6',
+  title: '第六单元',
+  titleZh: '祖国河山',
+  emoji: '🇨🇳',
+  theme: { color: '#2563eb', colorSoft: '#dbeafe' },
+  lessons: [
+    {
+      id: 1,
+      slug: 'u6-1',
+      title: '富饶的西沙群岛',
+      emoji: '🏝️',
+      kind: 'reading',
+      passages: [
+        {
+          title: '海水五光十色',
+          text: '西沙群岛一带海水五光十色，瑰丽无比：有深蓝的，淡青的，浅绿的，杏黄的。一块块，一条条，相互交错着。',
+          note: '用排比写出海水色彩多、变化多的特点。',
+        },
+        {
+          title: '物产丰富',
+          text: '海底的岩石上长着各种各样的珊瑚，有的像绽开的花朵，有的像分枝的鹿角。海参到处都是，在海底懒洋洋地蠕动。大龙虾全身披甲，划过来，划过去，样子挺威武。',
+          note: '用比喻写出海底生物的多样和有趣。',
+        },
+      ],
+      hanzi: [
+        { char: '景', pinyin: 'jǐng', group: ['风景', '景色'], mean: '风光；情况。' },
+        { char: '优', pinyin: 'yōu', group: ['优秀', '优美'], mean: '好；充足。' },
+        { char: '淡', pinyin: 'dàn', group: ['淡水', '平淡'], mean: '含某种成分少；不浓。' },
+        { char: '浅', pinyin: 'qiǎn', group: ['浅水', '深浅'], mean: '从上到下距离小。' },
+        { char: '底', pinyin: 'dǐ', group: ['海底', '底下'], mean: '最下面的部分。' },
+        { char: '岩', pinyin: 'yán', group: ['岩石', '山岩'], mean: '高峻的山崖；构成地壳的石头。' },
+        { char: '鹿', pinyin: 'lù', group: ['鹿角', '小鹿'], mean: '哺乳动物，四肢细长，善奔跑。' },
+        { char: '划', pinyin: 'huá', group: ['划船', '划动'], mean: '拨水前进；擦过。' },
+        { char: '布', pinyin: 'bù', group: ['分布', '棉布'], mean: '棉麻等织品；散布。' },
+        { char: '密', pinyin: 'mì', group: ['茂密', '秘密'], mean: '事物之间距离近；不公开。' },
+        { char: '厚', pinyin: 'hòu', group: ['深厚', '厚薄'], mean: '扁平物体上下两面距离大。' },
+        { char: '料', pinyin: 'liào', group: ['材料', '颜料'], mean: '原料；资料。' },
+        { char: '祖', pinyin: 'zǔ', group: ['祖国', '祖父'], mean: '先代；祖国。' },
+      ],
+      quiz: [
+        { q: '西沙群岛的海水有什么特点？', options: ['五光十色', '只有一种颜色', '很浑浊', '结冰了'], answer: 0, explain: '课文写西沙群岛的海水五光十色，瑰丽无比。' },
+        { q: '海底的岩石上长着什么？', options: ['珊瑚', '大树', '花朵', '草地'], answer: 0, explain: '海底岩石上长着各种各样的珊瑚。' },
+      ],
+    },
+    {
+      id: 2,
+      slug: 'u6-2',
+      title: '海滨小城',
+      emoji: '🏖️',
+      kind: 'reading',
+      passages: [
+        {
+          title: '海上景象',
+          text: '天是蓝的，海也是蓝的。海天交界的水平线上，有棕色的机帆船和银白色的军舰来来往往。天空飞翔着白色的、灰色的海鸥，还飘着跟海鸥一样颜色的云朵。',
+          note: '用色彩描写海滨小城的美丽。',
+        },
+      ],
+      hanzi: [
+        { char: '滨', pinyin: 'bīn', group: ['海滨', '湖滨'], mean: '水边；靠近水边。' },
+        { char: '棕', pinyin: 'zōng', group: ['棕色', '棕熊'], mean: '棕毛的颜色。' },
+        { char: '帆', pinyin: 'fān', group: ['帆船', '风帆'], mean: '挂在桅杆上的布篷，靠风推动船前进。' },
+        { char: '灰', pinyin: 'huī', group: ['灰色', '灰尘'], mean: '像木柴燃烧后剩下的粉末的颜色。' },
+        { char: '跟', pinyin: 'gēn', group: ['跟着', '脚跟'], mean: '随在后面；脚的后部。' },
+        { char: '渔', pinyin: 'yú', group: ['渔民', '渔船'], mean: '捕鱼。' },
+        { char: '壳', pinyin: 'ké', group: ['贝壳', '蛋壳'], mean: '坚硬的外皮。' },
+        { char: '院', pinyin: 'yuàn', group: ['院子', '医院'], mean: '房屋前后围起来的空地。' },
+        { char: '亚', pinyin: 'yà', group: ['亚洲', '亚军'], mean: '次；亚洲。' },
+        { char: '透', pinyin: 'tòu', group: ['透明', '透气'], mean: '穿过；通达。' },
+        { char: '除', pinyin: 'chú', group: ['除去', '除法'], mean: '去掉；算术中用一个数分另一个数。' },
+        { char: '踩', pinyin: 'cǎi', group: ['踩踏', '踩水'], mean: '用脚登在上面。' },
+        { char: '洁', pinyin: 'jié', group: ['洁白', '清洁'], mean: '干净。' },
+      ],
+      quiz: [
+        { q: '海滨小城有哪些主要景象？', options: ['大海、沙滩、庭院、公园、街道', '只有大海', '只有街道', '高山和森林'], answer: 0, explain: '课文写了大海、沙滩、庭院、公园、街道等景象。' },
+        { q: '「凤凰树开了花，开得那么热闹」中「热闹」写出了什么？', options: ['花开得多、旺盛', '声音大', '人多', '天气热'], answer: 0, explain: '「热闹」在这里形容凤凰花盛开得多而旺。' },
+      ],
+    },
+    {
+      id: 3,
+      slug: 'u6-3',
+      title: '美丽的小兴安岭',
+      emoji: '🌲',
+      kind: 'reading',
+      passages: [
+        {
+          title: '小兴安岭的四季（背诵）',
+          text: '小兴安岭一年四季景色诱人，是一座美丽的大花园，也是一座巨大的宝库。',
+          note: '总结全文，点明小兴安岭景色美丽、物产丰富。',
+        },
+      ],
+      hanzi: [
+        { char: '兴', pinyin: 'xīng', group: ['兴奋', '兴起'], mean: '旺盛；流行。' },
+        { char: '融', pinyin: 'róng', group: ['融化', '融合'], mean: '固体受热变软或变为液体。' },
+        { char: '侧', pinyin: 'cè', group: ['侧面', '侧身'], mean: '旁边；倾斜。' },
+        { char: '欣', pinyin: 'xīn', group: ['欣赏', '欣喜'], mean: '快乐；喜欢。' },
+        { char: '封', pinyin: 'fēng', group: ['信封', '封闭'], mean: '密闭；量词。' },
+        { char: '浸', pinyin: 'jìn', group: ['沉浸', '浸泡'], mean: '泡在液体里；渗入。' },
+        { char: '乳', pinyin: 'rǔ', group: ['乳汁', '乳白色'], mean: '奶；初生的。' },
+        { char: '梢', pinyin: 'shāo', group: ['树梢', '末梢'], mean: '树枝的末端。' },
+        { char: '舍', pinyin: 'shè', group: ['宿舍', '房舍'], mean: '房屋。' },
+        { char: '宿', pinyin: 'sù', group: ['宿舍', '住宿'], mean: '夜里睡觉；旧有的。' },
+        { char: '药', pinyin: 'yào', group: ['药材', '药品'], mean: '治病的物品。' },
+        { char: '眠', pinyin: 'mián', group: ['睡眠', '冬眠'], mean: '睡觉。' },
+      ],
+      quiz: [
+        { q: '小兴安岭被比作什么？', options: ['美丽的大花园和巨大的宝库', '一座高山', '一条大河', '一片沙漠'], answer: 0, explain: '课文结尾把小兴安岭比作美丽的大花园和巨大的宝库。' },
+        { q: '冬天小兴安岭的动物怎样过冬？', options: ['黑熊冬眠，紫貂捕野兔，松鼠吃松子', '都飞走了', '都不吃东西', '都搬家了'], answer: 0, explain: '课文写黑熊冬眠，紫貂捕野兔，松鼠靠收藏的松子过冬。' },
+      ],
+    },
+    {
+      id: 4,
+      slug: 'u6-4',
+      title: '香港，璀璨的明珠',
+      emoji: '💎',
+      kind: 'reading',
+      passages: [
+        {
+          title: '璀璨明珠',
+          text: '香港位于我国南部，南海之滨，虽然面积不大，却是享誉世界的金融、航运和贸易中心，还是购物、品尝美食和旅游的好去处。每当夜幕降临，香港便成了灯的海洋。',
+          note: '了解香港是国际贸易、金融、旅游中心，为祖国骄傲。',
+        },
+      ],
+      hanzi: [
+        { char: '贸', pinyin: 'mào', group: ['贸易', '外贸'], mean: '交易；买卖。' },
+        { char: '愧', pinyin: 'kuì', group: ['惭愧', '愧疚'], mean: '惭愧。' },
+        { char: '仅', pinyin: 'jǐn', group: ['不仅', '仅仅'], mean: '只；才。' },
+        { char: '议', pinyin: 'yì', group: ['会议', '议论'], mean: '讨论；意见。' },
+        { char: '政', pinyin: 'zhèng', group: ['政府', '政治'], mean: '国家事务。' },
+        { char: '府', pinyin: 'fǔ', group: ['政府', '官府'], mean: '行政机关。' },
+        { char: '赠', pinyin: 'zèng', group: ['赠送', '赠言'], mean: '无代价地把东西送给别人。' },
+        { char: '幻', pinyin: 'huàn', group: ['幻想', '变幻'], mean: '虚幻；变化。' },
+        { char: '焰', pinyin: 'yàn', group: ['火焰', '焰火'], mean: '火苗。' },
+        { char: '澳', pinyin: 'ào', group: ['澳门', '澳洲'], mean: '海边弯曲可以停船的地方。' },
+        { char: '扮', pinyin: 'bàn', group: ['打扮', '扮演'], mean: '装饰；表演。' },
+        { char: '角', pinyin: 'jué', group: ['角色', '角度'], mean: '演员扮演的人物；几何中的角。' },
+      ],
+      quiz: [
+        { q: '香港为什么被称为「璀璨的明珠」？', options: ['经济繁荣、景色美丽', '只有夜景好看', '面积很大', '人口最多'], answer: 0, explain: '香港是金融、航运、贸易和旅游中心，经济繁荣，夜景美丽。' },
+        { q: '香港位于我国哪里？', options: ['南部，南海之滨', '北部，黄河边', '西部，青藏高原', '东部，长江口'], answer: 0, explain: '课文写香港位于我国南部，南海之滨。' },
+      ],
+    },
+    {
+      id: 5,
+      slug: 'u6-5',
+      title: '习作 · 这儿真美',
+      emoji: '✏️',
+      kind: 'writing',
+      hint: '观察身边的一处美景（花园、果园、小河……），围绕一个意思写一段话。写出景物的美和自己的感受。',
+      quiz: [],
+    },
+    {
+      id: 6,
+      slug: 'u6-6',
+      title: '语文园地六',
+      emoji: '📜',
+      kind: 'park',
+      idioms: [
+        {
+          title: '日积月累 · 《早发白帝城》',
+          kind: 'poem',
+          items: [{ term: '朝辞白帝彩云间，千里江陵一日还。两岸猿声啼不住，轻舟已过万重山。', source: '唐 · 李白', meaning: '早晨告别彩云缭绕的白帝城，一天就回到了千里之外的江陵。两岸猿猴的叫声还没停，轻快的小船已穿过万重青山。' }],
+        },
+      ],
+      quiz: [
+        { q: '《早发白帝城》的作者是谁？', options: ['唐·李白', '唐·杜甫', '宋·苏轼', '清·查慎行'], answer: 0, explain: '《早发白帝城》是唐代诗人李白所作。' },
+        { q: '「轻舟已过万重山」说明什么？', options: ['船行很快', '山很少', '水很浅', '天很冷'], answer: 0, explain: '小船飞快，已经穿过了很多山，说明船行速度很快。' },
+      ],
+    },
+  ],
+}
+const u7: ChineseUnit = {
+  id: 7,
+  slug: 'u7',
+  title: '第七单元',
+  titleZh: '我与自然',
+  emoji: '🌿',
+  theme: { color: '#0891b2', colorSoft: '#cffafe' },
+  lessons: [
+    {
+      id: 1,
+      slug: 'u7-1',
+      title: '古诗三首',
+      emoji: '📜',
+      kind: 'poetry',
+      poems: [
+        {
+          title: '鹿柴',
+          author: '王维',
+          dynasty: '唐',
+          lines: [
+            { text: '空山不见人，', explain: '空旷的山林中看不见一个人。' },
+            { text: '但闻人语响。', explain: '只听到有人说话的声音。' },
+            { text: '返景入深林，', explain: '傍晚的阳光照进幽深的树林。' },
+            { text: '复照青苔上。', explain: '又照在林中的青苔上。' },
+          ],
+        },
+        {
+          title: '望天门山',
+          author: '李白',
+          dynasty: '唐',
+          lines: [
+            { text: '天门中断楚江开，', explain: '天门山从中间断开，长江浩浩荡荡地流过。' },
+            { text: '碧水东流至此回。', explain: '碧绿的江水东流到这里回旋。' },
+            { text: '两岸青山相对出，', explain: '两岸的青山相对耸立，迎面而来。' },
+            { text: '孤帆一片日边来。', explain: '一只小船从太阳升起的地方驶来。' },
+          ],
+        },
+        {
+          title: '饮湖上初晴后雨',
+          author: '苏轼',
+          dynasty: '宋',
+          lines: [
+            { text: '水光潋滟晴方好，', explain: '晴天时，西湖水波荡漾，波光闪闪，正好。' },
+            { text: '山色空蒙雨亦奇。', explain: '雨天时，远山云雾迷茫，也很奇妙。' },
+            { text: '欲把西湖比西子，', explain: '我想把西湖比作古代美女西施。' },
+            { text: '淡妆浓抹总相宜。', explain: '无论是淡妆还是浓妆，她总是那么合适。' },
+          ],
+        },
+      ],
+      hanzi: [
+        { char: '返', pinyin: 'fǎn', group: ['返回', '往返'], mean: '回；归。' },
+        { char: '苔', pinyin: 'tái', group: ['青苔', '苔藓'], mean: '阴湿地方生长的绿色低矮植物。' },
+        { char: '亦', pinyin: 'yì', group: ['亦然', '人云亦云'], mean: '也。' },
+        { char: '抹', pinyin: 'mǒ', group: ['涂抹', '抹掉'], mean: '涂；擦。' },
+        { char: '宜', pinyin: 'yí', group: ['适宜', '便宜'], mean: '合适；应当。' },
+        { char: '断', pinyin: 'duàn', group: ['中断', '打断'], mean: '分开；隔绝。' },
+        { char: '楚', pinyin: 'chǔ', group: ['清楚', '楚国'], mean: '痛苦；清晰；周代诸侯国名。' },
+        { char: '至', pinyin: 'zhì', group: ['至今', '至于'], mean: '到；极。' },
+        { char: '岸', pinyin: 'àn', group: ['岸边', '海岸'], mean: '水边的陆地。' },
+        { char: '孤', pinyin: 'gū', group: ['孤独', '孤单'], mean: '单独；幼年丧父。' },
+      ],
+      quiz: [
+        { q: '《饮湖上初晴后雨》把西湖比作谁？', options: ['西施', '王昭君', '貂蝉', '杨贵妃'], answer: 0, explain: '诗中「欲把西湖比西子」把西湖比作西施。' },
+        { q: '《望天门山》中的「楚江」指的是什么？', options: ['长江', '黄河', '淮河', '珠江'], answer: 0, explain: '长江中下游部分河段古代流经楚地，故称楚江。' },
+        { q: '《鹿柴》中「但闻人语响」的「但」是什么意思？', options: ['只', '但是', '而且', '也许'], answer: 0, explain: '「但」在这里是「只」的意思。' },
+      ],
+    },
+    {
+      id: 2,
+      slug: 'u7-2',
+      title: '大自然的声音',
+      emoji: '🎵',
+      kind: 'reading',
+      passages: [
+        {
+          title: '风的声音（背诵）',
+          text: '风，是大自然的音乐家。他会在森林里演奏他的手风琴。当他翻动树叶，树叶便像歌手一样，唱出各种不同的歌曲。不一样的树叶，有不一样的声音；不一样的季节，有不一样的音乐。',
+          note: '把风比作音乐家，树叶比作歌手，是拟人和比喻。',
+        },
+      ],
+      hanzi: [
+        { char: '妙', pinyin: 'miào', group: ['美妙', '奇妙'], mean: '神奇；好。' },
+        { char: '奏', pinyin: 'zòu', group: ['演奏', '节奏'], mean: '依照曲调吹弹乐器；呈现。' },
+        { char: '琴', pinyin: 'qín', group: ['钢琴', '手风琴'], mean: '弦乐器；某些乐器的统称。' },
+        { char: '柔', pinyin: 'róu', group: ['温柔', '柔软'], mean: '软；温和。' },
+        { char: '感', pinyin: 'gǎn', group: ['感受', '感动'], mean: '觉得；情感。' },
+        { char: '充', pinyin: 'chōng', group: ['充满', '充足'], mean: '满；足。' },
+        { char: '威', pinyin: 'wēi', group: ['威力', '威风'], mean: '表现出来的使人敬畏的力量。' },
+        { char: '器', pinyin: 'qì', group: ['乐器', '机器'], mean: '用具；器官。' },
+        { char: '汇', pinyin: 'huì', group: ['汇合', '汇聚'], mean: '聚集；综合。' },
+        { char: '鸣', pinyin: 'míng', group: ['鸣叫', '一鸣惊人'], mean: '鸟兽或昆虫叫。' },
+        { char: '塘', pinyin: 'táng', group: ['水塘', '池塘'], mean: '蓄水的坑。' },
+      ],
+      quiz: [
+        { q: '课文说谁是「大自然的音乐家」？', options: ['风', '水', '动物', '树叶'], answer: 0, explain: '课文开头写「风，是大自然的音乐家」。' },
+        { q: '「不一样的树叶，有不一样的声音；不一样的季节，有不一样的音乐」运用了什么修辞？', options: ['排比', '比喻', '拟人', '夸张'], answer: 0, explain: '结构相同、意思相关的句子连续出现，是排比。' },
+      ],
+    },
+    {
+      id: 3,
+      slug: 'u7-3',
+      title: '读不完的大书',
+      emoji: '📖',
+      kind: 'reading',
+      passages: [
+        {
+          title: '大自然是大书（背诵）',
+          text: '大自然是一本看不完的大画册，是一部永远读不完的大书，里面有无穷的奥秘，有无尽的乐趣。',
+          note: '点明大自然像一本永远读不完的书，充满奥秘和乐趣。',
+        },
+      ],
+      hanzi: [
+        { char: '麻', pinyin: 'má', group: ['麻雀', '麻布'], mean: '草本植物；感觉不灵。' },
+        { char: '旋', pinyin: 'xuán', group: ['盘旋', '旋转'], mean: '转动；回环。' },
+        { char: '序', pinyin: 'xù', group: ['顺序', '秩序'], mean: '排列次第；开头的。' },
+        { char: '贞', pinyin: 'zhēn', group: ['忠贞', '贞洁'], mean: '坚定；有操守。' },
+        { char: '姿', pinyin: 'zī', group: ['姿态', '姿势'], mean: '样子；形态。' },
+        { char: '笋', pinyin: 'sǔn', group: ['竹笋', '春笋'], mean: '竹子初从土里长出的嫩芽。' },
+        { char: '超', pinyin: 'chāo', group: ['超过', '超人'], mean: '越过；高出。' },
+        { char: '凡', pinyin: 'fán', group: ['平凡', '凡是'], mean: '平常；总共。' },
+        { char: '俗', pinyin: 'sú', group: ['风俗', '俗语'], mean: '社会上长期形成的风尚；大众化的。' },
+        { char: '奥', pinyin: 'ào', group: ['奥秘', '深奥'], mean: '含义深，不容易懂。' },
+        { char: '秘', pinyin: 'mì', group: ['秘密', '奥秘'], mean: '不公开的；神秘。' },
+      ],
+      quiz: [
+        { q: '作者把大自然比作什么？', options: ['大画册和大书', '大海', '高山', '花园'], answer: 0, explain: '课文结尾把大自然比作看不完的大画册和读不完的大书。' },
+        { q: '「井然有序」用来形容什么？', options: ['蚂蚁搬家', '花开', '下雨', '下雪'], answer: 0, explain: '课文写蚂蚁搬家井然有序，形容整齐有秩序。' },
+      ],
+    },
+    {
+      id: 4,
+      slug: 'u7-4',
+      title: '口语交际 · 身边的「小事」',
+      emoji: '🗣️',
+      kind: 'speaking',
+      hint: '交流身边令人感到温暖的行为或不文明的行为，清楚地表达自己的看法，汇总小组意见时尽量反映每个人的想法。',
+      quiz: [],
+    },
+    {
+      id: 5,
+      slug: 'u7-5',
+      title: '习作 · 我有一个想法',
+      emoji: '✏️',
+      kind: 'writing',
+      hint: '发现生活中需要改进的问题，写出问题和你的想法。如果有改进建议和解决办法，也可以写下来。',
+      quiz: [],
+    },
+    {
+      id: 6,
+      slug: 'u7-6',
+      title: '语文园地七',
+      emoji: '📜',
+      kind: 'park',
+      idioms: [
+        {
+          title: '日积月累 · 《采莲曲》',
+          kind: 'poem',
+          items: [{ term: '荷叶罗裙一色裁，芙蓉向脸两边开。乱入池中看不见，闻歌始觉有人来。', source: '唐 · 王昌龄', meaning: '采莲女的绿罗裙与荷叶仿佛一色裁成，荷花朝着她的脸两边开放。混入莲池中看不见人影，听到歌声才发觉有人来。' }],
+        },
+      ],
+      quiz: [
+        { q: '《采莲曲》的作者是谁？', options: ['唐·王昌龄', '唐·李白', '宋·苏轼', '清·袁枚'], answer: 0, explain: '《采莲曲》是唐代诗人王昌龄所作。' },
+        { q: '「乱入池中看不见」为什么看不见采莲女？', options: ['荷叶荷花和她衣裳颜色相近', '她躲起来了', '天太黑', '水太深'], answer: 0, explain: '罗裙与荷叶一色，脸与荷花相映，所以看不见。' },
+      ],
+    },
+  ],
+}
 
-  // ============================== 第六单元 ==============================
-  {
-    id: 6,
-    slug: 'u6',
-    title: '第六单元',
-    titleZh: '祖国河山',
-    emoji: '🏞️',
-    theme: { color: '#0284c7', colorSoft: '#e0f2fe' },
-    lessons: [
-      {
-        id: 1,
-        slug: 'u6-1',
-        title: '古诗三首',
-        emoji: '📜',
-        poems: [
-          {
-            title: '望天门山',
-            author: '李白',
-            dynasty: '唐',
-            lines: [
-              { text: '天门中断楚江开，', explain: '天门山被楚江从中间劈开，' },
-              { text: '碧水东流至此回。', explain: '碧绿的江水东流到这里回旋澎湃。' },
-              { text: '两岸青山相对出，', explain: '两岸青翠的山峦相对耸立，' },
-              { text: '孤帆一片日边来。', explain: '一片孤帆从太阳那边驶来。' },
-            ],
-          },
-          {
-            title: '饮湖上初晴后雨',
-            author: '苏轼',
-            dynasty: '宋',
-            lines: [
-              { text: '水光潋滟晴方好，', explain: '晴天里湖面波光闪动，正好看，' },
-              { text: '山色空蒙雨亦奇。', explain: '雨中山色迷蒙，也十分奇妙。' },
-              { text: '欲把西湖比西子，', explain: '若把西湖比作美人西施，' },
-              { text: '淡妆浓抹总相宜。', explain: '无论淡妆还是浓妆都合适美丽。' },
-            ],
-          },
-          {
-            title: '望洞庭',
-            author: '刘禹锡',
-            dynasty: '唐',
-            lines: [
-              { text: '湖光秋月两相和，', explain: '洞庭湖光与秋月交相辉映，' },
-              { text: '潭面无风镜未磨。', explain: '无风的湖面像一面没磨过的铜镜。' },
-              { text: '遥望洞庭山水翠，', explain: '远望洞庭，山水一片青翠，' },
-              { text: '白银盘里一青螺。', explain: '如同白银盘里托着一只青螺。' },
-            ],
-          },
-        ],
-        quiz: [
-          {
-            q: '《饮湖上初晴后雨》把西湖比作谁？',
-            options: ['西子（西施）', '王昭君', '杨贵妃', '貂蝉'],
-            answer: 0,
-            explain: '「欲把西湖比西子」，西子即西施。',
-          },
-          {
-            q: '「白银盘里一青螺」描写的是？',
-            options: ['洞庭湖中的君山', '大海', '江河', '雪山'],
-            answer: 0,
-            explain: '把洞庭湖面比作白银盘，湖中君山比作青螺。',
-          },
-          {
-            q: '《望天门山》的作者是？',
-            options: ['李白', '杜甫', '白居易', '王维'],
-            answer: 0,
-            explain: '《望天门山》是唐代李白所作。',
-          },
-        ],
-      },
-      {
-        id: 2,
-        slug: 'u6-2',
-        title: '富饶的西沙群岛（结尾段）',
-        emoji: '🐠',
-        passages: [
-          {
-            title: '结尾段（背诵）',
-            text: '富饶的西沙群岛，是我们祖祖辈辈生活的地方。随着祖国建设事业的发展，可爱的西沙群岛必将变得更加美丽，更加富饶。',
-            note: '课文写了西沙群岛的海水、海底生物、海滩和海岛，表达热爱之情。',
-          },
-        ],
-        quiz: [
-          {
-            q: '西沙群岛的特点是？',
-            options: ['美丽、富饶', '寒冷', '干旱', '荒凉'],
-            answer: 0,
-            explain: '课文题目就是「富饶的西沙群岛」。',
-          },
-          {
-            q: '「必将变得更加美丽，更加富饶」表达了作者怎样的感情？',
-            options: ['对祖国海疆的热爱与自豪', '难过', '害怕', '无所谓'],
-            answer: 0,
-            explain: '表达了对祖国河山的热爱与自豪。',
-          },
-        ],
-      },
-      {
-        id: 3,
-        slug: 'u6-3',
-        title: '语文园地六 · 日积月累',
-        emoji: '⛰️',
-        poems: [
-          {
-            title: '早发白帝城',
-            author: '李白',
-            dynasty: '唐',
-            lines: [
-              { text: '朝辞白帝彩云间，', explain: '早晨告别彩云间的白帝城，' },
-              { text: '千里江陵一日还。', explain: '千里外的江陵一天就能到达。' },
-              { text: '两岸猿声啼不住，', explain: '两岸猿猴的啼声连绵不绝，' },
-              { text: '轻舟已过万重山。', explain: '轻快的小船已驶过万重山峦。' },
-            ],
-          },
-        ],
-        quiz: [
-          {
-            q: '「朝辞白帝彩云间」中「辞」的意思是？',
-            options: ['告别、离开', '词语', '推辞', '命令'],
-            answer: 0,
-            explain: '早晨告别白帝城，从彩云间出发。',
-          },
-          {
-            q: '「轻舟已过万重山」让人感受到？',
-            options: ['船行很快、心情轻快', '山很多很慢', '船沉了', '风很大'],
-            answer: 0,
-            explain: '小船飞快越过万重山，写出诗人轻快喜悦的心情。',
-          },
-        ],
-      },
-      {
-        id: 4,
-        slug: 'u6-4',
-        title: '第六单元 · 生字词',
-        emoji: '✍️',
-        hanzi: [
-          {
-  char: '断', pinyin: 'duàn', group: ['断开', '中断'],
-  mean: '分开；断绝。'
-},
-          {
-  char: '楚', pinyin: 'chǔ', group: ['清楚', '楚国'],
-  mean: '清晰；古国名。'
-},
-          {
-  char: '至', pinyin: 'zhì', group: ['至于', '至少'],
-  mean: '到；极。'
-},
-          {
-  char: '孤', pinyin: 'gū', group: ['孤单', '孤独'],
-  mean: '单独；独自。'
-},
-          {
-  char: '帆', pinyin: 'fān', group: ['帆船', '风帆'],
-  mean: '挂船桅上的布篷。'
-},
-          {
-  char: '饮', pinyin: 'yǐn', group: ['饮水', '饮料'],
-  mean: '喝。'
-},
-          {
-  char: '初', pinyin: 'chū', group: ['初升', '初级'],
-  mean: '开始；开头。'
-},
-          {
-  char: '镜', pinyin: 'jìng', group: ['镜子', '明镜'],
-  mean: '照影子的器具。'
-},
-          {
-  char: '未', pinyin: 'wèi', group: ['未来', '未必'],
-  mean: '没；不。'
-},
-          {
-  char: '磨', pinyin: 'mó', group: ['磨刀', '折磨'],
-  mean: '摩擦使锋利；困扰。'
-},
-          {
-  char: '遥', pinyin: 'yáo', group: ['遥远', '遥望'],
-  mean: '远。'
-},
-          {
-  char: '银', pinyin: 'yín', group: ['银色', '银子'],
-  mean: '白银；银白色。'
-},
-          {
-  char: '盘', pinyin: 'pán', group: ['盘子', '圆盘'],
-  mean: '扁圆盛物的器具。'
-},
-          {
-  char: '优', pinyin: 'yōu', group: ['优美', '优秀'],
-  mean: '好；充足。'
-},
-          {
-  char: '浅', pinyin: 'qiǎn', group: ['浅绿', '深浅'],
-  mean: '深度小；颜色淡。'
-},
-          {
-  char: '错', pinyin: 'cuò', group: ['错误', '对错'],
-  mean: '不对；交叉。'
-},
-          {
-  char: '岩', pinyin: 'yán', group: ['岩石', '岩洞'],
-  mean: '石头；岩石。'
-},
-          {
-  char: '虾', pinyin: 'xiā', group: ['小虾', '鱼虾'],
-  mean: '水生小动物。'
-},
-          {
-  char: '挺', pinyin: 'tǐng', group: ['挺立', '挺直'],
-  mean: '直；硬而直。'
-},
-          {
-  char: '鼓', pinyin: 'gǔ', group: ['鼓励', '鼓掌'],
-  mean: '一种乐器；敲。'
-},
-          {
-  char: '数', pinyin: 'shǔ', group: ['数不清', '数数'],
-  mean: '计算；查点。'
-},
-          {
-  char: '厚', pinyin: 'hòu', group: ['厚厚', '深厚'],
-  mean: '扁平物上下距离大。'
-},
-          {
-  char: '宝', pinyin: 'bǎo', group: ['宝贝', '宝贵'],
-  mean: '珍贵的东西。'
-},
-          {
-  char: '贵', pinyin: 'guì', group: ['珍贵', '贵重'],
-  mean: '价值高。'
-},
-          {
-  char: '滨', pinyin: 'bīn', group: ['海滨', '湖滨'],
-  mean: '水边。'
-},
-          {
-  char: '灰', pinyin: 'huī', group: ['灰色', '灰心'],
-  mean: '灰白；消沉。'
-},
-          {
-  char: '渔', pinyin: 'yú', group: ['渔民', '渔船'],
-  mean: '捕鱼。'
-},
-          {
-  char: '遍', pinyin: 'biàn', group: ['一遍', '遍布'],
-  mean: '全面；次。'
-},
-          {
-  char: '躺', pinyin: 'tǎng', group: ['躺下', '躺椅'],
-  mean: '身体平放。'
-},
-          {
-  char: '载', pinyin: 'zài', group: ['满载', '装载'],
-  mean: '装；年。'
-},
-          {
-  char: '靠', pinyin: 'kào', group: ['靠岸', '依靠'],
-  mean: '倚着；依赖。'
-},
-          {
-  char: '栽', pinyin: 'zāi', group: ['栽树', '栽种'],
-  mean: '种植。'
-},
-          {
-  char: '亚', pinyin: 'yà', group: ['亚热带', '亚军'],
-  mean: '次一等的；第二。'
-},
-          {
-  char: '夏', pinyin: 'xià', group: ['夏天', '夏季'],
-  mean: '夏季。'
-},
-          {
-  char: '除', pinyin: 'chú', group: ['除了', '消除'],
-  mean: '去掉；不计算。'
-},
-          {
-  char: '踩', pinyin: 'cǎi', group: ['踩踏', '踩水'],
-  mean: '脚底接触地面。'
-},
-          {
-  char: '洁', pinyin: 'jié', group: ['洁白', '清洁'],
-  mean: '干净。'
-},
-          {
-  char: '脑', pinyin: 'nǎo', group: ['脑袋', '大脑'],
-  mean: '头脑。'
-},
-          {
-  char: '袋', pinyin: 'dài', group: ['口袋', '袋子'],
-  mean: '口袋；囊。'
-},
-          {
-  char: '严', pinyin: 'yán', group: ['严实', '严格'],
-  mean: '紧密；认真。'
-},
-          {
-  char: '实', pinyin: 'shí', group: ['实在', '果实'],
-  mean: '真实；果子。'
-},
-          {
-  char: '挡', pinyin: 'dǎng', group: ['挡住', '阻挡'],
-  mean: '阻拦。'
-},
-          {
-  char: '视', pinyin: 'shì', group: ['视线', '电视'],
-  mean: '看。'
-},
-          {
-  char: '线', pinyin: 'xiàn', group: ['线条', '电线'],
-  mean: '细长的东西。'
-},
-          {
-  char: '坛', pinyin: 'tán', group: ['花坛', '天坛'],
-  mean: '土台；场所。'
-},
-          {
-  char: '显', pinyin: 'xiǎn', group: ['显现', '明显'],
-  mean: '露出；清楚。'
-},
-          {
-  char: '材', pinyin: 'cái', group: ['木材', '材料'],
-  mean: '原料；能力。'
-},
-          {
-  char: '软', pinyin: 'ruǎn', group: ['柔软', '松软'],
-  mean: '不硬。'
-},
-          {
-  char: '刮', pinyin: 'guā', group: ['刮风', '刮胡子'],
-  mean: '用刀刮；风吹。'
-},
-          {
-  char: '库', pinyin: 'kù', group: ['宝库', '仓库'],
-  mean: '存放东西的房屋。'
-},
-        ],
-        quiz: [
-          {
-            q: '「楚」的拼音是？',
-            options: ['chǔ', 'cǔ', 'chū', 'cū'],
-            answer: 0,
-            explain: '楚 = chǔ（清楚、楚国）。',
-          },
-          {
-            q: '「镜」可以组词？',
-            options: ['镜子', '竞争', '安静', '环境'],
-            answer: 0,
-            explain: '镜 → 镜子、明镜。',
-          },
-        ],
-      },
-    ],
-  },
+const u8: ChineseUnit = {
+  id: 8,
+  slug: 'u8',
+  title: '第八单元',
+  titleZh: '美好品质',
+  emoji: '⭐',
+  theme: { color: '#ca8a04', colorSoft: '#fef08a' },
+  lessons: [
+    {
+      id: 1,
+      slug: 'u8-1',
+      title: '司马光',
+      emoji: '👦',
+      kind: 'reading',
+      poems: [
+        {
+          title: '司马光',
+          author: '佚名',
+          dynasty: '宋',
+          lines: [
+            { text: '群儿戏于庭，一儿登瓮，足跌没水中。', explain: '一群孩子在庭院里玩耍，一个孩子爬上水缸，一不小心掉进水里。' },
+            { text: '众皆弃去，光持石击瓮破之，水迸，儿得活。', explain: '其他孩子都吓跑了，司马光拿起石头砸破水缸，水涌出来，孩子得救了。' },
+          ],
+        },
+      ],
+      hanzi: [
+        { char: '司', pinyin: 'sī', group: ['司机', '公司'], mean: '主持；操作。' },
+        { char: '登', pinyin: 'dēng', group: ['登山', '登记'], mean: '由低处到高处；记载。' },
+        { char: '跌', pinyin: 'diē', group: ['跌倒', '跌落'], mean: '摔倒；下降。' },
+        { char: '皆', pinyin: 'jiē', group: ['皆大欢喜', '比比皆是'], mean: '都。' },
+        { char: '弃', pinyin: 'qì', group: ['放弃', '丢弃'], mean: '丢掉；不要。' },
+        { char: '持', pinyin: 'chí', group: ['坚持', '支持'], mean: '拿着；保持。' },
+        { char: '击', pinyin: 'jī', group: ['打击', '攻击'], mean: '打；敲打。' },
+      ],
+      quiz: [
+        { q: '司马光用什么办法救了小伙伴？', options: ['拿石头砸破水缸', '跳进水里救人', '喊大人来', '找绳子拉'], answer: 0, explain: '司马光拿起石头砸破水缸，让水流出来。' },
+        { q: '「众皆弃去」的「皆」是什么意思？', options: ['都', '一个', '没有', '也许'], answer: 0, explain: '「皆」是「都」的意思。' },
+      ],
+    },
+    {
+      id: 2,
+      slug: 'u8-2',
+      title: '一定要争气',
+      emoji: '💪',
+      kind: 'reading',
+      passages: [
+        {
+          title: '立志争气',
+          text: '童第周暗暗下定决心，一定要为中国人争气。青蛙卵外膜的成功剥离，震惊了欧洲同行。童第周激动地想：一定要争气，中国人并不比外国人笨。外国人认为很难办到的事，我们中国人经过努力，照样能办到。',
+          note: '感受童第周勤奋刻苦、为国争气的精神。',
+        },
+      ],
+      hanzi: [
+        { char: '念', pinyin: 'niàn', group: ['想念', '念书'], mean: '惦记；读。' },
+        { char: '差', pinyin: 'chà', group: ['差劲', '差别'], mean: '不好；不相同。' },
+        { char: '试', pinyin: 'shì', group: ['考试', '尝试'], mean: '测验；尝试。' },
+        { char: '均', pinyin: 'jūn', group: ['平均', '均匀'], mean: '平；匀。' },
+        { char: '退', pinyin: 'tuì', group: ['后退', '退步'], mean: '向后移动；减退。' },
+        { char: '努', pinyin: 'nǔ', group: ['努力', '努嘴'], mean: '尽力；使出力气。' },
+        { char: '单', pinyin: 'dān', group: ['单独', '简单'], mean: '一个；不复杂。' },
+        { char: '留', pinyin: 'liú', group: ['留下', '留学'], mean: '停留；保留。' },
+        { char: '度', pinyin: 'dù', group: ['程度', '温度'], mean: '计量长短或程度的单位；过。' },
+        { char: '奋', pinyin: 'fèn', group: ['奋斗', '兴奋'], mean: '振作；努力。' },
+      ],
+      quiz: [
+        { q: '童第周为什么一定要争气？', options: ['为中国人争气', '为了考试成绩', '为了得到奖励', '为了回家'], answer: 0, explain: '他看到中国学生被瞧不起，决心为中国人争气。' },
+        { q: '童第周在哪个国家留学？', options: ['比利时', '法国', '英国', '美国'], answer: 0, explain: '课文写童第周去比利时留学。' },
+      ],
+    },
+    {
+      id: 3,
+      slug: 'u8-3',
+      title: '手术台就是阵地',
+      emoji: '🏥',
+      kind: 'reading',
+      passages: [
+        {
+          title: '白求恩的话（背诵）',
+          text: '谢谢师长的关心。可是，手术台是医生的阵地。战士们没有离开他们的阵地，我怎么能离开自己的阵地呢？',
+          note: '白求恩把手术台当作阵地，坚守岗位、救死扶伤。',
+        },
+      ],
+      hanzi: [
+        { char: '棒', pinyin: 'bàng', group: ['木棒', '棒子'], mean: '棍子；好。' },
+        { char: '伤', pinyin: 'shāng', group: ['伤口', '受伤'], mean: '人体或其他物体受到的损害。' },
+        { char: '陆', pinyin: 'lù', group: ['陆地', '陆军'], mean: '高出水面的土地。' },
+        { char: '血', pinyin: 'xuè', group: ['血液', '鲜血'], mean: '人或动物体内循环的红色液体。' },
+        { char: '取', pinyin: 'qǔ', group: ['取出', '取得'], mean: '拿；得到。' },
+        { char: '盘', pinyin: 'pán', group: ['盘子', '算盘'], mean: '扁而浅的器具；回旋。' },
+        { char: '匆', pinyin: 'cōng', group: ['匆匆', '匆忙'], mean: '急促。' },
+        { char: '医', pinyin: 'yī', group: ['医生', '医院'], mean: '治病的人；医学。' },
+        { char: '迅', pinyin: 'xùn', group: ['迅速', '迅猛'], mean: '快。' },
+        { char: '速', pinyin: 'sù', group: ['速度', '快速'], mean: '快；迅速。' },
+        { char: '夺', pinyin: 'duó', group: ['夺取', '争分夺秒'], mean: '强取；争取。' },
+        { char: '秒', pinyin: 'miǎo', group: ['秒针', '分秒'], mean: '时间单位。' },
+      ],
+      quiz: [
+        { q: '白求恩连续工作了多长时间？', options: ['六十九个小时', '两天两夜', '三天三夜', '四十九个小时'], answer: 0, explain: '课文写白求恩在手术台旁连续工作了六十九个小时。' },
+        { q: '「手术台就是阵地」说明什么？', options: ['医生坚守岗位救死扶伤', '手术台在战场上', '阵地需要医生', '战士要保护医生'], answer: 0, explain: '白求恩把手术台当作阵地，像战士坚守阵地一样坚守岗位。' },
+      ],
+    },
+    {
+      id: 4,
+      slug: 'u8-4',
+      title: '一个粗瓷大碗',
+      emoji: '🥣',
+      kind: 'reading',
+      passages: [
+        {
+          title: '赵一曼让饭',
+          text: '赵一曼端着碗轻轻走进炊事棚，趁人不注意的时候，把碗里的饭倒进锅里，又从另一口锅里盛了半碗野菜粥。',
+          note: '赵一曼把病号饭让给战士，自己吃野菜粥，体现革命先辈舍己为人。',
+        },
+      ],
+      hanzi: [
+        { char: '瓷', pinyin: 'cí', group: ['瓷器', '瓷砖'], mean: '用高岭土等烧制成的材料。' },
+        { char: '赵', pinyin: 'zhào', group: ['姓赵', '赵国'], mean: '姓氏；古国名。' },
+        { char: '抗', pinyin: 'kàng', group: ['抗日', '反抗'], mean: '抵抗；对等。' },
+        { char: '束', pinyin: 'shù', group: ['一束', '结束'], mean: '捆；控制。' },
+        { char: '缸', pinyin: 'gāng', group: ['水缸', '鱼缸'], mean: '盛东西的陶器。' },
+        { char: '还', pinyin: 'huán', group: ['归还', '还有'], mean: '返回；偿还。' },
+        { char: '顿', pinyin: 'dùn', group: ['一顿饭', '顿时'], mean: '量词；立刻。' },
+        { char: '灶', pinyin: 'zào', group: ['灶台', '炉灶'], mean: '生火做饭的设备。' },
+        { char: '沾', pinyin: 'zhān', group: ['沾水', '沾染'], mean: '因接触而附着上。' },
+        { char: '禁', pinyin: 'jīn', group: ['不禁', '禁止'], mean: '受得住；忍耐。' },
+        { char: '锅', pinyin: 'guō', group: ['铁锅', '火锅'], mean: '烹煮食物的器具。' },
+        { char: '侦', pinyin: 'zhēn', group: ['侦察', '侦探'], mean: '暗中察看；调查。' },
+      ],
+      quiz: [
+        { q: '赵一曼为什么把高粱米饭倒进锅里？', options: ['留给伤病员吃，自己吃野菜粥', '她不爱吃', '饭太多了', '饭坏了'], answer: 0, explain: '赵一曼想到伤病员更需要粮食，便把饭倒回锅里，自己盛野菜粥。' },
+        { q: '这个粗瓷大碗最后成了什么？', options: ['七班的菜盆', '赵一曼的饭碗', '通讯员的挂包', ' museum 的展品'], answer: 0, explain: '课文说粗瓷大碗后来成了七班的菜盆。' },
+      ],
+    },
+    {
+      id: 5,
+      slug: 'u8-5',
+      title: '口语交际 · 请教',
+      emoji: '🗣️',
+      kind: 'speaking',
+      hint: '遇到不懂的问题时，在别人方便的时候请教，把问题说清楚，不清楚的地方及时追问，最后表示感谢。',
+      quiz: [],
+    },
+    {
+      id: 6,
+      slug: 'u8-6',
+      title: '习作 · 那次经历真难忘',
+      emoji: '✏️',
+      kind: 'writing',
+      hint: '回忆一次难忘的经历，把事情的经过像放电影一样回想一遍，再写下来。注意表达出难忘的心情。',
+      quiz: [],
+    },
+    {
+      id: 7,
+      slug: 'u8-7',
+      title: '语文园地八',
+      emoji: '📜',
+      kind: 'park',
+      idioms: [
+        {
+          title: '日积月累 · 关于立志的名言',
+          kind: 'quotes',
+          items: [
+            { term: '士不可以不弘毅，任重而道远。', source: '《论语》', meaning: '读书人不能不志向远大、意志坚强，因为责任重大，道路遥远。' },
+            { term: '志不强者智不达，言不信者行不果。', source: '《墨子》', meaning: '意志不坚强的人，智慧就不会通达；说话不守信的人，做事就不会成功。' },
+            { term: '锲而舍之，朽木不折；锲而不舍，金石可镂。', source: '《荀子》', meaning: '雕刻几下就放弃，连朽木也刻不断；坚持不懈地雕刻，金石也能刻穿。' },
+          ],
+        },
+      ],
+      quiz: [
+        { q: '「锲而不舍，金石可镂」告诉我们什么？', options: ['坚持就能成功', '放弃是对的', '金石很软', '雕刻很容易'], answer: 0, explain: '只要坚持不懈，再难的事也能成功。' },
+        { q: '「士不可以不弘毅」出自哪部经典？', options: ['《论语》', '《墨子》', '《孟子》', '《荀子》'], answer: 0, explain: '「士不可以不弘毅，任重而道远」出自《论语》。' },
+      ],
+    },
+  ],
+}
 
-  // ============================== 第七单元 ==============================
-  {
-    id: 7,
-    slug: 'u7',
-    title: '第七单元',
-    titleZh: '我与自然',
-    emoji: '🎵',
-    theme: { color: '#7c3aed', colorSoft: '#ede9fe' },
-    lessons: [
-      {
-        id: 1,
-        slug: 'u7-1',
-        title: '大自然的声音（风）',
-        emoji: '🌬️',
-        passages: [
-          {
-            title: '第 2 自然段（背诵）',
-            text: '风，是大自然的音乐家。他会在森林里演奏他的手风琴。当他翻动树叶，树叶便像歌手一样，唱出各种不同的歌曲。不一样的树叶，有不一样的声音；不一样的季节，有不一样的音乐。当微风拂过，那声音轻轻柔柔的，好像呢喃细语，让人感受到大自然的温柔；当狂风吹起，整座森林都激动起来，合奏出一首雄伟的乐曲，那声音充满力量，令人感受到大自然的威力。',
-            note: '把风比作「音乐家」，把树叶比作「歌手」，是拟人 + 比喻。',
-          },
-        ],
-        quiz: [
-          {
-            q: '「风，是大自然的音乐家」运用了什么写法？',
-            options: ['比喻 + 拟人', '夸张', '反问', '排比'],
-            answer: 0,
-            explain: '把风比作音乐家（比喻），又赋予它演奏的动作（拟人）。',
-          },
-          {
-            q: '微风拂过时，声音给人什么感觉？',
-            options: ['轻轻柔柔、温柔', '雄伟有力', '吵闹', '刺耳'],
-            answer: 0,
-            explain: '微风「轻轻柔柔的，好像呢喃细语」，让人感到温柔。',
-          },
-        ],
-      },
-      {
-        id: 2,
-        slug: 'u7-2',
-        title: '语文园地七 · 日积月累',
-        emoji: '🪷',
-        poems: [
-          {
-            title: '采莲曲',
-            author: '王昌龄',
-            dynasty: '唐',
-            lines: [
-              { text: '荷叶罗裙一色裁，', explain: '采莲女的罗裙和荷叶同色，像用一块布裁成，' },
-              { text: '芙蓉向脸两边开。', explain: '荷花朝着脸庞两边开放。' },
-              { text: '乱入池中看不见，', explain: '采莲女混入池中难分辨，' },
-              { text: '闻歌始觉有人来。', explain: '听到歌声才发觉有人来了。' },
-            ],
-          },
-        ],
-        quiz: [
-          {
-            q: '《采莲曲》中「荷叶罗裙一色裁」写采莲女和什么颜色一样？',
-            options: ['荷叶的绿色', '荷花红色', '天空蓝色', '水黄色'],
-            answer: 0,
-            explain: '罗裙和荷叶都是绿色，仿佛用同一块布裁成。',
-          },
-          {
-            q: '《采莲曲》的作者是？',
-            options: ['王昌龄', '李白', '杜甫', '王维'],
-            answer: 0,
-            explain: '《采莲曲》是唐代王昌龄所作。',
-          },
-        ],
-      },
-      {
-        id: 3,
-        slug: 'u7-3',
-        title: '第七单元 · 生字词',
-        emoji: '✍️',
-        hanzi: [
-          {
-  char: '妙', pinyin: 'miào', group: ['美妙', '奇妙'],
-  mean: '好；神奇。'
-},
-          {
-  char: '演', pinyin: 'yǎn', group: ['演奏', '表演'],
-  mean: '表演；发挥。'
-},
-          {
-  char: '奏', pinyin: 'zòu', group: ['演奏', '节拍'],
-  mean: '演奏乐器；发生。'
-},
-          {
-  char: '琴', pinyin: 'qín', group: ['钢琴', '琴声'],
-  mean: '一种乐器。'
-},
-          {
-  char: '柔', pinyin: 'róu', group: ['温柔', '柔和'],
-  mean: '软；温和。'
-},
-          {
-  char: '感', pinyin: 'gǎn', group: ['感受', '感动'],
-  mean: '觉得；触动。'
-},
-          {
-  char: '受', pinyin: 'shòu', group: ['接受', '感受'],
-  mean: '接纳；遭到。'
-},
-          {
-  char: '激', pinyin: 'jī', group: ['激动', '激发'],
-  mean: '使感情冲动；急剧。'
-},
-          {
-  char: '击', pinyin: 'jī', group: ['打击', '敲击'],
-  mean: '打；敲。'
-},
-          {
-  char: '器', pinyin: 'qì', group: ['乐器', '机器'],
-  mean: '用具；器官。'
-},
-          {
-  char: '滴', pinyin: 'dī', group: ['水滴', '滴水'],
-  mean: '液体一点一点落下。'
-},
-          {
-  char: '敲', pinyin: 'qiāo', group: ['敲打', '敲门'],
-  mean: '打；击。'
-},
-          {
-  char: '鸣', pinyin: 'míng', group: ['虫鸣', '鸣叫'],
-  mean: '鸟兽或昆虫叫。'
-},
-        ],
-        quiz: [
-          {
-            q: '「琴」的拼音是？',
-            options: ['qín', 'qíng', 'jīn', 'qīn'],
-            answer: 0,
-            explain: '琴 = qín（钢琴、琴声）。',
-          },
-          {
-            q: '「激」可以组词？',
-            options: ['激动', '吃水', '基础', '打击'],
-            answer: 0,
-            explain: '激 → 激动、激发。',
-          },
-        ],
-      },
+const appendixUnit: ChineseUnit = {
+  id: 9,
+  slug: 'appendix',
+  title: '附录',
+  titleZh: '字词总复习',
+  emoji: '📎',
+  theme: { color: '#4b5563', colorSoft: '#e5e7eb' },
+  lessons: [
+    {
+      id: 1,
+      slug: 'a-shizi',
+      title: '识字表',
+      emoji: '👀',
+      kind: 'appendix',
+      hint: '本册要求认识的字（已收录约 179 个，按课本识字表顺序）。识字表中蓝色标注的字此前已作为生字认读，此处作为多音字学习。',
+      hanzi: [
+        { char: '绒', pinyin: 'róng', group: ['绒毛'], mean: '柔软细小的毛。' },
+        { char: '昂', pinyin: 'áng', group: ['昂首'], mean: '仰起头。' },
+        { char: '扬', pinyin: 'yáng', group: ['飘扬'], mean: '高举；传播。' },
+        { char: '凤', pinyin: 'fèng', group: ['凤凰'], mean: '传说中的神鸟。' },
+        { char: '墙', pinyin: 'qiáng', group: ['墙壁'], mean: '房屋等的四围。' },
+        { char: '晃', pinyin: 'huàng', group: ['摇晃'], mean: '摇动。' },
+        { char: '轰', pinyin: 'hōng', group: ['轰响'], mean: '巨大的声响。' },
+        { char: '湿', pinyin: 'shī', group: ['湿润'], mean: '沾了水或是含水分多。' },
+        { char: '荒', pinyin: 'huāng', group: ['荒野'], mean: '没人耕种；冷清。' },
+        { char: '诵', pinyin: 'sòng', group: ['背诵'], mean: '读出声音来。' },
+        { char: '例', pinyin: 'lì', group: ['例子'], mean: '可以做依据的事物。' },
+        { char: '糊', pinyin: 'hú', group: ['糊涂'], mean: '不明事理。' },
+        { char: '厉', pinyin: 'lì', group: ['厉害'], mean: '严格；猛烈。' },
+        { char: '详', pinyin: 'xiáng', group: ['详细'], mean: '细密；完备。' },
+        { char: '挨', pinyin: 'ái', group: ['挨打'], mean: '遭受；忍受。' },
+        { char: '斜', pinyin: 'xié', group: ['斜坡'], mean: '不正；弯曲。' },
+        { char: '萧', pinyin: 'xiāo', group: ['萧萧'], mean: '形容风吹草木的声音。' },
+        { char: '挑', pinyin: 'tiǎo', group: ['挑动'], mean: '用细长的东西拨弄。' },
+        { char: '促', pinyin: 'cù', group: ['促进'], mean: '推动；靠近。' },
+        { char: '凌', pinyin: 'líng', group: ['凌乱'], mean: '升高；越过。' },
+        { char: '增', pinyin: 'zēng', group: ['增加'], mean: '加多。' },
+        { char: '棕', pinyin: 'zōng', group: ['棕色'], mean: '棕毛的颜色。' },
+        { char: '钥', pinyin: '', group: [], mean: '' },
+        { char: '匙', pinyin: 'shi', group: ['钥匙'], mean: '开锁的用具。' },
+        { char: '阝', pinyin: '', group: [], mean: '' },
+        { char: '爽', pinyin: 'shuǎng', group: ['凉爽'], mean: '明朗；舒适。' },
+        { char: '橘', pinyin: 'jú', group: ['橘子'], mean: '柑橘类水果。' },
+        { char: '频', pinyin: 'pín', group: ['频频'], mean: '屡次；连续。' },
+        { char: '梨', pinyin: 'lí', group: ['鸭梨'], mean: '梨树的果实。' },
+        { char: '勾', pinyin: 'gōu', group: ['勾住'], mean: '牵引；招引。' },
+        { char: '喇', pinyin: 'lǎ', group: ['喇叭'], mean: '一种管乐器。' },
+        { char: '叭', pinyin: 'bā', group: ['喇叭'], mean: '形容声音。' },
+        { char: '抖', pinyin: 'dǒu', group: ['抖动'], mean: '颤动。' },
+        { char: '振', pinyin: 'zhèn', group: ['振动'], mean: '摇动；奋起。' },
+        { char: '韵', pinyin: 'yùn', group: ['歌韵'], mean: '好听的声音。' },
+        { char: '辽', pinyin: 'liáo', group: ['辽阔'], mean: '远；广阔。' },
+        { char: '阔', pinyin: 'kuò', group: ['宽阔'], mean: '宽广。' },
+        { char: '咪', pinyin: 'mī', group: ['猫咪'], mean: '猫叫声。' },
+        { char: '哦', pinyin: 'ó', group: ['哦'], mean: '表示领会、醒悟。' },
+        { char: '喵', pinyin: 'miāo', group: ['喵喵'], mean: '形容猫叫的声音。' },
+        { char: '孵', pinyin: 'fū', group: ['孵化'], mean: '鸟类伏在卵上，用体温使卵内的胚胎发育成雏鸟。' },
+        { char: '叽', pinyin: 'jī', group: ['叽喳'], mean: '形容小鸟等的叫声。' },
+        { char: '偶', pinyin: 'ǒu', group: ['偶尔'], mean: '间或；有时候。' },
+        { char: '尔', pinyin: 'ěr', group: ['偶尔'], mean: '你；那。' },
+        { char: '陶', pinyin: 'táo', group: ['陶醉'], mean: '快乐；用黏土烧制的器物。' },
+        { char: '适', pinyin: 'shì', group: ['合适'], mean: '切合；舒服。' },
+        { char: '谈', pinyin: 'tán', group: ['谈话'], mean: '说话；讨论。' },
+        { char: '婚', pinyin: 'hūn', group: ['结婚'], mean: '男女结为夫妻。' },
+        { char: '庆', pinyin: 'qìng', group: ['庆祝'], mean: '祝贺。' },
+        { char: '典', pinyin: 'diǎn', group: ['典礼'], mean: '郑重举行的仪式。' },
+        { char: '途', pinyin: 'tú', group: ['路途'], mean: '道路。' },
+        { char: '括', pinyin: 'kuò', group: ['包括'], mean: '包容。' },
+        { char: '史', pinyin: 'shǐ', group: ['历史'], mean: '过去的事实。' },
+        { char: '倍', pinyin: 'bèi', group: ['加倍'], mean: '照原数增加一次。' },
+        { char: '几', pinyin: 'jī', group: ['几乎'], mean: '将近。' },
+        { char: '持', pinyin: 'chí', group: ['坚持'], mean: '拿着；保持。' },
+        { char: '官', pinyin: 'guān', group: ['官员'], mean: '担任一定职务的人。' },
+        { char: '汪', pinyin: 'wāng', group: ['汪汪'], mean: '狗叫声。' },
+        { char: '搞', pinyin: 'gǎo', group: ['搞定'], mean: '做；弄。' },
+        { char: '普', pinyin: '', group: [], mean: '' },
+        { char: '响', pinyin: '', group: [], mean: '' },
+        { char: '答', pinyin: '', group: [], mean: '' },
+        { char: '葵', pinyin: '', group: [], mean: '' },
+        { char: '瘦', pinyin: '', group: [], mean: '' },
+        { char: '罢', pinyin: '', group: [], mean: '' },
+        { char: '及', pinyin: '', group: [], mean: '' },
+        { char: '卷', pinyin: '', group: [], mean: '' },
+        { char: '碌', pinyin: '', group: [], mean: '' },
+        { char: '齿', pinyin: '', group: [], mean: '' },
+        { char: '恐', pinyin: '', group: [], mean: '' },
+        { char: '诱', pinyin: '', group: [], mean: '' },
+        { char: '毅', pinyin: '', group: [], mean: '' },
+        { char: '强', pinyin: '', group: [], mean: '' },
+        { char: '纪', pinyin: '', group: [], mean: '' },
+        { char: '性', pinyin: '', group: [], mean: '' },
+        { char: '渣', pinyin: '', group: [], mean: '' },
+        { char: '犯', pinyin: '', group: [], mean: '' },
+        { char: '立', pinyin: '', group: [], mean: '' },
+        { char: '鹦', pinyin: 'yīng', group: ['鹦鹉'], mean: '羽毛美丽的鸟。' },
+        { char: '鹉', pinyin: 'wǔ', group: ['鹦鹉'], mean: '鹦鹉。' },
+        { char: '衔', pinyin: 'xián', group: ['衔泥'], mean: '用嘴含。' },
+        { char: '蒲', pinyin: '', group: [], mean: '' },
+        { char: '英', pinyin: '', group: [], mean: '' },
+        { char: '茸', pinyin: '', group: [], mean: '' },
+        { char: '欠', pinyin: '', group: [], mean: '' },
+        { char: '拢', pinyin: '', group: [], mean: '' },
+        { char: '饶', pinyin: 'ráo', group: ['求饶'], mean: '宽恕。' },
+        { char: '优', pinyin: 'yōu', group: ['优秀'], mean: '好。' },
+        { char: '负', pinyin: '', group: [], mean: '' },
+        { char: '划', pinyin: '', group: [], mean: '' },
+        { char: '威', pinyin: 'wēi', group: ['威力', '威风'], mean: '表现出来的使人敬畏的力量。' },
+        { char: '武', pinyin: '', group: [], mean: '' },
+        { char: '插', pinyin: '', group: [], mean: '' },
+        { char: '栖', pinyin: '', group: [], mean: '' },
+        { char: '厚', pinyin: '', group: [], mean: '' },
+        { char: '粪', pinyin: '', group: [], mean: '' },
+        { char: '辈', pinyin: '', group: [], mean: '' },
+        { char: '滩', pinyin: '', group: [], mean: '' },
+        { char: '载', pinyin: '', group: [], mean: '' },
+        { char: '逢', pinyin: '', group: [], mean: '' },
+        { char: '浸', pinyin: '', group: [], mean: '' },
+        { char: '乳', pinyin: '', group: [], mean: '' },
+        { char: '梢', pinyin: '', group: [], mean: '' },
+        { char: '宿', pinyin: '', group: [], mean: '' },
+        { char: '舍', pinyin: '', group: [], mean: '' },
+        { char: '兴', pinyin: '', group: [], mean: '' },
+        { char: '融', pinyin: '', group: [], mean: '' },
+        { char: '侧', pinyin: '', group: [], mean: '' },
+        { char: '欣', pinyin: '', group: [], mean: '' },
+        { char: '封', pinyin: '', group: [], mean: '' },
+        { char: '药', pinyin: '', group: [], mean: '' },
+        { char: '眠', pinyin: '', group: [], mean: '' },
+        { char: '仅', pinyin: 'jǐn', group: ['不仅'], mean: '只。' },
+        { char: '议', pinyin: 'yì', group: ['会议'], mean: '讨论。' },
+        { char: '政', pinyin: 'zhèng', group: ['政府'], mean: '国家事务。' },
+        { char: '府', pinyin: 'fǔ', group: ['政府'], mean: '行政机关。' },
+        { char: '赠', pinyin: 'zèng', group: ['赠送'], mean: '无代价地送。' },
+        { char: '幻', pinyin: 'huàn', group: ['幻想'], mean: '虚幻。' },
+        { char: '焰', pinyin: 'yàn', group: ['火焰'], mean: '火苗。' },
+        { char: '澳', pinyin: 'ào', group: ['澳门'], mean: '海边弯曲可停船处。' },
+        { char: '扮', pinyin: 'bàn', group: ['打扮'], mean: '装饰。' },
+        { char: '角', pinyin: 'jué', group: ['角色'], mean: '演员扮演的人物。' },
+        { char: '贸', pinyin: '', group: [], mean: '' },
+        { char: '愧', pinyin: '', group: [], mean: '' },
+        { char: '返', pinyin: 'fǎn', group: ['返回', '往返'], mean: '回；归。' },
+        { char: '苔', pinyin: 'tái', group: ['青苔', '苔藓'], mean: '阴湿地方生长的绿色低矮植物。' },
+        { char: '抹', pinyin: 'mǒ', group: ['涂抹', '抹掉'], mean: '涂；擦。' },
+        { char: '宜', pinyin: 'yí', group: ['适宜', '便宜'], mean: '合适；应当。' },
+        { char: '妙', pinyin: 'miào', group: ['美妙', '奇妙'], mean: '神奇；好。' },
+        { char: '奏', pinyin: 'zòu', group: ['演奏', '节奏'], mean: '依照曲调吹弹乐器；呈现。' },
+        { char: '呢', pinyin: '', group: [], mean: '' },
+        { char: '喃', pinyin: '', group: [], mean: '' },
+        { char: '激', pinyin: '', group: [], mean: '' },
+        { char: '伟', pinyin: '', group: [], mean: '' },
+        { char: '充', pinyin: 'chōng', group: ['充满', '充足'], mean: '满；足。' },
+        { char: '击', pinyin: 'jī', group: ['打击', '攻击'], mean: '打；敲打。' },
+        { char: '麻', pinyin: 'má', group: ['麻雀'], mean: '草本植物。' },
+        { char: '旋', pinyin: 'xuán', group: ['盘旋'], mean: '转动。' },
+        { char: '序', pinyin: 'xù', group: ['顺序', '秩序'], mean: '排列次第；开头的。' },
+        { char: '贞', pinyin: 'zhēn', group: ['忠贞'], mean: '坚定。' },
+        { char: '姿', pinyin: 'zī', group: ['姿态', '姿势'], mean: '样子；形态。' },
+        { char: '笋', pinyin: 'sǔn', group: ['竹笋'], mean: '竹子的嫩芽。' },
+        { char: '超', pinyin: 'chāo', group: ['超过'], mean: '高出。' },
+        { char: '凡', pinyin: 'fán', group: ['平凡'], mean: '平常。' },
+        { char: '俗', pinyin: 'sú', group: ['风俗'], mean: '社会上长期形成的风尚。' },
+        { char: '奥', pinyin: 'ào', group: ['奥秘'], mean: '含义深。' },
+        { char: '秘', pinyin: 'mì', group: ['秘密'], mean: '不公开。' },
+        { char: '均', pinyin: 'jūn', group: ['平均', '均匀'], mean: '平；匀。' },
+        { char: '资', pinyin: '', group: [], mean: '' },
+        { char: '欧', pinyin: '', group: [], mean: '' },
+        { char: '洲', pinyin: '', group: [], mean: '' },
+        { char: '授', pinyin: '', group: [], mean: '' },
+        { char: '项', pinyin: '', group: [], mean: '' },
+        { char: '验', pinyin: '', group: [], mean: '' },
+        { char: '耐', pinyin: '', group: [], mean: '' },
+        { char: '励', pinyin: '', group: [], mean: '' },
+        { char: '棒', pinyin: 'bàng', group: ['木棒', '棒子'], mean: '棍子；好。' },
+        { char: '大', pinyin: '', group: [], mean: '' },
+        { char: '血', pinyin: 'xuè', group: ['血液', '鲜血'], mean: '人或动物体内循环的红色液体。' },
+        { char: '硝', pinyin: '', group: [], mean: '' },
+        { char: '危', pinyin: '', group: [], mean: '' },
+        { char: '险', pinyin: '', group: [], mean: '' },
+        { char: '势', pinyin: '', group: [], mean: '' },
+        { char: '瓦', pinyin: '', group: [], mean: '' },
+        { char: '帘', pinyin: '', group: [], mean: '' },
+        { char: '迅', pinyin: 'xùn', group: ['迅速', '迅猛'], mean: '快。' },
+        { char: '速', pinyin: 'sù', group: ['速度', '快速'], mean: '快；迅速。' },
+        { char: '夺', pinyin: 'duó', group: ['夺取', '争分夺秒'], mean: '强取；争取。' },
+        { char: '瓷', pinyin: 'cí', group: ['瓷器', '瓷砖'], mean: '用高岭土等烧制成的材料。' },
+        { char: '赵', pinyin: 'zhào', group: ['姓赵', '赵国'], mean: '姓氏；古国名。' },
+        { char: '抗', pinyin: 'kàng', group: ['抗日', '反抗'], mean: '抵抗；对等。' },
+        { char: '束', pinyin: 'shù', group: ['一束', '结束'], mean: '捆；控制。' },
+        { char: '缸', pinyin: 'gāng', group: ['水缸', '鱼缸'], mean: '盛东西的陶器。' },
+        { char: '还', pinyin: 'huán', group: ['归还', '还有'], mean: '返回；偿还。' },
+        { char: '顿', pinyin: 'dùn', group: ['一顿饭', '顿时'], mean: '量词；立刻。' },
+        { char: '灶', pinyin: 'zào', group: ['灶台', '炉灶'], mean: '生火做饭的设备。' },
+        { char: '沾', pinyin: 'zhān', group: ['沾水', '沾染'], mean: '因接触而附着上。' },
+        { char: '锅', pinyin: 'guō', group: ['铁锅', '火锅'], mean: '烹煮食物的器具。' },
+        { char: '侦', pinyin: 'zhēn', group: ['侦察', '侦探'], mean: '暗中察看；调查。' },
+      ],
+      quiz: [],
+    },
+    {
+      id: 2,
+      slug: 'a-xiezi',
+      title: '写字表',
+      emoji: '✍️',
+      kind: 'appendix',
+      hint: '本册要求会写的字（已收录约 221 个）。点字可听发音，每天练几个更扎实。',
+      hanzi: [
+        { char: '坡', pinyin: '', group: [], mean: '' },
+        { char: '球', pinyin: '', group: [], mean: '' },
+        { char: '招', pinyin: '', group: [], mean: '' },
+        { char: '呼', pinyin: '', group: [], mean: '' },
+        { char: '飘', pinyin: '', group: [], mean: '' },
+        { char: '扬', pinyin: '', group: [], mean: '' },
+        { char: '读', pinyin: '', group: [], mean: '' },
+        { char: '热', pinyin: '', group: [], mean: '' },
+        { char: '闹', pinyin: '', group: [], mean: '' },
+        { char: '粗', pinyin: '', group: [], mean: '' },
+        { char: '壮', pinyin: '', group: [], mean: '' },
+        { char: '洁', pinyin: '', group: [], mean: '' },
+        { char: '轰', pinyin: '', group: [], mean: '' },
+        { char: '湿', pinyin: '', group: [], mean: '' },
+        { char: '润', pinyin: '', group: [], mean: '' },
+        { char: '笛', pinyin: '', group: [], mean: '' },
+        { char: '狂', pinyin: '', group: [], mean: '' },
+        { char: '功', pinyin: '', group: [], mean: '' },
+        { char: '罚', pinyin: '', group: [], mean: '' },
+        { char: '互', pinyin: '', group: [], mean: '' },
+        { char: '碰', pinyin: '', group: [], mean: '' },
+        { char: '黄', pinyin: '', group: [], mean: '' },
+        { char: '急', pinyin: '', group: [], mean: '' },
+        { char: '庭', pinyin: '', group: [], mean: '' },
+        { char: '相', pinyin: '', group: [], mean: '' },
+        { char: '未', pinyin: '', group: [], mean: '' },
+        { char: '寒', pinyin: '', group: [], mean: '' },
+        { char: '径', pinyin: '', group: [], mean: '' },
+        { char: '斜', pinyin: '', group: [], mean: '' },
+        { char: '枫', pinyin: '', group: [], mean: '' },
+        { char: '霜', pinyin: '', group: [], mean: '' },
+        { char: '挑', pinyin: '', group: [], mean: '' },
+        { char: '深', pinyin: '', group: [], mean: '' },
+        { char: '落', pinyin: '', group: [], mean: '' },
+        { char: '朗', pinyin: '', group: [], mean: '' },
+        { char: '晶', pinyin: '', group: [], mean: '' },
+        { char: '珠', pinyin: '', group: [], mean: '' },
+        { char: '粘', pinyin: '', group: [], mean: '' },
+        { char: '印', pinyin: '', group: [], mean: '' },
+        { char: '案', pinyin: '', group: [], mean: '' },
+        { char: '展', pinyin: '', group: [], mean: '' },
+        { char: '列', pinyin: '', group: [], mean: '' },
+        { char: '规', pinyin: '', group: [], mean: '' },
+        { char: '则', pinyin: '', group: [], mean: '' },
+        { char: '凌', pinyin: '', group: [], mean: '' },
+        { char: '乱', pinyin: '', group: [], mean: '' },
+        { char: '凉', pinyin: '', group: [], mean: '' },
+        { char: '杏', pinyin: '', group: [], mean: '' },
+        { char: '枚', pinyin: '', group: [], mean: '' },
+        { char: '邮', pinyin: '', group: [], mean: '' },
+        { char: '票', pinyin: '', group: [], mean: '' },
+        { char: '爽', pinyin: '', group: [], mean: '' },
+        { char: '挤', pinyin: '', group: [], mean: '' },
+        { char: '争', pinyin: '', group: [], mean: '' },
+        { char: '菊', pinyin: '', group: [], mean: '' },
+        { char: '频', pinyin: '', group: [], mean: '' },
+        { char: '勾', pinyin: '', group: [], mean: '' },
+        { char: '挖', pinyin: '', group: [], mean: '' },
+        { char: '油', pinyin: '', group: [], mean: '' },
+        { char: '屋', pinyin: '', group: [], mean: '' },
+        { char: '板', pinyin: '', group: [], mean: '' },
+        { char: '准', pinyin: '', group: [], mean: '' },
+        { char: '备', pinyin: '', group: [], mean: '' },
+        { char: '等', pinyin: '', group: [], mean: '' },
+        { char: '暴', pinyin: '', group: [], mean: '' },
+        { char: '哦', pinyin: '', group: [], mean: '' },
+        { char: '钻', pinyin: '', group: [], mean: '' },
+        { char: '爬', pinyin: '', group: [], mean: '' },
+        { char: '漂', pinyin: '', group: [], mean: '' },
+        { char: '晒', pinyin: '', group: [], mean: '' },
+        { char: '葫', pinyin: '', group: [], mean: '' },
+        { char: '芦', pinyin: '', group: [], mean: '' },
+        { char: '错', pinyin: '', group: [], mean: '' },
+        { char: '普', pinyin: '', group: [], mean: '' },
+        { char: '宫', pinyin: '', group: [], mean: '' },
+        { char: '肯', pinyin: '', group: [], mean: '' },
+        { char: '冒', pinyin: '', group: [], mean: '' },
+        { char: '式', pinyin: '', group: [], mean: '' },
+        { char: '怜', pinyin: '', group: [], mean: '' },
+        { char: '旅', pinyin: '', group: [], mean: '' },
+        { char: '另', pinyin: '', group: [], mean: '' },
+        { char: '晴', pinyin: '', group: [], mean: '' },
+        { char: '及', pinyin: '', group: [], mean: '' },
+        { char: '卷', pinyin: '', group: [], mean: '' },
+        { char: '救', pinyin: '', group: [], mean: '' },
+        { char: '命', pinyin: '', group: [], mean: '' },
+        { char: '尾', pinyin: '', group: [], mean: '' },
+        { char: '齿', pinyin: '', group: [], mean: '' },
+        { char: '胃', pinyin: '', group: [], mean: '' },
+        { char: '管', pinyin: '', group: [], mean: '' },
+        { char: '刚', pinyin: '', group: [], mean: '' },
+        { char: '咬', pinyin: '', group: [], mean: '' },
+        { char: '搭', pinyin: '', group: [], mean: '' },
+        { char: '亲', pinyin: '', group: [], mean: '' },
+        { char: '祖', pinyin: '', group: [], mean: '' },
+        { char: '披', pinyin: '', group: [], mean: '' },
+        { char: '摇', pinyin: '', group: [], mean: '' },
+        { char: '停', pinyin: '', group: [], mean: '' },
+        { char: '羽', pinyin: '', group: [], mean: '' },
+        { char: '翠', pinyin: '', group: [], mean: '' },
+        { char: '蓝', pinyin: '', group: [], mean: '' },
+        { char: '静', pinyin: '', group: [], mean: '' },
+        { char: '悄', pinyin: '', group: [], mean: '' },
+        { char: '吞', pinyin: '', group: [], mean: '' },
+        { char: '捕', pinyin: '', group: [], mean: '' },
+        { char: '蒲', pinyin: '', group: [], mean: '' },
+        { char: '英', pinyin: '', group: [], mean: '' },
+        { char: '盛', pinyin: '', group: [], mean: '' },
+        { char: '耍', pinyin: '', group: [], mean: '' },
+        { char: '使', pinyin: '', group: [], mean: '' },
+        { char: '劲', pinyin: '', group: [], mean: '' },
+        { char: '脸', pinyin: '', group: [], mean: '' },
+        { char: '欠', pinyin: '', group: [], mean: '' },
+        { char: '朝', pinyin: '', group: [], mean: '' },
+        { char: '钓', pinyin: '', group: [], mean: '' },
+        { char: '察', pinyin: '', group: [], mean: '' },
+        { char: '拢', pinyin: '', group: [], mean: '' },
+        { char: '喜', pinyin: '', group: [], mean: '' },
+        { char: '景', pinyin: '', group: [], mean: '' },
+        { char: '优', pinyin: '', group: [], mean: '' },
+        { char: '淡', pinyin: '', group: [], mean: '' },
+        { char: '浅', pinyin: '', group: [], mean: '' },
+        { char: '底', pinyin: '', group: [], mean: '' },
+        { char: '岩', pinyin: '', group: [], mean: '' },
+        { char: '鹿', pinyin: '', group: [], mean: '' },
+        { char: '划', pinyin: '', group: [], mean: '' },
+        { char: '布', pinyin: '', group: [], mean: '' },
+        { char: '茂', pinyin: '', group: [], mean: '' },
+        { char: '密', pinyin: '', group: [], mean: '' },
+        { char: '厚', pinyin: '', group: [], mean: '' },
+        { char: '料', pinyin: '', group: [], mean: '' },
+        { char: '滨', pinyin: '', group: [], mean: '' },
+        { char: '棕', pinyin: '', group: [], mean: '' },
+        { char: '帆', pinyin: '', group: [], mean: '' },
+        { char: '灰', pinyin: '', group: [], mean: '' },
+        { char: '跟', pinyin: '', group: [], mean: '' },
+        { char: '渔', pinyin: '', group: [], mean: '' },
+        { char: '壳', pinyin: '', group: [], mean: '' },
+        { char: '院', pinyin: '', group: [], mean: '' },
+        { char: '亚', pinyin: '', group: [], mean: '' },
+        { char: '透', pinyin: '', group: [], mean: '' },
+        { char: '除', pinyin: '', group: [], mean: '' },
+        { char: '踩', pinyin: '', group: [], mean: '' },
+        { char: '抽', pinyin: '', group: [], mean: '' },
+        { char: '封', pinyin: '', group: [], mean: '' },
+        { char: '严', pinyin: '', group: [], mean: '' },
+        { char: '挡', pinyin: '', group: [], mean: '' },
+        { char: '坛', pinyin: '', group: [], mean: '' },
+        { char: '显', pinyin: '', group: [], mean: '' },
+        { char: '苍', pinyin: '', group: [], mean: '' },
+        { char: '药', pinyin: '', group: [], mean: '' },
+        { char: '材', pinyin: '', group: [], mean: '' },
+        { char: '软', pinyin: '', group: [], mean: '' },
+        { char: '刮', pinyin: '', group: [], mean: '' },
+        { char: '捉', pinyin: '', group: [], mean: '' },
+        { char: '返', pinyin: '', group: [], mean: '' },
+        { char: '望', pinyin: '', group: [], mean: '' },
+        { char: '断', pinyin: '', group: [], mean: '' },
+        { char: '楚', pinyin: '', group: [], mean: '' },
+        { char: '至', pinyin: '', group: [], mean: '' },
+        { char: '岸', pinyin: '', group: [], mean: '' },
+        { char: '孤', pinyin: '', group: [], mean: '' },
+        { char: '饮', pinyin: '', group: [], mean: '' },
+        { char: '亦', pinyin: '', group: [], mean: '' },
+        { char: '欲', pinyin: '', group: [], mean: '' },
+        { char: '抹', pinyin: '', group: [], mean: '' },
+        { char: '宜', pinyin: '', group: [], mean: '' },
+        { char: '妙', pinyin: '', group: [], mean: '' },
+        { char: '奏', pinyin: '', group: [], mean: '' },
+        { char: '琴', pinyin: '', group: [], mean: '' },
+        { char: '柔', pinyin: '', group: [], mean: '' },
+        { char: '感', pinyin: '', group: [], mean: '' },
+        { char: '充', pinyin: '', group: [], mean: '' },
+        { char: '威', pinyin: '', group: [], mean: '' },
+        { char: '器', pinyin: '', group: [], mean: '' },
+        { char: '汇', pinyin: '', group: [], mean: '' },
+        { char: '鸣', pinyin: '', group: [], mean: '' },
+        { char: '塘', pinyin: '', group: [], mean: '' },
+        { char: '虾', pinyin: '', group: [], mean: '' },
+        { char: '昆', pinyin: '', group: [], mean: '' },
+        { char: '仅', pinyin: '', group: [], mean: '' },
+        { char: '序', pinyin: '', group: [], mean: '' },
+        { char: '荣', pinyin: '', group: [], mean: '' },
+        { char: '枯', pinyin: '', group: [], mean: '' },
+        { char: '姿', pinyin: '', group: [], mean: '' },
+        { char: '态', pinyin: '', group: [], mean: '' },
+        { char: '刺', pinyin: '', group: [], mean: '' },
+        { char: '梨', pinyin: '', group: [], mean: '' },
+        { char: '部', pinyin: '', group: [], mean: '' },
+        { char: '奥', pinyin: '', group: [], mean: '' },
+        { char: '秘', pinyin: '', group: [], mean: '' },
+        { char: '司', pinyin: '', group: [], mean: '' },
+        { char: '登', pinyin: '', group: [], mean: '' },
+        { char: '跌', pinyin: '', group: [], mean: '' },
+        { char: '皆', pinyin: '', group: [], mean: '' },
+        { char: '弃', pinyin: '', group: [], mean: '' },
+        { char: '持', pinyin: '', group: [], mean: '' },
+        { char: '击', pinyin: '', group: [], mean: '' },
+        { char: '念', pinyin: '', group: [], mean: '' },
+        { char: '差', pinyin: '', group: [], mean: '' },
+        { char: '考', pinyin: '', group: [], mean: '' },
+        { char: '试', pinyin: '', group: [], mean: '' },
+        { char: '均', pinyin: '', group: [], mean: '' },
+        { char: '退', pinyin: '', group: [], mean: '' },
+        { char: '努', pinyin: '', group: [], mean: '' },
+        { char: '单', pinyin: '', group: [], mean: '' },
+        { char: '留', pinyin: '', group: [], mean: '' },
+        { char: '度', pinyin: '', group: [], mean: '' },
+        { char: '奋', pinyin: '', group: [], mean: '' },
+        { char: '棒', pinyin: '', group: [], mean: '' },
+        { char: '伤', pinyin: '', group: [], mean: '' },
+        { char: '陆', pinyin: '', group: [], mean: '' },
+        { char: '血', pinyin: '', group: [], mean: '' },
+        { char: '取', pinyin: '', group: [], mean: '' },
+        { char: '盘', pinyin: '', group: [], mean: '' },
+        { char: '匆', pinyin: '', group: [], mean: '' },
+        { char: '医', pinyin: '', group: [], mean: '' },
+        { char: '迅', pinyin: '', group: [], mean: '' },
+        { char: '速', pinyin: '', group: [], mean: '' },
+        { char: '夺', pinyin: '', group: [], mean: '' },
+        { char: '秒', pinyin: '', group: [], mean: '' },
+      ],
+      quiz: [],
+    },
+    {
+      id: 3,
+      slug: 'a-ciyu',
+      title: '词语表',
+      emoji: '📝',
+      kind: 'appendix',
+      hint: '本册要求掌握的词语（已收录约 246 个）。可用于听写和造句练习。',
+      words: [
+    '学校',
+    '山坡',
+    '飘扬',
+    '课文',
+    '声音',
+    '招引',
+    '热闹',
+    '古老',
+    '粗壮',
+    '枝干',
+    '洁白',
+    '轰响',
+    '阵雨',
+    '湿润',
+    '觉得',
+    '风笛',
+    '狂欢',
+    '功课',
+    '放学',
+    '老师',
+    '急急忙忙',
+    '秋风',
+    '亮晶晶',
+    '放晴',
+    '明朗',
+    '地面',
+    '落叶',
+    '图案',
+    '尽头',
+    '排列',
+    '凌乱',
+    '歌唱',
+    '规则',
+    '闪闪发光',
+    '迟到',
+    '清凉',
+    '枫树',
+    '邮票',
+    '秋天',
+    '炎热',
+    '凉爽',
+    '果树',
+    '菊花',
+    '仙子',
+    '气味',
+    '香甜',
+    '松果',
+    '频频',
+    '丰收',
+    '门板',
+    '准备',
+    '旁边',
+    '暴风雨',
+    '低头',
+    '安心',
+    '吃力',
+    '注意',
+    '母鸡',
+    '屋子',
+    '漂亮',
+    '再见',
+    '意思',
+    '因此',
+    '神圣',
+    '萌发',
+    '车轴',
+    '恒心',
+    '妥当',
+    '阁楼',
+    '培植',
+    '厘米',
+    '声明',
+    '神仙',
+    '普通',
+    '让步',
+    '条件',
+    '指甲',
+    '得到',
+    '所以',
+    '要是',
+    '同学',
+    '衣服',
+    '可怜',
+    '最好',
+    '科学',
+    '来得及',
+    '旅行',
+    '做梦',
+    '要好',
+    '答应',
+    '救命',
+    '尾巴',
+    '牙齿',
+    '肚皮',
+    '食物',
+    '消化',
+    '大吃一惊',
+    '当然',
+    '刚才',
+    '知觉',
+    '光亮',
+    '申请',
+    '介绍',
+    '主旨',
+    '占领',
+    '乏力',
+    '翠绿',
+    '船夫',
+    '外祖父',
+    '母亲',
+    '羽毛',
+    '静悄悄',
+    '翠鸟',
+    '捕鱼',
+    '草地',
+    '蒲公英',
+    '盛开',
+    '玩耍',
+    '一本正经',
+    '使劲',
+    '钓鱼',
+    '观察',
+    '合拢',
+    '张开',
+    '喜爱',
+    '风景',
+    '优美',
+    '物产',
+    '交错',
+    '鹿角',
+    '岩石',
+    '成群结队',
+    '布满',
+    '条纹',
+    '周身',
+    '皮球',
+    '茂密',
+    '肥料',
+    '祖国',
+    '事业',
+    '发展',
+    '海滨',
+    '街道',
+    '交界',
+    '水平线',
+    '机帆船',
+    '来来往往',
+    '渔民',
+    '汽笛電',
+    '朝阳',
+    '贝壳',
+    '庭院',
+    '亚热带',
+    '散发',
+    '打扫',
+    '干净',
+    '严严实实',
+    '东北',
+    '视线',
+    '山谷',
+    '密密层层',
+    '起来',
+    '花坛',
+    '苍翠',
+    '照射',
+    '显得',
+    '药材',
+    '各种各样',
+    '捕捉',
+    '野兔',
+    '景色',
+    '宝库',
+    '美妙',
+    '歌手',
+    '大自然',
+    '音乐家',
+    '手风琴',
+    '感受',
+    '温柔',
+    '充满',
+    '威力',
+    '合奏',
+    '乐器',
+    '屋顶',
+    '河流',
+    '合唱',
+    '轻快',
+    '水塘',
+    '万物',
+    '精神',
+    '昆虫',
+    '搬家',
+    '沉思',
+    '井然有序',
+    '植物',
+    '鲜美',
+    '千姿百态',
+    '池塘',
+    '倒映',
+    '秋高气爽',
+    '游玩',
+    '画册',
+    '奥秘',
+    '无穷',
+    '无尽',
+    '螃蟹',
+    '田螺',
+    '鲤鱼',
+    '鲫鱼',
+    '鲨鱼',
+    '生物',
+    '从事',
+    '成就',
+    '学期',
+    '考试',
+    '再三',
+    '同意',
+    '难得',
+    '值班',
+    '努力',
+    '留学',
+    '国家',
+    '落后',
+    '地位',
+    '环节',
+    '难度',
+    '刻苦',
+    '兴奋',
+    '阵地',
+    '战斗',
+    '消灭',
+    '伤员',
+    '手术台',
+    '打响',
+    '陆续',
+    '血丝',
+    '赶忙',
+    '转告',
+    '迅速',
+    '医生',
+    '争分夺秒',
+    '连续',
+    '怒目圆睁',
+    '眼眶',
+    '目瞪口呆',
+    '耳闻目睹'
     ],
-  },
+      quiz: [],
+    },
+  ],
+}
 
-  // ============================== 第八单元 ==============================
-  {
-    id: 8,
-    slug: 'u8',
-    title: '第八单元',
-    titleZh: '美好品质',
-    emoji: '🌟',
-    theme: { color: '#44403c', colorSoft: '#e7e5e4' },
-    lessons: [
-      {
-        id: 1,
-        slug: 'u8-1',
-        title: '司马光（文言文）',
-        emoji: '🪨',
-        passages: [
-          {
-            title: '全文（背诵）',
-            text: '群儿戏于庭，一儿登瓮，足跌没水中，众皆弃去，光持石击瓮破之，水迸，儿得活。',
-            note: '注释：庭＝庭院；瓮＝口小肚大的陶器；跌＝跌倒；没＝沉没；皆＝全、都；弃＝丢下；持＝拿；击＝砸；迸＝涌出。',
-          },
-        ],
-        quiz: [
-          {
-            q: '「群儿戏于庭」中「庭」的意思是？',
-            options: ['庭院', '大厅', '厨房', '学校'],
-            answer: 0,
-            explain: '庭＝庭院，孩子们在庭院里玩耍。',
-          },
-          {
-            q: '司马光是怎么救出落水小孩的？',
-            options: ['拿石头砸破水缸', '跳下去救', '叫大人', '伸手拉'],
-            answer: 0,
-            explain: '光持石击瓮破之——司马光拿石头砸破瓮，水流出来，小孩得救。',
-          },
-          {
-            q: '「水迸，儿得活」中「迸」的意思是？',
-            options: ['涌出', '进入', '停止', '结冰'],
-            answer: 0,
-            explain: '迸＝涌出，水流出来，小孩活了下来。',
-          },
-        ],
-      },
-      {
-        id: 2,
-        slug: 'u8-2',
-        title: '掌声（要点）',
-        emoji: '👏',
-        passages: [
-          {
-            title: '课文要点（熟读理解）',
-            text: '英子小时候生病落下残疾，不愿让别人看见她走路的样子。一次上台讲故事，同学们给了她热烈的掌声，使她鼓起勇气。后来英子变得开朗自信。故事告诉我们：掌声能给人鼓励和勇气。',
-            note: '重点词：犹豫、骤然、经久不息。',
-          },
-        ],
-        quiz: [
-          {
-            q: '同学们给英子的掌声起到了什么作用？',
-            options: ['鼓励她、给她勇气', '嘲笑她', '让她难过', '没有作用'],
-            answer: 0,
-            explain: '掌声让英子鼓起勇气，变得自信开朗。',
-          },
-          {
-            q: '英子后来变得怎样了？',
-            options: ['开朗自信', '更自卑', '不爱说话', '离开学校'],
-            answer: 0,
-            explain: '得到鼓励后，英子变得开朗、自信。',
-          },
-        ],
-      },
-      {
-        id: 3,
-        slug: 'u8-3',
-        title: '语文园地八 · 日积月累',
-        emoji: '❤️',
-        idioms: [
-          {
-            title: '关于仁爱的格言',
-            kind: 'sayings',
-            items: [
-              { term: '爱人若爱其身。', source: '《墨子》', meaning: '爱别人要像爱自己一样。' },
-              { term: '不迁怒，不贰过。', source: '《论语》', meaning: '不把怒气转到别人身上，不犯同样的错。' },
-              { term: '仁者爱人，有礼者敬人。', source: '《孟子》', meaning: '仁爱的人爱人，懂礼的人尊敬人。' },
-              { term: '与人善言，暖于布帛；伤人以言，深于矛戟。', source: '《荀子》', meaning: '对人有善意的话比布帛还温暖；伤人的话比矛戟还锋利。' },
-            ],
-          },
-        ],
-        quiz: [
-          {
-            q: '「爱人若爱其身」出自哪部典籍？',
-            options: ['《墨子》', '《论语》', '《孟子》', '《荀子》'],
-            answer: 0,
-            explain: '「爱人若爱其身」出自《墨子》。',
-          },
-          {
-            q: '「不迁怒，不贰过」意思是？',
-            options: ['不把怒气转到别人身上，不犯同样的错', '不生气', '不说话', '不迟到'],
-            answer: 0,
-            explain: '出自《论语》，指不把脾气发泄在别人身上，不重犯同样的过失。',
-          },
-        ],
-      },
-      {
-        id: 4,
-        slug: 'u8-4',
-        title: '第八单元 · 生字词',
-        emoji: '✍️',
-        hanzi: [
-          {
-  char: '司', pinyin: 'sī', group: ['司机', '公司'],
-  mean: '掌管；也作姓氏。'
-},
-          {
-  char: '庭', pinyin: 'tíng', group: ['庭院', '家庭'],
-  mean: '院子；厅堂。'
-},
-          {
-  char: '登', pinyin: 'dēng', group: ['登山', '登高'],
-  mean: '由低处向高处走；刊载。'
-},
-          {
-  char: '跌', pinyin: 'diē', group: ['跌倒', '跌跤'],
-  mean: '摔倒；下降。'
-},
-          {
-  char: '众', pinyin: 'zhòng', group: ['观众', '众人'],
-  mean: '许多人；大家。'
-},
-          {
-  char: '弃', pinyin: 'qì', group: ['放弃', '丢弃'],
-  mean: '丢掉；放弃。'
-},
-          {
-  char: '持', pinyin: 'chí', group: ['坚持', '保持'],
-  mean: '拿着；保持。'
-},
-          {
-  char: '雀', pinyin: 'què', group: ['灰雀', '麻雀'],
-  mean: '小鸟，如麻雀。'
-},
-          {
-  char: '郊', pinyin: 'jiāo', group: ['郊外', '郊区'],
-  mean: '城市外面的地方。'
-},
-          {
-  char: '养', pinyin: 'yǎng', group: ['养病', '养成'],
-  mean: '照料；生育。'
-},
-          {
-  char: '粉', pinyin: 'fěn', group: ['粉红', '粉笔'],
-  mean: '细末；白色。'
-},
-          {
-  char: '谷', pinyin: 'gǔ', group: ['谷粒', '山谷'],
-  mean: '粮食作物；两山之间的低地。'
-},
-          {
-  char: '粒', pinyin: 'lì', group: ['米粒', '颗粒'],
-  mean: '小圆颗的东西。'
-},
-          {
-  char: '男', pinyin: 'nán', group: ['男孩', '男生'],
-  mean: '男性；儿子。'
-},
-          {
-  char: '或', pinyin: 'huò', group: ['或者', '或许'],
-  mean: '也许；或者。'
-},
-          {
-  char: '者', pinyin: 'zhě', group: ['作者', '读者'],
-  mean: '指人或有某种特点的事物。'
-},
-          {
-  char: '冻', pinyin: 'dòng', group: ['冻死', '冻结'],
-  mean: '水遇冷结成冰；受冷。'
-},
-          {
-  char: '惜', pinyin: 'xī', group: ['可惜', '珍惜'],
-  mean: '爱惜；可惜。'
-},
-          {
-  char: '肯', pinyin: 'kěn', group: ['肯定', '不肯'],
-  mean: '愿意；同意。'
-},
-          {
-  char: '诚', pinyin: 'chéng', group: ['诚实', '真诚'],
-  mean: '真实；诚恳。'
-},
-        ],
-        quiz: [
-          {
-            q: '「跌」的拼音是？',
-            options: ['diē', 'dié', 'tiē', 'dīe'],
-            answer: 0,
-            explain: '跌 = diē（跌倒、跌跤）。',
-          },
-          {
-            q: '「诚」可以组词？',
-            options: ['诚实', '城市', '成功', '成分'],
-            answer: 0,
-            explain: '诚 → 诚实、真诚。',
-          },
-        ],
-      },
-    ],
-  },
-]
 
-// ===================== 访问辅助函数 =====================
-export function getUnit(slug: string | undefined): ChineseUnit | undefined {
-  if (!slug) return undefined
+export const chineseUnits: ChineseUnit[] = [u1, u2, u3, u4, u5, u6, u7, u8, appendixUnit]
+
+export function getChineseUnit(slug: string): ChineseUnit | undefined {
   return chineseUnits.find((u) => u.slug === slug)
 }
 
-export function getChineseLesson(
-  unitSlug: string | undefined,
-  lessonSlug: string | undefined,
-): { unit: ChineseUnit; lesson: ChineseLesson; unitIdx: number; lessonIdx: number } | undefined {
-  const unitIdx = chineseUnits.findIndex((u) => u.slug === unitSlug)
-  if (unitIdx < 0) return undefined
-  const unit = chineseUnits[unitIdx]
+export function getChineseLesson(unitSlug: string, lessonSlug: string):
+  | { unit: ChineseUnit; lesson: ChineseLesson; lessonIdx: number }
+  | undefined {
+  const unit = getChineseUnit(unitSlug)
+  if (!unit) return undefined
   const lessonIdx = unit.lessons.findIndex((l) => l.slug === lessonSlug)
-  if (lessonIdx < 0) return undefined
-  return { unit, lesson: unit.lessons[lessonIdx], unitIdx, lessonIdx }
+  if (lessonIdx === -1) return undefined
+  return { unit, lesson: unit.lessons[lessonIdx], lessonIdx }
 }
 
-export const totalChineseLessons = chineseUnits.reduce((a, u) => a + u.lessons.length, 0)
+export const getUnit = getChineseUnit
+export const totalChineseLessons = chineseUnits.reduce((n, u) => n + u.lessons.length, 0)

@@ -93,9 +93,30 @@ export default function ChineseLesson() {
 }
 
 // ===================== 知识点展示 =====================
+const KIND_LABEL: Record<string, string> = {
+  reading: '课文',
+  poetry: '古诗',
+  speaking: '口语交际',
+  writing: '习作',
+  example: '习作例文',
+  park: '语文园地',
+  'reading-club': '快乐读书吧',
+  appendix: '附录',
+}
+
 function KnowledgeTab({ lesson, mcStyle }: { lesson: Lesson; mcStyle: React.CSSProperties }) {
+  const kindLabel = lesson.kind ? KIND_LABEL[lesson.kind] : undefined
   return (
     <div className="cn-knowledge">
+      {kindLabel && <div className="cn-kind-badge" style={mcStyle}>{kindLabel}</div>}
+
+      {lesson.hint && (
+        <div className="cn-hint" style={mcStyle}>
+          <span className="cn-hint-icon">💡</span>
+          <span>{lesson.hint}</span>
+        </div>
+      )}
+
       {lesson.poems?.map((p, i) => (
         <section className="cn-poem" key={i} style={mcStyle}>
           <div className="cn-poem-head">
@@ -149,6 +170,20 @@ function KnowledgeTab({ lesson, mcStyle }: { lesson: Lesson; mcStyle: React.CSSP
                 <div className="cn-hanzi-pinyin">{h.pinyin}</div>
                 <div className="cn-hanzi-group">{h.group.join('、')}</div>
                 {h.mean && <div className="cn-hanzi-mean">释义：{h.mean}</div>}
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {lesson.words && lesson.words.length > 0 && (
+        <section className="cn-words" style={mcStyle}>
+          <div className="cn-section-title">📝 {lesson.title}（共 {lesson.words.length} 个）</div>
+          <div className="cn-words-grid">
+            {lesson.words.map((w, j) => (
+              <div className="cn-word" key={j}>
+                <span className="cn-word-text">{w}</span>
+                <SpeakButton text={w} label={w} lang="zh" />
               </div>
             ))}
           </div>

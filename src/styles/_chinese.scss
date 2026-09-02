@@ -293,3 +293,48 @@
 }
 .cn-quiz-verdict { font-size: var(--fs-xl); font-weight: 800; margin: 10px 0; color: var(--ink); }
 .cn-quiz-last { font-size: var(--fs-sm); color: var(--ink-soft); margin-bottom: 16px; }
+
+// ---------- 提示 / 词语表 ----------
+.cn-kind-badge {
+  display: inline-block;
+  background: var(--mc, #dc2626);
+  color: #fff;
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: var(--r-pill);
+  margin-bottom: 12px;
+}
+.cn-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background: var(--mc-soft, #fee2e2);
+  border-left: 4px solid var(--mc, #dc2626);
+  border-radius: var(--r-md);
+  padding: 10px 14px;
+  font-size: var(--fs-sm);
+  color: var(--ink);
+  line-height: 1.7;
+  margin-bottom: 14px;
+}
+.cn-hint-icon { flex: none; font-size: var(--fs-md); line-height: 1.4; }
+
+.cn-words { background: var(--mc-soft, #fee2e2); border-radius: var(--r-lg); padding: 14px 16px; }
+.cn-words-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+.cn-word {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  background: var(--card);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-md);
+  padding: 8px 10px;
+}
+.cn-word-text { font-size: var(--fs-md); color: var(--ink); line-height: 1.4; }

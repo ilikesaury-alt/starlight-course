@@ -85,3 +85,9 @@ dist-final*/
 # 原始绘本素材（含版权 PDF/txt，不纳入版本控制）
 src/data/Fly Guy/
 
+# 语文课本 OCR/提取/构建中间产物（本地用，不提交；生成的 src/data/chinese.ts 已纳入版本控制）
+scripts/_build_chinese_parts/
+scripts/_ocr_*.txt
+scripts/_toc_*.png
+scripts/ocr_book.py
+
