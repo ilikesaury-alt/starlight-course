@@ -97,22 +97,24 @@ function KnowledgeTab({ lesson, mcStyle }: { lesson: Lesson; mcStyle: React.CSSP
   return (
     <div className="cn-knowledge">
       {lesson.words && lesson.words.length > 0 && (
-        <section className="cn-hanzi" style={mcStyle}>
+        <section className="en3-words" style={mcStyle}>
           <div className="cn-section-title">🔤 词汇（英文 · 中文 · 例句）</div>
-          <div className="cn-hanzi-grid en3-word-grid">
+          <div className="en3-word-list">
             {lesson.words.map((w, i) => (
-              <div className="cn-hanzi-card" key={i}>
-                <div className="cn-hanzi-top">
+              <div className="en3-word-row" key={i}>
+                <div className="en3-word-main">
                   {w.emoji && <span className="en3-word-emoji">{w.emoji}</span>}
-                  <span className="cn-hanzi-char en3-word-en">{w.en}</span>
+                  <span className="en3-word-en">{w.en}</span>
+                  <span className="en3-word-zh">{w.zh}</span>
                   <SpeakButton text={w.en} label={w.en} />
                 </div>
-                <div className="cn-hanzi-pinyin">{w.zh}</div>
                 {w.sentence && (
-                  <div className="en3-word-sentence">
-                    <span className="en3-word-sentence-en">{w.sentence}</span>
-                    <SpeakButton text={w.sentence} label={w.sentence} slow />
-                    {w.sentenceZh && <span className="en3-word-sentence-zh">{w.sentenceZh}</span>}
+                  <div className="en3-word-eg">
+                    <div className="en3-word-eg-en">
+                      <span className="en3-word-eg-text">{w.sentence}</span>
+                      <SpeakButton text={w.sentence} label={w.sentence} slow />
+                    </div>
+                    {w.sentenceZh && <div className="en3-word-eg-zh">{w.sentenceZh}</div>}
                   </div>
                 )}
               </div>
