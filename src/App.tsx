@@ -26,6 +26,8 @@ const ChineseLesson = lazy(() => import('@/pages/ChineseLesson'))
 const Eng3aHome = lazy(() => import('@/pages/Eng3aHome'))
 const Eng3aUnit = lazy(() => import('@/pages/Eng3aUnit'))
 const Eng3aLesson = lazy(() => import('@/pages/Eng3aLesson'))
+const Eng3aPlay = lazy(() => import('@/pages/Eng3aPlay'))
+const Eng3aPlayScript = lazy(() => import('@/pages/Eng3aPlayScript'))
 const PhrasesPage = lazy(() => import('@/pages/PhrasesPage'))
 
 // 分包加载中的兜底:轻量居中提示(儿童向文案)
@@ -73,6 +75,9 @@ function AppRoutes() {
           <Route path="/chinese/:unitId" element={<ChineseUnit />} />
           <Route path="/chinese/:unitId/:lessonId" element={<ChineseLesson />} />
           <Route path="/eng3a" element={<Eng3aHome />} />
+          {/* 小剧场路由必须排在 :unitId 之前，否则 play 会被当成单元 id */}
+          <Route path="/eng3a/play" element={<Eng3aPlay />} />
+          <Route path="/eng3a/play/:playId" element={<Eng3aPlayScript />} />
           <Route path="/eng3a/:unitId" element={<Eng3aUnit />} />
           <Route path="/eng3a/:unitId/:lessonId" element={<Eng3aLesson />} />
           <Route path="/phrases" element={<PhrasesPage />} />

@@ -9,7 +9,7 @@
 
 import { modules as starlightModules, getModule, STARLIGHT_THEME } from './starlight'
 import { chineseUnits, CHINESE_THEME } from './chinese'
-import { eng3aUnits, ENG3A_THEME } from './eng3a'
+import { eng3aUnits, eng3aPlays, ENG3A_THEME, collectEngUnitWords, collectEngPlayWords } from './eng3a'
 import { FG_THEME, RG_THEME } from './story-themes'
 import type { Story } from './story-types'
 
@@ -161,6 +161,8 @@ const chineseMeta: ModuleMeta = {
 
 // 三年级上册英语（外研版）：单词作为 SRS 记忆卡,key = 单词英文,zh = 中文释义,
 // module='eng3a'。进英语课（Eng3aLesson）即播种到 SRS,统一走「智能复习」(/smart) 到期调度。
+// 取词覆盖三处：单元重点词 + 补充词（moreWords，教材词汇表余下的功能词）+ 附录剧本重点词，
+// 保证「教材里出现过的英语词」都能被复习系统调度到。
 const eng3aMeta: ModuleMeta = {
   id: 'eng3a',
   label: '英语',
@@ -168,20 +170,26 @@ const eng3aMeta: ModuleMeta = {
   color: ENG3A_THEME.color,
   colorSoft: ENG3A_THEME.colorSoft,
   kind: 'unit',
-  items: eng3aUnits.map((u) => ({
-    id: u.slug,
-    title: u.title,
-    titleZh: u.titleZh,
-    emoji: u.emoji,
-  })),
-  getWords: (unitSlug) =>
-    collectUnitWords(
-      eng3aUnits,
-      unitSlug,
-      (l) => l.words,
-      (w) => w.en,
-      (w) => ({ en: w.en, zh: w.zh, emoji: w.emoji ?? '🔤' }),
-    ),
+  items: [
+    ...eng3aUnits.map((u) => ({
+      id: u.slug,
+      title: u.title,
+      titleZh: u.titleZh,
+      emoji: u.emoji,
+    })),
+    ...eng3aPlays.map((p) => ({
+      id: p.slug,
+      title: p.title,
+      titleZh: p.titleZh,
+      emoji: p.emoji,
+    })),
+  ],
+  getWords: (itemId) => {
+    const words = itemId.startsWith('play-')
+      ? collectEngPlayWords(itemId)
+      : collectEngUnitWords(itemId)
+    return words.map((w) => ({ en: w.en, zh: w.zh, emoji: w.emoji ?? '🔤' }))
+  },
   load: async () => ({ items: eng3aMeta.items, getWords: eng3aMeta.getWords }),
 }
 

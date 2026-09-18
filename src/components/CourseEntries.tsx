@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { totalEngLessons, eng3aWordCount, eng3aUnits } from '@/data/eng3a'
+import { totalEngLessons, eng3aWordCount, eng3aUnits, eng3aPlays } from '@/data/eng3a'
 import { chineseUnits } from '@/data/chinese'
 import { modules as starlightModules } from '@/data/starlight'
 import { useCourseStore } from '@/store/useCourseStore'
@@ -98,7 +98,7 @@ export default function CourseEntries() {
           <span className="en3-home-emoji">📘</span>
           <div className="en3-home-body">
             <div className="en3-home-title">三年级上册英语</div>
-            <div className="en3-home-sub">外研版（新标准 2024）· 6 单元 / {totalEngLessons} 课 / {eng3aWordCount} 词 · 听说启蒙</div>
+            <div className="en3-home-sub">外研版（新标准 2024）· {eng3aUnits.length} 单元 / {totalEngLessons} 关 · 5 步闯关 + {eng3aPlays.length} 出小戏 / {eng3aWordCount} 词</div>
             <Badge id="eng3a" />
           </div>
           <span className="en3-home-arrow">›</span>
