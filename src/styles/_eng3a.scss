@@ -219,10 +219,36 @@
   transition: transform var(--ease), box-shadow var(--ease);
 }
 .en3-board:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+// 「课文同步」是页面内滚动按钮（不是路由链接），补齐 button 的样式重置，
+// 让它和旁边两个 <Link> 卡片外观完全一致。
+button.en3-board {
+  width: 100%;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+}
+// 滚动落点留一点顶部呼吸感
+#units { scroll-margin-top: 12px; }
 .en3-board-emoji { font-size: 28px; line-height: 1; flex-shrink: 0; }
 .en3-board-body { min-width: 0; }
 .en3-board-title { font-size: var(--fs-lg); font-weight: 800; color: var(--mc, #2563eb); }
 .en3-board-sub { font-size: var(--fs-sm); color: var(--ink-soft); line-height: 1.5; margin-top: 2px; }
+
+// 兜底页（NotFound）：把失配的路径显示成一个中性小胶囊
+.en3-notfound-path {
+  display: inline-block;
+  margin: 6px 0;
+  padding: 2px 8px;
+  border-radius: var(--r-sm);
+  background: var(--line);
+  color: var(--ink);
+  font-size: var(--fs-sm);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  word-break: break-all;
+}
 
 // 五关学习路径（首页纵向说明）
 .en3-path {

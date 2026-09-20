@@ -102,4 +102,45 @@ test.describe('英语课程（外研版 2024 重设计）', () => {
     await expect(page.locator('.en3-play-list')).toBeVisible()
     await expect(page.locator('.hero-title, .page-title').first()).toHaveText('英语小剧场')
   })
+
+  // 回归：HashRouter 下 `href="#units"` 会把 hash 换成 #units，路由解析成 /units
+  // → 无匹配路由 → 白屏。「课文同步」必须走页面内滚动，不能改 hash。
+  test('「课文同步」原地滚动到单元地图，不改 hash、不白屏', async ({ page }) => {
+    await page.goto('/#/eng3a')
+    const unitHeading = page.locator('#units')
+    await expect(unitHeading).toBeAttached({ timeout: 20_000 })
+
+    await page.locator('.en3-board', { hasText: '课文同步' }).click()
+
+    // 关键断言：hash 仍然停在 #/eng3a，页面内容还在（不是白屏）
+    expect(new URL(page.url()).hash).toBe('#/eng3a')
+    await expect(unitHeading).toBeInViewport()
+    await expect(page.locator('.module-card')).toHaveCount(7)
+    await expect(page.locator('.hero-title')).toBeAttached()
+  })
+})
+
+test.describe('路由兜底', () => {
+  test('未知路径显示兜底页而不是白屏', async ({ page }) => {
+    // 这条就是当初的真实症状：HashRouter 下点 `href="#units"` 会把 hash 换成 #units，
+    // 路径变成 /units —— 不匹配任何路由，整页白屏。
+    await page.goto('/#/units')
+    await expect(page.locator('.en3-notfound-path')).toHaveText('/units')
+    await expect(page.locator('body')).toContainText('这一页走丢了')
+
+    await page.locator('a.back-link', { hasText: '回首页' }).click()
+    await expect(page.locator('.hero-title')).toBeVisible()
+  })
+
+  test('深链 id 写错也有兜底文案（不会静默白屏）', async ({ page }) => {
+    // 单段 -> 单元页接住
+    await page.goto('/#/eng3a/u9')
+    await expect(page.locator('body')).toContainText('没有找到这个单元')
+    await expect(page.locator('a.btn', { hasText: '返回英语课程' })).toBeVisible()
+
+    // 双段 -> 课页接住
+    await page.goto('/#/eng3a/u9/u9-9')
+    await expect(page.locator('body')).toContainText('没有找到这一课')
+    await expect(page.locator('a.btn', { hasText: '返回英语课程' })).toBeVisible()
+  })
 })

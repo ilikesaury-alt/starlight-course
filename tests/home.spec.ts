@@ -58,4 +58,27 @@ test.describe('首页与导航', () => {
       page.getByRole('heading', { name: '26 个字母' }),
     ).toBeVisible()
   })
+
+  // 回归：字体栈若把 CJK 字体排在拉丁字体之前，U+2019（’）会按全角渲染（16px），
+  // 使 "Let's" 显示成 "Let' s"。这里断言撇号宽度不是全角。
+  test('英文撇号 U+2019 不占全角宽度', async ({ page }) => {
+    await page.goto('/')
+
+    const widths = await page.evaluate(() => {
+      const cs = getComputedStyle(document.body)
+      const s = document.createElement('span')
+      s.style.cssText = `position:absolute;visibility:hidden;font:${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`
+      document.body.appendChild(s)
+      const probe = (t: string) => {
+        s.textContent = t
+        return s.getBoundingClientRect().width
+      }
+      const res = { ascii: probe("'"), typographic: probe('\u2019') }
+      s.remove()
+      return res
+    })
+
+    // 全角约 16px；拉丁字体约 4.6px。放宽到 12 以免不同平台字体差异导致抖动。
+    expect(widths.typographic).toBeLessThan(12)
+  })
 })

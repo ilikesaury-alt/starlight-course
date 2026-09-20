@@ -237,8 +237,12 @@ $z-toast: 1000;
   --z-overlay: #{$z-overlay};
   --z-toast: #{$z-toast};
 
-  // 字体
+  // 字体。顺序很关键：拉丁字体必须排在 CJK 字体前面。
+  // CJK 字体（Noto Sans SC / 微软雅黑 等）把 U+2019（’）当作全角字符，advance 为 16px，
+  // 会把 "Let's" 显示成 "Let' s"（撇号后一个空格大的洞）；拉丁字体只有约 4.6px，才是撇号
+  // 应有的宽度。汉字的字形不受影响 —— 拉丁字体没有汉字，浏览器会自动往后回退到 CJK 字体。
   --font-cute: 'ZCOOL KuaiLe', 'Noto Sans SC', sans-serif;
-  --font-sans: 'Noto Sans SC', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
-    'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, 'Noto Sans SC', 'PingFang SC', 'Hiragino Sans GB',
+    'Microsoft YaHei', sans-serif;
 }

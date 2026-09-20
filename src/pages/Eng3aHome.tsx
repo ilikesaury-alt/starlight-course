@@ -26,6 +26,12 @@ export default function Eng3aHome() {
   const totalNodes = totalEngLessons + eng3aPlays.length
   const doneCount = completed.length
 
+  // 注意:本应用用 HashRouter,页面内的 `#units` 会被当成路由路径 -> 白屏。
+  // 所以这里用滚动而不是锚点跳转。
+  const scrollToUnits = () => {
+    document.getElementById('units')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
   return (
     <div className="home en3-home" style={moduleThemeVars(ENG3A_THEME)}>
       <section className="hero" style={moduleThemeVars(ENG3A_THEME)}>
@@ -52,7 +58,7 @@ export default function Eng3aHome() {
       {/* ---------- 板块导航 ---------- */}
       <h2 className="section-title">🧭 这个板块有什么</h2>
       <div className="en3-boards">
-        <a href="#units" className="en3-board">
+        <button type="button" className="en3-board" onClick={scrollToUnits}>
           <span className="en3-board-emoji">📚</span>
           <div className="en3-board-body">
             <div className="en3-board-title">课文同步</div>
@@ -60,7 +66,7 @@ export default function Eng3aHome() {
               7 个单元 · 每单元五关：认单词 → 说句子 → 唱起来 → 长知识 → 闯关测
             </div>
           </div>
-        </a>
+        </button>
         <Link to="/eng3a/play" className="en3-board">
           <span className="en3-board-emoji">🎭</span>
           <div className="en3-board-body">
