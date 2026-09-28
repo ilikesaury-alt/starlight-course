@@ -131,7 +131,7 @@ export function useAnimatedSpeak(
     safetyTimer.current = setTimeout(() => {
       if (isMounted.current) resetSelfAnim()
     }, capMs)
-  }, [text, opts.slow, opts.lang, stopSelf])
+  }, [text, opts.slow, opts.lang, resetSelfAnim])
 
   // 离开页面 / 组件卸载时，若本按钮正在发声则立即停止，避免语音残留。
   useEffect(
