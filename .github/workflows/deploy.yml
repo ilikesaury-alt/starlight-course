@@ -4,6 +4,9 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
+  # 合并前就先跑门禁：不必等到推到 main 才知道单测挂了
+  pull_request:
+    branches: [main]
   # 允许手动触发
   workflow_dispatch:
 
@@ -19,7 +22,37 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # 质量门禁：lint + 单测。
+  # 之前这里没有任何测试检查项——deploy.yml 只有一个 npm run build，
+  # 导致 npm test / npm run lint 全靠人工执行，测试写坏了照样能部署。
+  # 与 build 并行执行，不额外拉长总耗时。
+  quality:
+    name: 质量门禁
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 安装 Node.js
+        uses: actions/setup-node@v4
+        with:
+          # 注意：jsdom 27 要求 >=20.19（vitest 4 要求 >=20）。
+          # setup-node 的 `20` 会装最新 20.x，天然满足；不要改成固定小版本。
+          # 若将来要把 Node 升到 22，同步确认 AGENTS.md 里的「构建需 Node≥20」说明。
+          node-version: 20
+          cache: npm
+
+      - name: 安装依赖
+        run: npm ci
+
+      - name: ESLint
+        run: npm run lint
+
+      - name: 单元测试
+        run: npm run test
+
   build:
+    name: 构建
     runs-on: ubuntu-latest
     steps:
       - name: 检出代码
@@ -44,7 +77,7 @@ jobs:
           path: dist
 
   deploy:
-    needs: build
+    needs: [quality, build]
     runs-on: ubuntu-latest
     environment:
       name: github-pages
