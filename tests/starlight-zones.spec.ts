@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test'
+import { STARLIGHT_PASSAGE } from '../src/data/starlight-passage'
 
 /**
  * M0 拓展词 / M1+M2 跟读降级 / M3 句型框架 / M5 课文点读 的 E2E。
@@ -11,6 +12,16 @@ import { test, expect } from '@playwright/test'
  */
 
 const LESSON = '/#/preview/hello/1' // Unit 1 Lesson 1（Say Hello）
+
+/**
+ * 在页面里装/卸一个假的 SpeechRecognition。
+ * tests/** 不在任何 tsconfig project 内（`npm run check` 覆盖不到），
+ * 所以这里必须自己声明 window 上的厂商前缀属性，否则类型错误会被门禁静默放过。
+ * 传函数定义而非值：addInitScript 会在页面上下文里重新求值。
+ */
+function withStt(page: import('@playwright/test').Page, fn: () => void) {
+  return page.addInitScript(`(${fn.toString()})()`)
+}
 
 test.describe('E 课堂拓展词', () => {
   test('录词 → 持久化 → 删除生效', async ({ page }) => {
@@ -86,9 +97,9 @@ test.describe('E 课堂拓展词', () => {
 test.describe('跟读区（降级闭环）', () => {
   test('不支持语音识别时展示家长确认，点击后记对', async ({ page }) => {
     // Chromium 本身有 webkitSpeechRecognition，这里主动抹掉以稳定复现降级分支
-    await page.addInitScript(() => {
-      delete window.SpeechRecognition
-      delete window.webkitSpeechRecognition
+    await withStt(page, () => {
+      delete (window as unknown as Record<string, unknown>).SpeechRecognition
+      delete (window as unknown as Record<string, unknown>).webkitSpeechRecognition
     })
     await page.goto(LESSON)
     await page.getByRole('button', { name: /跟读/ }).click()
@@ -104,23 +115,24 @@ test.describe('跟读区（降级闭环）', () => {
 
   test('识别权限被拒时也降级到家长确认，不崩溃', async ({ page }) => {
     // 模拟存在识别 API 但一启动就报 not-allowed（权限拒绝）
-    await page.addInitScript(() => {
+    await withStt(page, () => {
       class Denied {
         lang = ''
         continuous = false
         interimResults = false
         maxAlternatives = 1
-        onresult = null
-        onend = null
-        onerror = null
+        onresult: ((e: unknown) => void) | null = null
+        onend: (() => void) | null = null
+        onerror: ((e: unknown) => void) | null = null
         start() {
           setTimeout(() => this.onerror?.({ error: 'not-allowed' }), 0)
         }
         stop() {}
         abort() {}
       }
-      window.SpeechRecognition = Denied
-      window.webkitSpeechRecognition = Denied
+      const w = window as unknown as Record<string, unknown>
+      w.SpeechRecognition = Denied
+      w.webkitSpeechRecognition = Denied
     })
     await page.goto(LESSON)
     await page.getByRole('button', { name: /跟读/ }).click()
@@ -177,9 +189,25 @@ test.describe('课文点读', () => {
     await expect(page.locator('.tt-legend .tt-word--unknown')).toBeVisible()
   })
 
-  test('未提取 passage 的课回落到课本原文视图，不报错', async ({ page }) => {
-    await page.goto('/#/preview/toys/5') // Unit 4 Lesson 5：未试点
+  test('扩量后非试点课也渲染点读视图', async ({ page }) => {
+    // passage 已从试点 2 课扩到全部 96 课，toys/5 不再走 BookTextView 回落
+    await page.goto('/#/preview/toys/5')
     await page.getByRole('button', { name: /课本原文/ }).click()
-    await expect(page.locator('.book-original')).toBeVisible()
+    await expect(page.locator('.passage-zone')).toBeVisible()
+    await expect(page.locator('.tt-word').first()).toBeVisible()
+  })
+
+  test('全 96 课都有 passage 数据（覆盖度回归）', () => {
+    // 直接在 Node 侧 import 生成的数据文件。
+    // 不要写成 page.evaluate(() => import('/src/data/...'))：那是 Vite dev server 的
+    // 专有 URL 路径，生产构建里不存在；且 tests/** 不在 tsconfig 内，类型错误不会被拦。
+    const missing: string[] = []
+    for (let u = 1; u <= 12; u++) {
+      for (let l = 1; l <= 8; l++) {
+        const p = STARLIGHT_PASSAGE[`${u}-${l}`]
+        if (!p || p.lines.length === 0) missing.push(`${u}-${l}`)
+      }
+    }
+    expect(missing).toEqual([])
   })
 })
