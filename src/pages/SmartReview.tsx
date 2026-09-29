@@ -4,6 +4,8 @@ import SpeakButton from '../components/SpeakButton'
 import FcWord from '../components/FcWord'
 import SafeBoundary from '../components/SafeBoundary'
 import ModuleFilterChips, { type ModuleFilter } from '../components/ModuleFilterChips'
+import SentenceReader from '../components/SentenceReader'
+import { fillFrame } from '../data/sentenceFrame'
 import { modules, STARLIGHT_THEME } from '../data/starlight'
 import { MODULE_LIST, type ModuleId } from '../data/modules'
 import { useCourseStore } from '../store/useCourseStore'
@@ -11,6 +13,7 @@ import { boxLabel, boxEmoji, type SrsCard } from '../data/srs'
 import { speakText } from '../utils/speak'
 import { moduleThemeVars } from '../utils/theme'
 import { quizStars, isPassed } from '../utils/stars'
+import { mixReviewQueue } from '../utils/reviewQueue'
 
 // 建一份 en → 内容元信息的索引,供卡片渲染时取 emoji/zh/ipa（单词和句型都索引）。
 // 故事类模块词表经 load() 动态加载,因此索引为异步构建;组件在 ready 前不进入会话。
@@ -83,8 +86,10 @@ export default function SmartReview() {
 
   // 默认选中第一个模块(主课),「全部」在智能复习页已隐藏,改为按模块逐一复习
   const [filter, setFilter] = useState<ModuleFilter>('starlight')
-  // 拍快照:进入页面/切换模块时一次性确定本次复习队列,避免复习过程中队列抖动
-  const loadQueue = (f: ModuleFilter) => getDueCards(20, f === 'all' ? undefined : f)
+  // 拍快照：进入页面/切换模块时一次性确定本次复习队列，避免复习过程中队列抖动
+  // 先取全部到期卡片再按配额编排：句子框架卡必须留到席，否则会被数百张单词卡淹没
+  const loadQueue = (f: ModuleFilter) =>
+    mixReviewQueue(getDueCards(undefined, f === 'all' ? undefined : f), 20)
   const [queue, setQueue] = useState<SrsCard[]>(() => loadQueue('starlight'))
   const [idx, setIdx] = useState(0)
   const [revealed, setRevealed] = useState(false)
@@ -329,6 +334,11 @@ export default function SmartReview() {
 
   const boxInfo = cur ? `${boxEmoji(cur.box)} ${boxLabel(cur.box)} · 盒 ${cur.box}` : ''
   const remainMeta = cur ? contentIndex[cur.en] : undefined
+  // 句子框架卡：内容索引里没有（键为 frame:<hash>），改由卡片自带的 frame 渲染
+  const frameCard = cur?.kind === 'sentence' && cur.frame ? cur.frame : null
+  const frameSentence = frameCard
+    ? fillFrame(frameCard, frameCard.blanks.map((b) => b.answer))
+    : ''
 
   return (
     <div className="page smart-review" style={mcStyle}>
@@ -354,7 +364,27 @@ export default function SmartReview() {
           <div className="quiz-progress-fill" style={{ width: `${(idx / total) * 100}%` }} />
         </div>
 
-        {cur && remainMeta && (
+        {frameCard && (
+          <div className="smart-card" style={mcStyle}>
+            <div className="smart-card-from">📍 句型框架 · 说出整句</div>
+            <div className="smart-card-emoji">🧩</div>
+            <div className="sfc-pattern">
+              {frameCard.blanks.length === 0
+                ? frameCard.pattern
+                : frameCard.pattern.split('___').join('（ ）')}
+            </div>
+            <div className="fc-zh">💡 {frameCard.zh}</div>
+            {/* 说出整句 → 走跟读评分，达标记对并调度 SRS */}
+            <SentenceReader
+              sentence={frameSentence}
+              zh={frameCard.zh}
+              onPass={() => answer(true)}
+            />
+            <div className="smart-card-box">{boxInfo}</div>
+          </div>
+        )}
+
+        {cur && remainMeta && !frameCard && (
           <div className="smart-card" style={mcStyle}>
             <div className="smart-card-from">📍 {remainMeta.from}</div>
             {remainMeta.emoji && <div className="smart-card-emoji">{remainMeta.emoji}</div>}

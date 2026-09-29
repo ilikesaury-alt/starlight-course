@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest'
+import { State } from 'ts-fsrs'
 import {
   dayStamp,
   scheduleNext,
@@ -10,6 +11,11 @@ import {
   BOX_INTERVALS,
   MAX_BOX,
 } from './srs'
+import {
+  migrateFromLeitner,
+  deriveBox,
+  BOX_STABILITY,
+} from './fsrsScheduler'
 
 describe('dayStamp', () => {
   it('同一本地日历日返回相同天戳', () => {
@@ -24,29 +30,99 @@ describe('dayStamp', () => {
   })
 })
 
-describe('scheduleNext', () => {
-  it('答对：升一盒、势头+1、次数+1、下次复习 = 今天 + 间隔', () => {
+describe('scheduleNext（FSRS 内核）', () => {
+  it('连续答对：间隔逐次递增（Good 拉长稳定度）', () => {
     const today = 1000
-    const r = scheduleNext({ box: 2, streak: 1, reviews: 3 }, true, today)
-    expect(r.box).toBe(3)
-    expect(r.streak).toBe(2)
-    expect(r.reviews).toBe(4)
-    expect(r.nextReview).toBe(today + BOX_INTERVALS[3])
-    expect(r.lastReview).toBe(today)
+    let card = createNewCard('apple', 'starlight', today)
+    const gaps: number[] = []
+    let day = today
+    for (let i = 0; i < 5; i++) {
+      const r = scheduleNext(card, true, day)
+      gaps.push(r.nextReview - day)
+      day = r.nextReview
+      card = { ...card, ...r }
+    }
+    // 相邻两次的间隔不下降（学习步进逐步走出后间隔单调不减）
+    for (let i = 1; i < gaps.length; i++) {
+      expect(gaps[i]).toBeGreaterThanOrEqual(gaps[i - 1])
+    }
+    expect(gaps[gaps.length - 1]).toBeGreaterThan(0)
   })
-  it('答对：盒号封顶于 MAX_BOX', () => {
-    const r = scheduleNext({ box: MAX_BOX, streak: 5, reviews: 9 }, true, 1000)
-    expect(r.box).toBe(MAX_BOX)
-    expect(r.nextReview).toBe(1000 + BOX_INTERVALS[MAX_BOX])
-  })
-  it('答错：归零盒、势头清零、当天到期、次数仍+1', () => {
+
+  it('答对：势头+1、次数+1、派生 nextReview 与 fsrs.due 一致', () => {
     const today = 1000
-    const r = scheduleNext({ box: 4, streak: 3, reviews: 5 }, false, today)
-    expect(r.box).toBe(0)
+    const c = createNewCard('apple', 'starlight', today)
+    const r = scheduleNext(c, true, today)
+    expect(r.streak).toBe(2 - 1)
+    expect(r.reviews).toBe(1)
+    expect(r.nextReview).toBe(r.fsrs!.due)
+    expect(r.box).toBe(deriveBox(r.fsrs!))
+  })
+
+  it('答错：当天到期、势头清零、lapses+1、进入 Relearning', () => {
+    const today = 1000
+    // FSRS 只在「已毕业（Review）的卡」上计 lapses：先把卡推到 Review
+    let card = createNewCard('apple', 'starlight', today)
+    let day = today
+    for (let i = 0; i < 4; i++) {
+      const r = scheduleNext(card, true, day)
+      day = r.nextReview
+      card = { ...card, ...r }
+    }
+    expect(card.fsrs!.state).toBe(State.Review)
+
+    const r = scheduleNext(card, false, day)
+    expect(r.nextReview).toBe(day) // 答错回到当天
     expect(r.streak).toBe(0)
+    expect(r.reviews).toBe(card.reviews + 1)
+    expect(r.fsrs!.lapses).toBe(1)
+  })
+
+  it('答错卡在 Learning 阶段时不计 lapses（FSRS 语义：仅 Review 卡计遗忘）', () => {
+    const today = 1000
+    const c = createNewCard('apple', 'starlight', today)
+    const r = scheduleNext(c, false, today)
     expect(r.nextReview).toBe(today)
-    expect(r.lastReview).toBe(today)
-    expect(r.reviews).toBe(6)
+    expect(r.fsrs!.lapses).toBe(0)
+  })
+
+  it('盒号封顶于 MAX_BOX（派生兼容字段不越界）', () => {
+    const c = createNewCard('apple', 'starlight', 1000)
+    const r = scheduleNext(c, true, 1000)
+    expect(r.box).toBeLessThanOrEqual(MAX_BOX)
+  })
+})
+
+describe('migrateFromLeitner', () => {
+  it('字段完整、due 沿用旧 nextReview（进度不丢）', () => {
+    const nextReview = 1234
+    const f = migrateFromLeitner(3, nextReview)
+    expect(f.due).toBe(nextReview)
+    expect(f.stability).toBe(BOX_STABILITY[3])
+    expect(f.difficulty).toBeGreaterThanOrEqual(1)
+    expect(f.difficulty).toBeLessThanOrEqual(10)
+    expect(f.reps).toBeGreaterThan(0)
+    expect(f.lastReview).toBe(nextReview - BOX_INTERVALS[3])
+  })
+
+  it('盒 0 → Learning，高盒 → Review；盒号钳制在范围内', () => {
+    expect(migrateFromLeitner(0, 100).state).toBe(State.Learning)
+    expect(migrateFromLeitner(6, 100).state).toBe(State.Review)
+    expect(deriveBox(migrateFromLeitner(99, 100))).toBeLessThanOrEqual(MAX_BOX)
+    expect(deriveBox(migrateFromLeitner(-5, 100))).toBeGreaterThanOrEqual(0)
+  })
+
+  it('lapses 参数被保留', () => {
+    expect(migrateFromLeitner(2, 100, 5).lapses).toBe(5)
+  })
+})
+
+describe('deriveBox', () => {
+  it('稳定度越高盒号越高，且与 fsrs 字段自洽', () => {
+    const low = migrateFromLeitner(1, 100)
+    const high = migrateFromLeitner(5, 100)
+    expect(deriveBox(low)).toBeLessThan(deriveBox(high))
+    expect(deriveBox({ ...low, state: State.New })).toBe(0)
   })
 })
 
@@ -59,6 +135,12 @@ describe('createNewCard', () => {
     expect(c.modules).toEqual(['starlight'])
     expect(c.reviews).toBe(0)
     expect(c.streak).toBe(0)
+    expect(c.source).toBe('lesson')
+    expect(c.fsrs!.due).toBe(today)
+  })
+  it('拓展词卡带 source=extension（删除时据此清理）', () => {
+    const c = createNewCard('broccoli', 'starlight', 500, 'extension')
+    expect(c.source).toBe('extension')
   })
 })
 

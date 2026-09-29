@@ -1,8 +1,10 @@
-// Starlight 单课学习页：与 Fly Guy / Rocket Girl 的故事页保持同一套三标签结构
-//   🎴 单词卡 —— 逐词翻卡 + 本课词表
-//   📖 课本原文 —— 教材 PDF 提取的真实课文（逐词可点、可听、带中文），顶部先给本课重点句型
-//   🎯 闯关 —— 从课本原文挖空生成选词填空，题量不足时用本课单词与单元测验补足
-// 三个标签共用 BookTextView / bookQuiz / bookDict，逻辑不在页面里重复实现。
+// Starlight 单课学习页：五区布局
+//   🎴 单词区 —— 逐词翻卡 + 本课词表 + ➕ E 课堂拓展词（录入 / 删除）
+//   🗣️ 跟读区 —— 逐句跟读：播原句 → 孩子跟读 → 逐词高亮 → 达标入 SRS（识别不可用时家长确认降级）
+//   🧩 句型区 —— 句子框架卡：填空 + 说出整句
+//   📖 课文区 —— 教材 PDF 提取的真实课文（逐词可点、可听、带中文），顶部先给本课重点句型
+//   🎯 闯关   —— 从课本原文挖空生成选词填空，题量不足时用本课单词与单元测验补足
+// 三个逻辑模块共用 BookTextView / bookQuiz / bookDict，逻辑不在页面里重复实现。
 
 import { useState, useEffect, useMemo, useRef } from 'react'
 import { Link, useParams } from 'react-router-dom'
@@ -12,26 +14,40 @@ import SafeBoundary from '@/components/SafeBoundary'
 import ConfirmDialog from '@/components/ConfirmDialog'
 import QuizEngine, { type QuizItem } from '@/components/QuizEngine'
 import BookTextView from '@/components/BookTextView'
+import TappableText, { PassageLegend } from '@/components/TappableText'
 import Breadcrumb from '@/components/Breadcrumb'
+import ExtensionWordEntry from '@/components/ExtensionWordEntry'
+import SentenceReader from '@/components/SentenceReader'
+import SentenceFrameCard from '@/components/SentenceFrameCard'
 import { getModule, STARLIGHT_THEME, type Sentence, type Word } from '@/data/starlight'
 import { getLessonBook } from '@/data/starlight-book'
+import { getPassage } from '@/data/starlight-passage'
+import { framesOfLesson, hashPattern } from '@/data/sentenceFrame'
 import { useCourseStore } from '@/store/useCourseStore'
 import { useSettleQuiz } from '@/hooks/useSettleQuiz'
 import { speakText } from '@/utils/speak'
 import { moduleThemeVars } from '@/utils/theme'
 import { buildClozeQuiz, buildListeningQuiz, buildWordQuiz } from '@/utils/bookQuiz'
 
-type Tab = 'vocab' | 'book' | 'quiz'
+type Tab = 'vocab' | 'speak' | 'frame' | 'book' | 'quiz'
 
 export default function LessonPreview() {
   const { unitId = '', lessonId = '' } = useParams()
   const mod = getModule(unitId)
   const seedCards = useCourseStore((s) => s.seedCards)
+  const recordReview = useCourseStore((s) => s.recordReview)
   const markQuizDone = useCourseStore((s) => s.markQuizDone)
   const markLessonDone = useCourseStore((s) => s.markLessonDone)
   const lessonCompleted = useCourseStore((s) => s.lessonCompleted)
+  const srsCards = useCourseStore((s) => s.srsCards)
   const [tab, setTab] = useState<Tab>('vocab')
   const [showLessonDone, setShowLessonDone] = useState(false)
+  const [showExtEntry, setShowExtEntry] = useState(false)
+  const [sentIdx, setSentIdx] = useState(0)
+  const seedSentenceFrames = useCourseStore((s) => s.seedSentenceFrames)
+  const starlightExtensions = useCourseStore((s) => s.starlightExtensions)
+  const addExtensionWord = useCourseStore((s) => s.addExtensionWord)
+  const removeExtensionWord = useCourseStore((s) => s.removeExtensionWord)
   // 统一结算编排:加星 + 错题入本 + SRS 记录(同词去重)
   const { recordPick, restart, settle } = useSettleQuiz({
     module: 'starlight',
@@ -48,6 +64,12 @@ export default function LessonPreview() {
   // 课本原文：按「单元号-课号」取，教材 PDF 每课一份
   const book = mod && lesson ? getLessonBook(mod.id, lesson.id) : undefined
   const chapters = book?.sections ?? []
+  // 拓展词 key 与课本原文保持同一套「单元号-课号」命名
+  const lessonKey = `${mod?.id ?? 0}-${lesson?.id ?? 0}`
+  const extensions = starlightExtensions[lessonKey] ?? []
+  const frames = mod && lesson ? framesOfLesson(mod.slug, lesson.id) : []
+  // 课文点读（D）：试点课有提取出的 passage，其余课回落到 BookTextView
+  const passage = mod && lesson ? getPassage(mod.id, lesson.id) : undefined
 
   // 闯关题：听力题优先(听说核心)→ 课本原文选词填空 → 词义题/单元测验补足
   const quizItems = useMemo<QuizItem[]>(() => {
@@ -90,8 +112,15 @@ export default function LessonPreview() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lesson?.id, mod?.slug])
 
+  // 本课句型框架卡播种进同一个复习池（kind='sentence'，与单词卡隔离）
+  useEffect(() => {
+    if (frames.length === 0) return
+    seedSentenceFrames(frames, 'starlight')
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lesson?.id, mod?.slug])
+
   // 换课时回到第一个标签，避免停留在上一课的闯关结果页
-  useEffect(() => { setTab('vocab') }, [lessonId, unitId])
+  useEffect(() => { setTab('vocab'); setSentIdx(0) }, [lessonId, unitId])
 
   if (!mod) {
     return (
@@ -148,6 +177,20 @@ export default function LessonPreview() {
           </button>
           <button
             type="button"
+            className={'tab-btn' + (tab === 'speak' ? ' active' : '')}
+            onClick={() => setTab('speak')}
+          >
+            🗣️ 跟读
+          </button>
+          <button
+            type="button"
+            className={'tab-btn' + (tab === 'frame' ? ' active' : '')}
+            onClick={() => setTab('frame')}
+          >
+            🧩 句型
+          </button>
+          <button
+            type="button"
             className={'tab-btn' + (tab === 'book' ? ' active' : '')}
             onClick={() => setTab('book')}
           >
@@ -162,11 +205,86 @@ export default function LessonPreview() {
           </button>
         </div>
 
-        {tab === 'vocab' && <VocabTab words={words} mcStyle={mcStyle} />}
+        {tab === 'vocab' && (
+          <>
+            <VocabTab words={words} mcStyle={mcStyle} />
+            <ExtensionSection
+              words={extensions}
+              onRemove={(en) => removeExtensionWord(lessonKey, en)}
+              onOpenEntry={() => setShowExtEntry(true)}
+            />
+          </>
+        )}
+        {tab === 'speak' && (
+          sentences.length === 0 ? (
+            <div className="empty"><p>这一课还没有跟读句子。</p></div>
+          ) : (
+            <div className="speak-zone" style={mcStyle}>
+              <p className="lead">
+                先听一遍示范，再跟着读一遍。
+                <span className="sent-hint">读得好会点亮星星，读不准可以再试，识别不了请家长帮忙确认</span>
+              </p>
+              <div className="speak-nav">
+                <button type="button" className="btn btn-soft" disabled={sentIdx === 0}
+                  onClick={() => setSentIdx((i) => Math.max(0, i - 1))}>← 上一句</button>
+                <span className="speak-count">{sentIdx + 1} / {sentences.length}</span>
+                <button type="button" className="btn btn-soft" disabled={sentIdx >= sentences.length - 1}
+                  onClick={() => setSentIdx((i) => Math.min(sentences.length - 1, i + 1))}>下一句 →</button>
+              </div>
+              <SentenceReader
+                key={`${lessonKey}-${sentIdx}`}
+                sentence={sentences[sentIdx].en}
+                zh={sentences[sentIdx].zh}
+                onPass={() => {
+                  seedCards([sentences[sentIdx].en], 'starlight')
+                  recordReview(sentences[sentIdx].en, true, 'starlight')
+                }}
+              />
+            </div>
+          )
+        )}
+        {tab === 'frame' && (
+          frames.length === 0 ? (
+            <div className="empty"><p>这一课还没有句型框架卡。</p></div>
+          ) : (
+            <div className="frame-zone" style={mcStyle}>
+              <p className="lead">
+                先把句子补完整，再用整句说出来。
+                <span className="sent-hint">框架卡会进复习池，到期时在智能复习里练</span>
+              </p>
+              {frames.map((f) => (
+                <SentenceFrameCard
+                  key={f.id}
+                  frame={f}
+                  onPass={() => {
+                    seedSentenceFrames([f], 'starlight')
+                    recordReview(`frame:${hashPattern(f.pattern)}`, true, 'starlight')
+                  }}
+                />
+              ))}
+            </div>
+          )
+        )}
         {tab === 'book' && (
           <>
             <PatternStrip sentences={sentences} mcStyle={mcStyle} />
-            {hasBook ? (
+            {passage ? (
+              <section className="passage-zone" style={mcStyle}>
+                <p className="lead">
+                  点任意单词听发音、看词义，点的词会按记忆强度着色。
+                  <span className="sent-hint">🟩 熟 · 🟨 模糊 · ⬜ 未知</span>
+                </p>
+                {passage.lines.map((line, i) => (
+                  <TappableText
+                    key={i}
+                    text={line}
+                    vocab={words}
+                    boxOf={(en) => srsCards[en]?.box}
+                  />
+                ))}
+                <PassageLegend />
+              </section>
+            ) : hasBook ? (
               <BookTextView
                 chapters={chapters}
                 mc={mcStyle}
@@ -208,6 +326,12 @@ export default function LessonPreview() {
         )}
       </SafeBoundary>
 
+      <ExtensionWordEntry
+        open={showExtEntry}
+        existing={extensions.map((w) => w.en)}
+        onSubmit={(w) => addExtensionWord(lessonKey, w)}
+        onCancel={() => setShowExtEntry(false)}
+      />
       <div className="page-nav">
         <Link to={`/preview/${unitId}`} className="back-link">← 课程列表</Link>
         <div className="lesson-nav">
@@ -355,6 +479,55 @@ function VocabTab({ words, mcStyle }: { words: Word[]; mcStyle: React.CSSPropert
         ))}
       </div>
     </>
+  )
+}
+
+// E 课堂拓展词区：➕ 加词 + 列表（带「拓展」角标）+ 删除。
+// 数据存在 store 的 starlightExtensions，教材 lessons.ts 不受影响。
+function ExtensionSection({
+  words,
+  onRemove,
+  onOpenEntry,
+}: {
+  words: Word[]
+  onRemove: (en: string) => void
+  onOpenEntry: () => void
+}) {
+  return (
+    <section className="ext-zone">
+      <div className="ext-zone-head">
+        <span>➕ E 课堂拓展词（{words.length}）</span>
+        <button type="button" className="btn btn-soft" onClick={onOpenEntry}>
+          ➕ 加词
+        </button>
+      </div>
+      {words.length === 0 ? (
+        <p className="ext-empty">老师课上临时教的词，录进来就会自动进复习队列。</p>
+      ) : (
+        <div className="ext-list">
+          {words.map((w) => (
+            <div key={w.en} className="ext-item">
+              <span className="ext-emoji">{w.emoji || '📝'}</span>
+              <span className="ext-en">{w.en}</span>
+              {w.zh && <span className="ext-zh">{w.zh}</span>}
+              <span className="ext-badge">拓展</span>
+              <span onClick={(e) => e.stopPropagation()}>
+                <SpeakButton text={w.en} label={w.en} />
+              </span>
+              <button
+                type="button"
+                className="ext-del"
+                aria-label={`删除 ${w.en}`}
+                title="删除这个拓展词"
+                onClick={() => onRemove(w.en)}
+              >
+                🗑️
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
   )
 }
 

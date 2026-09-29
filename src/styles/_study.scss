@@ -599,3 +599,261 @@
   .stats-grid { grid-template-columns: 1fr 1fr 1fr 1fr; }
   .unit-progress-grid { grid-template-columns: 1fr 1fr 1fr; }
 }
+
+// ---------- E 课堂拓展词区 ----------
+.ext-zone {
+  margin-top: 16px;
+  padding: 12px;
+  border: 2px dashed var(--mc, var(--brand));
+  border-radius: var(--r-md);
+  background: var(--card);
+}
+.ext-zone-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: var(--fs-md);
+  font-weight: 800;
+  color: var(--mc-deep, var(--brand-deep));
+}
+.ext-empty {
+  margin: 8px 0 0;
+  font-size: var(--fs-sm);
+  color: var(--ink-soft);
+}
+.ext-list { display: grid; gap: 8px; margin-top: 10px; }
+.ext-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--line, #e5e7eb);
+  border-radius: var(--r-sm);
+  background: var(--bg, #fff);
+  font-size: var(--fs-base);
+  font-weight: 600;
+}
+.ext-en { font-weight: 800; }
+.ext-zh { color: var(--ink-soft); font-size: var(--fs-sm); }
+.ext-badge {
+  margin-left: auto;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--mc-soft, var(--brand-soft));
+  color: var(--mc-deep, var(--brand-deep));
+  font-size: var(--fs-xs);
+  font-weight: 800;
+}
+.ext-del {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font-size: var(--fs-base);
+  line-height: 1;
+  padding: 4px;
+  &:hover { transform: scale(1.15); }
+}
+
+// ---------- 拓展词录入弹卡 ----------
+.ext-entry-mask {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 60;
+}
+.ext-entry {
+  width: min(420px, 100%);
+  background: var(--card, #fff);
+  border-radius: var(--r-lg);
+  padding: 18px;
+  display: grid;
+  gap: 12px;
+  box-shadow: var(--shadow-lg, 0 18px 40px rgba(0, 0, 0, 0.2));
+}
+.ext-entry-title { margin: 0; font-size: var(--fs-lg); }
+.ext-entry-field {
+  display: grid;
+  gap: 4px;
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--ink-soft);
+  input {
+    padding: 10px 12px;
+    border: 2px solid var(--line, #e5e7eb);
+    border-radius: var(--r-sm);
+    font-family: inherit;
+    font-size: var(--fs-base);
+    font-weight: 600;
+  }
+}
+.ext-entry-error { margin: 0; color: var(--coral, #fb7185); font-size: var(--fs-sm); font-weight: 700; }
+.ext-entry-actions { display: flex; justify-content: flex-end; gap: 10px; }
+
+// ---------- 逐句跟读卡 ----------
+.speak-zone, .frame-zone { display: grid; gap: 12px; }
+.speak-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+.sr-card {
+  padding: 16px;
+  border: 2px solid var(--mc, var(--brand));
+  border-radius: var(--r-lg);
+  background: var(--card, #fff);
+  display: grid;
+  gap: 12px;
+}
+.sr-sentence {
+  font-size: var(--fs-xl);
+  font-weight: 800;
+  line-height: 1.4;
+  text-align: center;
+}
+.sr-zh { text-align: center; color: var(--ink-soft); font-size: var(--fs-md); }
+.sr-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.sr-mic.is-live { animation: wiggle 1s ease-in-out infinite; }
+.sr-result {
+  text-align: center;
+  font-size: var(--fs-lg);
+  font-weight: 800;
+  &--ok { color: var(--ok, #22c55e); }
+  &--retry { color: var(--warn, #f59e0b); }
+}
+.sr-words {
+  text-align: center;
+  font-size: var(--fs-lg);
+  line-height: 1.8;
+}
+.sr-word { padding: 0 2px; border-radius: 4px; }
+.sr-word--hit { background: rgba(34, 197, 94, 0.22); }
+.sr-word--near { background: rgba(59, 130, 246, 0.18); }
+.sr-word--miss { background: rgba(251, 113, 133, 0.14); text-decoration: underline wavy rgba(251, 113, 133, 0.6); }
+.sr-fallback {
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+  padding: 12px;
+  border-radius: var(--r-md);
+  background: var(--mc-soft, var(--brand-soft));
+}
+.sr-fallback-text { margin: 0; font-size: var(--fs-sm); font-weight: 700; color: var(--mc-deep, var(--brand-deep)); }
+
+// ---------- 句子框架卡 ----------
+.sfc-card {
+  padding: 14px;
+  border: 2px solid var(--mc, var(--brand));
+  border-radius: var(--r-lg);
+  background: var(--card, #fff);
+  display: grid;
+  gap: 10px;
+}
+.sfc-zh { font-size: var(--fs-md); font-weight: 700; color: var(--ink-soft); }
+.sfc-pattern {
+  font-size: var(--fs-xl);
+  font-weight: 800;
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+.sfc-blanks { display: grid; gap: 8px; }
+.sfc-blank-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.sfc-blank-label { font-size: var(--fs-sm); font-weight: 700; color: var(--ink-soft); }
+.sfc-opts { display: flex; gap: 8px; flex-wrap: wrap; }
+.sfc-opt {
+  padding: 8px 14px;
+  border: 2px solid var(--line, #e5e7eb);
+  border-radius: 999px;
+  background: var(--bg, #fff);
+  font-family: inherit;
+  font-size: var(--fs-base);
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--ease);
+  &.on {
+    border-color: var(--mc, var(--brand));
+    background: var(--mc-soft, var(--brand-soft));
+    transform: translateY(-2px);
+  }
+}
+.sfc-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.sfc-hint { font-size: var(--fs-sm); color: var(--ink-soft); font-weight: 600; }
+
+// ---------- 课文点读（D） ----------
+.passage-zone { display: grid; gap: 10px; }
+.tt-wrap {
+  padding: 12px 14px;
+  border: 1px solid var(--line, #e5e7eb);
+  border-radius: var(--r-md);
+  background: var(--card, #fff);
+}
+.tt-head { display: flex; justify-content: flex-end; margin-bottom: 6px; }
+.tt-text {
+  margin: 0;
+  font-size: var(--fs-lg);
+  line-height: 2;
+  font-weight: 600;
+}
+.tt-word {
+  border: 0;
+  background: transparent;
+  padding: 2px 3px;
+  margin: 0 1px;
+  border-radius: 4px;
+  font: inherit;
+  cursor: pointer;
+  transition: var(--ease);
+  &.tt-word--known { background: rgba(34, 197, 94, 0.24); color: #14532d; }
+  &.tt-word--vague { background: rgba(250, 204, 21, 0.32); color: #713f12; }
+  &.tt-word--unknown { background: rgba(148, 163, 184, 0.18); color: var(--ink-soft); }
+  &:hover { transform: translateY(-2px); }
+}
+.tt-pop {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 8px 12px;
+  border-radius: var(--r-sm);
+  background: var(--mc-soft, var(--brand-soft));
+  font-size: var(--fs-base);
+  font-weight: 700;
+}
+.tt-pop-word { font-weight: 800; }
+.tt-pop-zh { color: var(--ink-soft); font-weight: 600; }
+.tt-pop-close {
+  margin-left: auto;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font-size: var(--fs-sm);
+}
+.tt-legend {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  font-size: var(--fs-xs);
+  color: var(--ink-soft);
+}
+.tt-legend-note { font-weight: 600; }

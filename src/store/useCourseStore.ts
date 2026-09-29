@@ -10,6 +10,10 @@ import {
 } from '../data/srs'
 import { MODULE_LIST, type ModuleId } from '../data/modules'
 import { modules } from '../data/starlight'
+import type { Word } from '../data/starlight'
+import type { SentenceFrame } from '../data/sentenceFrame'
+import { frameCardKey } from '../data/sentenceFrame'
+import { migrateFromLeitner } from '../data/fsrsScheduler'
 
 // Starlight 主课:单元 slug -> 全部课 id,用于课级进度判断
 const lessonsOf = (unitId: string) => modules.find((m) => m.slug === unitId)?.lessons ?? []
@@ -36,6 +40,9 @@ interface CourseStore {
   completedStories: string[]
   /** SRS 智能记忆卡片,key 为单词 en */
   srsCards: Record<string, SrsCard>
+  /** E 课堂拓展词:lessonKey(`${unitId}-${lessonId}`) -> 该课现场录入的拓展词。
+   *  与教材 lessons.ts 解耦(FR-C0.4):教材数据保持只读,拓展词只存本地。 */
+  starlightExtensions: Record<string, Word[]>
 
   // 中文课程(三年级上册语文)进度——独立于英语 SRS,仅做打卡/自测记录
   // 打卡记录设计取舍:不做历史裁剪。按每天多次打卡估算每年仅增长约 10KB(localStorage 预算内),
@@ -91,6 +98,12 @@ interface CourseStore {
   recordReview: (en: string, correct: boolean, module?: ModuleId) => void
   /** 批量种子化(进单元/故事预习页时调用)，并归入所属模块 */
   seedCards: (ens: string[], module: ModuleId) => void
+  /** 录入一个拓展词:自动播种进复习池。返回 false 表示校验失败(空 en / 本课重复) */
+  addExtensionWord: (lessonKey: string, w: Word) => boolean
+  /** 删除拓展词:同时把该词的拓展来源卡片移出复习池 */
+  removeExtensionWord: (lessonKey: string, en: string) => void
+  /** 播种句子框架卡(kind='sentence',en=frame:<hash>),与单词卡共享复习池但键空间隔离 */
+  seedSentenceFrames: (frames: SentenceFrame[], module: ModuleId) => void
   /** 获取今日到期卡片(已排序),可限制数量；module 非空时只取该模块的卡 */
   getDueCards: (limit?: number, module?: ModuleId) => SrsCard[]
   /** 今日到期卡片数量；module 非空时只计该模块 */
@@ -111,6 +124,7 @@ export const useCourseStore = create<CourseStore>()(
       lessonCompleted: {},
       completedStories: [],
       srsCards: {},
+      starlightExtensions: {},
       reciteCheckins: {},
       chineseQuiz: {},
       eng3aRecite: {},
@@ -243,6 +257,7 @@ export const useCourseStore = create<CourseStore>()(
           lessonCompleted: {},
           completedStories: [],
           srsCards: {},
+          starlightExtensions: {},
           reciteCheckins: {},
           chineseQuiz: {},
           eng3aRecite: {},
@@ -289,6 +304,65 @@ export const useCourseStore = create<CourseStore>()(
           return changed ? { srsCards: next } : s
         }),
 
+      seedSentenceFrames: (frames, module) =>
+        set((s) => {
+          let changed = false
+          const next = { ...s.srsCards }
+          for (const f of frames) {
+            const en = frameCardKey(f)
+            const existing = next[en]
+            if (existing) {
+              if (!existing.modules.includes(module)) {
+                next[en] = { ...existing, modules: [...existing.modules, module] }
+                changed = true
+              }
+            } else {
+              next[en] = { ...createNewCard(en, module), kind: 'sentence', frame: f }
+              changed = true
+            }
+          }
+          return changed ? { srsCards: next } : s
+        }),
+
+      addExtensionWord: (lessonKey, w) => {
+        const en = (w.en ?? '').trim()
+        if (!en) return false
+        let ok = false
+        set((s) => {
+          const list = s.starlightExtensions[lessonKey] ?? []
+          const dup = list.some((x) => x.en.toLowerCase() === en.toLowerCase())
+          if (dup) return s
+          const word: Word = { en, zh: w.zh ?? '', emoji: w.emoji || '📝', ipa: w.ipa }
+          ok = true
+          // 播种:已有卡(如教材词同形)只归模块,不覆盖来源;无卡则按 extension 来源建卡
+          const existing = s.srsCards[en]
+          const srsCards = existing
+            ? { ...s.srsCards }
+            : { ...s.srsCards, [en]: createNewCard(en, 'starlight', dayStamp(), 'extension') }
+          return {
+            starlightExtensions: { ...s.starlightExtensions, [lessonKey]: [...list, word] },
+            srsCards,
+          }
+        })
+        return ok
+      },
+
+      removeExtensionWord: (lessonKey, en) =>
+        set((s) => {
+          const list = s.starlightExtensions[lessonKey]
+          if (!list) return s
+          const nextList = list.filter((x) => x.en !== en)
+          const starlightExtensions = { ...s.starlightExtensions }
+          if (nextList.length === 0) delete starlightExtensions[lessonKey]
+          else starlightExtensions[lessonKey] = nextList
+          // 只清 extension 来源的卡:若该词已是教材课内词,卡片需保留
+          const card = s.srsCards[en]
+          const srsCards = card && card.source === 'extension'
+            ? Object.fromEntries(Object.entries(s.srsCards).filter(([k]) => k !== en))
+            : s.srsCards
+          return { starlightExtensions, srsCards }
+        }),
+
       recordReview: (en, correct, module) =>
         set((s) => {
           const today = dayStamp()
@@ -329,7 +403,7 @@ export const useCourseStore = create<CourseStore>()(
     }),
     {
       name: 'starlight-course',
-      version: 6,
+      version: 7,
       // 只持久化数据字段,避免函数/瞬态状态被写入 localStorage
       partialize: (state) => ({
         wrongWords: state.wrongWords,
@@ -339,6 +413,7 @@ export const useCourseStore = create<CourseStore>()(
         lessonCompleted: state.lessonCompleted,
         completedStories: state.completedStories,
         srsCards: state.srsCards,
+        starlightExtensions: state.starlightExtensions,
         reciteCheckins: state.reciteCheckins,
         chineseQuiz: state.chineseQuiz,
         eng3aRecite: state.eng3aRecite,
@@ -373,6 +448,16 @@ export const useCourseStore = create<CourseStore>()(
             }
           }
         }
+        // v6:旧卡片只有 Leitner 字段,按 box 估算 FSRS 状态(due 沿用旧 nextReview,进度不丢)
+        for (const en of Object.keys(srsCards)) {
+          const c = srsCards[en]
+          if (!c.fsrs) {
+            srsCards[en] = {
+              ...c,
+              fsrs: migrateFromLeitner(c.box ?? 0, c.nextReview ?? today),
+            }
+          }
+        }
         // 旧卡片缺 modules 字段时,默认归入 starlight
         for (const en of Object.keys(srsCards)) {
           const c = srsCards[en]
@@ -404,6 +489,7 @@ export const useCourseStore = create<CourseStore>()(
         return {
           ...s,
           srsCards,
+          starlightExtensions: s.starlightExtensions ?? {},
           wrongWords,
           completedPreviews,
           completedStories,
