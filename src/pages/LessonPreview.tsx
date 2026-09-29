@@ -22,7 +22,7 @@ import SentenceFrameCard from '@/components/SentenceFrameCard'
 import { getModule, STARLIGHT_THEME, type Sentence, type Word } from '@/data/starlight'
 import { getLessonBook } from '@/data/starlight-book'
 import { getPassage } from '@/data/starlight-passage'
-import { framesOfLesson, hashPattern } from '@/data/sentenceFrame'
+import { framesOfLesson, frameCardKey } from '@/data/sentenceFrame'
 import { useCourseStore } from '@/store/useCourseStore'
 import { useSettleQuiz } from '@/hooks/useSettleQuiz'
 import { speakText } from '@/utils/speak'
@@ -258,7 +258,7 @@ export default function LessonPreview() {
                   frame={f}
                   onPass={() => {
                     seedSentenceFrames([f], 'starlight')
-                    recordReview(`frame:${hashPattern(f.pattern)}`, true, 'starlight')
+                    recordReview(frameCardKey(f), true, 'starlight')
                   }}
                 />
               ))}

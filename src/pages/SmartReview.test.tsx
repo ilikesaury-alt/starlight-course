@@ -79,6 +79,23 @@ describe('SmartReview 句子框架卡分支', () => {
     expect(screen.queryByRole('button', { name: /想想.*然后翻面/ })).toBeNull()
   }, 20000)
 
+  it('回归：句型卡上「记得/忘了」始终可点（否则无麦孩子会卡死）', async () => {
+    // 句型卡没有「翻面」环节，若按钮沿用 revealed 门控就永远 disabled，
+    // 孩子既说不出、也点不了记得/忘了，流程彻底卡住。
+    seedSentenceCardOnly()
+    renderReview()
+    await waitFor(
+      () => expect(screen.queryByText('正在准备复习内容…')).toBeNull(),
+      { timeout: 15000 }
+    )
+    await waitFor(() => expect(screen.getByText(/句型框架 · 说出整句/)).toBeTruthy(), {
+      timeout: 15000,
+    })
+    expect(screen.queryByRole('button', { name: /翻面/ })).toBeNull()
+    expect(screen.getByRole('button', { name: /记得/ }).hasAttribute('disabled')).toBe(false)
+    expect(screen.getByRole('button', { name: /忘了/ }).hasAttribute('disabled')).toBe(false)
+  }, 20000)
+
   it('单词卡仍走原有的「翻面 → 记得/忘了」流程（回归保护）', async () => {
     // 只播种单词卡，不播种句子卡
     useCourseStore.getState().seedCards(['doll'], 'starlight')

@@ -334,11 +334,16 @@ export default function SmartReview() {
 
   const boxInfo = cur ? `${boxEmoji(cur.box)} ${boxLabel(cur.box)} · 盒 ${cur.box}` : ''
   const remainMeta = cur ? contentIndex[cur.en] : undefined
-  // 句子框架卡：内容索引里没有（键为 frame:<hash>），改由卡片自带的 frame 渲染
+  // 句子框架卡：内容索引里没有（键为 frame:<id>），改由卡片自带的 frame 渲染
   const frameCard = cur?.kind === 'sentence' && cur.frame ? cur.frame : null
   const frameSentence = frameCard
     ? fillFrame(frameCard, frameCard.blanks.map((b) => b.answer))
     : ''
+  // 句型卡没有「翻面」环节（说出整句由 SentenceReader 自动判分），
+  // 所以底部的「记得/忘了」在这里是 STT 不可用、孩子又说不出来时的手动兜底，
+  // 必须始终可点；否则没有麦克风的孩子会在句型卡上彻底卡死（按钮永远 disabled）。
+  const isFrameCard = frameCard != null
+  const canAnswer = revealed || isFrameCard
 
   return (
     <div className="page smart-review" style={mcStyle}>
@@ -423,7 +428,7 @@ export default function SmartReview() {
             type="button"
             className="btn smart-btn-wrong"
             onClick={() => answer(false)}
-            disabled={!revealed}
+            disabled={!canAnswer}
           >
             😅 忘了
           </button>
@@ -431,13 +436,16 @@ export default function SmartReview() {
             type="button"
             className="btn smart-btn-right"
             onClick={() => answer(true)}
-            disabled={!revealed}
+            disabled={!canAnswer}
           >
             ✅ 记得
           </button>
         </div>
-        {!revealed && (
+        {!canAnswer && (
           <p className="smart-hint">先在心里说出中文意思,再点「翻面」对照</p>
+        )}
+        {isFrameCard && (
+          <p className="smart-hint">先「说出整句」让系统听；说不出来就直接点下面的按钮</p>
         )}
       </SafeBoundary>
 

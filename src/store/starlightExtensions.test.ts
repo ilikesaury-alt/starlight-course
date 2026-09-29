@@ -105,10 +105,14 @@ describe('seedSentenceFrames', () => {
     expect(Object.keys(useCourseStore.getState().srsCards)).toHaveLength(before)
   })
 
-  it('同一 pattern 在不同帧数据下键稳定一致', () => {
+  it('key 由帧 id 决定：不同帧即使 pattern 相同也不合并为一张卡', () => {
+    // 旧实现以 pattern 的散列为 key，导致 Unit2/Unit4 同为 "This is a ___." 的两个框架
+    // 塔成同一张卡。此处固定新契约：id 才是键的来源。
     const a = frameCardKey({ ...STARLIGHT_FRAMES[0], id: 'other' })
     const b = frameCardKey(STARLIGHT_FRAMES[0])
-    expect(a).toBe(b)
+    expect(a).not.toBe(b)
+    // 同一帧则稳定
+    expect(frameCardKey(STARLIGHT_FRAMES[0])).toBe(b)
   })
 })
 
