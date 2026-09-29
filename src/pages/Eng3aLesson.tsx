@@ -57,9 +57,7 @@ export default function Eng3aLesson() {
     )
   }
 
-  const { unit, lesson, lessonIdx } = found
-  const prevLesson = unit.lessons[lessonIdx - 1]
-  const nextLesson = unit.lessons[lessonIdx + 1]
+  const { unit, lesson } = found
   const mcStyle = {
     '--mc': unit.theme.color,
     '--mc-soft': unit.theme.colorSoft,
@@ -98,10 +96,7 @@ export default function Eng3aLesson() {
       lastResult={quizResult}
       onSubmitQuiz={handleSubmitQuiz}
       done={completed.includes(lesson.slug)}
-      onMarkDone={() => markDone(lesson.slug)}
       backTo={{ to: `/eng3a/${unit.slug}`, label: '课程列表' }}
-      prevTo={prevLesson ? `/eng3a/${unit.slug}/${prevLesson.slug}` : undefined}
-      nextTo={nextLesson ? `/eng3a/${unit.slug}/${nextLesson.slug}` : undefined}
     />
   )
 }

@@ -11,7 +11,6 @@ import { Link, useParams } from 'react-router-dom'
 import SpeakButton from '@/components/SpeakButton'
 import Flashcard from '@/components/Flashcard'
 import SafeBoundary from '@/components/SafeBoundary'
-import ConfirmDialog from '@/components/ConfirmDialog'
 import QuizEngine, { type QuizItem } from '@/components/QuizEngine'
 import BookTextView from '@/components/BookTextView'
 import TappableText, { PassageLegend } from '@/components/TappableText'
@@ -26,6 +25,7 @@ import { framesOfLesson, frameCardKey } from '@/data/sentenceFrame'
 import { useCourseStore } from '@/store/useCourseStore'
 import { useSettleQuiz } from '@/hooks/useSettleQuiz'
 import { speakText } from '@/utils/speak'
+import { buildLineZhIndex, lineZhOf } from '@/utils/passageZh'
 import { moduleThemeVars } from '@/utils/theme'
 import { buildClozeQuiz, buildListeningQuiz, buildWordQuiz } from '@/utils/bookQuiz'
 
@@ -41,9 +41,14 @@ export default function LessonPreview() {
   const lessonCompleted = useCourseStore((s) => s.lessonCompleted)
   const srsCards = useCourseStore((s) => s.srsCards)
   const [tab, setTab] = useState<Tab>('vocab')
-  const [showLessonDone, setShowLessonDone] = useState(false)
   const [showExtEntry, setShowExtEntry] = useState(false)
   const [sentIdx, setSentIdx] = useState(0)
+  // 点「上一句 / 下一句」后，新一句挂载时自动播一遍示范
+  const [sentAutoPlay, setSentAutoPlay] = useState(false)
+  // 离开跟读区就收起自动播，避免切回来时莫名出声
+  useEffect(() => {
+    if (tab !== 'speak') setSentAutoPlay(false)
+  }, [tab])
   const seedSentenceFrames = useCourseStore((s) => s.seedSentenceFrames)
   const starlightExtensions = useCourseStore((s) => s.starlightExtensions)
   const addExtensionWord = useCourseStore((s) => s.addExtensionWord)
@@ -63,13 +68,23 @@ export default function LessonPreview() {
   const sentences = lesson?.sentences ?? []
   // 课本原文：按「单元号-课号」取，教材 PDF 每课一份
   const book = mod && lesson ? getLessonBook(mod.id, lesson.id) : undefined
-  const chapters = book?.sections ?? []
+  // 包一层 useMemo：否则每次渲染都是新数组，下游 lineZhIndex / quizItems 的依赖会跟着抖
+  const chapters = useMemo(() => book?.sections ?? [], [book])
   // 拓展词 key 与课本原文保持同一套「单元号-课号」命名
   const lessonKey = `${mod?.id ?? 0}-${lesson?.id ?? 0}`
   const extensions = starlightExtensions[lessonKey] ?? []
   const frames = mod && lesson ? framesOfLesson(mod.slug, lesson.id) : []
   // 课文点读（D）：试点课有提取出的 passage，其余课回落到 BookTextView
   const passage = mod && lesson ? getPassage(mod.id, lesson.id) : undefined
+  // 点读区整句中文索引：课本 textZh（人工翻译） > 本单元句子表；都查不到时逐词拼粗释义
+  const lineZhIndex = useMemo(
+    () =>
+      buildLineZhIndex([
+        chapters.flatMap((ch) => ch.pages.map((p) => ({ en: p.text, zh: p.textZh }))),
+        mod.lessons.flatMap((l) => l.sentences.map((s) => ({ en: s.en, zh: s.zh }))),
+      ]),
+    [chapters, mod]
+  )
 
   // 闯关题：听力题优先(听说核心)→ 课本原文选词填空 → 词义题/单元测验补足
   const quizItems = useMemo<QuizItem[]>(() => {
@@ -141,10 +156,8 @@ export default function LessonPreview() {
   }
 
   const mcStyle = moduleThemeVars(STARLIGHT_THEME)
-  const prevLesson = lessons[lessonIdx - 1]
-  const nextLesson = lessons[lessonIdx + 1]
   const hasBook = chapters.length > 0
-  // 课级完成状态:闯关全对自动标记,或手动点「本课完成」
+  // 课级完成状态：仅由「闯关全对」自动标记（手动标记按钮已移除，防小孩误点）
   const lessonDone = lessonCompleted[mod.slug]?.includes(lesson.id) ?? false
 
   return (
@@ -226,10 +239,10 @@ export default function LessonPreview() {
               </p>
               <div className="speak-nav">
                 <button type="button" className="btn btn-soft" disabled={sentIdx === 0}
-                  onClick={() => setSentIdx((i) => Math.max(0, i - 1))}>← 上一句</button>
+                  onClick={() => { setSentAutoPlay(true); setSentIdx((i) => Math.max(0, i - 1)) }}>← 上一句</button>
                 <span className="speak-count">{sentIdx + 1} / {sentences.length}</span>
                 <button type="button" className="btn btn-soft" disabled={sentIdx >= sentences.length - 1}
-                  onClick={() => setSentIdx((i) => Math.min(sentences.length - 1, i + 1))}>下一句 →</button>
+                  onClick={() => { setSentAutoPlay(true); setSentIdx((i) => Math.min(sentences.length - 1, i + 1)) }}>下一句 →</button>
               </div>
               <SentenceReader
                 key={`${lessonKey}-${sentIdx}`}
@@ -239,6 +252,7 @@ export default function LessonPreview() {
                   seedCards([sentences[sentIdx].en], 'starlight')
                   recordReview(sentences[sentIdx].en, true, 'starlight')
                 }}
+                autoPlay={sentAutoPlay}
               />
             </div>
           )
@@ -274,14 +288,19 @@ export default function LessonPreview() {
                   点任意单词听发音、看词义，点的词会按记忆强度着色。
                   <span className="sent-hint">🟩 熟 · 🟨 模糊 · ⬜ 未知</span>
                 </p>
-                {passage.lines.map((line, i) => (
-                  <TappableText
-                    key={i}
-                    text={line}
-                    vocab={words}
-                    boxOf={(en) => srsCards[en]?.box}
-                  />
-                ))}
+                {passage.lines.map((line, i) => {
+                  const { zh, auto } = lineZhOf(lineZhIndex, line)
+                  return (
+                    <TappableText
+                      key={i}
+                      text={line}
+                      textZh={zh}
+                      textZhAuto={auto}
+                      vocab={words}
+                      boxOf={(en) => srsCards[en]?.box}
+                    />
+                  )
+                })}
                 <PassageLegend />
               </section>
             ) : hasBook ? (
@@ -334,43 +353,14 @@ export default function LessonPreview() {
       />
       <div className="page-nav">
         <Link to={`/preview/${unitId}`} className="back-link">← 课程列表</Link>
-        <div className="lesson-nav">
-          {prevLesson && (
-            <Link to={`/preview/${unitId}/${prevLesson.id}`} className="btn btn-soft">← 上一课</Link>
-          )}
-          {nextLesson && (
-            <Link to={`/preview/${unitId}/${nextLesson.id}`} className="btn">下一课 →</Link>
-          )}
-        </div>
       </div>
 
-      {/* 课级完成:手动标记(闯关全对也会自动标记) */}
-      <div style={{ textAlign: 'center', marginTop: '18px' }}>
-        {lessonDone ? (
+      {/* 课级完成：只展示状态，不再提供手动标记（闯关全对会自动标记） */}
+      {lessonDone && (
+        <div style={{ textAlign: 'center', marginTop: '18px' }}>
           <p style={{ color: 'var(--ok)', fontWeight: 600 }}>✅ 本课已完成学习</p>
-        ) : (
-          <button
-            type="button"
-            className="btn btn-soft"
-            onClick={() => setShowLessonDone(true)}
-          >
-            ✅ 标记本课完成
-          </button>
-        )}
-      </div>
-      <ConfirmDialog
-        open={showLessonDone}
-        emoji="✅"
-        title="学完这一课了吗？"
-        message="标记后这一课就算完成啦，可以在课程列表里看到进度。"
-        confirmText="完成啦"
-        cancelText="再学一会儿"
-        onConfirm={() => {
-          markLessonDone(mod.slug, lesson.id)
-          setShowLessonDone(false)
-        }}
-        onCancel={() => setShowLessonDone(false)}
-      />
+        </div>
+      )}
     </div>
   )
 }

@@ -807,7 +807,13 @@
   border-radius: var(--r-md);
   background: var(--card, #fff);
 }
-.tt-head { display: flex; justify-content: flex-end; margin-bottom: 6px; }
+.tt-head {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-bottom: 6px;
+}
 .tt-text {
   margin: 0;
   font-size: var(--fs-lg);
@@ -841,6 +847,14 @@
 }
 .tt-pop-word { font-weight: 800; }
 .tt-pop-zh { color: var(--ink-soft); font-weight: 600; }
+// 点单词时的整句中文与喇叭按钮同行：译文靠左、按钮保持居右
+.tt-head-zh {
+  margin-right: auto;
+  font-size: var(--fs-sm);
+  line-height: 1.4;
+  color: var(--ink-soft);
+  font-weight: 700;
+}
 .tt-pop-close {
   margin-left: auto;
   border: 0;

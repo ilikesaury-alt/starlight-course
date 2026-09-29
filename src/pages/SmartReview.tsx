@@ -11,6 +11,7 @@ import { MODULE_LIST, type ModuleId } from '../data/modules'
 import { useCourseStore } from '../store/useCourseStore'
 import { boxLabel, boxEmoji, type SrsCard } from '../data/srs'
 import { speakText } from '../utils/speak'
+import { pickLang } from '../utils/lang'
 import { moduleThemeVars } from '../utils/theme'
 import { quizStars, isPassed } from '../utils/stars'
 import { mixReviewQueue } from '../utils/reviewQueue'
@@ -274,7 +275,7 @@ export default function SmartReview() {
                     <span className="sw-en">{w.en}</span>
                     <span className="sw-zh">{w.zh}</span>
                     <span onClick={(e) => e.stopPropagation()}>
-                      <SpeakButton text={w.en} label={w.en} lang={/[一-龥]/.test(w.en) ? 'zh' : 'en'} />
+                      <SpeakButton text={w.en} label={w.en} lang={pickLang(w.en)} />
                     </span>
                   </div>
                 ))}

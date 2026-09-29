@@ -4,7 +4,7 @@
 import { useState } from 'react'
 import SentenceReader from './SentenceReader'
 import SpeakButton from './SpeakButton'
-import { fillFrame, type SentenceFrame } from '@/data/sentenceFrame'
+import { fillFrame, frameZh, type SentenceFrame } from '@/data/sentenceFrame'
 
 interface Props {
   frame: SentenceFrame
@@ -15,6 +15,8 @@ interface Props {
 export default function SentenceFrameCard({ frame, onPass }: Props) {
   const [picks, setPicks] = useState<number[]>(() => frame.blanks.map(() => -1))
   const [showReader, setShowReader] = useState(false)
+  // 换词后自动读一遍新拼出的英文整句（SpeakButton: autoPlay 转 true 或 text 变化时各播一次）
+  const [autoPlay, setAutoPlay] = useState(false)
 
   const blanksCount = frame.blanks.length
   const filled = picks.every((p, i) => p >= 0 && p < frame.blanks[i].options.length)
@@ -25,6 +27,7 @@ export default function SentenceFrameCard({ frame, onPass }: Props) {
       next[blankIdx] = optIdx
       return next
     })
+    setAutoPlay(true)
     setShowReader(false)
   }
 
@@ -45,10 +48,12 @@ export default function SentenceFrameCard({ frame, onPass }: Props) {
   }
 
   const full = fillFrame(frame, picks.map((p, i) => (p >= 0 ? p : frame.blanks[i]?.answer ?? 0)))
+  // 中文提示跟着换词变：选 mouth 显示「我有一张嘴。」，未选时回退到答案句
+  const zhNow = frameZh(frame, picks)
 
   return (
     <div className="sfc-card">
-      <div className="sfc-zh">💡 {frame.zh}</div>
+      <div className="sfc-zh">💡 {zhNow}</div>
       <div className="sfc-pattern">{preview()}</div>
 
       {blanksCount > 0 && (
@@ -74,7 +79,7 @@ export default function SentenceFrameCard({ frame, onPass }: Props) {
       )}
 
       <div className="sfc-actions">
-        <SpeakButton text={full} label="听整句" />
+        <SpeakButton text={full} label="听整句" autoPlay={autoPlay} />
         <button
           type="button"
           className="btn"
@@ -87,7 +92,7 @@ export default function SentenceFrameCard({ frame, onPass }: Props) {
       </div>
 
       {showReader && (
-        <SentenceReader sentence={full} zh={frame.zh} onPass={onPass} />
+        <SentenceReader sentence={full} zh={zhNow} onPass={onPass} />
       )}
     </div>
   )

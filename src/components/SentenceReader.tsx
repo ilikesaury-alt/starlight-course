@@ -13,6 +13,8 @@ interface Props {
   zh?: string
   /** 达标回调（达标记对 SRS）*/
   onPass?: () => void
+  /** 切句后自动播一遍示范（由「上一句 / 下一句」点击触发） */
+  autoPlay?: boolean
 }
 
 const ERR_TEXT: Record<string, string> = {
@@ -43,7 +45,7 @@ function highlight(sentence: string, heard: string | null, passed: boolean) {
   })
 }
 
-export default function SentenceReader({ sentence, zh, onPass }: Props) {
+export default function SentenceReader({ sentence, zh, onPass, autoPlay = false }: Props) {
   // 只在达标时回调 onPass：页面用它把「答对」写进 SRS，
   // 若失败也回调会把没读对的句子记成记得（错调度）。
   const reader = useSentenceReader({
@@ -63,7 +65,7 @@ export default function SentenceReader({ sentence, zh, onPass }: Props) {
       {zh && <div className="sr-zh">{zh}</div>}
 
       <div className="sr-actions">
-        <SpeakButton text={sentence} label="听示范" />
+        <SpeakButton text={sentence} label="听示范" autoPlay={autoPlay} />
         <button
           type="button"
           className={'btn sr-mic' + (reader.status === 'listening' ? ' is-live' : '')}

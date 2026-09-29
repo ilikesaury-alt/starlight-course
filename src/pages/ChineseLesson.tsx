@@ -48,9 +48,7 @@ export default function ChineseLesson() {
     )
   }
 
-  const { unit, lesson, lessonIdx } = found
-  const prevLesson = unit.lessons[lessonIdx - 1]
-  const nextLesson = unit.lessons[lessonIdx + 1]
+  const { unit, lesson } = found
   const mcStyle = {
     '--mc': unit.theme.color,
     '--mc-soft': unit.theme.colorSoft,
@@ -84,10 +82,7 @@ export default function ChineseLesson() {
       lastResult={quizResult}
       onSubmitQuiz={handleSubmitQuiz}
       done={completed.includes(lesson.slug)}
-      onMarkDone={() => markDone(lesson.slug)}
       backTo={{ to: `/chinese/${unit.slug}`, label: '课程列表' }}
-      prevTo={prevLesson ? `/chinese/${unit.slug}/${prevLesson.slug}` : undefined}
-      nextTo={nextLesson ? `/chinese/${unit.slug}/${nextLesson.slug}` : undefined}
     />
   )
 }

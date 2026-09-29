@@ -1,12 +1,13 @@
 // 自学型课程页共享骨架：语文课与英语3A 课的结构性双胞胎合并。
 // 差异（主题色、文案、知识点内容、数据源、store 动作）全部通过 props 注入，
 // 页面只保留各自的知识点渲染。统一承载：
-//   打卡(streak 计算) / 自测(统一星规 + ≥80% 完成判定 + 错题收集) / 手动标记完成。
+//   打卡(streak 计算) / 自测(统一星规 + ≥80% 完成判定 + 错题收集)。
+// 不提供「标记本课完成」和「上一课/下一课」按钮：小孩随手误点会跳课、虚标进度，
+// 完成状态只由自测 ≥80% 自动点亮，翻课走课程列表。
 
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import SafeBoundary from '@/components/SafeBoundary'
-import ConfirmDialog from '@/components/ConfirmDialog'
 import { dayStamp } from '@/data/srs'
 import { quizStars, isPassed } from '@/utils/stars'
 import type { QuizQuestion } from '@/data/quiz-types'
@@ -34,13 +35,10 @@ export interface SelfStudyLessonProps {
   lastResult?: { score: number; total: number; date: number }
   /** 交卷回调:score/total 为成绩,wrongKeys 为可入错题本的错题(key 非空的题) */
   onSubmitQuiz: (score: number, total: number, wrongKeys: { en: string; zh: string }[]) => void
-  // ---- 完成判定(≥80% 自动点亮,或手动标记) ----
+  // ---- 完成判定(≥80% 由页面交卷回调自动点亮) ----
   done: boolean
-  onMarkDone: () => void
   // ---- 导航 ----
   backTo: { to: string; label: string }
-  prevTo?: string
-  nextTo?: string
 }
 
 type Tab = 'knowledge' | 'recite' | 'quiz'
@@ -65,17 +63,13 @@ export default function SelfStudyLesson({
   lastResult,
   onSubmitQuiz,
   done,
-  onMarkDone,
   backTo,
-  prevTo,
-  nextTo,
 }: SelfStudyLessonProps) {
   const mcStyle = {
     '--mc': theme.color,
     '--mc-soft': theme.colorSoft,
   } as React.CSSProperties
   const [tab, setTab] = useState<Tab>('knowledge')
-  const [showDone, setShowDone] = useState(false)
 
   const today = reciteDays.includes(dayStamp())
   const streak = (() => {
@@ -136,35 +130,14 @@ export default function SelfStudyLesson({
 
       <div className="page-nav">
         <Link to={backTo.to} className="back-link">← {backTo.label}</Link>
-        <div className="lesson-nav">
-          {prevTo && <Link to={prevTo} className="btn btn-soft">← 上一课</Link>}
-          {nextTo && <Link to={nextTo} className="btn">下一课 →</Link>}
-        </div>
       </div>
 
-      {/* 课级完成:自测 ≥80% 自动标记,或手动点「本课完成」 */}
-      <div style={{ textAlign: 'center', marginTop: '18px' }}>
-        {done ? (
+      {/* 课级完成：只展示状态（自测 ≥80% 时由交卷回调点亮），不再提供手动标记 */}
+      {done && (
+        <div style={{ textAlign: 'center', marginTop: '18px' }}>
           <p style={{ color: 'var(--ok)', fontWeight: 600 }}>✅ 本课已完成学习</p>
-        ) : (
-          <button type="button" className="btn btn-soft" onClick={() => setShowDone(true)}>
-            ✅ 标记本课完成
-          </button>
-        )}
-      </div>
-      <ConfirmDialog
-        open={showDone}
-        emoji="✅"
-        title="学完这一课了吗？"
-        message="标记后这一课就算完成啦，可以在课程列表里看到进度。"
-        confirmText="完成啦"
-        cancelText="再学一会儿"
-        onConfirm={() => {
-          onMarkDone()
-          setShowDone(false)
-        }}
-        onCancel={() => setShowDone(false)}
-      />
+        </div>
+      )}
     </div>
   )
 }

@@ -7,6 +7,7 @@ import { useState, useEffect, useRef } from 'react'
 
 import SpeakButton from './SpeakButton'
 import { speakText } from '@/utils/speak'
+import { pickLang } from '@/utils/lang'
 
 export interface QuizItem {
   q: string
@@ -73,7 +74,7 @@ export default function QuizEngine({
   // 听力题:进入题目自动朗读一遍 prompt(点选项发音钮可反复听)
   useEffect(() => {
     if (!done && cur?.listen && cur.speakText) {
-      speakText(cur.speakText, { lang: cur.lang ?? 'en' })
+      speakText(cur.speakText, { lang: pickLang(cur.speakText, cur.lang ?? 'en') })
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [idx, done])
@@ -103,7 +104,8 @@ export default function QuizEngine({
     })
     const correct = i === cur.answer
     onPick({ en: cur.speakText, picked: cur.options[i], correct })
-    speakText(cur.options[i], { lang: cur.lang ?? 'en' })
+    // 选项可能是中文（听力题「选出正确的意思」）——按文本选引擎，别拿英文引擎念汉字
+    speakText(cur.options[i], { lang: pickLang(cur.options[i], cur.lang ?? 'en') })
   }
 
   const goNext = () => {
@@ -174,7 +176,7 @@ export default function QuizEngine({
               ) : (
                 <>
                   <span>{cur.emoji ? `${cur.emoji} ` : ''}{cur.q}</span>
-                  <SpeakButton text={cur.speakText ?? cur.q} label="听发音" lang={cur.lang ?? 'en'} />
+                  <SpeakButton text={cur.speakText ?? cur.q} label="听发音" lang={pickLang(cur.speakText ?? cur.q, cur.lang ?? 'en')} />
                 </>
               )}
             </div>
@@ -190,7 +192,7 @@ export default function QuizEngine({
                     <span className="quiz-opt-letter">{String.fromCharCode(65 + i)}</span>
                     <span>{opt}</span>
                     <span onClick={(e) => e.stopPropagation()}>
-                      <SpeakButton text={opt} label={opt} />
+                      <SpeakButton text={opt} label={opt} lang={pickLang(opt, cur.lang ?? 'en')} />
                     </span>
                   </div>
                 )
