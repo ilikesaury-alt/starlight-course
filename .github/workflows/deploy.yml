@@ -51,6 +51,11 @@ jobs:
       - name: 单元测试
         run: npm run test
 
+      # e2e 用例的类型检查。tsconfig.json 只 include src，覆盖不到 tests/**；
+      # src 自身的类型检查已由 build job 的 tsc -b 负责，这里不重复。
+      - name: E2E 用例类型检查
+        run: npm run check:e2e
+
   build:
     name: 构建
     runs-on: ubuntu-latest

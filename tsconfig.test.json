@@ -1,0 +1,18 @@
+{
+  // tests/** 的类型检查配置（tsconfig.json 只 include src，覆盖不到 Playwright 用例）。
+  //
+  // 为什么需要：tests 不在任何 project 内时，`npm run check` 对 e2e 用例里的类型错误
+  // 完全无感。本仓库已因此漏过 window.SpeechRecognition 不存在、
+  // onerror 被推断为 null 导致「不可调用」等错误。
+  //
+  // 注意：tsconfig.json 已覆盖 src/**，这里只补 tests，并继承全部 compilerOptions
+  // （含 @/* 路径别名），不重复维护配置。
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.test.tsbuildinfo",
+    // e2e 用例用 page.evaluate 在浏览器上下文里跑，DOM 类型必须可用；
+    // Node 侧的 @playwright/test 也需要 node 类型。
+    "types": ["node"]
+  },
+  "include": ["tests", "src"]
+}

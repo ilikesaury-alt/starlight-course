@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview --host 0.0.0.0",
-    "check": "tsc -b --noEmit",
+    "check": "tsc -b --noEmit && npm run check:e2e",
+    "check:e2e": "tsc -p tsconfig.test.json --noEmit",
     "test": "vitest run",
     "e2e": "playwright test",
     "pwa-assets": "pwa-assets-generator public/favicon.svg --preset minimal-2023"
