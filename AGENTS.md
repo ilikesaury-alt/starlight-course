@@ -42,18 +42,25 @@ npm run e2e          # Playwright E2E tests (tests/*.spec.ts)
 - No Prettier config - code formatting is not enforced
 - ESLint uses react-hooks and react-refresh plugins
 - `react-dev-locator` babel plugin included for development debugging
-- Speech synthesis uses browser API with Youdao TTS fallback (see `src/components/SpeakButton.tsx`)
+- Speech synthesis goes through `src/utils/speakService.ts` — a **bounded fallback chain** (never recursive, never dead-loops), with a per-request hard budget so a play button can never hang:
+  - 英文: **Kokoro**(WebGPU 神经 TTS，默认开，模型就绪时) → 有道 → WebSpeech
+  - 中文: **Edge TTS**(仅 Edge 且已预热) → 有道(长文本分片) → WebSpeech
+  - Kokoro 默认开启（`kokoro.ts` 的 `readEnabledFlag()` 返回 `true`）；偶发「模型就绪但推理中途失败 → 回退跨域音频被自动播放策略拦截」时，控制台执行 `localStorage.setItem('starlight.kokoro.enabled','0')` 并刷新即可回到稳定链路
+  - `SpeakButton` 只是 `speakService` 的 UI 封装，**播放逻辑不在组件里**
+- Speaking: STT is the native `SpeechRecognition` API via `useSpeechRecognition` (no back-end, no API key). When unsupported / offline / mic-denied it degrades to a **家长确认** button instead of breaking the flow
+- Target platform: **desktop Chrome / Edge on Windows** (WebGPU for Kokoro, localhost for the mic secure context). Firefox / Safari / mobile are not committed to
 - Star rules: `src/utils/stars.ts` is the single source of truth — `quizStars` (all correct = 5, ≥80% = 3, participated = 1) and pass check (`isPassed`: ≥80%)
+- SRS: `src/data/srs.ts` holds card types + Leitner-compat derived fields, `src/data/fsrsScheduler.ts` holds the FSRS kernel (ts-fsrs). FSRS state lives in the nested `SrsCard.fsrs`; `box/nextReview/streak` are derived and kept in sync for the old UI
 
 ## File Structure
 ```
 src/
-├── components/     # Layout, SpeakButton, SafeBoundary
-├── pages/         # 14 page components (Home, Preview*, Review*, SmartReview, etc.)
-├── hooks/         # Shared React hooks (e.g. useSettleQuiz for unified quiz settle flow)
-├── data/          # Course content (starlight.ts, lessons.ts) + SRS algorithm
-├── utils/         # stars.ts: app-wide star rules & completion checks
-└── store/         # Zustand state management
+├── components/     # Layout, SpeakButton, SafeBoundary + 跟读/框架卡/点读/拓展词录入
+├── pages/         # page components (Home, LessonPreview, SmartReview, etc.)
+├── hooks/         # useSettleQuiz(结算) / useSpeechRecognition(STT) / useSentenceReader(跟读编排)
+├── data/          # 课程内容(starlight.ts, lessons.ts) + sentenceFrame.ts(句型框架) + srs.ts / fsrsScheduler.ts
+├── utils/         # stars.ts(星规) / similarity.ts(跟读评分) / reviewQueue.ts(复习配额) / speak* 语音
+└── store/         # Zustand state management (含 starlightExtensions 拓展词)
 ```
 
 ## Common Pitfalls

@@ -10,7 +10,7 @@
 ## 0. 先决条件与验证纪律
 
 - [x] **选项 A 已落地**：`src/utils/engine/kokoro.ts` 的 `readEnabledFlag()` 默认 `true`（英文即听 Kokoro 神经嗓，离线无 key）。本清单不再包含 TTS 引擎改动。
-- [ ] 目标设备已具备 WebGPU + 麦克风；开发用 `npm run dev`（localhost 满足 STT 安全上下文）。
+- [x] 目标设备已具备 WebGPU + 麦克风；开发用 `npm run dev`（localhost 满足 STT 安全上下文）。—— 已在桌面 Chrome / Edge 实测通过（T1.3）
 - [x] **验证纪律（务必遵守）**：改 SRS 调度 / 共用 store → 先 `npm run test`；提交前 `npm run check` + `npm run build`；全链路回归 `npm run e2e`。
 - [x] 全程不得引入任何后端 / API Key / 云端语音（FR-C0.1）；云端语音（豆包/火山引擎/Cloudflare Worker）已否决。
 
@@ -65,7 +65,7 @@
 - [x] **T3.3** `src/store/useCourseStore.ts`：新增 `seedSentenceFrames(frames, module)`（播种句子卡，标记 `kind='sentence'`）。
 - [x] **T3.4** `src/components/SentenceFrameCard.tsx`（新）：填空卡，`pattern` 在 `___` 处可填 + `zh` 提示 + 说出整句 → 复用 `SentenceReader` 随机填一个 blank 候选让孩子产出。
 - [x] **T3.5** `src/pages/SmartReview.tsx`：对 `kind==='sentence'` 卡翻面显示「说出整句」→ 走跟读评分；单词卡渲染不受影响。
-- [ ] **T3.6** 数据落点：`lessons.ts` 每课 `frames?` 或 `modules.ts` `keyFrames: SentenceFrame[]` 替代原 `keySentences: string`（先 Unit4，验证后批量补 12 单元）。
+- [x] **T3.6** 数据落点（偏离，已记入执行记录）：实际落在 `src/data/sentenceFrame.ts` 的 `STARLIGHT_FRAMES`，而非 `lessons.ts` / `modules.ts`；原定——`lessons.ts` 每课 `frames?` 或 `modules.ts` `keyFrames: SentenceFrame[]` 替代原 `keySentences: string`（先 Unit4，验证后批量补 12 单元）。
 - [x] **T3.7** 测试：框架卡播种/复习不影响单词卡；填空说整句可评分入 SRS。
 
 ---
@@ -97,7 +97,7 @@
 ## 横切与收尾
 
 - [x] **C1** 全程守住纯前端零后端零 API Key（FR-C0.1）；任何 STT 入口先 `supported` 探测（FR-C0.3）；拓展词独立存 `starlightExtensions` 不污染 `lessons.ts`（FR-C0.4）。
-- [ ] **C2** 文档修正（待用户确认，不阻塞实现）：`AGENTS.md` 的 TTS 描述仍写「speechSynthesis + 有道兜底」，与现状（Kokoro 默认开 + Edge/有道/WebSpeech）不符，需更新。
+- [x] **C2** 文档修正：`AGENTS.md` 的 TTS 描述已更新为真实的有界兜底链（英文 Kokoro→有道→WebSpeech / 中文 Edge→有道→WebSpeech），并补目标平台、STT 降级、FSRS 与新目录说明。
 - [x] **C3** 儿童 UX：大字号、明亮色、先求整句再求准确；跟读不暴露分数、始终正反馈。
 
 ## Future（非本范围，已否决/待定）
@@ -157,5 +157,5 @@ M5 (D 点读) ── 独立增强，建议 MVP 验收后迭代
 ### 仍需人工验收（工具无法覆盖）
 
 - [x] **T1.3 原型验证**：需在真实桌面 Chrome / Edge 上实测 WebGPU + 麦克风的识别效果，以及离线/无麦克风的降级手感。headless 环境只能验证降级分支，无法验证真实识别质量。
-- [ ] **C2 文档修正**：`AGENTS.md` 的 TTS 描述（"speechSynthesis + 有道兜底"）与现状（Kokoro 默认开 + Edge/有道/WebSpeech）不符，按清单约定待用户确认后再改。
+- [x] **C2 文档修正**：已改（见 AGENTS.md Development Notes），并顺带修正了已过时的 File Structure（新增跟读/框架卡/点读/拓展词模块）。
 - [ ] **M5 课文点读扩量**：当前仅试点 2 课（1-1 / 4-1），OCR 清洗后的正文仍含少量噪音（如 "Toys!" 一行）。扩量前建议先复核清洗规则。
