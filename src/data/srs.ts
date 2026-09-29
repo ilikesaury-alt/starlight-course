@@ -4,7 +4,7 @@
 
 import type { ModuleId } from './modules'
 import type { SentenceFrame } from './sentenceFrame'
-import { createFsrsCard, gradeFsrsCard, migrateFromLeitner, deriveBox, type FsrsCard } from './fsrsScheduler'
+import { createFsrsCard, gradeFsrsCard, migrateFromLeitner, deriveBox, BOX_STABILITY, type FsrsCard } from './fsrsScheduler'
 
 // 各盒对应的下次复习间隔(天)。box 0 = 当天/短期重练。
 // 实际值由 fsrsScheduler 定义（避开循环依赖），此处转出保持既有导入方不变。
@@ -87,32 +87,55 @@ export function scheduleNext(
   }
 }
 
-/** 卡片是否到期(需要今天复习)：优先用 FSRS 的 due，旧数据回退到 Leitner 的 nextReview */
+/**
+ * 卡片的到期日（dayStamp）。
+ *
+ * FSRS 的 `fsrs.due` 是唯一真值来源；旧 v6 数据（迁移后已补 fsrs，但字段未重算）
+ * 或尚未迁移的卡片回退到 Leitner 的 `nextReview`。
+ *
+ * `isDue` 与 `sortDueCards` 都必须经由此函数：此前前者读 fsrs.due、后者读
+ * nextReview，两者一旦不一致就会出现「判定到期却被排到最后」或反之的卡片。
+ */
+export function dueOf(card: Pick<SrsCard, 'nextReview' | 'fsrs'>): number {
+  return card.fsrs?.due ?? card.nextReview
+}
+
+/** 上次复习日（dayStamp）；无 fsrs 时回退到 Leitner 字段 */
+function lastReviewOf(card: Pick<SrsCard, 'lastReview' | 'fsrs'>): number {
+  return card.fsrs?.lastReview ?? card.lastReview
+}
+
+/** 卡片是否到期(需要今天复习)：与 sortDueCards 同源（均走 dueOf） */
 export function isDue(
   card: Pick<SrsCard, 'nextReview' | 'fsrs'>,
   today: number = dayStamp()
 ): boolean {
-  const due = card.fsrs?.due ?? card.nextReview
-  return due <= today
+  return dueOf(card) <= today
 }
 
 /**
  * 排序到期卡片:最紧迫的排前面。
- * 优先级:过期越久越优先 → box 越低越优先 → 最近没复习的优先
+ * 优先级:逾期越久越优先 → 稳定度越低越优先(越不熟越靠前) → 上次复习早的优先。
+ *
+ * 到期日与上次复习日均经 dueOf / lastReviewOf 读取，与 isDue 同源；
+ * 不稳定时读 `stability`，无 fsrs 时回退到派生的 `box`（box 本身由 stability 导出）。
  */
-export function sortDueCards<T extends Pick<SrsCard, 'box' | 'nextReview' | 'lastReview'>>(
-  cards: T[],
-  today: number = dayStamp()
-): T[] {
+export function sortDueCards<
+  T extends Pick<SrsCard, 'box' | 'nextReview' | 'lastReview' | 'fsrs'>
+>(cards: T[], today: number = dayStamp()): T[] {
+  // 稳定度回退顺序：fsrs.stability → 由 box 导出的粗粒档（与旧行为一致）
+  const strengthOf = (c: T) => c.fsrs?.stability ?? BOX_STABILITY[c.box] ?? 0
   return [...cards].sort((a, b) => {
-    // 过期越久(box 低的卡更可能被遗忘)优先
-    const overdueA = today - a.nextReview
-    const overdueB = today - b.nextReview
+    // 逾期越久越优先
+    const overdueA = today - dueOf(a)
+    const overdueB = today - dueOf(b)
     if (overdueA !== overdueB) return overdueB - overdueA
-    // box 低的优先(更不熟)
-    if (a.box !== b.box) return a.box - b.box
-    // 最近复习时间早的优先
-    return a.lastReview - b.lastReview
+    // 越不熟（稳定度越低）越优先
+    const sa = strengthOf(a)
+    const sb = strengthOf(b)
+    if (sa !== sb) return sa - sb
+    // 上次复习时间早的优先
+    return lastReviewOf(a) - lastReviewOf(b)
   })
 }
 

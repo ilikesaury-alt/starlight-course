@@ -5,6 +5,7 @@ import {
   createNewCard,
   scheduleNext,
   isDue,
+  dueOf,
   sortDueCards,
   dayStamp,
 } from '../data/srs'
@@ -393,7 +394,9 @@ export const useCourseStore = create<CourseStore>()(
 
       getTomorrowDueCount: () => {
         const tomorrow = dayStamp() + 1
-        return Object.values(get().srsCards).filter((c) => c.nextReview === tomorrow).length
+        // 走 dueOf 而非直接读 nextReview：否则这里会与 isDue / sortDueCards
+        // 形成第三套独立判据，卡片一旦不同步就出现「明天到期数」与实际队列对不上
+        return Object.values(get().srsCards).filter((c) => dueOf(c) === tomorrow).length
       },
 
       getWrongWords: (module) => {

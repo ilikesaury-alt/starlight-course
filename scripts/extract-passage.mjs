@@ -189,16 +189,11 @@ const FLAGS = {
   instr: (line) => INSTRUCTION.test(line),
 }
 
+/** 收集一行命中的噪音类别。FLAGS 里都是正则 .test() 判定，不会抛异常，无需 try/catch 包裹。 */
 function flagsOf(line, title) {
   const hits = []
   for (const [name, fn] of Object.entries(FLAGS)) {
-    let hit = false
-    try {
-      hit = fn(line, title)
-    } catch {
-      hit = false
-    }
-    if (hit) hits.push(name)
+    if (fn(line, title)) hits.push(name)
   }
   return hits
 }

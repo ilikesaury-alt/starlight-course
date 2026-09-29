@@ -5,6 +5,7 @@ import {
   scheduleNext,
   createNewCard,
   isDue,
+  dueOf,
   sortDueCards,
   boxLabel,
   boxEmoji,
@@ -151,6 +152,38 @@ describe('isDue', () => {
   })
   it('nextReview > today 视为未到期', () => {
     expect(isDue({ nextReview: 101 }, 100)).toBe(false)
+  })
+  it('以 fsrs.due 为准（与 sortDueCards 同源）', () => {
+    const today = 100
+    // fsrs.due 已到期，但派生的 nextReview 还没到：判定必须跟随 fsrs
+    expect(isDue({ nextReview: 200, fsrs: { ...migrateFromLeitner(3, 50) } }, today)).toBe(true)
+    // 反过来：nextReview 已过期但 fsrs.due 未到，不算到期
+    expect(isDue({ nextReview: 50, fsrs: { ...migrateFromLeitner(3, 200) } }, today)).toBe(false)
+  })
+})
+
+describe('dueOf 单一真值来源', () => {
+  it('有 fsrs 时取 fsrs.due，否则回退 nextReview', () => {
+    expect(dueOf({ nextReview: 1, fsrs: { ...migrateFromLeitner(2, 9) } })).toBe(9)
+    expect(dueOf({ nextReview: 7 })).toBe(7)
+  })
+
+  it('回归：isDue 与 sortDueCards 对同一张冲突卡结论一致', () => {
+    const today = 100
+    // 刻意制造分歧：fsrs.due 远早于 nextReview
+    const conflicted = {
+      box: 1,
+      nextReview: 500,   // 派生字段说「没到期」
+      lastReview: 100,
+      fsrs: { ...migrateFromLeitner(4, 20) }, // FSRS 说「早已到期」
+    }
+    const other = { box: 3, nextReview: 99, lastReview: 100 }
+
+    // isDue 依据 fsrs → 冲突卡到期
+    expect(isDue(conflicted, today)).toBe(true)
+    // 排序也必须依据 fsrs：冲突卡逾期 80 天，应排在未逾期的 other 之前
+    const sorted = sortDueCards([other, conflicted], today)
+    expect(sorted[0]).toBe(conflicted)
   })
 })
 
