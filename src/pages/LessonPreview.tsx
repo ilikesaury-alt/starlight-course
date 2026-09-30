@@ -1,6 +1,6 @@
 // Starlight 单课学习页：五区布局
 //   🎴 单词区 —— 逐词翻卡 + 本课词表 + ➕ E 课堂拓展词（录入 / 删除）
-//   🗣️ 跟读区 —— 逐句跟读：播原句 → 孩子跟读 → 逐词高亮 → 达标入 SRS（识别不可用时家长确认降级）
+//   🗣️ 跟读区 —— 逐句跟读：播原句 → 孩子跟读 → 逐词高亮 → 达标入 SRS（没听清自动重听，识别不了孩子自己重读或跳过）
 //   🧩 句型区 —— 句子框架卡：填空 + 说出整句
 //   📖 课文区 —— 教材 PDF 提取的真实课文（逐词可点、可听、带中文），顶部先给本课重点句型
 //   🎯 闯关   —— 从课本原文挖空生成选词填空，题量不足时用本课单词与单元测验补足
@@ -235,7 +235,7 @@ export default function LessonPreview() {
             <div className="speak-zone" style={mcStyle}>
               <p className="lead">
                 先听一遍示范，再跟着读一遍。
-                <span className="sent-hint">读得好会点亮星星，读不准可以再试，识别不了请家长帮忙确认</span>
+                <span className="sent-hint">读得好会点亮星星，读不准可以再试，没听清会自动再听一次</span>
               </p>
               <div className="speak-nav">
                 <button type="button" className="btn btn-soft" disabled={sentIdx === 0}

@@ -47,7 +47,7 @@ npm run e2e          # Playwright E2E tests (tests/*.spec.ts)
   - 中文: **Edge TTS**(仅 Edge 且已预热) → 有道(长文本分片) → WebSpeech
   - Kokoro 默认开启（`kokoro.ts` 的 `readEnabledFlag()` 返回 `true`）；偶发「模型就绪但推理中途失败 → 回退跨域音频被自动播放策略拦截」时，控制台执行 `localStorage.setItem('starlight.kokoro.enabled','0')` 并刷新即可回到稳定链路
   - `SpeakButton` 只是 `speakService` 的 UI 封装，**播放逻辑不在组件里**
-- Speaking: STT is the native `SpeechRecognition` API via `useSpeechRecognition` (no back-end, no API key). When unsupported / offline / mic-denied it degrades to a **家长确认** button instead of breaking the flow
+- Speaking: STT is the native `SpeechRecognition` API via `useSpeechRecognition` (no back-end, no API key). Judgement is fully automatic: the engine's alternatives are all scored (best match wins), transient failures (`no-speech`/`aborted`/`network`) auto-re-listen up to 2 times, and only on terminal failure does the child get a **跳过这句** button — there is no 家长确认 path
 - Target platform: **desktop Chrome / Edge on Windows** (WebGPU for Kokoro, localhost for the mic secure context). Firefox / Safari / mobile are not committed to
 - Star rules: `src/utils/stars.ts` is the single source of truth — `quizStars` (all correct = 5, ≥80% = 3, participated = 1) and pass check (`isPassed`: ≥80%)
 - SRS: `src/data/srs.ts` holds card types + Leitner-compat derived fields, `src/data/fsrsScheduler.ts` holds the FSRS kernel (ts-fsrs). FSRS state lives in the nested `SrsCard.fsrs`; `box/nextReview/streak` are derived and kept in sync for the old UI

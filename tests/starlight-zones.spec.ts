@@ -5,8 +5,8 @@ import { STARLIGHT_PASSAGE } from '../src/data/starlight-passage'
  * M0 拓展词 / M1+M2 跟读降级 / M3 句型框架 / M5 课文点读 的 E2E。
  *
  * 关键前提：
- * - headless Chromium 没有 SpeechRecognition → 跟读区必定走「家长确认」降级分支，
- *   这里正好覆盖 T1.2 的降级闭环（不崩溃、能记对）。
+ * - 跟读全程自动判定，没有「家长确认」：识别不可用只留常驻说明；权限被拒 / 听不清
+ *   自动重听用完才给「跳过这句」。headless Chromium 两条分支都稳定可复现。
  * - 拓展词与 SRS 状态存在 localStorage，每个用例独立 context，互不污染。
  * - 课文点读只在试点课（1-1 / 4-1）有提取出的 passage。
  */
@@ -95,7 +95,7 @@ test.describe('E 课堂拓展词', () => {
 })
 
 test.describe('跟读区（降级闭环）', () => {
-  test('不支持语音识别时展示家长确认，点击后记对', async ({ page }) => {
+  test('不支持语音识别时只给常驻说明，不假装能打分', async ({ page }) => {
     // Chromium 本身有 webkitSpeechRecognition，这里主动抹掉以稳定复现降级分支
     await withStt(page, () => {
       delete (window as unknown as Record<string, unknown>).SpeechRecognition
@@ -107,20 +107,20 @@ test.describe('跟读区（降级闭环）', () => {
     await expect(page.locator('.sr-sentence')).toBeVisible()
     await expect(page.getByText(/不支持语音识别/)).toBeVisible()
 
-    await page.getByRole('button', { name: /家长确认/ }).click()
-    await expect(page.getByText(/太棒了/)).toBeVisible()
-    // 不向儿童暴露分数
-    await expect(page.locator('.sr-result')).not.toContainText('%')
+    // 没有任何「替孩子判对」的出口：无家长确认、无跳过、无结果面板
+    await expect(page.getByRole('button', { name: /家长确认/ })).toHaveCount(0)
+    await expect(page.getByRole('button', { name: /跳过这句/ })).toHaveCount(0)
+    await expect(page.locator('.sr-result')).toHaveCount(0)
   })
 
-  test('识别权限被拒时也降级到家长确认，不崩溃', async ({ page }) => {
+  test('识别权限被拒 → 给提示 + 跳过这句，不崩溃也不找家长', async ({ page }) => {
     // 模拟存在识别 API 但一启动就报 not-allowed（权限拒绝）
     await withStt(page, () => {
       class Denied {
         lang = ''
         continuous = false
         interimResults = false
-        maxAlternatives = 1
+        maxAlternatives = 3
         onresult: ((e: unknown) => void) | null = null
         onend: (() => void) | null = null
         onerror: ((e: unknown) => void) | null = null
@@ -138,9 +138,17 @@ test.describe('跟读区（降级闭环）', () => {
     await page.getByRole('button', { name: /跟读/ }).click()
     await page.getByRole('button', { name: /我来读/ }).click()
 
-    await expect(page.getByText(/需要允许使用麦克风/)).toBeVisible()
-    await page.getByRole('button', { name: /家长确认/ }).click()
-    await expect(page.getByText(/太棒了/)).toBeVisible()
+    // 录音阶段横幅先出现（开麦要等示范播完，兜底上限 6s）
+    await expect(page.locator('.sr-stage-text')).toHaveText(/先听一遍示范/)
+    // 终态提示：不找家长，重试指向麦克风按钮，另有「跳过这句」
+    await expect(page.getByText(/麦克风还没打开/)).toBeVisible({ timeout: 15000 })
+    await expect(page.getByRole('button', { name: /我来读/ })).toBeEnabled()
+
+    await page.getByRole('button', { name: /跳过这句/ }).click()
+    // 面板收起，且不假装读对
+    await expect(page.getByRole('button', { name: /跳过这句/ })).toHaveCount(0)
+    await expect(page.getByText(/太棒了/)).toHaveCount(0)
+    await expect(page.locator('.sr-result')).toHaveCount(0)
   })
 
   test('可逐句切换', async ({ page }) => {

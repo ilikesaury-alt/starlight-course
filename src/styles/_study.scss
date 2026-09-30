@@ -753,6 +753,64 @@
   background: var(--mc-soft, var(--brand-soft));
 }
 .sr-fallback-text { margin: 0; font-size: var(--fs-sm); font-weight: 700; color: var(--mc-deep, var(--brand-deep)); }
+.sr-fallback-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+
+// 录音阶段横幅：示范 / 在听 / 自动重听三态，波形动画让「正在听」看得见
+.sr-stage {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--r-md);
+  background: var(--mc-soft, var(--brand-soft));
+  animation: srPop 0.22s ease-out;
+}
+.sr-stage-text {
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--mc-deep, var(--brand-deep));
+}
+.sr-stage-bars {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 20px;
+  color: var(--mc-deep, var(--brand-deep));
+}
+.sr-stage-bars i {
+  display: block;
+  width: 4px;
+  height: 6px;
+  border-radius: 2px;
+  background: currentColor;
+  animation: srBar 0.9s ease-in-out infinite;
+}
+.sr-stage-bars i:nth-child(2) { animation-delay: 0.12s; }
+.sr-stage-bars i:nth-child(3) { animation-delay: 0.24s; }
+.sr-stage-bars i:nth-child(4) { animation-delay: 0.36s; }
+.sr-stage-bars i:nth-child(5) { animation-delay: 0.48s; }
+// 示范阶段慢一点、在听阶段快一点，视觉上能区分
+.sr-stage--play .sr-stage-bars i { animation-duration: 1.5s; }
+.sr-stage--listen .sr-stage-bars i { animation-duration: 0.7s; }
+.sr-stage--retry .sr-stage-bars i { animation-duration: 1.1s; opacity: 0.7; }
+
+// 在听时实时显示识别到的中间文字
+.sr-interim {
+  margin: 0;
+  font-size: var(--fs-xs, 0.8rem);
+  color: var(--ink-soft, #6b7280);
+  min-height: 1.2em;
+  word-break: break-word;
+}
+
+@keyframes srBar {
+  0%, 100% { height: 6px; }
+  50% { height: 20px; }
+}
+@keyframes srPop {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: none; }
+}
 
 // ---------- 句子框架卡 ----------
 .sfc-card {
