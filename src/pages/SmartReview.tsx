@@ -65,6 +65,22 @@ const contentIndexReady = (async () => {
         }
       }
     }
+    // 本地拓展词（老师课上录的 + 按主题自动填充的）同样会生成 SRS 卡片，
+    // 必须一并进索引：否则这些卡片在复习页查不到释义，渲染不出卡片正文，
+    // 「翻面/记得/忘了」会恒为 disabled —— 孩子直接卡死在这一张，只能刷新。
+    // key 形如 `${moduleId}-${lessonId}`（与 LessonPreview 的 lessonKey 一致）。
+    const extensions = useCourseStore.getState().starlightExtensions ?? {}
+    for (const [lessonKey, list] of Object.entries(extensions)) {
+      const [unitId, lessonId] = lessonKey.split('-')
+      const mod = modules.find((m) => m.id === Number(unitId))
+      const from = `课堂拓展词 · ${mod?.titleZh ?? mod?.title ?? `M${unitId}`} L${lessonId}`
+      for (const w of list) {
+        if (!w?.en) continue
+        if (!idx[w.en]) {
+          idx[w.en] = { en: w.en, zh: w.zh, emoji: w.emoji, from, type: 'word' }
+        }
+      }
+    }
     contentIndex = idx
   } catch {
     console.error('[SmartReview] 内容索引构建失败,降级为空索引')
@@ -334,7 +350,11 @@ export default function SmartReview() {
   }
 
   const boxInfo = cur ? `${boxEmoji(cur.box)} ${boxLabel(cur.box)} · 盒 ${cur.box}` : ''
-  const remainMeta = cur ? contentIndex[cur.en] : undefined
+  // 队列是 SRS 卡的快照，内容索引未必覆盖每一张（自定义/历史遗留词），
+  // 缺索引时用最小可用的元信息兜底，保证卡片能渲染、能翻面、能作答。
+  const remainMeta: ContentMeta | undefined = cur
+    ? contentIndex[cur.en] ?? { en: cur.en, zh: '', from: '课堂收录', type: 'word' }
+    : undefined
   // 句子框架卡：内容索引里没有（键为 frame:<id>），改由卡片自带的 frame 渲染
   const frameCard = cur?.kind === 'sentence' && cur.frame ? cur.frame : null
   const frameSentence = frameCard

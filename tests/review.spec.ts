@@ -33,15 +33,30 @@ test.describe('智能复习与错题本', () => {
     // 进入有卡片的分支：显示「第 X / N 张」与翻面按钮
     await expect(page.getByText(/第 1 \/ \d+ 张/)).toBeVisible()
 
-    // 循环：翻面 → 记得，直到完成页出现
-    for (let i = 0; i < 12; i++) {
-      if (await page.getByText('本次复习完成').isVisible().catch(() => false)) break
-      const reveal = page.getByRole('button', { name: /翻面/ })
-      if (await reveal.isVisible().catch(() => false)) await reveal.click()
-      const right = page.getByRole('button', { name: /记得/ })
-      await expect(right).toBeEnabled()
-      await right.click()
+    // 循环：翻面 → 记得，直到完成页出现。
+    // 上限给到 120：进课会自动填充 5 个拓展词，它们同样以 extension 来源入 SRS 队列，
+    // 队列比「只有课本词」时更长（当前 16 张）。
+    // 每轮只做一件事：若「记得」不可用就先去翻面（翻面动画结束后下一轮才能答），
+    // 避免 check-then-click 在重渲染瞬间漏点而导致卡死。
+    const done = page.getByText('本次复习完成')
+    const reveal = page.getByRole('button', { name: /翻面/ }).first()
+    const right = page.getByRole('button', { name: /记得/ }).first()
+    let sawExtensionCard = false
+    for (let i = 0; i < 120; i++) {
+      if (await done.isVisible().catch(() => false)) break
+      // 自动填充的拓展词也在队列里；它们必须有释义卡片（否则会出现「无卡片可答」的死局）
+      if ((await page.locator('.smart-card-from', { hasText: '课堂拓展词' }).count()) > 0) {
+        sawExtensionCard = true
+      }
+      const answerable = await right.isEnabled({ timeout: 2000 }).catch(() => false)
+      if (answerable) {
+        await right.click()
+        continue
+      }
+      await reveal.click({ timeout: 5000 }).catch(() => {})
     }
+    // 回归护栏：拓展词卡片确实出现过，且整轮能跑完（曾因缺释义索引而卡死在某一张）
+    expect(sawExtensionCard).toBe(true)
 
     await expect(page.getByText('本次复习完成')).toBeVisible()
     await expect(page.getByText(/全部记住啦/)).toBeVisible()

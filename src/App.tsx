@@ -2,6 +2,7 @@ import { HashRouter as Router, Routes, Route, useLocation, Navigate, useParams }
 import { lazy, Suspense, useEffect } from 'react'
 import Layout from '@/components/Layout'
 import SafeBoundary from '@/components/SafeBoundary'
+import AudioDebugPanel from '@/components/AudioDebugPanel'
 import { cancelSpeech } from '@/utils/speak'
 
 // 路由级代码分割:每个页面(含其专属课程数据)按需加载,减小首屏 bundle。
@@ -100,6 +101,8 @@ export default function App() {
       <Layout>
         <AppRoutes />
       </Layout>
+      {/* 语音诊断面板：仅 ?debug=audio 时渲染，默认不产生任何 DOM */}
+      <AudioDebugPanel />
     </Router>
   )
 }

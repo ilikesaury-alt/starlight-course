@@ -35,6 +35,7 @@ interface KokoroModule {
 // 统一 URL 播放器（保证 Promise 一定结束，区分 blocked/failed）
 import { playUrl } from './playUrl'
 import { PlayOutcome } from './types'
+import { traceNote } from './engineTrace'
 
 // 官方 ONNX 模型仓库（含 q8 量化权重）
 const MODEL_ID = 'onnx-community/kokoro-82m-v1.0-onnx'
@@ -116,6 +117,8 @@ async function loadModel(): Promise<KokoroTTSInstance> {
 
   loadingPromise = (async () => {
     // 运行时从 CDN 拉取 ESM 构建（@vite-ignore：构建期不分析、不打包此 URL）
+    // SAFETY: kokoro-js 无本地类型声明（不进构建依赖），CDN 返回的模块形状由上面
+    // 的 KokoroModule 接口约定；实际只用 KokoroTTS.from_pretrained，拿不到即抛错回落。
     const mod = (await import(/* @vite-ignore */ KOKORO_CDN)) as unknown as KokoroModule
     const tts = await mod.KokoroTTS.from_pretrained(MODEL_ID, {
       dtype: DTYPE,
@@ -131,6 +134,11 @@ async function loadModel(): Promise<KokoroTTSInstance> {
     // 加载失败：标记不支持，后续直接回落，避免反复重试
     loadingPromise = null
     unsupported = true
+    const reason = e instanceof Error ? e.message : String(e)
+    // 国内网络通常连不上 huggingface.co（模型 ~80MB），这里是最常见的「Kokoro 永远
+    // 不就绪」原因；记进诊断流，?debug=audio 面板可直接看到，不必翻控制台。
+    console.warn('[kokoro] 模型加载失败，本次会话回落到有道/WebSpeech:', reason)
+    traceNote('kokoro', `模型加载失败：${reason}（已回落到有道）`)
     throw e
   }
 }

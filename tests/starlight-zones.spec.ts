@@ -23,13 +23,28 @@ function withStt(page: import('@playwright/test').Page, fn: () => void) {
   return page.addInitScript(`(${fn.toString()})()`)
 }
 
+/**
+ * 拓展词区现在有两类来源：进课自动填充的（角标「自动」）与手动录入的（角标「拓展」）。
+ * 本组用例验证的是**手动录入**路径，而进课时会先自动填 5 个词、占满上限让「➕ 加词」
+ * 变灰，故先逐个删空（删空后不会自动回填，这本身也是被测行为之一）。
+ */
+async function clearAutoFilled(page: import('@playwright/test').Page) {
+  // 自动填充在 effect 里异步发生，先等它真的落地再删（否则会误判成「没有词」而直接返回）
+  await expect(page.locator('.ext-item').first()).toBeVisible({ timeout: 15000 })
+  let n = await page.locator('.ext-item').count()
+  while (n > 0) {
+    await page.locator('.ext-item button[aria-label^="删除"]').first().click()
+    await expect(page.locator('.ext-item')).toHaveCount(n - 1)
+    n -= 1
+  }
+  await expect(page.getByText(/E 课堂拓展词（0\/5）/)).toBeVisible()
+}
+
 test.describe('E 课堂拓展词', () => {
   test('录词 → 持久化 → 删除生效', async ({ page }) => {
     await page.goto(LESSON)
     await expect(page.getByRole('heading', { name: /Say Hello/ })).toBeVisible()
-
-    // 初始为空
-    await expect(page.getByText(/E 课堂拓展词（0）/)).toBeVisible()
+    await clearAutoFilled(page)
 
     // ➕ 加词 → 录 broccoli
     await page.getByRole('button', { name: /加词/ }).click()
@@ -52,6 +67,7 @@ test.describe('E 课堂拓展词', () => {
 
   test('空英文被拒绝，重复词被拒绝', async ({ page }) => {
     await page.goto(LESSON)
+    await clearAutoFilled(page)
 
     // 空提交 → 报错提示
     await page.getByRole('button', { name: /加词/ }).click()
@@ -71,6 +87,7 @@ test.describe('E 课堂拓展词', () => {
 
   test('录入的拓展词进入复习队列（带来源标记）', async ({ page }) => {
     await page.goto(LESSON)
+    await clearAutoFilled(page)
     await page.getByRole('button', { name: /加词/ }).click()
     await page.getByPlaceholder('例如 broccoli').fill('broccoli')
     await page.getByRole('button', { name: '保存' }).click()
@@ -91,6 +108,55 @@ test.describe('E 课堂拓展词', () => {
       return JSON.parse(raw).state.srsCards.broccoli ?? null
     })
     expect(after).toBeNull()
+  })
+})
+
+test.describe('拓展词自动填充', () => {
+  test('进课自动填 5 个、换一批只换自动词、手动词不被顶掉', async ({ page }) => {
+    await page.goto(LESSON)
+    await expect(page.getByRole('heading', { name: /Say Hello/ })).toBeVisible()
+
+    // 自动填充：满额 5 个、角标「自动」、显示主题
+    await expect(page.getByText(/E 课堂拓展词（5\/5）/)).toBeVisible()
+    await expect(page.locator('.ext-item')).toHaveCount(5)
+    await expect(page.locator('.ext-badge', { hasText: '自动' })).toHaveCount(5)
+    await expect(page.locator('.ext-topic')).toBeVisible()
+    // 满额时手动加词禁用，但「换一批」仍可用（换掉的是自动词）
+    await expect(page.getByRole('button', { name: /加词/ })).toBeDisabled()
+    await expect(page.getByRole('button', { name: /换一批/ })).toBeEnabled()
+
+    const before = await page.locator('.ext-en').allTextContents()
+
+    // 换一批：仍是 5 个自动词，但内容真的变了
+    await page.getByRole('button', { name: /换一批/ }).click()
+    await expect(page.locator('.ext-item')).toHaveCount(5)
+    const after = await page.locator('.ext-en').allTextContents()
+    expect(after).not.toEqual(before)
+
+    // 删空后不会自动回填（轮次标记记住了「已经填过」）
+    await clearAutoFilled(page)
+    await page.waitForTimeout(600)
+    await expect(page.locator('.ext-item')).toHaveCount(0)
+  })
+
+  test('手动词在换一批后依然保留', async ({ page }) => {
+    await page.goto(LESSON)
+    await expect(page.getByText(/E 课堂拓展词（5\/5）/)).toBeVisible()
+
+    // 删到只剩 4 个位子，再手录一个（总数 5，占满上限）
+    const del = page.locator('.ext-item button[aria-label^="删除"]')
+    await del.first().click()
+    await expect(page.locator('.ext-item')).toHaveCount(4)
+    await page.getByRole('button', { name: /加词/ }).click()
+    await page.getByPlaceholder('例如 broccoli').fill('broccoli')
+    await page.getByRole('button', { name: '保存' }).click()
+    await expect(page.locator('.ext-item', { hasText: 'broccoli' })).toBeVisible()
+
+    // 换一批：只替换 4 个自动词，手录的 broccoli 不动
+    await page.getByRole('button', { name: /换一批/ }).click()
+    await expect(page.locator('.ext-item')).toHaveCount(5)
+    await expect(page.locator('.ext-item', { hasText: 'broccoli' })).toBeVisible()
+    await expect(page.locator('.ext-badge', { hasText: '拓展' })).toHaveCount(1)
   })
 })
 

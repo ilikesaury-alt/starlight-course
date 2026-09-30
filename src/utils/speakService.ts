@@ -30,6 +30,13 @@ import {
   warmupEdgeTts,
 } from './engine/edgeTts'
 import { unlockAudio } from './audioUnlock'
+import { traceEngine, traceNote, type EngineName } from './engine/engineTrace'
+
+/** 兜底链的一级：名字（诊断用）+ 实际执行 */
+interface ChainStep {
+  name: EngineName
+  run: () => Promise<PlayOutcome>
+}
 
 export interface SpeakOptions {
   /** slower rate for kids (0.6) */
@@ -92,22 +99,25 @@ const delay = (ms: number) => new Promise<void>((r) => setTimeout(r, ms))
 
 /** 顺序执行兜底链：每个引擎至多一次（blocked 解锁后重试一次），永不递归 */
 async function runChain(
-  chain: Array<() => Promise<PlayOutcome>>,
+  chain: ChainStep[],
   guard: () => boolean,
   done: () => void,
+  text: string,
 ): Promise<void> {
   for (let i = 0; i < chain.length; i++) {
     if (!guard()) {
       done()
       return
     }
-    const attempt = chain[i]
+    const step = chain[i]
+    const startedAt = Date.now()
     let out: PlayOutcome
     try {
-      out = await attempt()
+      out = await step.run()
     } catch {
       out = { status: 'failed' }
     }
+    traceEngine(step.name, out.status, Date.now() - startedAt, text)
     if (!guard()) {
       done()
       return
@@ -124,11 +134,13 @@ async function runChain(
         done()
         return
       }
+      const retryAt = Date.now()
       try {
-        out = await attempt()
+        out = await step.run()
       } catch {
         out = { status: 'failed' }
       }
+      traceEngine(step.name, out.status, Date.now() - retryAt, text, '解锁后重试')
       if (!guard()) {
         done()
         return
@@ -208,39 +220,47 @@ export function speakText(text: string, opts: SpeakOptions = {}) {
   }
 
   // ---- 构建有界兜底链（优先级从高到低，互不递归）----
-  const chain: Array<() => Promise<PlayOutcome>> = []
+  const chain: ChainStep[] = []
   const zh = lang === 'zh'
 
   if (zh) {
     // 中文：Edge TTS（仅 Edge 且已预热）→ 有道（长文本分片）→ WebSpeech
     if (isEdgeTtsEnabled() && isEdgeBrowser()) {
       if (isEdgeReady()) {
-        chain.push(() => speakWithEdgeTts(text, { slow, guard, onAudio }))
+        chain.push({ name: 'edge-tts', run: () => speakWithEdgeTts(text, { slow, guard, onAudio }) })
       } else {
         warmupEdgeTts() // 模块尚未预热：后台预热，首次点击仍走有道保证跟手
       }
     }
     if (text.length > 30) {
-      chain.push(() => playYoudaoChunked(text, rate, guard, onAudio))
+      chain.push({ name: 'youdao', run: () => playYoudaoChunked(text, rate, guard, onAudio) })
     } else {
-      chain.push(() => playYoudaoAudio(text, 'zh', { rate: slow ? 0.6 : 1, guard, onAudio }))
+      chain.push({
+        name: 'youdao',
+        run: () => playYoudaoAudio(text, 'zh', { rate: slow ? 0.6 : 1, guard, onAudio }),
+      })
     }
   } else {
     // 英文：Kokoro（仅当模型已就绪）→ 有道 → WebSpeech
     if (isKokoroEnabled()) {
       if (isKokoroReady()) {
-        chain.push(() => speakWithKokoro(text, { slow, guard, onAudio }))
+        chain.push({ name: 'kokoro', run: () => speakWithKokoro(text, { slow, guard, onAudio }) })
       } else {
+        // 模型未就绪：本次发音完全绕过 Kokoro（有道是主力），只把原因记进诊断流
+        traceNote('kokoro', '模型未就绪，本次发音跳过（走有道）', text)
         warmupKokoro()
       }
     }
-    chain.push(() => playYoudaoAudio(text, 'en', { rate: slow ? 0.6 : 1, guard, onAudio }))
+    chain.push({
+      name: 'youdao',
+      run: () => playYoudaoAudio(text, 'en', { rate: slow ? 0.6 : 1, guard, onAudio }),
+    })
   }
-  chain.push(() => speakWithWebSpeech(text, { lang, rate, guard }))
+  chain.push({ name: 'webspeech', run: () => speakWithWebSpeech(text, { lang, rate, guard }) })
 
   // 请求级硬预算：无论如何都会复位 UI（不取消音频，让其自然结束）
   const budgetMs = Math.max(15000, Math.min(120000, text.length * (slow ? 350 : 250) + 12000))
   budgetTimer = setTimeout(() => done(), budgetMs)
 
-  void runChain(chain, guard, done)
+  void runChain(chain, guard, done, text)
 }

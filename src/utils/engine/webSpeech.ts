@@ -17,14 +17,20 @@
  */
 
 import { PlayOutcome } from './types'
+import { traceNote } from './engineTrace'
 
 // ---------- 嗓音预载（Chrome 首次 getVoices() 常为空，需等 voiceschanged）----------
 let voices: SpeechSynthesisVoice[] = []
+/** 嗓音列表是否曾经成功加载过（空列表 ≠ 没有嗓音，可能只是还没加载完） */
+let voicesLoaded = false
 
 function loadVoices() {
   try {
     const vs = window.speechSynthesis?.getVoices?.() ?? []
-    if (vs.length) voices = vs
+    if (vs.length) {
+      voices = vs
+      voicesLoaded = true
+    }
   } catch {
     /* ignore */
   }
@@ -50,6 +56,44 @@ function pickVoice(kind: 'en' | 'zh'): SpeechSynthesisVoice | undefined {
   )
 }
 
+/**
+ * 嗓音列表尚未加载完时，最多等 VOICE_WAIT_MS 让 voiceschanged 补上。
+ *
+ * 重要：首次进页面时 getVoices() 经常是空数组，**不能**据此判定「系统没语音包」，
+ * 否则会把正常设备也判失败。故只在「已成功加载过、且确实没有匹配嗓音」时才算缺失。
+ */
+const VOICE_WAIT_MS = 800
+
+function waitVoices(): Promise<void> {
+  if (voicesLoaded || typeof window === 'undefined' || !window.speechSynthesis) {
+    return Promise.resolve()
+  }
+  return new Promise<void>((resolve) => {
+    let done = false
+    const finish = () => {
+      if (done) return
+      done = true
+      clearTimeout(timer)
+      try {
+        window.speechSynthesis.removeEventListener('voiceschanged', onChange)
+      } catch {
+        /* ignore */
+      }
+      resolve()
+    }
+    const onChange = () => {
+      loadVoices()
+      if (voicesLoaded) finish()
+    }
+    const timer = setTimeout(finish, VOICE_WAIT_MS)
+    try {
+      window.speechSynthesis.addEventListener('voiceschanged', onChange)
+    } catch {
+      /* ignore */
+    }
+  })
+}
+
 // ---------- 引擎状态 ----------
 // 假死冷却期：到该时间点之前不再尝试原生合成器，避免在死引擎上反复空转
 let nativeDeadUntil = 0
@@ -66,8 +110,47 @@ export interface WebSpeechOptions {
 const DEFAULT_BUDGET_MS = 20000
 const DEAD_COOLDOWN_MS = 30000
 const MAX_RECOVERIES = 2
+/** 已确认系统缺对应语音包时的压缩预算：早点失败，别让用户干等 */
+const MISS_VOICE_BUDGET_MS = 6000
 
-export function speakWithWebSpeech(text: string, opts: WebSpeechOptions = {}): Promise<PlayOutcome> {
+/**
+ * 先探一次本地嗓音，再决定本级的预算。
+ *
+ * 已确认「系统没有对应语音包」时，Chrome/Edge 会转去连 Google 在线 TTS ——
+ * 国内不通就静默无回调（既不 onstart 也不 onerror），白等满额预算毫无意义。
+ * 故此时把预算压到 MISS_VOICE_BUDGET_MS，并打日志 + 记进诊断流，让失败快速暴露。
+ * 反之，「嗓音列表还没加载完」（首次进页面 getVoices() 常为空）不算缺失，
+ * 等 VOICE_WAIT_MS 后按正常预算走，避免误杀正常设备。
+ */
+async function resolveBudgetMs(text: string, opts: WebSpeechOptions): Promise<number> {
+  const base = opts.budgetMs ?? Math.max(DEFAULT_BUDGET_MS, Math.min(120000, text.length * 500 + 10000))
+  await waitVoices()
+  const kind = opts.lang === 'zh' ? 'zh' : 'en'
+  if (pickVoice(kind)) return base
+  const reason = voicesLoaded
+    ? `系统没有 ${kind} 语音包（已加载 ${voices.length} 个嗓音，可用: ${voices
+        .map((v) => v.lang)
+        .slice(0, 6)
+        .join('/')}）`
+    : '嗓音列表未就绪（voiceschanged 未触发）'
+  console.warn(`[webSpeech] ${reason}`)
+  traceNote('webspeech', reason, text)
+  return voicesLoaded ? Math.min(base, MISS_VOICE_BUDGET_MS) : base
+}
+
+export async function speakWithWebSpeech(
+  text: string,
+  opts: WebSpeechOptions = {},
+): Promise<PlayOutcome> {
+  const budgetMs = await resolveBudgetMs(text, opts)
+  return runWebSpeech(text, opts, budgetMs)
+}
+
+function runWebSpeech(
+  text: string,
+  opts: WebSpeechOptions,
+  budgetMs: number,
+): Promise<PlayOutcome> {
   return new Promise<PlayOutcome>((resolve) => {
     const synth = typeof window !== 'undefined' ? window.speechSynthesis : undefined
     if (!synth || typeof synth.speak !== 'function' || typeof synth.cancel !== 'function') {
@@ -105,9 +188,7 @@ export function speakWithWebSpeech(text: string, opts: WebSpeechOptions = {}): P
       return u
     }
 
-    // 预算随文本长度自适应：长朗读（段落/全文）不能被固定 20s 腰斩。
-    // 约 500ms/字 + 10s 余量，上限 120s。
-    const budgetMs = opts.budgetMs ?? Math.max(DEFAULT_BUDGET_MS, Math.min(120000, text.length * 500 + 10000))
+    // 预算在探测嗓音后已定（见 resolveBudgetMs），deadline 从此刻起算
     const deadline = Date.now() + budgetMs
 
     // 给单个 utterance 挂上统一的事件处理
