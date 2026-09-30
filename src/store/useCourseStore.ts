@@ -15,6 +15,7 @@ import type { Word } from '../data/starlight'
 import type { SentenceFrame } from '../data/sentenceFrame'
 import { frameCardKey } from '../data/sentenceFrame'
 import { migrateFromLeitner } from '../data/fsrsScheduler'
+import { EXT_LIMIT, type ExtWord } from '../data/extensionTopics'
 
 // Starlight 主课:单元 slug -> 全部课 id,用于课级进度判断
 const lessonsOf = (unitId: string) => modules.find((m) => m.slug === unitId)?.lessons ?? []
@@ -42,8 +43,13 @@ interface CourseStore {
   /** SRS 智能记忆卡片,key 为单词 en */
   srsCards: Record<string, SrsCard>
   /** E 课堂拓展词:lessonKey(`${unitId}-${lessonId}`) -> 该课现场录入的拓展词。
-   *  与教材 lessons.ts 解耦(FR-C0.4):教材数据保持只读,拓展词只存本地。 */
-  starlightExtensions: Record<string, Word[]>
+   *  与教材 lessons.ts 解耦(FR-C0.4):教材数据保持只读,拓展词只存本地。
+   *  每课上限 EXT_LIMIT(5) 个;自动填充写入的词带 auto 标记,换一批时整体替换。 */
+  starlightExtensions: Record<string, ExtWord[]>
+  /** 自动填充轮次:lessonKey -> 第几轮(0/缺省 = 从未自动填充)。
+   *  同时充当「已自动填充过」的标记 —— 用户删空后不会被反复自动填回;
+   *  换一批时 +1,用于轮换候选词窗口。 */
+  extensionRound: Record<string, number>
 
   // 中文课程(三年级上册语文)进度——独立于英语 SRS,仅做打卡/自测记录
   // 打卡记录设计取舍:不做历史裁剪。按每天多次打卡估算每年仅增长约 10KB(localStorage 预算内),
@@ -103,6 +109,9 @@ interface CourseStore {
   addExtensionWord: (lessonKey: string, w: Word) => boolean
   /** 删除拓展词:同时把该词的拓展来源卡片移出复习池 */
   removeExtensionWord: (lessonKey: string, en: string) => void
+  /** 自动填充 / 换一批:先移除本课 auto 标记的词,再写入 candidates(截断到 EXT_LIMIT),
+   *  并记录本轮次。返回实际写入条数(0 = 候选为空或都已存在)。 */
+  fillExtensionWords: (lessonKey: string, candidates: Word[], round: number) => number
   /** 播种句子框架卡(kind='sentence',en=frame:<hash>),与单词卡共享复习池但键空间隔离 */
   seedSentenceFrames: (frames: SentenceFrame[], module: ModuleId) => void
   /** 获取今日到期卡片(已排序),可限制数量；module 非空时只取该模块的卡 */
@@ -126,6 +135,7 @@ export const useCourseStore = create<CourseStore>()(
       completedStories: [],
       srsCards: {},
       starlightExtensions: {},
+      extensionRound: {},
       reciteCheckins: {},
       chineseQuiz: {},
       eng3aRecite: {},
@@ -259,6 +269,7 @@ export const useCourseStore = create<CourseStore>()(
           completedStories: [],
           srsCards: {},
           starlightExtensions: {},
+          extensionRound: {},
           reciteCheckins: {},
           chineseQuiz: {},
           eng3aRecite: {},
@@ -331,9 +342,11 @@ export const useCourseStore = create<CourseStore>()(
         let ok = false
         set((s) => {
           const list = s.starlightExtensions[lessonKey] ?? []
+          // 每课上限:满了就不再接受手动录入(UI 同步禁用「➕ 加词」)
+          if (list.length >= EXT_LIMIT) return s
           const dup = list.some((x) => x.en.toLowerCase() === en.toLowerCase())
           if (dup) return s
-          const word: Word = { en, zh: w.zh ?? '', emoji: w.emoji || '📝', ipa: w.ipa }
+          const word: ExtWord = { en, zh: w.zh ?? '', emoji: w.emoji || '📝', ipa: w.ipa }
           ok = true
           // 播种:已有卡(如教材词同形)只归模块,不覆盖来源;无卡则按 extension 来源建卡
           const existing = s.srsCards[en]
@@ -363,6 +376,58 @@ export const useCourseStore = create<CourseStore>()(
             : s.srsCards
           return { starlightExtensions, srsCards }
         }),
+
+      fillExtensionWords: (lessonKey, candidates, round) => {
+        let added = 0
+        set((s) => {
+          const list = s.starlightExtensions[lessonKey] ?? []
+          const kept = list.filter((x) => !x.auto) // 手动录入的词永远保留
+          const dropped = list.filter((x) => x.auto) // 上一批自动词整体换掉
+          let srsCards = s.srsCards
+          // copy-on-write:只有真的动卡片时才复制,避免每次填充都克隆整个复习池
+          const touch = () => {
+            if (srsCards === s.srsCards) srsCards = { ...s.srsCards }
+            return srsCards
+          }
+          // 被换掉的自动词:仅当卡片来源是 extension 时移出复习池(教材同形词必须留下)
+          for (const d of dropped) {
+            const card = srsCards[d.en]
+            if (card && card.source === 'extension') delete touch()[d.en]
+          }
+          const have = new Set(kept.map((x) => x.en.toLowerCase()))
+          const picked: ExtWord[] = []
+          for (const c of candidates) {
+            if (kept.length + picked.length >= EXT_LIMIT) break // 每课硬上限
+            const en = (c.en ?? '').trim()
+            if (!en) continue
+            const base = en.toLowerCase()
+            if (have.has(base)) continue // 课内同形/已录词不重复占用名额
+            have.add(base)
+            picked.push({
+              ...c,
+              en,
+              zh: c.zh ?? '',
+              emoji: c.emoji || '📝',
+              ipa: c.ipa,
+              auto: true,
+            })
+            // 播种:已有卡只保留,无卡按 extension 来源建卡(与 addExtensionWord 同口径)
+            if (!srsCards[en]) touch()[en] = createNewCard(en, 'starlight', dayStamp(), 'extension')
+          }
+          added = picked.length
+          const nextList = [...kept, ...picked]
+          const starlightExtensions = { ...s.starlightExtensions }
+          if (nextList.length === 0) delete starlightExtensions[lessonKey]
+          else starlightExtensions[lessonKey] = nextList
+          // 轮次始终记录:即使候选为空也标记「已尝试过」,避免空列表时反复自动填充
+          return {
+            starlightExtensions,
+            srsCards,
+            extensionRound: { ...s.extensionRound, [lessonKey]: round },
+          }
+        })
+        return added
+      },
 
       recordReview: (en, correct, module) =>
         set((s) => {
@@ -406,7 +471,7 @@ export const useCourseStore = create<CourseStore>()(
     }),
     {
       name: 'starlight-course',
-      version: 7,
+      version: 8,
       // 只持久化数据字段,避免函数/瞬态状态被写入 localStorage
       partialize: (state) => ({
         wrongWords: state.wrongWords,
@@ -417,6 +482,7 @@ export const useCourseStore = create<CourseStore>()(
         completedStories: state.completedStories,
         srsCards: state.srsCards,
         starlightExtensions: state.starlightExtensions,
+        extensionRound: state.extensionRound,
         reciteCheckins: state.reciteCheckins,
         chineseQuiz: state.chineseQuiz,
         eng3aRecite: state.eng3aRecite,
@@ -493,6 +559,8 @@ export const useCourseStore = create<CourseStore>()(
           ...s,
           srsCards,
           starlightExtensions: s.starlightExtensions ?? {},
+          // v8:补自动填充轮次标记(缺省 = 从未自动填充过,进课时空词表才会自动填一次)
+          extensionRound: s.extensionRound ?? {},
           wrongWords,
           completedPreviews,
           completedStories,

@@ -18,6 +18,7 @@ import Breadcrumb from '@/components/Breadcrumb'
 import ExtensionWordEntry from '@/components/ExtensionWordEntry'
 import SentenceReader from '@/components/SentenceReader'
 import SentenceFrameCard from '@/components/SentenceFrameCard'
+import { EXT_LIMIT, lessonTopicZh, suggestExtensions, type ExtWord } from '@/data/extensionTopics'
 import { getModule, STARLIGHT_THEME, type Sentence, type Word } from '@/data/starlight'
 import { getLessonBook } from '@/data/starlight-book'
 import { getPassage } from '@/data/starlight-passage'
@@ -53,6 +54,8 @@ export default function LessonPreview() {
   const starlightExtensions = useCourseStore((s) => s.starlightExtensions)
   const addExtensionWord = useCourseStore((s) => s.addExtensionWord)
   const removeExtensionWord = useCourseStore((s) => s.removeExtensionWord)
+  const extensionRound = useCourseStore((s) => s.extensionRound)
+  const fillExtensionWords = useCourseStore((s) => s.fillExtensionWords)
   // 统一结算编排:加星 + 错题入本 + SRS 记录(同词去重)
   const { recordPick, restart, settle } = useSettleQuiz({
     module: 'starlight',
@@ -64,7 +67,7 @@ export default function LessonPreview() {
   const lessonIdx = lessons.findIndex((l) => String(l.id) === lessonId)
   const lesson = lessonIdx >= 0 ? lessons[lessonIdx] : null
 
-  const words = lesson?.words ?? []
+  const words = useMemo(() => lesson?.words ?? [], [lesson])
   const sentences = lesson?.sentences ?? []
   // 课本原文：按「单元号-课号」取，教材 PDF 每课一份
   const book = mod && lesson ? getLessonBook(mod.id, lesson.id) : undefined
@@ -72,7 +75,39 @@ export default function LessonPreview() {
   const chapters = useMemo(() => book?.sections ?? [], [book])
   // 拓展词 key 与课本原文保持同一套「单元号-课号」命名
   const lessonKey = `${mod?.id ?? 0}-${lesson?.id ?? 0}`
-  const extensions = starlightExtensions[lessonKey] ?? []
+  // useMemo：空数组不能每次渲染都造新的，否则下面自动填充 effect 的依赖会一直抖
+  const extensions = useMemo(
+    () => starlightExtensions[lessonKey] ?? [],
+    [starlightExtensions, lessonKey]
+  )
+  const round = extensionRound[lessonKey] ?? 0
+  const [fillHint, setFillHint] = useState('')
+  // 切课时清掉上一课的填充提示
+  useEffect(() => { setFillHint('') }, [lessonKey])
+  // 首次进这一课且拓展词是空的 → 按本课主题自动补一批。
+  // 只填一次：extensionRound 记住轮次，之后即使被删空也不会反复填回（想再填点「✨ 自动填充」）。
+  useEffect(() => {
+    if (!lesson) return
+    if (round > 0) return
+    if (extensions.length > 0) return
+    fillExtensionWords(lessonKey, suggestExtensions({ lessonKey, lessonWords: words, existing: [] }), 1)
+  }, [lesson, lessonKey, words, extensions, round, fillExtensionWords])
+  // ✨ 自动填充 / 🔄 换一批：换一批只替换带「自动」标记的词，手动录入的词原样保留
+  const handleAutoFill = () => {
+    const manual = extensions.filter((x) => !x.auto)
+    const next = suggestExtensions({
+      lessonKey,
+      lessonWords: words,
+      existing: manual,
+      round: round + 1,
+    })
+    if (next.length === 0) {
+      setFillHint('这一课相关的词都填过了，剩下的可以自己 ➕ 加词。')
+      return
+    }
+    setFillHint('')
+    fillExtensionWords(lessonKey, next, round + 1)
+  }
   const frames = mod && lesson ? framesOfLesson(mod.slug, lesson.id) : []
   // 课文点读（D）：试点课有提取出的 passage，其余课回落到 BookTextView
   const passage = mod && lesson ? getPassage(mod.id, lesson.id) : undefined
@@ -223,8 +258,12 @@ export default function LessonPreview() {
             <VocabTab words={words} mcStyle={mcStyle} />
             <ExtensionSection
               words={extensions}
+              topic={lessonTopicZh(lessonKey)}
+              round={round}
+              hint={fillHint}
               onRemove={(en) => removeExtensionWord(lessonKey, en)}
               onOpenEntry={() => setShowExtEntry(true)}
+              onAutoFill={handleAutoFill}
             />
           </>
         )}
@@ -472,27 +511,67 @@ function VocabTab({ words, mcStyle }: { words: Word[]; mcStyle: React.CSSPropert
   )
 }
 
-// E 课堂拓展词区：➕ 加词 + 列表（带「拓展」角标）+ 删除。
+// E 课堂拓展词区：✨ 自动填充 / 🔄 换一批 + ➕ 加词 + 列表（带角标）+ 删除。
+// 每课上限 EXT_LIMIT（5）个：满了禁用「➕ 加词」，但只要还有自动填的词就能「换一批」。
 // 数据存在 store 的 starlightExtensions，教材 lessons.ts 不受影响。
 function ExtensionSection({
   words,
+  topic,
+  round,
+  hint,
   onRemove,
   onOpenEntry,
+  onAutoFill,
 }: {
-  words: Word[]
+  words: ExtWord[]
+  /** 本课主题名（如「颜色」），没有配主题时不显示 */
+  topic?: string
+  /** 当前填充轮次（0 = 还没自动填充过） */
+  round: number
+  /** 填充失败/无候选时的提示文案 */
+  hint?: string
   onRemove: (en: string) => void
   onOpenEntry: () => void
+  onAutoFill: () => void
 }) {
+  const full = words.length >= EXT_LIMIT
+  // 满 5 个仍可换一批（换掉的是自动词）；只有 5 个全是手动录入时才没得换
+  const canAutoFill = !full || words.some((w) => w.auto)
   return (
     <section className="ext-zone">
       <div className="ext-zone-head">
-        <span>➕ E 课堂拓展词（{words.length}）</span>
-        <button type="button" className="btn btn-soft" onClick={onOpenEntry}>
-          ➕ 加词
-        </button>
+        <span className="ext-title">
+          ➕ E 课堂拓展词（{words.length}/{EXT_LIMIT}）
+          {topic && <em className="ext-topic">主题：{topic}</em>}
+        </span>
+        <span className="ext-actions">
+          <button
+            type="button"
+            className="btn btn-soft"
+            disabled={!canAutoFill}
+            onClick={onAutoFill}
+            title={canAutoFill ? '按本课主题补一批拓展词' : '全是手动录入的词，没有可替换的'}
+          >
+            {words.length === 0 ? '✨ 自动填充' : '🔄 换一批'}
+          </button>
+          <button
+            type="button"
+            className="btn btn-soft"
+            disabled={full}
+            onClick={onOpenEntry}
+            title={full ? `本课拓展词已达上限 ${EXT_LIMIT} 个` : '手动录入一个拓展词'}
+          >
+            ➕ 加词
+          </button>
+        </span>
       </div>
+      {hint && <p className="ext-hint">{hint}</p>}
       {words.length === 0 ? (
-        <p className="ext-empty">老师课上临时教的词，录进来就会自动进复习队列。</p>
+        <p className="ext-empty">
+          {round === 0
+            ? '点「✨ 自动填充」按本课主题补 5 个拓展词；老师课上临时教的词也可以 ➕ 录进来。'
+            : '这一课的拓展词已清空，可再点「✨ 自动填充」重新补一批。'}
+        </p>
       ) : (
         <div className="ext-list">
           {words.map((w) => (
@@ -500,7 +579,7 @@ function ExtensionSection({
               <span className="ext-emoji">{w.emoji || '📝'}</span>
               <span className="ext-en">{w.en}</span>
               {w.zh && <span className="ext-zh">{w.zh}</span>}
-              <span className="ext-badge">拓展</span>
+              <span className="ext-badge">{w.auto ? '自动' : '拓展'}</span>
               <span onClick={(e) => e.stopPropagation()}>
                 <SpeakButton text={w.en} label={w.en} />
               </span>

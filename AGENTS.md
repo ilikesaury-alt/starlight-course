@@ -51,6 +51,7 @@ npm run e2e          # Playwright E2E tests (tests/*.spec.ts)
 - Target platform: **desktop Chrome / Edge on Windows** (WebGPU for Kokoro, localhost for the mic secure context). Firefox / Safari / mobile are not committed to
 - Star rules: `src/utils/stars.ts` is the single source of truth — `quizStars` (all correct = 5, ≥80% = 3, participated = 1) and pass check (`isPassed`: ≥80%)
 - SRS: `src/data/srs.ts` holds card types + Leitner-compat derived fields, `src/data/fsrsScheduler.ts` holds the FSRS kernel (ts-fsrs). FSRS state lives in the nested `SrsCard.fsrs`; `box/nextReview/streak` are derived and kept in sync for the old UI
+- Extensions: `src/data/extensionTopics.ts` is a hand-curated theme word bank (52 themes, ~630 en/zh/emoji words) covering all 96 lessons — no open RAZ dataset exists (Reading A-Z is copyrighted), so the bank is maintained by hand. **`EXT_LIMIT = 5` words per lesson** (hard cap, shared by auto-fill and manual entry). `suggestExtensions()` picks by theme, drops lesson words + already-added words, and rotates by `round` so 「换一批」 really changes the batch. Auto-fill runs **once per lesson** when the list is first empty; `store.extensionRound` remembers the round so deleting words never triggers a refill
 
 ## File Structure
 ```
@@ -58,9 +59,9 @@ src/
 ├── components/     # Layout, SpeakButton, SafeBoundary + 跟读/框架卡/点读/拓展词录入
 ├── pages/         # page components (Home, LessonPreview, SmartReview, etc.)
 ├── hooks/         # useSettleQuiz(结算) / useSpeechRecognition(STT) / useSentenceReader(跟读编排)
-├── data/          # 课程内容(starlight.ts, lessons.ts) + sentenceFrame.ts(句型框架) + srs.ts / fsrsScheduler.ts
+├── data/          # 课程内容(starlight.ts, lessons.ts) + sentenceFrame.ts(句型框架) + extensionTopics.ts(拓展词主题库) + srs.ts / fsrsScheduler.ts
 ├── utils/         # stars.ts(星规) / similarity.ts(跟读评分) / reviewQueue.ts(复习配额) / speak* 语音
-└── store/         # Zustand state management (含 starlightExtensions 拓展词)
+└── store/         # Zustand state management (含 starlightExtensions 拓展词 + extensionRound 填充轮次)
 ```
 
 ## Common Pitfalls

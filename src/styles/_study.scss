@@ -617,6 +617,35 @@
   font-weight: 800;
   color: var(--mc-deep, var(--brand-deep));
 }
+.ext-title {
+  display: inline-flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+// 主题标签：说明这批词是按什么主题自动挑的
+.ext-topic {
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--mc-soft, var(--brand-soft));
+  color: var(--mc-deep, var(--brand-deep));
+  font-size: var(--fs-xs);
+  font-style: normal;
+  font-weight: 800;
+}
+// 按钮组：自动填充/换一批 + 加词，窄屏也能并排放下
+.ext-actions {
+  display: inline-flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.ext-actions .btn { white-space: nowrap; }
+// 填充提示（如「这一课相关的词都填过了」）
+.ext-hint {
+  margin: 8px 0 0;
+  font-size: var(--fs-sm);
+  color: var(--mc-deep, var(--brand-deep));
+}
 .ext-empty {
   margin: 8px 0 0;
   font-size: var(--fs-sm);

@@ -116,6 +116,87 @@ describe('seedSentenceFrames', () => {
   })
 })
 
+describe('每课上限 EXT_LIMIT', () => {
+  it('手动录入到 5 个后第 6 个被拒', () => {
+    const store = useCourseStore.getState()
+    for (let i = 1; i <= 5; i++) {
+      expect(store.addExtensionWord(KEY, { en: `w${i}`, zh: '', emoji: '' })).toBe(true)
+    }
+    expect(store.addExtensionWord(KEY, { en: 'w6', zh: '', emoji: '' })).toBe(false)
+    expect(useCourseStore.getState().starlightExtensions[KEY]).toHaveLength(5)
+  })
+
+  it('手动录入的词不带 auto 标记（换一批不会替换掉它）', () => {
+    useCourseStore.getState().addExtensionWord(KEY, { en: 'hand-made', zh: '手作', emoji: '✋' })
+    expect(useCourseStore.getState().starlightExtensions[KEY][0].auto).toBeUndefined()
+  })
+})
+
+describe('fillExtensionWords（自动填充 / 换一批）', () => {
+  const cands = (n: number): Word[] =>
+    Array.from({ length: n }, (_, i) => ({ en: `w${i}`, zh: `词${i}`, emoji: '🌟' }))
+
+  it('候选超过上限也只写 5 个，且都带 auto 标记 + 播种 extension 卡', () => {
+    const added = useCourseStore.getState().fillExtensionWords(KEY, cands(8), 1)
+    expect(added).toBe(5)
+
+    const s = useCourseStore.getState()
+    expect(s.starlightExtensions[KEY]).toHaveLength(5)
+    expect(s.starlightExtensions[KEY].every((x) => x.auto === true)).toBe(true)
+    expect(s.srsCards.w0.source).toBe('extension')
+    expect(s.extensionRound[KEY]).toBe(1)
+  })
+
+  it('换一批：只替换自动词，手动录入的词原样保留', () => {
+    const store = useCourseStore.getState()
+    store.addExtensionWord(KEY, { en: 'hand-made', zh: '手作', emoji: '✋' })
+    store.fillExtensionWords(KEY, cands(5), 1) // 上限 5 → 自动词只能进 4 个
+
+    const first = useCourseStore.getState().starlightExtensions[KEY]
+    expect(first).toHaveLength(5)
+    expect(first.filter((x) => x.auto)).toHaveLength(4)
+
+    useCourseStore.getState().fillExtensionWords(KEY, cands(5).map((w) => ({ ...w, en: `n-${w.en}` })), 2)
+    const second = useCourseStore.getState().starlightExtensions[KEY]
+    expect(second).toHaveLength(5)
+    expect(second.some((x) => x.en === 'hand-made')).toBe(true) // 手动词留着
+    expect(second.some((x) => x.en === 'w0')).toBe(false) // 上一批自动词被换掉
+    expect(second.filter((x) => x.en.startsWith('n-'))).toHaveLength(4)
+    expect(useCourseStore.getState().extensionRound[KEY]).toBe(2)
+  })
+
+  it('换掉的自动词卡片出复习池，教材同形词的卡片保留', () => {
+    const store = useCourseStore.getState()
+    store.seedCard('broccoli', 'starlight') // 教材词，source=lesson
+    store.fillExtensionWords(KEY, [
+      { en: 'broccoli', zh: '西兰花', emoji: '🥦' },
+      { en: 'turnip', zh: '芜菁', emoji: '🥬' },
+    ], 1)
+    store.fillExtensionWords(KEY, [{ en: 'beet', zh: '甜菜', emoji: '🫒' }], 2)
+    const s = useCourseStore.getState()
+    expect(s.srsCards.broccoli).toBeDefined() // 同形教材卡不能被换走
+    expect(s.srsCards.turnip).toBeUndefined() // 被换掉的自动词卡片出池
+    expect(s.srsCards.beet.source).toBe('extension') // 新一批正常播种
+    expect(s.starlightExtensions[KEY].map((x) => x.en)).toEqual(['beet'])
+  })
+
+  it('候选为空时也记录轮次，避免空列表被反复自动填充', () => {
+    useCourseStore.getState().fillExtensionWords(KEY, [], 1)
+    expect(useCourseStore.getState().extensionRound[KEY]).toBe(1)
+    expect(useCourseStore.getState().starlightExtensions[KEY]).toBeUndefined()
+  })
+
+  it('候选里有空 en / 重复 en 时跳过，不占用名额', () => {
+    const added = useCourseStore.getState().fillExtensionWords(
+      KEY,
+      [{ en: '   ', zh: '', emoji: '' }, { en: 'AA', zh: '', emoji: '' }, { en: 'aa', zh: '', emoji: '' }],
+      1
+    )
+    expect(added).toBe(1)
+    expect(useCourseStore.getState().starlightExtensions[KEY]).toHaveLength(1)
+  })
+})
+
 describe('持久化（persist）', () => {
   it('starlightExtensions 写入 localStorage，重载后仍在', async () => {
     useCourseStore.getState().addExtensionWord(KEY, { en: 'broccoli', zh: '西兰花', emoji: '🥦' })
@@ -131,5 +212,21 @@ describe('持久化（persist）', () => {
     await useCourseStore.persist.rehydrate()
     expect(useCourseStore.getState().starlightExtensions).toEqual({})
     expect(useCourseStore.getState().totalStars).toBe(3)
+  })
+
+  it('v7 数据迁移补 extensionRound，已填过的课不会被重新自动填', async () => {
+    localStorage.setItem(
+      'starlight-course',
+      JSON.stringify({ state: { wrongWords: [], totalStars: 1, srsCards: {} }, version: 7 })
+    )
+    await useCourseStore.persist.rehydrate()
+    expect(useCourseStore.getState().extensionRound).toEqual({})
+  })
+
+  it('extensionRound 持久化：换批轮次重载后仍在', async () => {
+    useCourseStore.getState().fillExtensionWords(KEY, [{ en: 'kiwi', zh: '猕猴桃', emoji: '🥝' }], 3)
+    await useCourseStore.persist.rehydrate()
+    expect(useCourseStore.getState().extensionRound[KEY]).toBe(3)
+    expect(useCourseStore.getState().starlightExtensions[KEY][0].auto).toBe(true)
   })
 })
