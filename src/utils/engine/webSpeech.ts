@@ -105,10 +105,26 @@ export interface WebSpeechOptions {
   guard?: () => boolean
   /** 整体预算（毫秒）：任何情况下都会在该时长内结束 */
   budgetMs?: number
+  /**
+   * 「兜底链最后一级」标记。
+   *
+   * Kokoro / 有道都拿不到时，原生合成器是**唯一**还能出声的引擎。此时若沿用
+   * 假死冷却期直接判 failed，就会出现「前一句还好好的，这一句之后整段静默」——
+   * 冷却期内每次点击都直接失败，而此时已经没有下一级可降级了。
+   * 故最后一级必须无视冷却、每次都真试一次（有界，绝不死循环）。
+   */
+  lastResort?: boolean
 }
 
 const DEFAULT_BUDGET_MS = 20000
-const DEAD_COOLDOWN_MS = 30000
+/**
+ * 假死冷却期。
+ *
+ * 原为 30s —— 那意味着引擎一旦假死，接下来半分钟内**所有**发音都被硬判失败；
+ * 在「有道大面积 500 + 无 Kokoro」的设备上（多数手机都是），这就是持续性静音。
+ * 冷却的本意只是「别在死引擎上反复空转」，不该成为静音的理由，故压到 3s。
+ */
+const DEAD_COOLDOWN_MS = 3000
 const MAX_RECOVERIES = 2
 /** 已确认系统缺对应语音包时的压缩预算：早点失败，别让用户干等 */
 const MISS_VOICE_BUDGET_MS = 6000
@@ -157,7 +173,9 @@ function runWebSpeech(
       resolve({ status: 'failed' })
       return
     }
-    if (Date.now() < nativeDeadUntil) {
+    // 冷却期只用于「省掉在死引擎上的空转」。作为兜底链最后一级时必须无视它：
+    // 此时没有下一级，硬判 failed 就等于彻底静音。
+    if (!opts.lastResort && Date.now() < nativeDeadUntil) {
       resolve({ status: 'failed' })
       return
     }

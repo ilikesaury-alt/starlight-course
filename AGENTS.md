@@ -44,7 +44,11 @@ npm run e2e          # Playwright E2E tests (tests/*.spec.ts)
 - `react-dev-locator` babel plugin included for development debugging
 - Speech synthesis goes through `src/utils/speakService.ts` — a **bounded fallback chain** (never recursive, never dead-loops), with a per-request hard budget so a play button can never hang:
   - 英文: **Kokoro**(WebGPU 神经 TTS，默认开，模型就绪时) → 有道 → WebSpeech
-  - 中文: **Edge TTS**(仅 Edge 且已预热) → 有道(长文本分片) → WebSpeech
+  - 中文: **Edge TTS**(仅 Edge 且已预热) → 有道 → WebSpeech
+  - **有道不是通用 TTS**（实测 `dict.youdao.com`）：单词稳定，整句约 **65% 返回 HTTP 500**，中文几乎只回**同一段 48ms 空白音频**（不同文本字节完全相同）。所以它只能当「锦上添花」，句子发音的真正底线是设备自带的 WebSpeech —— 这条链路必须保证任何设备（含手机）都能出声
+  - **空白音频 = 失败**：`playUrl` 把时长 < 200ms 的片段判 `failed`（而非 `onended` 就当成功），否则兜底链会停在静音上、后面所有引擎都不再发声，表现为「点了完全没声音」且无任何报错
+  - **有道整段优先 → 分片重试 → 原生兜底**（`playYoudaoResilient`）；连续拿不到有效音频时熔断 60s 直接跳过有道，避免每句都白等一串必然失败的请求
+  - **原生合成器是最后一级，必须传 `lastResort: true`**：无视「假死冷却期」每次都真试一次。冷却期只用于省掉空转；若在最后一级照常硬判失败，就会出现「前一句还能响、之后整段静默」
   - Kokoro 默认开启（`kokoro.ts` 的 `readEnabledFlag()` 返回 `true`）；偶发「模型就绪但推理中途失败 → 回退跨域音频被自动播放策略拦截」时，控制台执行 `localStorage.setItem('starlight.kokoro.enabled','0')` 并刷新即可回到稳定链路
   - `SpeakButton` 只是 `speakService` 的 UI 封装，**播放逻辑不在组件里**
 - Speaking: STT is the native `SpeechRecognition` API via `useSpeechRecognition` (no back-end, no API key). Judgement is fully automatic: the engine's alternatives are all scored (best match wins), transient failures (`no-speech`/`aborted`/`network`) auto-re-listen up to 2 times, and only on terminal failure does the child get a **跳过这句** button — there is no 家长确认 path

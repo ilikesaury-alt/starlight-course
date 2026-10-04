@@ -12,6 +12,7 @@
  */
 
 import { PlayOutcome } from './types'
+import { traceNote, type EngineName } from './engineTrace'
 
 export interface PlayUrlOptions {
   /** 播放前的守卫（如代次校验）；返回 false 时放弃本次播放（aborted） */
@@ -24,10 +25,32 @@ export interface PlayUrlOptions {
   loadTimeout?: number
   /** 绝对兜底上限：仅当 loadedmetadata 始终不触发、ended 也丢失时才依赖它 */
   hardCapMs?: number
+  /** 引擎名：仅用于把「空白音频」这条诊断记到正确的引擎名下 */
+  engineName?: EngineName
 }
 
 const DEFAULT_LOAD_TIMEOUT = 10000
 const DEFAULT_HARD_CAP = 90000
+
+/**
+ * 「有响应、但根本没有声音」的判定阈值（秒）。
+ *
+ * 实测有道 dictvoice 在无法合成时并不报错，而是回一段**固定的空白音频**
+ * （HTTP 200 + 约 48ms 的静音 mp3，且不同文本返回的字节完全相同）。
+ * 若把它当成 success，整条兜底链会就此停下 —— WebSpeech 再也没机会出声，
+ * 对外表现就是「点了完全没声音」，而且没有任何报错。
+ *
+ * 故凡短于该阈值的片段一律判 failed，让链路继续降级。
+ * 真实单词发音实测 ≥ 300ms（cat 336ms / elephant 804ms），阈值取 200ms 留足余量；
+ * duration 未知（NaN）或流式（Infinity）一律放行，不误杀。
+ */
+const MIN_USABLE_SECONDS = 0.2
+
+/** 片段是否短到不可能是有效发音（duration 未知/流式则放行） */
+function isBlankClip(el: HTMLAudioElement): boolean {
+  const d = el.duration
+  return Number.isFinite(d) && d > 0 && d < MIN_USABLE_SECONDS
+}
 
 export function playUrl(url: string, opts: PlayUrlOptions = {}): Promise<PlayOutcome> {
   return new Promise<PlayOutcome>((resolve) => {
@@ -78,6 +101,18 @@ export function playUrl(url: string, opts: PlayUrlOptions = {}): Promise<PlayOut
       }
     }
 
+    // 把「服务端回了一段空白音频」记进诊断流，?debug=audio 面板可直接看到原因
+    let blankReported = false
+    const reportBlank = () => {
+      if (blankReported) return
+      blankReported = true
+      traceNote(
+        opts.engineName ?? 'youdao',
+        `服务端返回空白音频（时长 ${el.duration.toFixed(2)}s < ${MIN_USABLE_SECONDS}s），已判失败并降级`,
+        url.length > 40 ? `${url.slice(0, 40)}…` : url,
+      )
+    }
+
     // 加载/解码超时：始终无法开始播放（网络慢 / 媒体格式不支持）则判失败
     timers.push(
       setTimeout(() => {
@@ -99,8 +134,11 @@ export function playUrl(url: string, opts: PlayUrlOptions = {}): Promise<PlayOut
     }
     el.onended = () => {
       clearTimers()
+      // 空白片段即使「正常结束」也不算成功 —— 否则兜底链会停在静音上
+      const blank = isBlankClip(el)
       revoke()
-      settle({ status: 'success' })
+      if (blank) reportBlank()
+      settle({ status: blank ? 'failed' : 'success' })
     }
     el.onplaying = () => {
       started = true
@@ -111,6 +149,14 @@ export function playUrl(url: string, opts: PlayUrlOptions = {}): Promise<PlayOut
     el.addEventListener(
       'loadedmetadata',
       () => {
+        // 空白音频（有响应但没声音）：立刻判失败并降级，绝不把静音当成功
+        if (isBlankClip(el)) {
+          clearTimers()
+          reportBlank()
+          revoke()
+          settle({ status: 'failed' })
+          return
+        }
         const d = Number.isFinite(el.duration) && el.duration > 0 ? el.duration : 0
         const soft = (d > 0 ? d : 45) * 1000 + 1500
         timers.push(

@@ -19,7 +19,7 @@
  */
 
 import { PlayOutcome } from './engine/types'
-import { playYoudaoAudio, playYoudaoChunked } from './engine/youdao'
+import { playYoudaoResilient } from './engine/youdao'
 import { speakWithWebSpeech } from './engine/webSpeech'
 import { speakWithKokoro, isKokoroEnabled, isKokoroReady, warmupKokoro } from './engine/kokoro'
 import {
@@ -224,7 +224,7 @@ export function speakText(text: string, opts: SpeakOptions = {}) {
   const zh = lang === 'zh'
 
   if (zh) {
-    // 中文：Edge TTS（仅 Edge 且已预热）→ 有道（长文本分片）→ WebSpeech
+    // 中文：Edge TTS（仅 Edge 且已预热）→ 有道（整段→分片→原生兜底）→ WebSpeech
     if (isEdgeTtsEnabled() && isEdgeBrowser()) {
       if (isEdgeReady()) {
         chain.push({ name: 'edge-tts', run: () => speakWithEdgeTts(text, { slow, guard, onAudio }) })
@@ -232,16 +232,9 @@ export function speakText(text: string, opts: SpeakOptions = {}) {
         warmupEdgeTts() // 模块尚未预热：后台预热，首次点击仍走有道保证跟手
       }
     }
-    if (text.length > 30) {
-      chain.push({ name: 'youdao', run: () => playYoudaoChunked(text, rate, guard, onAudio) })
-    } else {
-      chain.push({
-        name: 'youdao',
-        run: () => playYoudaoAudio(text, 'zh', { rate: slow ? 0.6 : 1, guard, onAudio }),
-      })
-    }
+    chain.push({ name: 'youdao', run: () => playYoudaoResilient(text, 'zh', slow ? 0.6 : 1, guard, onAudio) })
   } else {
-    // 英文：Kokoro（仅当模型已就绪）→ 有道 → WebSpeech
+    // 英文：Kokoro（仅当模型已就绪）→ 有道（整段→分片→原生兜底）→ WebSpeech
     if (isKokoroEnabled()) {
       if (isKokoroReady()) {
         chain.push({ name: 'kokoro', run: () => speakWithKokoro(text, { slow, guard, onAudio }) })
@@ -251,12 +244,12 @@ export function speakText(text: string, opts: SpeakOptions = {}) {
         warmupKokoro()
       }
     }
-    chain.push({
-      name: 'youdao',
-      run: () => playYoudaoAudio(text, 'en', { rate: slow ? 0.6 : 1, guard, onAudio }),
-    })
+    chain.push({ name: 'youdao', run: () => playYoudaoResilient(text, 'en', slow ? 0.6 : 1, guard, onAudio) })
   }
-  chain.push({ name: 'webspeech', run: () => speakWithWebSpeech(text, { lang, rate, guard }) })
+  // 兜底链最后一级：传 lastResort，让原生合成器无视假死冷却期。
+  // 否则一旦引擎假死被判「死亡」，冷却期内每次点击都直接失败 —— 而此时
+  // 已经没有下一级可降级，表现就是「前一句还能响，之后整段没声音」。
+  chain.push({ name: 'webspeech', run: () => speakWithWebSpeech(text, { lang, rate, guard, lastResort: true }) })
 
   // 请求级硬预算：无论如何都会复位 UI（不取消音频，让其自然结束）
   const budgetMs = Math.max(15000, Math.min(120000, text.length * (slow ? 350 : 250) + 12000))
