@@ -61,8 +61,12 @@ function pickVoice(kind: 'en' | 'zh'): SpeechSynthesisVoice | undefined {
  *
  * 重要：首次进页面时 getVoices() 经常是空数组，**不能**据此判定「系统没语音包」，
  * 否则会把正常设备也判失败。故只在「已成功加载过、且确实没有匹配嗓音」时才算缺失。
+ *
+ * 取值 2000ms：安卓 Chrome 首次调用会同步拉起系统 TTS 引擎，
+ * voiceschanged 常在 1~3s 后才触发（实测安卓机型偏慢）。原 800ms 太短，
+ * 会把「还没加载完」误判成「系统没语音包」。
  */
-const VOICE_WAIT_MS = 800
+const VOICE_WAIT_MS = 2000
 
 function waitVoices(): Promise<void> {
   if (voicesLoaded || typeof window === 'undefined' || !window.speechSynthesis) {
@@ -158,18 +162,44 @@ export async function speakWithWebSpeech(
   text: string,
   opts: WebSpeechOptions = {},
 ): Promise<PlayOutcome> {
+  const startedAt = Date.now()
   const budgetMs = await resolveBudgetMs(text, opts)
-  return runWebSpeech(text, opts, budgetMs)
+  return runWebSpeech(text, opts, budgetMs, startedAt)
 }
+
+/**
+ * 「引擎压根不存在」时，最多等这么久再判失败。
+ *
+ * 现场（安卓自带浏览器）面板显示 webspeech ❌ 失败 4ms —— 4ms 意味着
+ * 它在第一次访问 window.speechSynthesis 时就放弃，而此时引擎可能只是
+ * 尚未初始化完成。给它一个有界的等待窗口，避免「白点一次」。
+ */
+const ENGINE_WAIT_MS = 2500
 
 function runWebSpeech(
   text: string,
   opts: WebSpeechOptions,
   budgetMs: number,
+  startedAt: number = Date.now(),
 ): Promise<PlayOutcome> {
   return new Promise<PlayOutcome>((resolve) => {
-    const synth = typeof window !== 'undefined' ? window.speechSynthesis : undefined
+    const synth =
+      typeof window !== 'undefined'
+        ? ((window.speechSynthesis as SpeechSynthesis | undefined) ?? null)
+        : null
     if (!synth || typeof synth.speak !== 'function' || typeof synth.cancel !== 'function') {
+      // 兜底链最后一级遇到「引擎不存在」：不能 4ms 就放弃。
+      // 部分安卓浏览器首次进页面时 speechSynthesis 尚未就绪（甚至整个对象缺失），
+      // 稍后就绪 —— 现场截图里正是「❌ 失败 4ms」，等于白点一次。
+      // 这里有界地等一小会儿再判失败（不阻塞 UI：有自己的超时兜底）。
+      const waited = Date.now() - startedAt
+      if (waited < ENGINE_WAIT_MS) {
+        setTimeout(() => {
+          void runWebSpeech(text, opts, budgetMs, startedAt).then(resolve)
+        }, 400)
+        return
+      }
+      traceNote('webspeech', '此浏览器没有可用的 speechSynthesis（设备未装系统 TTS 引擎）', text)
       resolve({ status: 'failed' })
       return
     }

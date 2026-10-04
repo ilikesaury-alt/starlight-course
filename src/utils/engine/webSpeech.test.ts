@@ -140,6 +140,69 @@ describe('webSpeech · 假死冷却不再造成静音', () => {
     expect(out).toEqual({ status: 'aborted' })
   })
 
+  // 回归：现场截图里安卓自带浏览器显示「webspeech ❌ 失败 4ms」。
+  // 4ms = 第一次访问 speechSynthesis 就放弃。若引擎只是「尚未就绪」，
+  // 白点一次毫无意义；故必须有界地等一会儿。
+  it('引擎尚未就绪时不会 4ms 就放弃，而是有界等待后再判失败', async () => {
+    const noSynth = {} as unknown as SpeechSynthesis
+    vi.stubGlobal('speechSynthesis', noSynth)
+
+    vi.resetModules()
+    vi.stubGlobal(
+      'SpeechSynthesisUtterance',
+      class {
+        lang = ''
+        rate = 1
+        pitch = 1
+        voice: SpeechSynthesisVoice | null = null
+        onstart: (() => void) | null = null
+        onend: (() => void) | null = null
+        onerror: (() => void) | null = null
+        constructor(public text: string) {}
+      },
+    )
+    const { speakWithWebSpeech } = await import('./webSpeech')
+
+    const t0 = Date.now()
+    const out = await speakWithWebSpeech('hello there.', { lang: 'en', guard: () => true })
+    const elapsed = Date.now() - t0
+
+    expect(out).toEqual({ status: 'failed' })
+    // 关键：不是立刻（~0ms），而是真的等过一个有界窗口
+    expect(elapsed).toBeGreaterThan(1000)
+    expect(elapsed).toBeLessThan(6000)
+  }, 20000)
+
+  it('引擎在等待窗口内就绪时能正常出声', async () => {
+    let synth: ReturnType<typeof makeSynth> | null = null
+    vi.stubGlobal('speechSynthesis', {} as unknown as SpeechSynthesis)
+
+    vi.resetModules()
+    vi.stubGlobal(
+      'SpeechSynthesisUtterance',
+      class {
+        lang = ''
+        rate = 1
+        pitch = 1
+        voice: SpeechSynthesisVoice | null = null
+        onstart: (() => void) | null = null
+        onend: (() => void) | null = null
+        onerror: (() => void) | null = null
+        constructor(public text: string) {}
+      },
+    )
+    const { speakWithWebSpeech } = await import('./webSpeech')
+
+    // 250ms 后引擎才出现 —— 早于 ENGINE_WAIT_MS(2.5s)
+    setTimeout(() => {
+      synth = makeSynth({ voices: [VOICE_EN] })
+      vi.stubGlobal('speechSynthesis', synth)
+    }, 250)
+
+    const out = await speakWithWebSpeech('hello there.', { lang: 'en', guard: () => true })
+    expect(out).toEqual({ status: 'success' })
+  }, 20000)
+
   it('系统确实没有对应语音包时仍快速失败（不被 lastResort 拖成满额等待）', async () => {
     // 嗓音列表「已加载」但里面只有英文 —— 模拟装了英文语音包、没装中文的环境
     const onlyEn = makeSynth({ dead: true, voices: [VOICE_EN] })
