@@ -64,6 +64,36 @@ describe('playYoudaoResilient', () => {
     expect(m.playUrl).toHaveBeenCalledTimes(1)
   })
 
+  // 回归：安卓慢网实测「单词 1.6s 响、整句撞满 8s 超时」。
+  // 早先按长度跳过短句分片，导致「Mom, it's a dog!」超时后直接放弃 —— 三级引擎
+  // 全废（Kokoro 拉不到权重、该浏览器无 TTS 嗓音）＝彻底静音。
+  it('短句整段超时后仍会分片重试（安卓慢网回归）', async () => {
+    const m = await load()
+    // 整段失败 → 两片都成功
+    m.playUrl.mockResolvedValueOnce(FAIL).mockResolvedValue(OK)
+    const out = await m.playYoudaoResilient("Mom, it's a dog!", 'en', 1, () => true)
+    expect(out).toEqual(OK)
+    expect(m.playUrl.mock.calls.length).toBeGreaterThan(1)
+  })
+
+  it('整段用较短超时，好早点转入分片', async () => {
+    const m = await load()
+    m.playUrl.mockResolvedValue(OK)
+    await m.playYoudaoResilient('hello', 'en', 1, () => true)
+    // playUrl 的第三个参数即 opts，含我们传入的 loadTimeout
+    const opts = m.playUrl.mock.calls[0]?.[1] as { loadTimeout?: number }
+    expect(opts.loadTimeout).toBe(5000)
+  })
+
+  it('拆不开的单词失败时如实返回 failed，不做无谓分片', async () => {
+    const m = await load()
+    m.playUrl.mockResolvedValue(FAIL)
+    const out = await m.playYoudaoResilient('cat', 'en', 1, () => true)
+    expect(out).toEqual(FAIL)
+    expect(m.playUrl).toHaveBeenCalledTimes(1)
+    expect(m.speakWithWebSpeech).not.toHaveBeenCalled()
+  })
+
   it('英文长句整段失败后按标点分片重试', async () => {
     const m = await load()
     // 整段失败 → 两片都成功

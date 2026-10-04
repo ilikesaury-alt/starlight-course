@@ -251,8 +251,11 @@ export function speakText(text: string, opts: SpeakOptions = {}) {
   // 已经没有下一级可降级，表现就是「前一句还能响，之后整段没声音」。
   chain.push({ name: 'webspeech', run: () => speakWithWebSpeech(text, { lang, rate, guard, lastResort: true }) })
 
-  // 请求级硬预算：无论如何都会复位 UI（不取消音频，让其自然结束）
-  const budgetMs = Math.max(15000, Math.min(120000, text.length * (slow ? 350 : 250) + 12000))
+  // 请求级硬预算：无论如何都会复位 UI（不取消音频，让其自然结束）。
+  // 下限取 25s：慢网（实测安卓 5G 单词 1.6s、整句撞满 8s 超时）下，
+  // 有道要「整段试一次 + 分片重试」才有机会出声，预算太紧会让按钮先复位、
+  // 声音姗姗来迟。预算只管复位 UI、不取消音频，放宽是安全的。
+  const budgetMs = Math.max(25000, Math.min(120000, text.length * (slow ? 350 : 250) + 15000))
   budgetTimer = setTimeout(() => done(), budgetMs)
 
   void runChain(chain, guard, done, text)

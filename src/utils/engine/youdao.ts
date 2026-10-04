@@ -28,6 +28,8 @@ export interface YoudaoOptions {
   guard?: () => boolean
   /** 创建出 audio 元素时回调，便于上层接管取消逻辑 */
   onAudio?: (el: HTMLAudioElement) => void
+  /** 加载超时（毫秒）；整段用较短的值好早点转入分片，分片用较长值 */
+  loadTimeout?: number
 }
 
 export function playYoudaoAudio(
@@ -41,12 +43,21 @@ export function playYoudaoAudio(
     guard: opts.guard,
     onAudio: opts.onAudio,
     playbackRate: opts.rate ?? 1,
-    loadTimeout: 8000,
+    loadTimeout: opts.loadTimeout ?? 8000,
     hardCapMs: 120000,
     // 空白音频的诊断要记在有道名下
     engineName: 'youdao',
   })
 }
+
+/**
+ * 整段请求的加载超时。
+ *
+ * 实测（安卓 5G 慢网）：单词 1.6s 就响，整句却要撞满 8s 超时。
+ * 整段失败后还有分片这招可打，所以整段不必死等 —— 早点判失败早点分片，
+ * 整体等待反而更短。
+ */
+const WHOLE_LOAD_TIMEOUT = 5000
 
 /** 分片的最大字符数：短于此的片段有道基本都能给出真实音频 */
 const CHUNK_MAX = 26
@@ -115,25 +126,31 @@ export async function playYoudaoResilient(
   if (!guard()) return { status: 'aborted' }
   if (isYoudaoBypassed()) return { status: 'failed' }
 
-  // 短文本（单词 / 短语）：一次请求即可
-  if (text.length <= CHUNK_MAX) {
-    const out = await playYoudaoAudio(text, lang, { rate, guard, onAudio })
-    if (out.status === 'success') onHit()
-    else if (out.status === 'failed') onStrike(text)
-    return out
-  }
-
-  // 长文本：先整段试一次（成功则语调最自然）
-  const whole = await playYoudaoAudio(text, lang, { rate, guard, onAudio })
+  // 无论长短都先整段试一次：单词/短语本就命中率高，整段成功时语调最自然。
+  // 整段用较短的超时，好早点转入分片（慢网下整段极易撞满超时）。
+  const whole = await playYoudaoAudio(text, lang, {
+    rate,
+    guard,
+    onAudio,
+    loadTimeout: WHOLE_LOAD_TIMEOUT,
+  })
   if (whole.status === 'success') {
     onHit()
     return whole
   }
   if (whole.status === 'aborted') return whole
   onStrike(text)
+
+  // 整段失败：只要能拆成多片，就用更短的请求再试。
+  // 慢网实测「单词 1.6s 响、整句 8s 超时」，分片是此时唯一还剩的机会 ——
+  // 所以不能像早先那样按长度跳过：短句同样会超时。
+  const chunks = chunkByPunct(text, CHUNK_MAX)
+  if (chunks.length <= 1) {
+    // 拆不开（单词/无标点短语）：分片没有意义，如实返回失败让上层降级
+    return { status: whole.status === 'blocked' ? 'blocked' : 'failed' }
+  }
   traceNote('youdao', '整段发音失败，改为按标点分片播放', text)
 
-  const chunks = chunkByPunct(text, CHUNK_MAX)
   for (let i = 0; i < chunks.length; i++) {
     if (!guard()) return { status: 'aborted' }
 
@@ -145,7 +162,8 @@ export async function playYoudaoResilient(
 
     const piece = chunks[i]
     let ok = false
-    for (let attempt = 0; attempt < 2 && !ok; attempt++) {
+    // 分片都很短，重试 3 次（比整段更值得等）
+    for (let attempt = 0; attempt < 3 && !ok; attempt++) {
       if (!guard()) return { status: 'aborted' }
       const out = await playYoudaoAudio(piece, lang, { rate, guard, onAudio })
       if (out.status === 'success') {
