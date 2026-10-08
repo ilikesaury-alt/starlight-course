@@ -46,14 +46,34 @@ if (typeof window !== 'undefined' && window.speechSynthesis) {
 }
 
 function pickVoice(kind: 'en' | 'zh'): SpeechSynthesisVoice | undefined {
-  if (!voices.length) return undefined
+  return candidateVoices(kind)[0]
+}
+
+/**
+ * 给可用嗓音排序：**本地嗓音优先**，其次语言精确匹配。
+ *
+ * 关键现场：Chrome 会把远端 Google 嗓音（localService=false）一起列进来，
+ * 国内网络下对它 speak() 往往既不 onstart 也不 onerror —— 引擎看起来「在播」，
+ * 实际一个字都没出来，整句静音。所以永远先试本地嗓音；本级无回调触发自愈时
+ * 会换下一个候选（见 runWebSpeech 的 voiceIdx），不会反复卡在同一个坏嗓音上。
+ */
+function candidateVoices(kind: 'en' | 'zh'): SpeechSynthesisVoice[] {
+  if (!voices.length) return []
   const exact = kind === 'zh' ? 'zh-CN' : 'en-US'
   const prefix = kind === 'zh' ? 'zh' : 'en'
-  return (
-    voices.find((v) => v.lang === exact) ||
-    voices.find((v) => v.lang?.toLowerCase().startsWith(prefix)) ||
-    undefined
-  )
+  const ranked: { score: number; v: SpeechSynthesisVoice }[] = []
+  for (const v of voices) {
+    const lang = (v.lang ?? '').toLowerCase()
+    let score = -1
+    if (v.lang === exact) score = 2
+    else if (lang.startsWith(prefix)) score = 1
+    if (score < 0) continue
+    // 本地引擎不依赖网络，国内环境下可靠性压倒「语言更精确的远端嗓音」
+    if (v.localService) score += 2
+    ranked.push({ score, v })
+  }
+  ranked.sort((a, b) => b.score - a.score)
+  return ranked.map((r) => r.v)
 }
 
 /**
@@ -226,12 +246,17 @@ function runWebSpeech(
       return
     }
 
+    // 嗓音已在 resolveBudgetMs 里等过 voiceschanged；这里按优先级取候选，
+    // 自愈重试时换下一个 —— 避免一直卡在同一个「远端/坏」嗓音上反复空转
+    const candidates = candidateVoices(opts.lang === 'zh' ? 'zh' : 'en')
+    let voiceIdx = 0
+
     const makeUtter = (): SpeechSynthesisUtterance => {
       const u = new SpeechSynthesisUtterance(text)
       u.lang = opts.lang === 'zh' ? 'zh-CN' : 'en-US'
       u.rate = opts.rate ?? 0.9
       u.pitch = 1
-      const v = pickVoice(opts.lang === 'zh' ? 'zh' : 'en')
+      const v = candidates[voiceIdx]
       if (v) u.voice = v
       return u
     }
@@ -292,6 +317,8 @@ function runWebSpeech(
       } catch {
         /* ignore */
       }
+      // 沉默即换嗓音：上一个候选没出声，下一个很可能就是本地可用的那个
+      if (candidates.length > 1) voiceIdx = (voiceIdx + 1) % candidates.length
       window.setTimeout(() => {
         recovering = false
         if (settled) return

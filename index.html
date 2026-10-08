@@ -6,6 +6,15 @@
     <link rel="icon" href="/favicon.svg" sizes="any" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon-180x180.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <!--
+      百度云 TTS（fanyi.baidu.com/gettts）只在「不带 Referer」时返回真实音频，
+      只要带上非百度的 Referer 就回 0 字节 text/html（实测 Origin 头无害、Referer 有罪）。
+      页面默认 strict-origin-when-cross-origin 一定会给跨域 <audio> 带上 Origin-only
+      Referer → 拿到空 HTML → MEDIA_ERR_SRC_NOT_SUPPORTED，整句直接静音。
+      有道 / Google Fonts / huggingface / esm.sh 都不需要 Referer（已实测），
+      故全局置为 no-referrer。改动前先看 src/utils/engine/baidu.ts 的头注释。
+    -->
+    <meta name="referrer" content="no-referrer" />
     <meta name="theme-color" content="#5BC0EB" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />

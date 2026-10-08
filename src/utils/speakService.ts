@@ -97,6 +97,11 @@ export function cancelSpeech() {
 
 const delay = (ms: number) => new Promise<void>((r) => setTimeout(r, ms))
 
+/** 诊断面板要记哪台引擎：借道出声（via）时按实际引擎记，否则记兜底链步骤名 */
+function tracedEngine(out: PlayOutcome, fallback: EngineName): EngineName {
+  return out.status === 'success' && out.via ? out.via : fallback
+}
+
 /** 顺序执行兜底链：每个引擎至多一次（blocked 解锁后重试一次），永不递归 */
 async function runChain(
   chain: ChainStep[],
@@ -117,7 +122,9 @@ async function runChain(
     } catch {
       out = { status: 'failed' }
     }
-    traceEngine(step.name, out.status, Date.now() - startedAt, text)
+    // via：这一级实际借道了哪台引擎出声（如「有道那一级」内部先试了百度）——
+    // 不记的话面板会把成功算在步骤名头上，排查时会被自己人误导
+    traceEngine(tracedEngine(out, step.name), out.status, Date.now() - startedAt, text)
     if (!guard()) {
       done()
       return
@@ -140,7 +147,7 @@ async function runChain(
       } catch {
         out = { status: 'failed' }
       }
-      traceEngine(step.name, out.status, Date.now() - retryAt, text, '解锁后重试')
+      traceEngine(tracedEngine(out, step.name), out.status, Date.now() - retryAt, text, '解锁后重试')
       if (!guard()) {
         done()
         return
@@ -224,7 +231,8 @@ export function speakText(text: string, opts: SpeakOptions = {}) {
   const zh = lang === 'zh'
 
   if (zh) {
-    // 中文：Edge TTS（仅 Edge 且已预热）→ 有道（整段→分片→原生兜底）→ WebSpeech
+    // 中文：Edge TTS（仅 Edge 且已预热）→ 云 TTS（百度恒优先，有道中文几乎恒空白；
+    //          整段→分片→原生兜底）→ WebSpeech
     if (isEdgeTtsEnabled() && isEdgeBrowser()) {
       if (isEdgeReady()) {
         chain.push({ name: 'edge-tts', run: () => speakWithEdgeTts(text, { slow, guard, onAudio }) })
@@ -234,13 +242,14 @@ export function speakText(text: string, opts: SpeakOptions = {}) {
     }
     chain.push({ name: 'youdao', run: () => playYoudaoResilient(text, 'zh', slow ? 0.6 : 1, guard, onAudio) })
   } else {
-    // 英文：Kokoro（仅当模型已就绪）→ 有道（整段→分片→原生兜底）→ WebSpeech
+    // 英文：Kokoro（仅当模型已就绪）→ 云 TTS（整句先百度、单词先有道，
+    //          整段→分片→原生兜底）→ WebSpeech
     if (isKokoroEnabled()) {
       if (isKokoroReady()) {
         chain.push({ name: 'kokoro', run: () => speakWithKokoro(text, { slow, guard, onAudio }) })
       } else {
-        // 模型未就绪：本次发音完全绕过 Kokoro（有道是主力），只把原因记进诊断流
-        traceNote('kokoro', '模型未就绪，本次发音跳过（走有道）', text)
+        // 模型未就绪：本次发音完全绕过 Kokoro（云 TTS 是主力），只把原因记进诊断流
+        traceNote('kokoro', '模型未就绪，本次发音跳过（走云 TTS）', text)
         warmupKokoro()
       }
     }

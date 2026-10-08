@@ -203,6 +203,44 @@ describe('webSpeech · 假死冷却不再造成静音', () => {
     expect(out).toEqual({ status: 'success' })
   }, 20000)
 
+  // 语音包排序：Chrome 会把远端 Google 嗓音（localService=false）一起列出来，
+  // 国内网络下对它 speak() 常常既不 onstart 也不 onerror —— 整句静音。
+  it('本地嗓音优先于远端嗓音', async () => {
+    const remote = { lang: 'en-US', name: 'Google US English', localService: false } as SpeechSynthesisVoice
+    const local = { lang: 'en-US', name: 'Microsoft Zira Desktop', localService: true } as SpeechSynthesisVoice
+    const synth = makeSynth({ voices: [remote, local] })
+    const { speakWithWebSpeech } = await load(synth)
+
+    const out = await speakWithWebSpeech('hello there.', {
+      lang: 'en',
+      guard: () => true,
+      budgetMs: 2000,
+      lastResort: true,
+    })
+    expect(out.status).toBe('success')
+    expect(synth.speak.mock.calls[0]?.[0].voice).toBe(local)
+  })
+
+  it('首选嗓音不出声时，自愈会换下一个嗓音而不是反复卡在它上面', async () => {
+    const remote = { lang: 'en-US', name: 'Google US English', localService: false } as SpeechSynthesisVoice
+    const local = { lang: 'en-US', name: 'Microsoft Zira Desktop', localService: true } as SpeechSynthesisVoice
+    // 引擎假死：接了 utterance 但毫无动静 → 必然走自愈
+    const dead = makeSynth({ dead: true, voices: [remote, local] })
+    const { speakWithWebSpeech } = await load(dead)
+
+    const out = await speakWithWebSpeech('hello there.', {
+      lang: 'en',
+      guard: () => true,
+      budgetMs: 6000,
+      lastResort: true,
+    })
+    expect(out.status).toBe('failed')
+    const used = dead.speak.mock.calls.map((c) => c[0].voice)
+    expect(used.length).toBeGreaterThan(1)
+    expect(used[0]).toBe(local) // 排序后本地嗓音先上
+    expect(used[1]).toBe(remote) // 没出声 → 下一轮换另一个候选
+  }, 20000)
+
   it('系统确实没有对应语音包时仍快速失败（不被 lastResort 拖成满额等待）', async () => {
     // 嗓音列表「已加载」但里面只有英文 —— 模拟装了英文语音包、没装中文的环境
     const onlyEn = makeSynth({ dead: true, voices: [VOICE_EN] })

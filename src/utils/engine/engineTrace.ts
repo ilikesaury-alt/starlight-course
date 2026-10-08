@@ -1,7 +1,7 @@
 /**
  * 发音链路追踪（诊断用，默认零开销的惰性记录）。
  *
- * 动机：「点了没声音」在兜底链（Kokoro → 有道 → WebSpeech）里极难定位 ——
+ * 动机：「点了没声音」在兜底链（Kokoro → 有道/百度 → WebSpeech）里极难定位 ——
  * 表面看都是同一个按钮，真实原因可能是模型没就绪 / 有道被自动播放拦截 /
  * 系统没装对应语音包。这里把每次发音请求的**每一级引擎尝试**记下来，
  * 配合 `?debug=audio` 面板一眼看出到底命中了哪一级、为什么前面几级掉了。
@@ -14,7 +14,23 @@
 
 import { isWebGPUSupported } from './kokoro'
 
-export type EngineName = 'kokoro' | 'edge-tts' | 'youdao' | 'webspeech'
+/**
+ * 会话级粘性开关：HashRouter 在 SPA 内跳转时会重写整个 hash，
+ * 把 hash 里的 `?debug=audio` 丢掉，导致面板在路由变化后消失。
+ * 因此首屏命中一次就粘住整个页面会话（刷新/关标签页即失效，不污染 localStorage）。
+ */
+let stickyAudioDebug = false
+try {
+  if (typeof window !== 'undefined') {
+    const hashQuery = window.location.hash.split('?')[1]
+    const q = hashQuery ? `${window.location.search}&?${hashQuery}` : window.location.search
+    if (/[?&]debug=audio(&|$)/.test(q)) stickyAudioDebug = true
+  }
+} catch {
+  /* 初始化失败不影响发音主链路 */
+}
+
+export type EngineName = 'kokoro' | 'edge-tts' | 'youdao' | 'baidu' | 'webspeech'
 
 export type EngineStatus = 'success' | 'failed' | 'blocked' | 'aborted' | 'note'
 
@@ -52,6 +68,7 @@ const listeners = new Set<() => void>()
 
 /** 诊断开关：URL 带 ?debug=audio（HashRouter 下 hash 里的 query 同样识别），或本地存储 */
 export function isAudioDebug(): boolean {
+  if (stickyAudioDebug) return true
   if (typeof window === 'undefined') return false
   try {
     // search 本身带前导 '?'，直接与 hash 里的 query 拼起来整体匹配 /[?&]debug=audio/
