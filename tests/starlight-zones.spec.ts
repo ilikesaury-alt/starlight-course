@@ -227,6 +227,22 @@ test.describe('跟读区（降级闭环）', () => {
 })
 
 test.describe('句型框架区', () => {
+  test('扩量后：任意一课点开「句型」都有框架卡，不再出现空态', async ({ page }) => {
+    // 回归：扩量前 12 个单元只挂 26 张卡（每单元挑 2 课），
+    // 其余 70 课点开「🧩 句型」只有一句「这一课还没有句型框架卡。」
+    for (const lesson of ['/#/preview/hello/3', '/#/preview/animals/8', '/#/preview/food/6', '/#/preview/transport/2']) {
+      await page.goto(lesson)
+      await page.getByRole('button', { name: /句型/ }).click()
+      await expect(page.locator('.sfc-card').first()).toBeVisible()
+      await expect(page.getByText('这一课还没有句型框架卡。')).toHaveCount(0)
+      // 未选词时「说出整句」禁用，选词后可点（框架卡主流程仍然活着）
+      const sayBtn = page.getByRole('button', { name: /说出整句/ })
+      await expect(sayBtn).toBeDisabled()
+      await page.locator('.sfc-opt').first().click()
+      await expect(sayBtn).toBeEnabled()
+    }
+  })
+
   test('Unit4 试点课可填空并说出整句', async ({ page }) => {
     await page.goto('/#/preview/toys/1') // Unit 4 Lesson 1（My Toys）
     await expect(page.getByRole('heading', { name: /My Toys/ })).toBeVisible()
