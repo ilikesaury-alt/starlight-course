@@ -37,6 +37,13 @@ const MAX_AUTO_RETRY = 2
 const RETRY_DELAY = 800
 /** 「在听你说」至少展示这么久：不让状态一闪而过（孩子还没看清就报错了） */
 const MIN_LISTEN_MS = 1500
+/**
+ * 等示范播完的上限：正常云端链路 3~4s 内回调 onEnd，这里只兜「迟迟不回调」。
+ * 原 6s 是按旧链路（有道整段 5s 超时）定的；现在整链含百度整句/分片，
+ * 慢网下 10s 才出声是常态，6s 会把还能救的示范掐掉。到点会取消未播完的
+ * 示范再开麦（见 start()），不会把迟到音频盖在孩子跟读上。
+ */
+const PHASE_TIMEOUT_MS = 12000
 
 export function useSentenceReader({ reference, onPass, threshold = 0.6 }: Options) {
   const [status, setStatus] = useState<ReaderStatus>('idle')
@@ -160,9 +167,16 @@ export function useSentenceReader({ reference, onPass, threshold = 0.6 }: Option
       startStt()
     }
     // 等示范真正播完再开麦：麦一开就不该再有外放（既避免干扰识别，
-    // 也让孩子「听完 → 再读」的节奏固定。6s 上限防止引擎迟迟不回调 onEnd。
+    // 也让孩子「听完 → 再读」的节奏固定。
     speakText(reference, { onEnd: goListening })
-    phaseTimer.current = setTimeout(goListening, 6000)
+    // 超时保险：示范链最迟也会在 speakService 的请求预算内回调 onEnd，
+    // 但慢网 / 云端全挂时可能拖到几十秒 —— 到点就停掉还没播完的示范直接开麦，
+    // 绝不让流程卡在一声不响的等待上（不停就直接开麦的话，迟到的示范声
+    // 还会盖在孩子跟读上）。
+    phaseTimer.current = setTimeout(() => {
+      cancelSpeech()
+      goListening()
+    }, PHASE_TIMEOUT_MS)
   }, [reference, startStt, clearRetry])
 
   /** 停止录音（重新听示范）：同时作废迟到的示范回调，不让它再开麦 */

@@ -70,7 +70,7 @@ function stubFailingRecognition(code: string) {
 function startListening(stop?: () => boolean) {
   vi.useFakeTimers()
   fireEvent.click(screen.getByRole('button', { name: /我来读/ }))
-  for (let i = 0; i < 60; i++) {
+  for (let i = 0; i < 80; i++) {
     act(() => {
       vi.advanceTimersByTime(200)
     })
@@ -182,7 +182,7 @@ describe('SentenceReader 录音阶段动画与实时反馈', () => {
     fireEvent.click(screen.getByRole('button', { name: /我来读/ }))
     expect(screen.getByText(/先听一遍示范/)).toBeTruthy()
     act(() => {
-      vi.advanceTimersByTime(6200)
+      vi.advanceTimersByTime(12500) // 越过 phase timeout（12s）
     })
     expect(screen.getByText(/轮到你读啦/)).toBeTruthy()
     expect(screen.queryByText(/先听一遍示范/)).toBeNull()
@@ -195,7 +195,7 @@ describe('SentenceReader 录音阶段动画与实时反馈', () => {
     render(<SentenceReader sentence="I have a doll." />)
     fireEvent.click(screen.getByRole('button', { name: /我来读/ }))
     act(() => {
-      vi.advanceTimersByTime(6200)
+      vi.advanceTimersByTime(12500) // 越过 phase timeout（12s）
     })
     expect(screen.getByText(/我听到：Hello/)).toBeTruthy()
     vi.useRealTimers()
@@ -209,7 +209,7 @@ describe('SentenceReader 录音阶段动画与实时反馈', () => {
     // 示范还在放就切下一句：reset() 必须顺手清掉 phaseTimer
     rerender(<SentenceReader sentence="Hello! How are you?" />)
     act(() => {
-      vi.advanceTimersByTime(7000)
+      vi.advanceTimersByTime(13000) // 越过 phase timeout：没被清掉的话这里必开麦
     })
     expect(starts()).toBe(0)
     expect(screen.queryByRole('button', { name: /在听你说/ })).toBeNull()
@@ -222,7 +222,7 @@ describe('SentenceReader 录音阶段动画与实时反馈', () => {
     render(<SentenceReader sentence="I have a doll." />)
     fireEvent.click(screen.getByRole('button', { name: /我来读/ }))
     act(() => {
-      vi.advanceTimersByTime(6200)
+      vi.advanceTimersByTime(12500) // 越过 phase timeout（12s）
     })
     expect(screen.getByText(/轮到你读啦/)).toBeTruthy()
     expect(rec.starts()).toBe(1)
@@ -253,7 +253,7 @@ describe('SentenceReader 录音阶段动画与实时反馈', () => {
     expect(screen.queryByText(/先听一遍示范/)).toBeNull()
     expect(screen.queryByRole('button', { name: /停一下/ })).toBeNull()
     act(() => {
-      vi.advanceTimersByTime(9000)
+      vi.advanceTimersByTime(13000) // 越过 phase timeout：没被清掉的话这里必开麦
     })
     expect(rec.starts()).toBe(0)
     vi.useRealTimers()

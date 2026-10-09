@@ -43,8 +43,22 @@ npm run e2e          # Playwright E2E tests (tests/*.spec.ts)
 - ESLint uses react-hooks and react-refresh plugins
 - `react-dev-locator` babel plugin included for development debugging
 - Speech synthesis goes through `src/utils/speakService.ts` — a **bounded fallback chain** (never recursive, never dead-loops), with a per-request hard budget so a play button can never hang:
-  - 英文: **Kokoro**(WebGPU 神经 TTS，默认开，模型就绪时) → 云 TTS（`playYoudaoResilient`：**整句先百度、单词先有道**） → WebSpeech
+  - 英文: **Kokoro**(神经 TTS，**默认关闭**，需显式开启) → 云 TTS（`playYoudaoResilient`：**整句先百度、单词先有道**） → WebSpeech
   - 中文: **Edge TTS**(仅 Edge 且已预热) → 云 TTS（**百度恒优先**） → WebSpeech
+  - **Kokoro 默认关闭，英文走「有道 → WebSpeech」（1~3s 出声）**。这是 2026-10-09 实测后**反转**过的判断，别再凭「神经音色更好」打开它：
+    - 实测大量机器 WebGPU 拿不到适配器（老 Intel 核显 2016 驱动、**无 `vulkan-1.dll`**、远程桌面 / 虚拟机）→ 只能退 CPU；
+    - CPU 上 82M 参数模型实测**每个单词 7~9 秒**。幼儿点读等不了（会在第一个词出声前点掉五六个），还要叠加首次 88MB 下载；
+    - 历史上默认开过，代价是「前几次能响、模型就绪后反而哑火」（见 `fa71ee6`）
+    - 想要神经音色：控制台 `localStorage.setItem('starlight.kokoro.enabled','1')` + 刷新。**前提是先把核显驱动更新到支持 Vulkan**，否则等于主动选择 7~9s 的延迟
+  - **Kokoro 开启后的可靠性措施**（`engine/kokoro.ts`，保留以便将来驱动更新后直接可用）：
+    - **WASM 推理必须放 Worker**（`kokoro.worker.ts`）：onnxruntime-web 在主线程是**同步**跑的，实测一个单词冻结主线程 **5957ms**（基线 111ms）。连带后果是「页面很卡」+「等几秒才发音」+「喇叭 ⏸ 动画完全不出现」——最后一条最误导：`setPlaying(true)` 确实执行了，但**重绘也要主线程**，线程冻住就一帧都画不出来。搬进 Worker 后冻结降到 **0ms**，音质不变。WebGPU 推理本身在 GPU/异步队列上，不阻塞 UI，故仍留主线程
+    - **`'gpu' in navigator` 是假阳性**：必须 `probeWebGPUAdapter()` 真 `requestAdapter()` 一次，拿不到就**别下那 86MB**
+    - **多模型源 + 停滞看门狗**：`huggingface.co`（国内实测 connect 20s 超时 / 0.47 MB/s）与 `hf-mirror.com`（1.78 MB/s 稳定）按序尝试。⚠️ **故意不按「探测延迟」选源**：直连源对 44 字节文件要 2.4~2.6s 才回，但拉 86MB 有 1.6 MB/s —— 小文件慢 ≠ 大文件慢，按延迟选会把好源误判成坏源
+    - **绝不能让 `loadingPromise` 永久挂着**：原实现加载卡住时它一直非空，`warmupKokoro()` 每次都早退，模型整场会话停在「未就绪」且**不报任何错**。现在失败会释放它并退避 60s 允许重试
+    - **首屏就预热**（`App.tsx`）：模型可用性直接决定「点单词有没有声音」，等点下去才下载会让人误以为功能坏了
+  - **慢设备自适应（2026-10-09 手机实测一个单词 5~6s、整句 20~60s）**：Kokoro 生成有**按词数放宽的时间预算**（`generateBudgetMs`，6s 基础 + 2s/词、封顶 20s；离线备份场景放宽到 30s），超时判 failed 直接降级云 TTS；生成成功但 >5s 也会把本会话标记为**慢设备**（`isKokoroSlow`）—— 之后 Kokoro 退到云 TTS **之后**只当断网备份（云端 2~3 秒能出声就没必要让孩子干等）。诊断面板显示 `🐢 慢（退到云后）`
+    - 该阈值**对 WASM 同样适用且是必需的**：CPU 上每词 7~9s 必然超阈值 → 第一次慢就把 Kokoro 降到云 TTS 之后，后续点击回到 1~3s。曾给 WASM 开过 30s「免判慢」的特例，等于让每次点击都死等 9 秒，是错误的判断（已撤销）。WASM 只是**生成预算**更宽（`wasmBudgetMs`：12s 基础 + 4s/词、封顶 45s），好让第一次能跑完并完成这次「测速」
+  - **跟读区的开麦兜底**：`useSentenceReader` 等示范 `onEnd` 开麦，另有 `PHASE_TIMEOUT_MS=12s` 保险 —— 到点先 `cancelSpeech()` 停掉还没播完的示范再开麦，绝不让流程卡在一声不响的等待上，也不让迟到音频盖在孩子跟读上
   - **有道不是通用 TTS**（实测 `dict.youdao.com`）：单词稳定，整句约 **65% 返回 HTTP 500**，中文几乎只回**同一段 48ms 空白音频**（不同文本字节完全相同）。所以它只能当「锦上添花」，句子发音的真正底线是云 TTS + 设备自带的 WebSpeech —— 这条链路必须保证任何设备（含手机）都能出声
   - **百度云 TTS 是「句子没声」的解药**（`engine/baidu.ts`，实测 `fanyi.baidu.com/gettts` 整句 8/8、中文 3/3 返回真实音频，TTFB ≈ 480ms）。⚠️ **带非百度的 Referer 就回 0 字节 `text/html`**（`Origin` 头无害、`Referer` 有罪），所以 `index.html` 必须保留 `<meta name="referrer" content="no-referrer">` —— 删掉它 `<audio>` 会拿到空 HTML（`MEDIA_ERR_SRC_NOT_SUPPORTED`），整句重新变静音。百度也没有 CORS 头，只能 `<audio>` 直连播放、不能 `fetch` 成 blob（统一走 `playUrl`）
   - **空白音频 = 失败**：`playUrl` 把时长 < 200ms 的片段判 `failed`（而非 `onended` 就当成功），否则兜底链会停在静音上、后面所有引擎都不再发声，表现为「点了完全没声音」且无任何报错

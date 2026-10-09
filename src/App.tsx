@@ -4,6 +4,7 @@ import Layout from '@/components/Layout'
 import SafeBoundary from '@/components/SafeBoundary'
 import AudioDebugPanel from '@/components/AudioDebugPanel'
 import { cancelSpeech } from '@/utils/speak'
+import { warmupKokoro } from '@/utils/engine/kokoro'
 
 // 路由级代码分割:每个页面(含其专属课程数据)按需加载,减小首屏 bundle。
 // 数据文件(如 starlight-book/绘本原文)只被对应页面引用,会随页面 chunk 一起懒加载。
@@ -96,6 +97,13 @@ function RedirectToLessonList() {
 }
 
 export default function App() {
+  // 首屏就开始后台预热 Kokoro（q8 权重 86MB，首次要下载）。
+  // 放在这里而不是等第一次点击：模型的可用性直接决定「点单词有没有声音」，
+  // 等点下去再开始下载，用户会连续点到「未就绪」而误以为功能坏了。
+  useEffect(() => {
+    warmupKokoro()
+  }, [])
+
   return (
     <Router>
       <Layout>

@@ -158,13 +158,14 @@ export interface AudioEnvSnapshot {
   webgpu: boolean
   kokoroEnabled: boolean
   kokoroReady: boolean
+  kokoroSlow: boolean
   voiceTotal: number
   voiceEn: number
   voiceZh: number
 }
 
 /** 读取环境快照（voices 现场取，避免与 webSpeech 内部状态不同步） */
-export function readAudioEnv(kokoro: { enabled: boolean; ready: boolean }): AudioEnvSnapshot {
+export function readAudioEnv(kokoro: { enabled: boolean; ready: boolean; slow: boolean }): AudioEnvSnapshot {
   let vs: SpeechSynthesisVoice[] = []
   try {
     vs = window.speechSynthesis?.getVoices?.() ?? []
@@ -176,6 +177,7 @@ export function readAudioEnv(kokoro: { enabled: boolean; ready: boolean }): Audi
     webgpu: isWebGPUSupported(),
     kokoroEnabled: kokoro.enabled,
     kokoroReady: kokoro.ready,
+    kokoroSlow: kokoro.slow,
     voiceTotal: vs.length,
     voiceEn: count('en'),
     voiceZh: count('zh'),

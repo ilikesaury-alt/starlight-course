@@ -21,7 +21,7 @@
 import { PlayOutcome } from './engine/types'
 import { playYoudaoResilient } from './engine/youdao'
 import { speakWithWebSpeech } from './engine/webSpeech'
-import { speakWithKokoro, isKokoroEnabled, isKokoroReady, warmupKokoro } from './engine/kokoro'
+import { speakWithKokoro, isKokoroEnabled, isKokoroReady, isKokoroSlow, warmupKokoro } from './engine/kokoro'
 import {
   speakWithEdgeTts,
   isEdgeBrowser,
@@ -242,11 +242,22 @@ export function speakText(text: string, opts: SpeakOptions = {}) {
     }
     chain.push({ name: 'youdao', run: () => playYoudaoResilient(text, 'zh', slow ? 0.6 : 1, guard, onAudio) })
   } else {
-    // 英文：Kokoro（仅当模型已就绪）→ 云 TTS（整句先百度、单词先有道，
-    //          整段→分片→原生兜底）→ WebSpeech
+    // 英文：Kokoro（快设备优先；慢设备退到云 TTS 之后当离线备份）→
+    //      云 TTS（整句先百度、单词先有道，整段→分片→原生兜底）→ WebSpeech
+    let kokoroBackup: ChainStep | null = null
     if (isKokoroEnabled()) {
       if (isKokoroReady()) {
-        chain.push({ name: 'kokoro', run: () => speakWithKokoro(text, { slow, guard, onAudio }) })
+        if (isKokoroSlow()) {
+          // 慢设备（实测手机上一个单词 5~6s、整句 20~60s）：云端 2~3 秒就能出声，
+          // 没理由让孩子干等 Kokoro。降到云 TTS 之后只当「断网时的离线备份」，
+          // 并放宽生成预算 —— 此时网络路径已全部耗尽，等一等是唯一还能发声的机会。
+          kokoroBackup = {
+            name: 'kokoro',
+            run: () => speakWithKokoro(text, { slow, guard, onAudio, budgetMs: 30000 }),
+          }
+        } else {
+          chain.push({ name: 'kokoro', run: () => speakWithKokoro(text, { slow, guard, onAudio }) })
+        }
       } else {
         // 模型未就绪：本次发音完全绕过 Kokoro（云 TTS 是主力），只把原因记进诊断流
         traceNote('kokoro', '模型未就绪，本次发音跳过（走云 TTS）', text)
@@ -254,6 +265,8 @@ export function speakText(text: string, opts: SpeakOptions = {}) {
       }
     }
     chain.push({ name: 'youdao', run: () => playYoudaoResilient(text, 'en', slow ? 0.6 : 1, guard, onAudio) })
+    // 云端也全军覆没（典型：离线）时才轮到 Kokoro 备份，再往后才是原生合成器
+    if (kokoroBackup) chain.push(kokoroBackup)
   }
   // 兜底链最后一级：传 lastResort，让原生合成器无视假死冷却期。
   // 否则一旦引擎假死被判「死亡」，冷却期内每次点击都直接失败 —— 而此时

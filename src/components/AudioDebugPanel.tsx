@@ -22,7 +22,14 @@ import {
   subscribeTrace,
   type TraceEvent,
 } from '@/utils/engine/engineTrace'
-import { isKokoroEnabled, isKokoroReady } from '@/utils/engine/kokoro'
+import {
+  isKokoroEnabled,
+  isKokoroReady,
+  isKokoroSlow,
+  getKokoroModelState,
+  isWebGPUAdapterOk,
+  probeWebGPUAdapter,
+} from '@/utils/engine/kokoro'
 
 /** 订阅事件流：面板需要在引擎切换/记录时重渲染 */
 function useTraceVersion(): number {
@@ -57,19 +64,42 @@ export default function AudioDebugPanel() {
   const [, force] = useState(0)
   useEffect(() => {
     if (!isAudioDebug()) return
+    // 真去要一次 GPU 适配器：navigator.gpu 存在不等于能用，探一次面板才显示真话
+    void probeWebGPUAdapter().then(() => force((n) => n + 1))
     const t = setInterval(() => force((n) => n + 1), 2000)
     return () => clearInterval(t)
   }, [])
 
   if (!isAudioDebug()) return null
 
-  const env = readAudioEnv({ enabled: isKokoroEnabled(), ready: isKokoroReady() })
+  const env = readAudioEnv({ enabled: isKokoroEnabled(), ready: isKokoroReady(), slow: isKokoroSlow() })
   const last = getLastSuccess()
   const events = getTrace()
+  const model = getKokoroModelState()
   const missing: string[] = []
   if (!env.voiceEn) missing.push('英文语音包')
   if (!env.voiceZh) missing.push('中文语音包')
-  if (env.kokoroEnabled && !env.kokoroReady) missing.push('Kokoro 模型未就绪')
+  if (env.kokoroEnabled && !env.kokoroReady) {
+    // 拿不到适配器时说「模型未就绪」是误导 —— 模型压根不该去下
+    missing.push(
+      isWebGPUAdapterOk() === false ? 'WebGPU 无适配器（Kokoro 用不了）' : 'Kokoro 模型未就绪',
+    )
+  }
+
+  /** 模型加载状态：区分「正在下载」（要等）与「已失败」（等也没用），别都写成未就绪 */
+  const modelLabel = !env.kokoroEnabled
+    ? '⏸已关闭'
+    : env.kokoroReady
+      ? env.kokoroSlow
+        ? '🐢 慢（退到云后）'
+        : `✅已就绪${model.phase === 'ready' && model.device === 'wasm' ? '·CPU' : ''}`
+      : model.phase === 'connecting'
+        ? '🔌 连接模型源…'
+        : model.phase === 'downloading'
+          ? `📥 下载中 ${model.total ? Math.round((model.loaded / model.total) * 100) : '?'}%`
+          : model.phase === 'failed'
+            ? '❌ 加载失败'
+            : '⏳未就绪'
 
   return (
     <div
@@ -109,10 +139,27 @@ export default function AudioDebugPanel() {
       </div>
 
       <div style={{ marginTop: 4, color: '#9aa4b2' }}>
-        WebGPU {env.webgpu ? '✅' : '❌'} · Kokoro{' '}
-        {env.kokoroEnabled ? (env.kokoroReady ? '✅已就绪' : '⏳未就绪') : '⏸已关闭'} · 语音包 en{' '}
+        {/* WebGPU 三态：有适配器=真能用 / 探到没有 / 只是 API 在（还没探） */}
+        WebGPU {isWebGPUAdapterOk() === false ? '❌无适配器' : env.webgpu ? '✅' : '❌'} · Kokoro {modelLabel}
+        {' · 语音包 en '}
         {env.voiceEn} / zh {env.voiceZh}（共 {env.voiceTotal}）
       </div>
+
+      {/* 模型源/进度：以前只会显示「未就绪」，看不出是在下载还是已经放弃了 */}
+      {env.kokoroEnabled && !env.kokoroReady && (model.phase === 'connecting' || model.phase === 'downloading' || model.phase === 'failed') && (
+        <div style={{ marginTop: 2, color: model.phase === 'failed' ? '#f85149' : '#8b949e' }}>
+          {model.phase === 'connecting' &&
+            `正在连接 ${model.host.replace('https://', '')}（${model.device === 'wasm' ? 'CPU/WASM' : 'WebGPU'}）…`}
+          {model.phase === 'downloading' && (
+            <>
+              源 {model.host.replace('https://', '')} · {model.device === 'wasm' ? 'CPU/WASM' : 'WebGPU'} ·{' '}
+              {(model.loaded / 1048576).toFixed(1)}
+              {model.total ? ` / ${(model.total / 1048576).toFixed(0)} MB` : ' MB'}
+            </>
+          )}
+          {model.phase === 'failed' && `加载失败：${model.reason}`}
+        </div>
+      )}
 
       {missing.length > 0 && (
         <div style={{ marginTop: 4, color: '#fdb022' }}>⚠️ 缺：{missing.join('、')}</div>
