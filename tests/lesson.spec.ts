@@ -45,7 +45,7 @@ test.describe('Starlight 主课与单词卡', () => {
     await page.goto('/#/preview/hello/1')
 
     // 三标签结构:句型在「课本原文」tab 顶部的重点句型条中
-    await page.getByRole('button', { name: /课本原文/ }).click()
+    await page.locator('.tab-bar').getByRole('button', { name: /课本原文/ }).click()
     // 第一课首句
     await expect(page.getByText('Hello! How are you?').first()).toBeVisible()
   })

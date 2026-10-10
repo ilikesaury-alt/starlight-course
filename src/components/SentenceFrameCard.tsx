@@ -4,6 +4,7 @@
 import { useState } from 'react'
 import SentenceReader from './SentenceReader'
 import SpeakButton from './SpeakButton'
+import TappableWords from './TappableWords'
 import { fillFrame, frameZh, type SentenceFrame } from '@/data/sentenceFrame'
 
 interface Props {
@@ -54,7 +55,9 @@ export default function SentenceFrameCard({ frame, onPass }: Props) {
   return (
     <div className="sfc-card">
       <div className="sfc-zh">💡 {zhNow}</div>
-      <div className="sfc-pattern">{preview()}</div>
+      <div className="sfc-pattern">
+        <TappableWords text={preview()} />
+      </div>
 
       {blanksCount > 0 && (
         <div className="sfc-blanks">
