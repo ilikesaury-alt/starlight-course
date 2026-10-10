@@ -160,7 +160,23 @@ test.describe('拓展词自动填充', () => {
   })
 })
 
-test.describe('跟读区（降级闭环）', () => {
+test.describe('Tab 栏', () => {
+  test('「🗣️ 跟读」Tab 已隐藏，只剩四个标签', async ({ page }) => {
+    await page.goto(LESSON)
+    // 隐藏是 SHOW_SPEAK_TAB=false：只收入口，跟读相关代码与组件原样保留
+    await expect(page.getByRole('button', { name: /跟读/ })).toHaveCount(0)
+    await expect(page.locator('.tab-btn')).toHaveCount(4)
+    for (const name of [/单词卡/, /句型/, /课本原文/, /闯关/]) {
+      await expect(page.getByRole('button', { name })).toBeVisible()
+    }
+  })
+})
+
+// 「🗣️ 跟读」Tab 已按需求隐藏（LessonPreview 的 SHOW_SPEAK_TAB=false），
+// 这三个降级闭环用例的入口（tab 按钮）随之消失，故整组跳过。
+// 恢复 Tab 时把 describe.skip 改回 describe 即可，用例本身无需改动。
+// SentenceReader 自身的降级闭环仍由 src/components/SentenceReader.test.tsx 覆盖。
+test.describe.skip('跟读区（降级闭环）', () => {
   test('不支持语音识别时只给常驻说明，不假装能打分', async ({ page }) => {
     // Chromium 本身有 webkitSpeechRecognition，这里主动抹掉以稳定复现降级分支
     await withStt(page, () => {
@@ -232,7 +248,8 @@ test.describe('句型框架区', () => {
     // 其余 70 课点开「🧩 句型」只有一句「这一课还没有句型框架卡。」
     for (const lesson of ['/#/preview/hello/3', '/#/preview/animals/8', '/#/preview/food/6', '/#/preview/transport/2']) {
       await page.goto(lesson)
-      await page.getByRole('button', { name: /句型/ }).click()
+      // 作用域限定在 tab-bar：分区卡标题栏也是按钮（如「🧩 句型框架卡」），全局匹配会歧义
+      await page.locator('.tab-bar').getByRole('button', { name: /句型/ }).click()
       await expect(page.locator('.sfc-card').first()).toBeVisible()
       await expect(page.getByText('这一课还没有句型框架卡。')).toHaveCount(0)
       // 未选词时「说出整句」禁用，选词后可点（框架卡主流程仍然活着）
@@ -246,7 +263,7 @@ test.describe('句型框架区', () => {
   test('Unit4 试点课可填空并说出整句', async ({ page }) => {
     await page.goto('/#/preview/toys/1') // Unit 4 Lesson 1（My Toys）
     await expect(page.getByRole('heading', { name: /My Toys/ })).toBeVisible()
-    await page.getByRole('button', { name: /句型/ }).click()
+    await page.locator('.tab-bar').getByRole('button', { name: /句型/ }).click()
 
     await expect(page.locator('.sfc-pattern').first()).toContainText('I have a')
     // 未选词时「说出整句」禁用
@@ -261,17 +278,18 @@ test.describe('句型框架区', () => {
 test.describe('课文点读', () => {
   test('点词弹释义，按记忆强度着色', async ({ page }) => {
     await page.goto(LESSON)
-    await page.getByRole('button', { name: /课本原文/ }).click()
+    await page.locator('.tab-bar').getByRole('button', { name: /课本原文/ }).click()
 
-    // 试点课渲染 TappableText
-    const words = page.locator('.tt-word')
+    // 试点课渲染点读气泡（作用域限定在 passage-zone，
+    // 外教对话区也有 tt-word，全局匹配会点到剧本台词上）
+    const words = page.locator('.passage-zone .tt-word')
     await expect(words.first()).toBeVisible()
     expect(await words.count()).toBeGreaterThan(0)
 
     // 点一个词 → 弹释义
-    await page.locator('.tt-word', { hasText: 'how' }).first().click()
-    await expect(page.locator('.tt-pop')).toBeVisible()
-    await expect(page.locator('.tt-pop-word')).toHaveText('how')
+    await page.locator('.passage-zone .tt-word', { hasText: 'how' }).first().click()
+    await expect(page.locator('.passage-zone .tt-pop')).toBeVisible()
+    await expect(page.locator('.passage-zone .tt-pop-word')).toHaveText('how')
 
     // 三档着色都在
     await expect(page.locator('.tt-legend .tt-word--known')).toBeVisible()
@@ -282,9 +300,9 @@ test.describe('课文点读', () => {
   test('扩量后非试点课也渲染点读视图', async ({ page }) => {
     // passage 已从试点 2 课扩到全部 96 课，toys/5 不再走 BookTextView 回落
     await page.goto('/#/preview/toys/5')
-    await page.getByRole('button', { name: /课本原文/ }).click()
+    await page.locator('.tab-bar').getByRole('button', { name: /课本原文/ }).click()
     await expect(page.locator('.passage-zone')).toBeVisible()
-    await expect(page.locator('.tt-word').first()).toBeVisible()
+    await expect(page.locator('.passage-zone .tt-word').first()).toBeVisible()
   })
 
   test('全 96 课都有 passage 数据（覆盖度回归）', () => {

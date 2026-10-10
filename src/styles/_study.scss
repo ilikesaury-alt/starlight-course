@@ -145,7 +145,8 @@
 }
 .fc-controls { display: flex; gap: 10px; justify-content: center; }
 
-.word-list-mini { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 16px; }
+.word-list-mini { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+// 词表 chip 本身就是按钮：点词 = 发音 + 切卡看词义；英文按记忆强度着色
 .word-chip {
   display: flex;
   align-items: center;
@@ -154,14 +155,18 @@
   border-radius: var(--r-md);
   background: var(--card);
   border: 1px solid var(--line);
+  font-family: inherit;
   font-size: var(--fs-base);
   font-weight: 600;
+  cursor: pointer;
   transition: var(--ease);
-  flex-wrap: nowrap;
+  text-align: left;
   &:active { transform: scale(0.96); }
   &.on { border-color: var(--mc, var(--brand)); background: var(--mc-soft, var(--brand-soft)); }
-  span:nth-child(2) { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 }
+.word-chip-emoji { font-size: var(--fs-lg); flex-shrink: 0; }
+.word-chip-en { flex-shrink: 0; font-weight: 800; }
+.word-chip-zh { font-size: var(--fs-sm); color: var(--ink-soft); font-weight: 500; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 // ---------- 句型 Sentences ----------
 .sent-list { margin-top: 12px; display: grid; gap: 8px; }
@@ -511,7 +516,9 @@
 }
 
 // ---------- 对话 Dialogue ----------
-.dialogue-list { margin-top: 14px; display: flex; flex-direction: column; gap: 10px; }
+.dialogue-list { display: flex; flex-direction: column; gap: 10px; }
+// 在统一分区卡片内时，间距由 zone-card-body 管，去掉自带外边距
+.zone-card-body .dialogue-list { margin-top: 0; }
 .dialogue-bubble {
   max-width: 80%;
   padding: 12px 16px;
@@ -520,23 +527,31 @@
   font-weight: 600;
   box-shadow: var(--shadow-sm);
   animation: bubble-in 0.3s ease;
+  // 外教：白底卡片；孩子：模块浅色底 + 深色字。
+  // 两边都用浅色是必须的——气泡里的逐词点读要靠三档记忆色（深绿/深棕/灰）区分，
+  // 深色底会把这几档字色吃掉，孩子看不清自己跟读的词。
   &.left { align-self: flex-start; background: var(--card); border: 1px solid var(--line); border-bottom-left-radius: 4px; }
-  &.right { align-self: flex-end; background: var(--brand-deep); color: #fff; border-bottom-right-radius: 4px; }
+  &.right { align-self: flex-end; background: var(--mc-soft, var(--brand-soft)); color: var(--mc-deep, var(--brand-deep)); border: 1px solid var(--mc, var(--brand)); border-bottom-right-radius: 4px; }
 }
 @keyframes bubble-in { 0% { transform: translateY(8px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
 .dialogue-zh { font-size: var(--fs-sm); font-weight: 400; margin-top: 4px; opacity: 0.8; }
 .dialogue-speaker { font-size: var(--fs-xs); color: var(--ink-soft); margin-bottom: 2px; }
-.dialogue-bubble.right .dialogue-speaker { color: rgba(255, 255, 255, 0.7); }
+.dialogue-bubble.right .dialogue-speaker { color: var(--mc-deep, var(--brand-deep)); opacity: 0.75; }
+// 气泡里的词义弹层用白底，避免和孩子的浅色气泡糊在一起
+.dialogue-bubble .tt-pop { background: var(--card); border: 1px solid var(--line); }
+// 气泡内的整句播放按钮行（右对齐，不抢台词的视觉重量）
+.dialogue-foot { display: flex; justify-content: flex-end; gap: 8px; margin-top: 6px; }
+.dialogue-note { font-size: var(--fs-sm); font-weight: 500; opacity: 0.85; margin-top: 4px; }
 
-// ---------- 本课重点句型（课本原文标签顶部的折叠条） ----------
-.pattern-strip {
+// ---------- 统一分区卡片（单词 / 句型 / 外教对话 / 课本原文共用） ----------
+.zone-card {
   border: 1px solid var(--mc, var(--brand));
   border-radius: var(--r-md);
   background: var(--card);
   overflow: hidden;
   margin-bottom: 14px;
 }
-.pattern-strip-head {
+.zone-card-head {
   width: 100%;
   display: flex;
   align-items: center;
@@ -550,17 +565,24 @@
   font-family: inherit;
   font-size: var(--fs-md);
   font-weight: 800;
+  text-align: left;
 }
-.pattern-strip-toggle {
+.zone-card-title { min-width: 0; }
+.zone-card-side {
   font-size: var(--fs-sm);
   font-weight: 600;
   opacity: 0.8;
+  white-space: nowrap;
 }
-.pattern-strip-body {
-  display: grid;
-  gap: 10px;
-  padding: 12px;
+.zone-card-body { display: grid; gap: 12px; padding: 12px; }
+.zone-lead {
+  font-size: var(--fs-md);
+  font-weight: 600;
+  color: var(--ink-soft);
+  .sent-hint { display: block; margin-top: 4px; font-size: var(--fs-sm); opacity: 0.85; }
 }
+
+// ---------- 本课重点句型 ----------
 .pattern-item {
   border-bottom: 1px dashed var(--line, #e5e7eb);
   padding-bottom: 10px;
@@ -571,11 +593,6 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 8px;
-}
-.pattern-en {
-  font-size: var(--fs-lg, 18px);
-  font-weight: 700;
-  color: var(--ink);
 }
 .pattern-zh {
   margin-top: 4px;
@@ -856,6 +873,8 @@
   font-weight: 800;
   text-align: center;
   letter-spacing: 0.02em;
+  // 句型也可逐词点读：字号/字重跟随卡片，别再被 .tt-text 覆盖
+  .tt-text { font-size: inherit; font-weight: inherit; line-height: 1.7; text-align: center; }
 }
 .sfc-blanks { display: grid; gap: 8px; }
 .sfc-blank-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
@@ -887,7 +906,10 @@
 .sfc-hint { font-size: var(--fs-sm); color: var(--ink-soft); font-weight: 600; }
 
 // ---------- 课文点读（D） ----------
-.passage-zone { display: grid; gap: 10px; }
+// passage-zone 现在是统一分区卡片上的挂钩类名（样式走 zone-card），
+// 气泡之间的间距由 dialogue-list 管
+.passage-zone .tt-legend { margin-top: 2px; }
+.tt-words { display: block; }
 .tt-wrap {
   padding: 12px 14px;
   border: 1px solid var(--line, #e5e7eb);
@@ -903,10 +925,13 @@
 }
 .tt-text {
   margin: 0;
-  font-size: var(--fs-lg);
-  line-height: 2;
+  font-size: var(--fs-md);
+  line-height: 1.9;
   font-weight: 600;
 }
+// 气泡里字号略收，行距略紧，一屏能多看两句
+.dialogue-bubble .tt-text { font-size: var(--fs-md); line-height: 1.8; }
+.dialogue-bubble .tt-words { margin: 0; }
 .tt-word {
   border: 0;
   background: transparent;

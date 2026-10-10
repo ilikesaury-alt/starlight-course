@@ -2,7 +2,7 @@
 //   🎴 单词区 —— 逐词翻卡 + 本课词表 + ➕ E 课堂拓展词（录入 / 删除）
 //   🗣️ 跟读区 —— 逐句跟读：播原句 → 孩子跟读 → 逐词高亮 → 达标入 SRS（没听清自动重听，识别不了孩子自己重读或跳过）
 //   🧩 句型区 —— 句子框架卡：填空 + 说出整句
-//   📖 课文区 —— 教材 PDF 提取的真实课文（逐词可点、可听、带中文），顶部先给本课重点句型
+//   📖 课文区 —— 顶部给本课重点句型 + 🎭 外教课堂对话，下面是教材 PDF 提取的真实课文（逐词可点、可听、带中文）
 //   🎯 闯关   —— 从课本原文挖空生成选词填空，题量不足时用本课单词与单元测验补足
 // 三个逻辑模块共用 BookTextView / bookQuiz / bookDict，逻辑不在页面里重复实现。
 
@@ -13,15 +13,20 @@ import Flashcard from '@/components/Flashcard'
 import SafeBoundary from '@/components/SafeBoundary'
 import QuizEngine, { type QuizItem } from '@/components/QuizEngine'
 import BookTextView from '@/components/BookTextView'
-import TappableText, { PassageLegend } from '@/components/TappableText'
+import TappableWords from '@/components/TappableWords'
+import { PassageLegend } from '@/components/TappableText'
 import Breadcrumb from '@/components/Breadcrumb'
 import ExtensionWordEntry from '@/components/ExtensionWordEntry'
 import SentenceReader from '@/components/SentenceReader'
 import SentenceFrameCard from '@/components/SentenceFrameCard'
+import LessonDialogueBox from '@/components/LessonDialogueBox'
+import ZoneCard from '@/components/ZoneCard'
 import { EXT_LIMIT, lessonTopicZh, suggestExtensions, type ExtWord } from '@/data/extensionTopics'
 import { getModule, STARLIGHT_THEME, type Sentence, type Word } from '@/data/starlight'
 import { getLessonBook } from '@/data/starlight-book'
 import { getPassage } from '@/data/starlight-passage'
+import { getLessonDialogue } from '@/data/lessonDialogue'
+import { passageToTurns } from '@/utils/passageDialogue'
 import { framesOfLesson, frameCardKey } from '@/data/sentenceFrame'
 import { useCourseStore } from '@/store/useCourseStore'
 import { useSettleQuiz } from '@/hooks/useSettleQuiz'
@@ -29,8 +34,22 @@ import { speakText } from '@/utils/speak'
 import { buildLineZhIndex, lineZhOf } from '@/utils/passageZh'
 import { moduleThemeVars } from '@/utils/theme'
 import { buildClozeQuiz, buildListeningQuiz, buildWordQuiz } from '@/utils/bookQuiz'
+import { boxLevel } from '@/utils/boxLevel'
 
 type Tab = 'vocab' | 'speak' | 'frame' | 'book' | 'quiz'
+
+/**
+ * 「🗣️ 跟读」Tab 开关。
+ *
+ * 隐藏原因：跟读依赖麦克风 + 原生 SpeechRecognition（仅桌面 Chrome/Edge 可用），
+ * 孩子实际用不上这一区，五个标签挤在一起也容易点错。
+ *
+ * 这只是收起入口，不是删功能：`tab === 'speak'` 的整块渲染、SentenceReader、
+ * useSentenceReader、自动换句播放全部原样保留。想恢复时把这里改回 `true` 即可，
+ * 并把 tests/starlight-zones.spec.ts 里 `跟读区（降级闭环）` 的 describe.skip 改回 describe。
+ * 句子仍会在打开课时照常 seedCards 进复习池，收起 Tab 不影响 SRS。
+ */
+const SHOW_SPEAK_TAB = false
 
 export default function LessonPreview() {
   const { unitId = '', lessonId = '' } = useParams()
@@ -75,6 +94,8 @@ export default function LessonPreview() {
   const chapters = useMemo(() => book?.sections ?? [], [book])
   // 拓展词 key 与课本原文保持同一套「单元号-课号」命名
   const lessonKey = `${mod?.id ?? 0}-${lesson?.id ?? 0}`
+  // 外教课堂对话：每课一段，在「课本原文」tab 顶部替代原来的操作说明
+  const dialogue = mod && lesson ? getLessonDialogue(mod.id, lesson.id) : undefined
   // useMemo：空数组不能每次渲染都造新的，否则下面自动填充 effect 的依赖会一直抖
   const extensions = useMemo(
     () => starlightExtensions[lessonKey] ?? [],
@@ -111,6 +132,8 @@ export default function LessonPreview() {
   const frames = mod && lesson ? framesOfLesson(mod.slug, lesson.id) : []
   // 课文点读（D）：试点课有提取出的 passage，其余课回落到 BookTextView
   const passage = mod && lesson ? getPassage(mod.id, lesson.id) : undefined
+  // 课本原文拆解成课堂对话（外教 ↔ 孩子），替代原来的扁平句子清单
+  const passageTurns = useMemo(() => passageToTurns(passage?.lines ?? []), [passage])
   // 点读区整句中文索引：课本 textZh（人工翻译） > 本单元句子表；都查不到时逐词拼粗释义
   const lineZhIndex = useMemo(
     () =>
@@ -223,13 +246,15 @@ export default function LessonPreview() {
           >
             🎴 单词卡
           </button>
-          <button
-            type="button"
-            className={'tab-btn' + (tab === 'speak' ? ' active' : '')}
-            onClick={() => setTab('speak')}
-          >
-            🗣️ 跟读
-          </button>
+          {SHOW_SPEAK_TAB && (
+            <button
+              type="button"
+              className={'tab-btn' + (tab === 'speak' ? ' active' : '')}
+              onClick={() => setTab('speak')}
+            >
+              🗣️ 跟读
+            </button>
+          )}
           <button
             type="button"
             className={'tab-btn' + (tab === 'frame' ? ' active' : '')}
@@ -300,8 +325,8 @@ export default function LessonPreview() {
           frames.length === 0 ? (
             <div className="empty"><p>这一课还没有句型框架卡。</p></div>
           ) : (
-            <div className="frame-zone" style={mcStyle}>
-              <p className="lead">
+            <ZoneCard title="🧩 句型框架卡" side="点词听发音" mcStyle={mcStyle}>
+              <p className="zone-lead">
                 先把句子补完整，再用整句说出来。
                 <span className="sent-hint">框架卡会进复习池，到期时在智能复习里练</span>
               </p>
@@ -315,33 +340,39 @@ export default function LessonPreview() {
                   }}
                 />
               ))}
-            </div>
+            </ZoneCard>
           )
         )}
         {tab === 'book' && (
           <>
-            <PatternStrip sentences={sentences} mcStyle={mcStyle} />
+            <PatternStrip sentences={sentences} mcStyle={mcStyle} vocab={words} boxOf={(en) => srsCards[en]?.box} />
+            {dialogue && <LessonDialogueBox dialogue={dialogue} mcStyle={mcStyle} vocab={words} boxOf={(en) => srsCards[en]?.box} />}
             {passage ? (
-              <section className="passage-zone" style={mcStyle}>
-                <p className="lead">
-                  点任意单词听发音、看词义，点的词会按记忆强度着色。
-                  <span className="sent-hint">🟩 熟 · 🟨 模糊 · ⬜ 未知</span>
-                </p>
-                {passage.lines.map((line, i) => {
-                  const { zh, auto } = lineZhOf(lineZhIndex, line)
+              <ZoneCard
+                title="📖 课本原文 · 拆解成课堂对话"
+                side="👩‍🏫 外教 ↔ 🧒 孩子 · 点词听发音"
+                mcStyle={mcStyle}
+                className="passage-zone"
+              >
+                {passageTurns.map((t, i) => {
+                  const { zh, auto } = lineZhOf(lineZhIndex, t.en)
                   return (
-                    <TappableText
-                      key={i}
-                      text={line}
-                      textZh={zh}
-                      textZhAuto={auto}
-                      vocab={words}
-                      boxOf={(en) => srsCards[en]?.box}
-                    />
+                    <div key={i} className={'dialogue-bubble ' + (t.speaker === 'T' ? 'left' : 'right')}>
+                      <div className="dialogue-speaker">{t.speaker === 'T' ? '👩‍🏫 外教' : '🧒 孩子'}</div>
+                      <TappableWords text={t.en} vocab={words} boxOf={(en) => srsCards[en]?.box} />
+                      <div className="dialogue-foot">
+                        <SpeakButton text={t.en} label="朗读整句" />
+                      </div>
+                      {zh && (
+                        <div className="dialogue-zh">
+                          {auto ? '逐词参考' : '整句'}：{zh}
+                        </div>
+                      )}
+                    </div>
                   )
                 })}
                 <PassageLegend />
-              </section>
+              </ZoneCard>
             ) : hasBook ? (
               <BookTextView
                 chapters={chapters}
@@ -410,6 +441,7 @@ function VocabTab({ words, mcStyle }: { words: Word[]; mcStyle: React.CSSPropert
   const [selfChecked, setSelfChecked] = useState<Set<string>>(new Set())
   const seedCards = useCourseStore((s) => s.seedCards)
   const recordReview = useCourseStore((s) => s.recordReview)
+  const srsCards = useCourseStore((s) => s.srsCards)
   // 首卡/首次进入不自动发音(等用户点击),避免挂载即响;仅「切换单词」时发音
   const firstSpeakRef = useRef(true)
   useEffect(() => { setIdx(0); setShowZh(true); setSelfChecked(new Set()) }, [words])
@@ -492,21 +524,24 @@ function VocabTab({ words, mcStyle }: { words: Word[]; mcStyle: React.CSSPropert
         <button type="button" className="btn" onClick={next}>下一个 →</button>
       </div>
 
-      <div className="word-list-mini" style={mcStyle}>
-        {words.map((ww, i) => (
-          <div
-            key={ww.en}
-            className={'word-chip' + (i === idx ? ' on' : '')}
-            onClick={() => setIdx(i)}
-          >
-            <span>{ww.emoji}</span>
-            <span>{ww.en}</span>
-            <span onClick={(e) => e.stopPropagation()}>
-              <SpeakButton text={ww.en} label={ww.en} />
-            </span>
-          </div>
-        ))}
-      </div>
+      {/* 本课词表：点词本身即发音 + 切卡看词义；单词按记忆强度着色（与课文点读同一套） */}
+      <ZoneCard title="📚 本课词表 · 点词听发音、看词义" side="熟 🟩 · 模糊 🟨 · 未知 ⬜" mcStyle={mcStyle}>
+        <div className="word-list-mini">
+          {words.map((ww, i) => (
+            <button
+              key={ww.en}
+              type="button"
+              className={'word-chip' + (i === idx ? ' on' : '')}
+              onClick={() => { setIdx(i); speakText(ww.en) }}
+              aria-label={`${ww.en} ${ww.zh}`}
+            >
+              <span className="word-chip-emoji">{ww.emoji}</span>
+              <span className={`word-chip-en tt-word tt-word--${boxLevel(srsCards[ww.en]?.box)}`}>{ww.en}</span>
+              <span className="word-chip-zh">{ww.zh}</span>
+            </button>
+          ))}
+        </div>
+      </ZoneCard>
     </>
   )
 }
@@ -601,30 +636,33 @@ function ExtensionSection({
 }
 
 // 本课重点句型：放在课本原文上方，先看 5 个核心句，再读整篇课文。
-function PatternStrip({ sentences, mcStyle }: { sentences: Sentence[]; mcStyle: React.CSSProperties }) {
-  const [open, setOpen] = useState(true)
+function PatternStrip({
+  sentences,
+  mcStyle,
+  vocab,
+  boxOf,
+}: {
+  sentences: Sentence[]
+  mcStyle: React.CSSProperties
+  /** 本课词表：点词弹释义时优先取 emoji/中文 */
+  vocab?: Word[]
+  /** en → 记忆盒号，来自 SRS（点词着色） */
+  boxOf?: (en: string) => number | undefined
+}) {
   if (sentences.length === 0) return null
   return (
-    <section className="pattern-strip" style={mcStyle}>
-      <button type="button" className="pattern-strip-head" onClick={() => setOpen((v) => !v)}>
-        <span>💬 本课重点句型（{sentences.length}）</span>
-        <span className="pattern-strip-toggle">{open ? '收起 ▲' : '展开 ▼'}</span>
-      </button>
-      {open && (
-        <div className="pattern-strip-body">
-          {sentences.map((s, i) => (
-            <div key={i} className="pattern-item">
-              <div className="pattern-en-row">
-                <span className="pattern-en">{s.en}</span>
-                <SpeakButton text={s.en} label={s.en} />
-                <SpeakButton text={s.en} label={`${s.en} 慢速`} slow />
-              </div>
-              <div className="pattern-zh">{s.zh}</div>
-              {s.hint && <div className="pattern-hint">💡 {s.hint}</div>}
-            </div>
-          ))}
+    <ZoneCard title={`💬 本课重点句型（${sentences.length}）`} side="点词听发音" mcStyle={mcStyle}>
+      {sentences.map((s, i) => (
+        <div key={i} className="pattern-item">
+          <div className="pattern-en-row">
+            <TappableWords text={s.en} vocab={vocab} boxOf={boxOf} />
+            <SpeakButton text={s.en} label={s.en} />
+            <SpeakButton text={s.en} label={`${s.en} 慢速`} slow />
+          </div>
+          <div className="pattern-zh">{s.zh}</div>
+          {s.hint && <div className="pattern-hint">💡 {s.hint}</div>}
         </div>
-      )}
-    </section>
+      ))}
+    </ZoneCard>
   )
 }
