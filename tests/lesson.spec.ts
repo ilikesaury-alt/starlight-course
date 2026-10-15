@@ -41,11 +41,12 @@ test.describe('Starlight 主课与单词卡', () => {
     await expect(page.locator('.flashcard').getByText('好的')).toBeVisible()
   })
 
-  test('课本原文 tab 可查看重点句型', async ({ page }) => {
+  test('句型 tab 顶部可查看本课重点句型', async ({ page }) => {
     await page.goto('/#/preview/hello/1')
 
-    // 三标签结构:句型在「课本原文」tab 顶部的重点句型条中
-    await page.locator('.tab-bar').getByRole('button', { name: /课本原文/ }).click()
+    // 2026-10-10 重构：重点句型从「课本原文」Tab 挪到「🧩 句型」Tab 顶部
+    // （原来三个区块在同一 Tab 里重复展示同一批句子，单 Tab 高达 12,440px）
+    await page.locator('.tab-bar').getByRole('button', { name: /句型/ }).click()
     // 第一课首句
     await expect(page.getByText('Hello! How are you?').first()).toBeVisible()
   })

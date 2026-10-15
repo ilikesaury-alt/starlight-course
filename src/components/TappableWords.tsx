@@ -5,6 +5,7 @@
 
 import { useState } from 'react'
 import { speakText } from '@/utils/speak'
+import { useSlowMode } from '@/utils/slowMode'
 import { lookupZh, wordBase, cleanForSpeak } from '@/utils/bookDict'
 import { boxLevel } from '@/utils/boxLevel'
 import type { Word } from '@/data/starlight'
@@ -16,12 +17,16 @@ interface Props {
   vocab?: Word[]
   /** en → 记忆盒号，来自 SRS */
   boxOf?: (en: string) => number | undefined
+  /** 额外标记：入参是归一后的词形（wordBase），返回 true 就加 --mark 类（阅读区标本课词用） */
+  mark?: (base: string) => boolean
   /** 点到词时回调（供外层做联动，如显示整句译文） */
   onPick?: (word: string) => void
 }
 
-export default function TappableWords({ text, vocab = [], boxOf, onPick }: Props) {
+export default function TappableWords({ text, vocab = [], boxOf, mark, onPick }: Props) {
   const [picked, setPicked] = useState<{ word: string; zh: string; emoji?: string } | null>(null)
+  // 全局慢速开关：与整句朗读共用同一套语速（TouchRead「same pronunciation profile」）
+  const slow = useSlowMode()
 
   const vocabIndex = new Map<string, Word>()
   for (const w of vocab) vocabIndex.set(w.en.toLowerCase(), w)
@@ -42,9 +47,9 @@ export default function TappableWords({ text, vocab = [], boxOf, onPick }: Props
             <button
               key={i}
               type="button"
-              className={`tt-word tt-word--${level}`}
+              className={`tt-word tt-word--${level}${mark?.(base) ? ' tt-word--mark' : ''}`}
               onClick={() => {
-                speakText(cleanForSpeak(tk))
+                speakText(cleanForSpeak(tk), { slow })
                 setPicked({ word: tk, zh, emoji: entry?.emoji })
                 onPick?.(base)
               }}

@@ -1,10 +1,15 @@
 // Starlight 单课学习页：五区布局
 //   🎴 单词区 —— 逐词翻卡 + 本课词表 + ➕ E 课堂拓展词（录入 / 删除）
-//   🗣️ 跟读区 —— 逐句跟读：播原句 → 孩子跟读 → 逐词高亮 → 达标入 SRS（没听清自动重听，识别不了孩子自己重读或跳过）
 //   🧩 句型区 —— 句子框架卡：填空 + 说出整句
-//   📖 课文区 —— 顶部给本课重点句型 + 🎭 外教课堂对话，下面是教材 PDF 提取的真实课文（逐词可点、可听、带中文）
+//   🎭 对话区 —— 外教课堂对话（真实上课语气，替代原来和课本原文挤在一个 Tab 的三重展示）
+//   📖 课文区 —— 教材 PDF 提取的真实课文，逐词可点、可听、带中文
 //   🎯 闯关   —— 从课本原文挖空生成选词填空，题量不足时用本课单词与单元测验补足
-// 三个逻辑模块共用 BookTextView / bookQuiz / bookDict，逻辑不在页面里重复实现。
+//   📚 阅读区 —— 每课一段连贯短文：逐词点读 + 本课词高亮 + 逐句朗读 + 中文对照开关
+//
+// 页面级 UI 约定（依据 docs/lesson-detail-ui-research.md）：
+//   · 慢速朗读与「记忆状态着色」是全局开关（PlayTools），不再每句配慢速按钮
+//   · 点词按钮常态无底色，命中区与视觉解耦，句子才读起来像一句话
+//   · 每个区都能「读到哪了」：整篇朗读时非当前句淡化、当前句自动滚进视口
 
 import { useState, useEffect, useMemo, useRef } from 'react'
 import { Link, useParams } from 'react-router-dom'
@@ -19,13 +24,17 @@ import Breadcrumb from '@/components/Breadcrumb'
 import ExtensionWordEntry from '@/components/ExtensionWordEntry'
 import SentenceReader from '@/components/SentenceReader'
 import SentenceFrameCard from '@/components/SentenceFrameCard'
+import ReadingZone from '@/components/ReadingZone'
 import LessonDialogueBox from '@/components/LessonDialogueBox'
+import PlayTools from '@/components/PlayTools'
 import ZoneCard from '@/components/ZoneCard'
+import { useMemoryState } from '@/utils/memoryState'
 import { EXT_LIMIT, lessonTopicZh, suggestExtensions, type ExtWord } from '@/data/extensionTopics'
 import { getModule, STARLIGHT_THEME, type Sentence, type Word } from '@/data/starlight'
 import { getLessonBook } from '@/data/starlight-book'
 import { getPassage } from '@/data/starlight-passage'
 import { getLessonDialogue } from '@/data/lessonDialogue'
+import { getReadingPassage } from '@/data/reading'
 import { passageToTurns } from '@/utils/passageDialogue'
 import { framesOfLesson, frameCardKey } from '@/data/sentenceFrame'
 import { useCourseStore } from '@/store/useCourseStore'
@@ -36,7 +45,10 @@ import { moduleThemeVars } from '@/utils/theme'
 import { buildClozeQuiz, buildListeningQuiz, buildWordQuiz } from '@/utils/bookQuiz'
 import { boxLevel } from '@/utils/boxLevel'
 
-type Tab = 'vocab' | 'speak' | 'frame' | 'book' | 'quiz'
+// 六个区：「跟读」Tab 已按需求隐藏（SHOW_SPEAK_TAB=false），入口收起来但代码保留。
+// 顺序即 Tab 栏顺序：单词卡 → 句型 → 外教对话 → 课本原文 → 闯关 → 阅读。
+// 阅读放最后：它是课后自选动作，不与「学新课」抢位置。
+type Tab = 'vocab' | 'speak' | 'frame' | 'dialogue' | 'book' | 'quiz' | 'read'
 
 /**
  * 「🗣️ 跟读」Tab 开关。
@@ -63,6 +75,9 @@ export default function LessonPreview() {
   const [tab, setTab] = useState<Tab>('vocab')
   const [showExtEntry, setShowExtEntry] = useState(false)
   const [sentIdx, setSentIdx] = useState(0)
+  // 记忆状态着色开关：className 落到 .lesson-shell，所有点词按钮（.tt-word）
+  // 都受 .sr-mem 控制，不需要每个区各自接线。
+  const memOn = useMemoryState()
   // 点「上一句 / 下一句」后，新一句挂载时自动播一遍示范
   const [sentAutoPlay, setSentAutoPlay] = useState(false)
   // 离开跟读区就收起自动播，避免切回来时莫名出声
@@ -132,6 +147,8 @@ export default function LessonPreview() {
   const frames = mod && lesson ? framesOfLesson(mod.slug, lesson.id) : []
   // 课文点读（D）：试点课有提取出的 passage，其余课回落到 BookTextView
   const passage = mod && lesson ? getPassage(mod.id, lesson.id) : undefined
+  // 📚 阅读短文：每课一段连贯短文，用词严格限定在本课/本单元词表 + 基线高频词
+  const reading = mod && lesson ? getReadingPassage(mod.id, lesson.id) : undefined
   // 课本原文拆解成课堂对话（外教 ↔ 孩子），替代原来的扁平句子清单
   const passageTurns = useMemo(() => passageToTurns(passage?.lines ?? []), [passage])
   // 点读区整句中文索引：课本 textZh（人工翻译） > 本单元句子表；都查不到时逐词拼粗释义
@@ -220,10 +237,12 @@ export default function LessonPreview() {
 
   return (
     <div className="page lesson-preview" style={mcStyle}>
+      {/* 头部从 4 层压到 2 层（面包屑 + 标题），删掉与面包屑信息重复的
+          「📖 Starlight 课前预习」mode-badge：430px 视口下首屏该看到学习内容，
+          不是四层导航 chrome。面包屑本身也缩短为「‹ 模块 · Lesson N」。 */}
       <Breadcrumb
         items={[
           { label: '🏠', to: '/' },
-          { label: 'Starlight 主课', to: '/starlight' },
           { label: mod.title, to: `/preview/${unitId}` },
           { label: `Lesson ${lesson.id}` },
         ]}
@@ -231,13 +250,12 @@ export default function LessonPreview() {
       <div className="page-head" style={mcStyle}>
         <span className="page-emoji">{mod.emoji}</span>
         <div>
-          <div className="page-kicker">Module {mod.id} · Lesson {lesson.id}</div>
           <h1 className="page-title">{lesson.title}{lesson.titleZh ? ` · ${lesson.titleZh}` : ''}</h1>
         </div>
       </div>
 
       <SafeBoundary label="课前预习">
-        <div className="mode-badge mode-preview">📖 Starlight 课前预习</div>
+        <div className={'lesson-shell' + (memOn ? ' sr-mem' : '')}>
         <div className="tab-bar" style={mcStyle}>
           <button
             type="button"
@@ -264,10 +282,17 @@ export default function LessonPreview() {
           </button>
           <button
             type="button"
+            className={'tab-btn' + (tab === 'dialogue' ? ' active' : '')}
+            onClick={() => setTab('dialogue')}
+          >
+            🎭 外教对话
+          </button>
+          <button
+            type="button"
             className={'tab-btn' + (tab === 'book' ? ' active' : '')}
             onClick={() => setTab('book')}
           >
-            📖 课本原文
+            📖 课文
           </button>
           <button
             type="button"
@@ -275,6 +300,13 @@ export default function LessonPreview() {
             onClick={() => setTab('quiz')}
           >
             🎯 闯关
+          </button>
+          <button
+            type="button"
+            className={'tab-btn' + (tab === 'read' ? ' active' : '')}
+            onClick={() => setTab('read')}
+          >
+            📚 阅读
           </button>
         </div>
 
@@ -325,35 +357,67 @@ export default function LessonPreview() {
           frames.length === 0 ? (
             <div className="empty"><p>这一课还没有句型框架卡。</p></div>
           ) : (
-            <ZoneCard title="🧩 句型框架卡" side="点词听发音" mcStyle={mcStyle}>
-              <p className="zone-lead">
-                先把句子补完整，再用整句说出来。
-                <span className="sent-hint">框架卡会进复习池，到期时在智能复习里练</span>
-              </p>
-              {frames.map((f) => (
-                <SentenceFrameCard
-                  key={f.id}
-                  frame={f}
-                  onPass={() => {
-                    seedSentenceFrames([f], 'starlight')
-                    recordReview(frameCardKey(f), true, 'starlight')
-                  }}
-                />
-              ))}
-            </ZoneCard>
+            <>
+              {/* 本课重点句型：原来和「外教对话」「课文」挤在同一个 Tab 里被展示三遍。
+                  现在归到句型 Tab 顶部 —— 先看要学的 5 个句子，再练填空。 */}
+              <PatternStrip sentences={sentences} mcStyle={mcStyle} vocab={words} boxOf={(en) => srsCards[en]?.box} />
+              <ZoneCard title="🧩 句型框架卡" side="点词听发音" mcStyle={mcStyle}>
+                <p className="zone-lead">
+                  先把句子补完整，再用整句说出来。
+                  <span className="sent-hint">框架卡会进复习池，到期时在智能复习里练</span>
+                </p>
+                {frames.map((f) => (
+                  <SentenceFrameCard
+                    key={f.id}
+                    frame={f}
+                    onPass={() => {
+                      seedSentenceFrames([f], 'starlight')
+                      recordReview(frameCardKey(f), true, 'starlight')
+                    }}
+                  />
+                ))}
+              </ZoneCard>
+            </>
           )
         )}
+        {tab === 'read' && (
+          reading ? (
+            <ZoneCard
+              title="📚 今日阅读短文"
+              side="🧒 自己读一遍 · 点词听发音"
+              mcStyle={mcStyle}
+              className="reading-zone-card"
+            >
+              <p className="zone-lead">
+                用这一课学过的词写的一个小故事。
+                <span className="sent-hint">点每句的小喇叭听这一句，再自己指着读一句；读得出来的词就是学会了</span>
+              </p>
+              <ReadingZone passage={reading} vocab={words} boxOf={(en) => srsCards[en]?.box} />
+            </ZoneCard>
+          ) : (
+            <div className="empty"><p>这一课还没有阅读短文。</p></div>
+          )
+        )}
+        {tab === 'dialogue' && (
+          dialogue ? (
+            <LessonDialogueBox dialogue={dialogue} mcStyle={mcStyle} vocab={words} boxOf={(en) => srsCards[en]?.box} />
+          ) : (
+            <div className="empty"><p>这一课还没有外教对话。</p></div>
+          )
+        )}
+        {/* 课文区：只放教材真实课文。原来这里还叠加「重点句型」和「外教对话」两块，
+            同一批 5 个句型被展示三遍，单 Tab 高达 12,440px（≈14 屏手机）。
+            现在句型归「🧩 句型」Tab（frames）、外教对话独立成 Tab，这里只留原文。 */}
         {tab === 'book' && (
-          <>
-            <PatternStrip sentences={sentences} mcStyle={mcStyle} vocab={words} boxOf={(en) => srsCards[en]?.box} />
-            {dialogue && <LessonDialogueBox dialogue={dialogue} mcStyle={mcStyle} vocab={words} boxOf={(en) => srsCards[en]?.box} />}
-            {passage ? (
-              <ZoneCard
-                title="📖 课本原文 · 拆解成课堂对话"
-                side="👩‍🏫 外教 ↔ 🧒 孩子 · 点词听发音"
-                mcStyle={mcStyle}
-                className="passage-zone"
-              >
+          passage ? (
+            <ZoneCard
+              title="📖 本课课文"
+              side="👩‍🏫 外教 ↔ 🧒 孩子 · 点词听发音"
+              mcStyle={mcStyle}
+              className="passage-zone"
+            >
+              <PlayTools hint="点单词听发音 · 正在读的句子会亮起来" />
+              <div className="dialogue-list">
                 {passageTurns.map((t, i) => {
                   const { zh, auto } = lineZhOf(lineZhIndex, t.en)
                   return (
@@ -371,23 +435,23 @@ export default function LessonPreview() {
                     </div>
                   )
                 })}
-                <PassageLegend />
-              </ZoneCard>
-            ) : hasBook ? (
-              <BookTextView
-                chapters={chapters}
-                mc={mcStyle}
-                lead={
-                  <>
-                    下面是这一课教材上的真实课文，按课堂活动顺序排好了。
-                    <span className="sent-hint">点单词听发音、鼠标悬停看词义，点 🔊 听整句</span>
-                  </>
-                }
-              />
-            ) : (
-              <div className="empty"><p>这一课暂时没有课本原文。</p></div>
-            )}
-          </>
+              </div>
+              <PassageLegend />
+            </ZoneCard>
+          ) : hasBook ? (
+            <BookTextView
+              chapters={chapters}
+              mc={mcStyle}
+              lead={
+                <>
+                  下面是这一课教材上的真实课文，按课堂活动顺序排好了。
+                  <span className="sent-hint">点单词听发音、鼠标悬停看词义，点 🔊 听整句</span>
+                </>
+              }
+            />
+          ) : (
+            <div className="empty"><p>这一课暂时没有课文。</p></div>
+          )
         )}
         {tab === 'quiz' && (
           <QuizEngine
@@ -413,6 +477,7 @@ export default function LessonPreview() {
             }}
           />
         )}
+        </div>
       </SafeBoundary>
 
       <ExtensionWordEntry
@@ -635,7 +700,9 @@ function ExtensionSection({
   )
 }
 
-// 本课重点句型：放在课本原文上方，先看 5 个核心句，再读整篇课文。
+// 本课重点句型：先看要学的 5 个核心句，再练下面的框架卡填空。
+// 2026-10-10：删掉每句的「慢速」按钮 —— 原来每句 2 个喇叭，慢速与正常的区分度
+// 对孩子几乎为零；慢速改成 PlayTools 里的全局开关，点词和整句共用同一套语速。
 function PatternStrip({
   sentences,
   mcStyle,
@@ -652,12 +719,12 @@ function PatternStrip({
   if (sentences.length === 0) return null
   return (
     <ZoneCard title={`💬 本课重点句型（${sentences.length}）`} side="点词听发音" mcStyle={mcStyle}>
+      <PlayTools hint="点单词听发音" />
       {sentences.map((s, i) => (
         <div key={i} className="pattern-item">
           <div className="pattern-en-row">
             <TappableWords text={s.en} vocab={vocab} boxOf={boxOf} />
             <SpeakButton text={s.en} label={s.en} />
-            <SpeakButton text={s.en} label={`${s.en} 慢速`} slow />
           </div>
           <div className="pattern-zh">{s.zh}</div>
           {s.hint && <div className="pattern-hint">💡 {s.hint}</div>}

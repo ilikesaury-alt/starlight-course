@@ -932,19 +932,38 @@
 // 气泡里字号略收，行距略紧，一屏能多看两句
 .dialogue-bubble .tt-text { font-size: var(--fs-md); line-height: 1.8; }
 .dialogue-bubble .tt-words { margin: 0; }
+// 点词按钮：命中区与视觉解耦（借鉴 TouchRead.js 的 wordBox：命中区常态全透明，
+// 只在 hover/正在读时才出底色）——否则每句英文被切成一串带底色的方块，
+// 孩子看不出「这是一句话」，整句阅读的眼跳训练直接被毁掉。
+// SRS 三色记忆状态默认隐藏，由「🧠 记忆状态」开关显式打开（复刻 Lute 的热键 h）。
 .tt-word {
   border: 0;
   background: transparent;
+  // 命中区比字形宽（左右各 3px），但 padding 不加背景，所以看不出按钮边界
   padding: 2px 3px;
   margin: 0 1px;
-  border-radius: 4px;
+  border-radius: 6px;
   font: inherit;
+  color: inherit;
   cursor: pointer;
   transition: var(--ease);
-  &.tt-word--known { background: rgba(34, 197, 94, 0.24); color: #14532d; }
-  &.tt-word--vague { background: rgba(250, 204, 21, 0.32); color: #713f12; }
-  &.tt-word--unknown { background: rgba(148, 163, 184, 0.18); color: var(--ink-soft); }
-  &:hover { transform: translateY(-2px); }
+  &:hover { transform: translateY(-1px); background: var(--brand-tint); }
+  &:active { transform: scale(0.96); }
+}
+// 记忆状态显式开启后才着色；三个状态都只染「淡色块 + 深色字」，不盖掉句子轮廓
+// .tt-legend 的色板本身要永远显示颜色（它是图例，不是正文），所以图例内的
+// .tt-word 不受 .sr-mem 开关约束，单独保底。
+.tt-legend .tt-word--known { background: rgba(34, 197, 94, 0.24); color: #14532d; }
+.tt-legend .tt-word--vague { background: rgba(250, 204, 21, 0.32); color: #713f12; }
+.tt-legend .tt-word--unknown { background: rgba(148, 163, 184, 0.18); color: var(--ink-soft); }
+.sr-mem .tt-word.tt-word--known { background: rgba(34, 197, 94, 0.24); color: #14532d; }
+.sr-mem .tt-word.tt-word--vague { background: rgba(250, 204, 21, 0.32); color: #713f12; }
+.sr-mem .tt-word.tt-word--unknown { background: rgba(148, 163, 184, 0.18); color: var(--ink-soft); }
+// 本课学过的高亮（阅读区）：波浪下划线 + 加重，仍不换底色
+.tt-word--mark {
+  text-decoration: underline wavy var(--mc-deep, var(--brand-deep)) 1.5px;
+  text-underline-offset: 4px;
+  font-weight: 800;
 }
 .tt-pop {
   display: flex;
@@ -983,3 +1002,150 @@
   color: var(--ink-soft);
 }
 .tt-legend-note { font-weight: 600; }
+
+// ---------- 播放工具条（🐢 慢速 / 🧠 记忆状态 / 区块自己的操作） ----------
+// 全局两个开关（src/utils/slowMode.ts + src/utils/memoryState.ts）收在一处，
+// 替代原来散落各区的「每句一个慢速按钮」。
+.play-tools {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.play-tools .btn.active {
+  background: var(--mc-soft, var(--brand-soft));
+  border-color: var(--mc-deep, var(--brand-deep));
+}
+.play-tools-hint {
+  font-size: var(--fs-xs);
+  color: var(--ink-soft);
+  font-weight: 600;
+}
+
+// ---------- 📚 阅读短文区 ----------
+// 排版原则：这是全站唯一「让孩子自己从头读到尾」的地方，字号/行距/段距都比点读区宽，
+// 单行长度压到 ~34em 以内（太长的行孩子读着跳行、也分行视线）。
+.reading-zone {
+  margin-top: 12px;
+}
+// 兼容旧类名（阅读区的工具条已换成 .play-tools，这里留个别名避免外部引用断）
+.reading-tools { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+.reading-tools .btn.active {
+  background: var(--mc-soft, var(--brand-soft));
+  border-color: var(--mc-deep, var(--brand-deep));
+}
+.reading-tip {
+  font-size: var(--fs-xs);
+  color: var(--ink-soft);
+  font-weight: 600;
+}
+.reading-legend {
+  color: var(--mc-deep, var(--brand-deep));
+  text-decoration: underline wavy currentColor 1px;
+  text-underline-offset: 3px;
+}
+.reading-body {
+  padding: 18px 20px;
+  border: 1px solid var(--line, #e5e7eb);
+  border-radius: var(--r-md);
+  background: var(--card, #fff);
+  max-width: 34em;
+}
+.reading-title {
+  margin: 0 0 12px;
+  font-size: var(--fs-lg);
+  font-weight: 800;
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.reading-title-zh {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+.reading-para + .reading-para { margin-top: 18px; }
+// 每句单独成卡片：英文在上、中文在下、小喇叭在英文行右侧。
+// 注意方向：这里是**纵向** flex。早先写成横向 flex，结果「显示中文」时译文被排到
+// 英文右边、和正文挤在一起（.reading-zh 是 .reading-sent-row 的兄弟节点）。
+.reading-sent {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 12px;
+  border-radius: var(--r-md);
+  border: 1px solid transparent;
+  transition: var(--ease);
+}
+.reading-sent + .reading-sent { margin-top: 6px; }
+.reading-sent-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+// 整篇连读时的当前句：跟着声音走，孩子知道读到哪了
+.reading-sent--now {
+  background: var(--mc-soft, var(--brand-soft));
+  border-color: var(--mc-deep, var(--brand-deep));
+}
+// focus dimming（借鉴 readalong-reader）：朗读时非当前句降到 32%，当前句保持 100%。
+// 只在「正在朗读」时生效（.reading-zone.is-playing 由 playing 状态挂上），
+// 不朗读时所有句子都是 100%，孩子可以正常整篇扫读。
+.reading-zone.is-playing .reading-sent { opacity: 0.32; }
+.reading-zone.is-playing .reading-sent--now,
+.reading-zone.is-playing .reading-sent--busy { opacity: 1; }
+// 单句朗读「正在播」：轻高亮 + 喇叭动起来
+.reading-sent--busy {
+  background: color-mix(in srgb, var(--mc-soft, var(--brand-soft)) 60%, transparent);
+}
+// 每句右侧的小喇叭：平时低调，hover/正在播时弹出，点一下就读这一句
+// 命中区 40px（含 padding 外扩），高于儿童 44pt 规范的下限
+.reading-say {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--line, #e5e7eb);
+  background: var(--card, #fff);
+  color: var(--mc-deep, var(--brand-deep));
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.55;
+  transition: var(--ease);
+  margin-top: 2px;
+}
+.reading-say:hover {
+  opacity: 1;
+  border-color: var(--mc-deep, var(--brand-deep));
+  box-shadow: 0 2px 8px var(--mc-soft, var(--brand-soft));
+}
+.reading-say.is-playing {
+  opacity: 1;
+  background: var(--mc-deep, var(--brand-deep));
+  color: #fff;
+  border-color: var(--mc-deep, var(--brand-deep));
+  animation: speak-pulse 0.8s infinite;
+}
+// reduced-motion：朗读时不做缩放脉冲，只保留颜色变化（可访问性）
+@media (prefers-reduced-motion: reduce) {
+  .reading-say.is-playing { animation: none; }
+  .reading-sent { transition: none; }
+}
+.reading-sent .tt-text {
+  font-size: var(--fs-lg);
+  line-height: 2.1;
+  font-weight: 600;
+}
+.reading-zh {
+  margin: 2px 0 0;
+  padding-left: 2px;
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+  color: var(--ink-soft);
+  font-weight: 600;
+}
