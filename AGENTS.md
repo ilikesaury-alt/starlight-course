@@ -14,6 +14,9 @@ npm run check        # TypeScript type check (no emit)
 npm run preview      # Preview production build on 0.0.0.0
 npm run test         # Vitest unit tests (src/**/*.test.ts only)
 npm run e2e          # Playwright E2E tests (tests/*.spec.ts)
+npm run electron:dev    # 桌面壳开发态（并发起 vite + electron，自动探测 dev server）
+npm run electron:smoke  # 桌面壳冒烟探针（构建 + 加载 + 程序化验验收标准，输出 JSON）
+npm run electron:build  # 打包 Windows NSIS 安装包（产物在 release/）
 ```
 
 **Testing**: Unit tests use vitest (e.g. `src/data/srs.test.ts`); E2E uses Playwright (`tests/*.spec.ts`, `npm run e2e`). Vitest is configured in `vite.config.ts` (`test.include: src/**`) so it never collects the Playwright specs.
@@ -36,6 +39,14 @@ npm run e2e          # Playwright E2E tests (tests/*.spec.ts)
 - **CI**: GitHub Actions on push to main → GitHub Pages
 - **Base path**: Auto-configured via `GITHUB_REPOSITORY` env var in vite.config.ts
 - **PWA assets**: Generate with `npm run pwa-assets` (requires public/favicon.svg)
+
+### Desktop (Electron)
+- **壳**: `electron/main.cjs` —— 业务代码**零改动**，只开窗口加载同一份前端产物：dev server 可达则载它，否则载 `dist/index.html`。`--smoke` 模式程序化验证「非白屏 / WebGPU / localStorage / 云 TTS」后退出
+- **打包**: `scripts/electron-build.mjs` —— 设 `ELECTRON_BUILD=1`（vite 输出相对 `base: './'`，file:// 才不白屏）→ 前端构建 → electron-builder 出 NSIS；国内镜像（`ELECTRON_MIRROR` / `ELECTRON_BUILDER_BINARIES_MIRROR`）默认注入，可用同名 env 覆盖
+- **双形态隔离**: 桌面构建时 `VitePWA` 用 `disable: process.env.ELECTRON_BUILD === '1'`（**不是**从 plugins 数组摘掉，否则 `virtual:pwa-register` 虚拟模块解析失败）；另有 `src/main.tsx` 的 UA 守卫跳过 SW 注册。网页版构建照常含 `sw.js`
+- **⚠️ 未开「开发者模式」的 Windows 打包必失败**（winCodeSign 包内含 macOS `.dylib` 软链，7-Zip `-snld` 建链被拒）：`electron-build.mjs` 会预先用 `7za` 解压到 `Cache/winCodeSign/winCodeSign-2.6.0` 并**排除 `darwin`/`linux`**（Windows 只需 `signtool`/`rcedit`），幂等、可自愈
+- **STT 在 Electron 必挂**（需 Google 语音后端）：无需处理，`useSpeechRecognition` 的 `supported` 守卫 + 跟读 Tab 默认隐藏天然兜住
+- **WebGPU 不可用是常态**（老核显/虚拟机拿不到适配器）：自动退回云 TTS/WebSpeech，**不静音**（验收标准 #3）
 
 ## Development Notes
 - TypeScript strict mode is **disabled** (`strict: false` in tsconfig.json)

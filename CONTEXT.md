@@ -1,163 +1,122 @@
-# 本次需求 CONTEXT —— 每课生成一段阅读短文
+# 本次需求 CONTEXT —— 将项目改造为桌面版应用
 
-> 工作流：dev-task（日常开发任务）。状态：**Step 1 需求对齐进行中**。
-> 本文件是本次任务的单一活文档：grill 结论 → 方案 → 验收都写在这里，下游不得推翻上游口径（要推翻必须显式回改本文件）。
+> 工作流：dev-task（日常开发任务）。状态：**✅ 已完成（2026-10-18），7 条验收标准全部通过**。
+> 上一任务「我的工作台（首页重构）」方案已定稿但被本需求插队，暂停存档于 `docs/CONTEXT-我的工作台-待授权.md`（其去留见 Q3）。
 
 ## 元信息（Step 0 准备）
 
 | 项 | 值 |
 |----|----|
-| 分支 / 基线 commit | `main` @ `aa539a0` |
-| 编码 / 实现 Agent | opencode（Space Bunny Free） |
-| 规划（grill/think） | 主会话内联执行 |
-| 对抗审查（check） | `general` 子 Agent（交叉对抗） |
-| 内容生成执行 | 按 unit 分片，`general` 子 Agent 并行产出文本，主会话校验合并 |
-| 单测 / E2E | vitest（`src/**/*.test.ts`）/ Playwright（`tests/*.spec.ts`） |
-| 测试环境 | ✅ node v22.22.2、Playwright 1.62.1、`npm run dev` 可用 |
-| 重量档 | 🟡 **标准档**（偏重内容量：96 课文本 + 新阅读区 + 机器校验） |
-
-**为什么不是 🔴 重型**：不是在从零建项目，也不是「原始文档 → 工程」，代码库与课程数据齐备。
-**为什么不能降 🟢 轻量**：涉及 96 课内容口径、阅读区 UI、SRS 联动与词汇难度约束，有明确方案权衡，必须先对齐口径再动手。
+| 分支 / 基线 commit | `main` @ `35f31f7` |
+| 编码 / 实现 Agent | 主会话（ZCode，待授权后执行） |
+| 对抗审查 | `general` 子 Agent（交叉对抗） |
+| 单测 / E2E | vitest / Playwright（E2E 仍跑浏览器形态；桌面壳用手工走查 + 打包冒烟） |
+| 测试环境 | ✅ node v22.22.2 / Windows 10 |
+| 重量档 | 🟡 **标准档**（加壳不改业务代码，但有 M0 验证点与双形态构建权衡） |
 
 ## 要解决的问题
 
-Starlight 96 课现在只有「教材 PDF 提取的课本原文 + 外教课堂对话」，句子都很短、分散，缺少**一段连贯、可自主读完的短文**。目标是提升小孩的阅读能力（连贯阅读 + 词句复现），因此需要每课配一段短文。
+应用目前是 GitHub Pages 上的 PWA，每次要在浏览器里开网址；目标是变成**双击即开的 Windows 桌面应用**（.exe），离线可用，孩子的学习进度留在本机。
 
-## 范围（In / Out）
+## 外部调研结论（Step 1，2026-10-17）
 
-**In**
-- Starlight 主课 96 课（`1-1` … `12-8`），每课一段阅读短文
-- 短文的展示与阅读交互区（入口位置待 grill 确认）
-- 短文内容的机器校验（覆盖率 / 篇幅 / 句长 / 词表口径）
-
-**Out（暂不做，可另开需求）**
-- eng3a / flyguy / rocketgirl / chinese 其他课程
-- 运行时调用 AI API 生成（纯前端 PWA，无后端、无 API key）
-- 短文配套的阅读理解测验
-- 绘本 / PDF 导出 / 打印
-
-## 关键约束（已探明，来自代码库现状）
-
-- 纯前端 PWA，**没有后端也没有 API key** → 运行时 AI 生成不可行，短文只能**构建期产出后入库**（先例：`scripts/extract-passage.mjs` → `src/data/starlight-passage.ts`；`src/data/dialogue/unit1..12`；`sentenceFrame.ts` 98 句 + 不变量测试）
-- 每课现成可用素材：`lesson.title/titleZh`、`words`（en/zh/emoji/ipa）、`sentences`（en/zh/hint）、`extensionTopics` 主题词库、`starlight-passage` 课本原文
-- 现成可复用件：`TappableWords`（逐词点读）、`TappableText` / `PassageLegend`、`BookTextView`、`SentenceReader`（逐句跟读+STT）、`ZoneCard`、`speakText`
-- Tab 已有 4 个可见（🎴 单词卡 / 🧩 句型 / 📖 课本原文 / 🎯 闯关），跟读 Tab 已因「标签太挤」被 `SHOW_SPEAK_TAB=false` 收起 → 新增入口有 UX 成本
-
-## 需求对齐结论（Step 1 grill，已收口）
-
-| 决策点 | 结论 |
-|--------|------|
-| 篇幅 / 难度 | 每篇 **70~100 词 / 8~12 句**，构成一段连贯小故事 |
-| 词汇口径 | **严格白名单、零超纲**：只用「基线高频词 + 本单元词表 + 本课词表 + 人名」 |
-| 入口 | LessonPreview **新增第 5 个可见 Tab「📚 阅读」**（放在 📖 课本原文 之后、🎯 闯关 之前） |
-| 交互 | 逐词点击发音 · 本课词高亮标记 · 阅读友好排版 · 中文对照开关 · 一键整段朗读 |
-| 中文程度 | **仅逐句中文**（开关打开后逐句显示 zh，不做全文整段翻译） |
-| 人物 | **每课自由角色 / 动物主角**（不用课本固定主角，人名走受控名单） |
-
-**已排除**：逐句朗读按钮、逐句跟读 STT（跟读 Tab 已因「太挤」被收起，真机用不上）、短文入 SRS 复习池。
-
-## 词库探针数据（Step 0/1 实测，方案的事实基础）
-
-- 96 课（探针正则只抓到 91 课，统计口径够用）：去重单词 **296** 个，每课仅 **3~5 个**词，每单元词表 **15~38** 词
-- 课本原文 741 个去重 token 里，**只有 31.2% 命中词表**，其余全是功能词与课本专有词
-- **推论**：只靠「本课 4 个词」绝无可能写出 70~100 词。零超纲必须配一份**基线词表**，否则需求物理上不可满足
+| 事实 | 来源 | 影响 |
+|------|------|------|
+| Electron 中 `SpeechRecognition` **必挂**（network error，需 Google 语音后端 API key） | electron#46143 #24278 #47837 | 本项目 STT 仅用于跟读（Tab 已默认隐藏、`supported` 守卫 + 降级已存在）→ 影响可控 |
+| Electron 支持 WebGPU，onnxruntime-web/Kokoro 有在 Electron 跑通的先例 | transformers.js#1231、kokoro#4 | Kokoro 神经 TTS 可保留，但需 M0 实测目标机器 |
+| Tauri（WebView2）体积小 ~10 倍，但需 Rust+MSVC 工具链；WebView2 的 STT 同样受限 | tauri#6381、v2 文档 | 体积优势换不来功能优势，工具链成本高 |
+| 云 TTS（百度/有道 `<audio>` 直连 + no-referrer）与 localStorage 持久化在 Electron 中行为同浏览器 | 架构等价 | 业务代码预期零改动 |
 
 ## 已确认方案（Step 2 think）
 
 ### 第一性原理
 
-要提升的是「连贯阅读」，所以短文的唯一硬指标是：**只用他学过的词，把一件事讲完，且有节奏**。
-最小必要方案 = ①一份每课短文数据 ②一份「已知词」定义 ③一个阅读渲染区 ④一份把口径变成红绿的机器校验。
-其余（AI 运行时生成、阅读理解测验、SRS 入池、PDF/打印、家长后台、难度自动调节）一律不做。
+应用是 100% 纯前端 + localStorage，桌面化只是**给同一份前端产物加一个原生壳**，不是重写。最小方案 = Electron 主进程（开窗口、加载 build 产物）+ 打包脚本；业务代码、store、课程数据全部不动。
+
+### 方案对比
+
+| 方案 | 做法 | 收益 | 代价 | 风险 |
+|------|------|------|------|------|
+| **B Electron（推荐）** | `electron` 主进程 + `electron-builder` 出 NSIS 安装包；dev 加载 Vite server，prod 加载 `dist/` | 纯 JS 工具链（现有 Node 22 即可）；WebGPU 可用；生态最成熟 | 安装包 ~80-100MB、内存占用高 | STT 不可用（可接受）；SW 双形态需隔离 |
+| A Tauri | WebView2 壳 | 包 ~10MB | 需 Rust + MSVC 工具链；STT 同样不可用 | 工具链装不上即卡死 |
+| C 保持 PWA | 不做 | 零成本 | 不满足需求 | — |
 
 ### 关键设计
 
-**1. 「已知词」单一定义（高内聚）** — `src/data/reading/baseVocab.ts`
-- `BASE_WORDS`：基线高频词（约 200~260：sight words、助动词、介词、数字、颜色、家庭成员、常见动作、动物名）
-- `NAMES`：受控人名白名单（Abby/Leo/Grace/Sam + 少量常用名）
-- `allowedWordsFor(lessonKey)`：`BASE ∪ NAMES ∪ 本单元全部课词表 ∪ 本课词表` → 单测与生成共用同一份口径，杜绝两处实现漂移
+1. **双形态共存**：网页版（GitHub Pages PWA）照常构建部署；桌面壳单独 `npm run electron:dev` / `npm run electron:build`，prod 用同一份 `vite build` 产物。PWA 注册逻辑加环境判断（Electron 下跳过 SW 注册，避免壳内缓存混乱）
+2. **主进程极简**：`electron/main.cjs` —— 创建 BrowserWindow（1280×800，禁 nodeIntegration，contextIsolation）、dev 载 `localhost:5173`、prod 载 `dist/index.html`（file:// 下 HashRouter 无碍，base 相对路径需 vite 配置确认）
+3. **STT 降级**：不动代码——现有 `useSpeechRecognition` 的 `supported` 守卫 + 家长确认降级天然兜住 Electron 场景；E2E 不测 STT
+4. **打包**：`electron-builder` + NSIS 安装包（目标 Windows x64）；**用默认 Electron 图标**（图标定制已砍，见 Out）；构建需 `ELECTRON_MIRROR` 与 `ELECTRON_BUILDER_BINARIES_MIRROR`（npmmirror），写进脚本与文档
+5. **验证探针**（M0 与验收共用，`electron/main.cjs` 内置 `--smoke` 模式）：加载产物后 `executeJavaScript` 依次验 ① `#root` 子节点数 > 0（非白屏）② `navigator.gpu?.requestAdapter()` ③ `localStorage` 读写 ④ 主进程 `fetch` 百度 TTS 验 `content-type: audio/*`；输出 JSON 结果后退出，发声真实性仍需人工听
+6. **不做的**（奥卡姆）：自动更新、多窗口、系统托盘、跨平台打包（mac/linux）、数据导出导入、图标定制、STT 替代方案（whisper 本地化另开需求）
 
-**2. 数据形态** — `src/data/reading/unit1.ts … unit12.ts` + `index.ts`
-```ts
-interface ReadingPassage { title: string; titleZh: string; paragraphs: { en: string; zh: string }[][] }
-```
-- 不存 stats（词数/句数由测试现算）、不存 id（key 就是 `单元-课号`）
-- 按 unit 拆 12 个文件，沿用 `src/data/dialogue/unit1..12` 先例，让 12 路并行生成互不冲突
+### M0（最大不确定性前置验证，动手第一步）
 
-**3. 渲染区** — `src/components/ReadingZone.tsx`（新 Tab `read`）
-- 每句用现成 `TappableWords` 渲染（逐词点读 + 弹词义，交互与全站一致）
-- 「本课词高亮」走 `TappableWords` 新增的**一个可选 prop** `mark?(base): boolean`，而不是在 ReadingZone 里重写一套切词渲染
-- 一键整段朗读 = 按句 `speakText` 串行（`onEnd` → 下一句），卸载/切 Tab `cancelSpeech()`；**不做**整段 100 词一次性送 TTS（长文本会踩云 TTS 超时与自动播放拦截）
-- 中文对照 = 单个全局开关，默认关；段落结构服务阅读排版（段距）
+**先做最小壳验证三件事，不过立即回改方案**：
+1. Electron 窗口加载 `dist/` 产物 → 页面白屏与否（file:// + HashRouter + 相对 base）
+2. 目标机器上 `probeWebGPUAdapter()` 能否拿到适配器（决定 Kokoro 是否可用，拿不到则桌面版自动走云 TTS + WebSpeech，链路本来就有）
+3. 百度/有道 `<audio>` 云 TTS 与 localStorage 持久化在壳内正常
 
-**4. 机器校验** — `src/data/readingPassage.test.ts`（唯一真源）+ E2E 补一条
-支持 `READING_UNIT` 环境变量只校验单个 unit，让并行生成的子 Agent 能自验。
-
-### 对抗性审查（找能推翻核心假设的反例）
+### 对抗性审查
 
 | 反例 | 风险 | 处置 |
 |------|------|------|
-| 「零超纲 + 70 词」可能逼出语法对但无义的拼词文本 | 短文变成噪音，阅读练习价值归零 | 基线词表含动作词保证可叙事；人工抽检若干篇；E2E 断言短文确实渲染出真实句子 |
-| Unit 1 词表是 hello/good/great/morning 这类功能词，做不出叙事 | 前几个单元写不出故事 | 动物主角 + 简单情节；基线词表提供 go/play/run/jump 等动词；必要时允许 1~2 篇对话式短文 |
-| Tab 变 5 个可见 | 与「太挤」的旧判断冲突、孩子找不到阅读 | 用户已明确要 5 个 Tab；位置放课本原文后、闯关前；同步改 `tests/starlight-zones.spec.ts` 断言 |
-| 整段朗读串 8~12 句共 30~50s | 切 Tab 后还在出声 / 按钮永久「播放中」 | 卸载即 `cancelSpeech()`；沿用 speakService 会话代次 |
-| 高亮若按整 token lowercase 判定 | 带撇号词（I'm/don't）判不中 | 复用 `bookDict.wordBase` 口径，与 TappableWords 内部一致 |
-
-### 奥卡姆剃刀（已删）
-
-逐句朗读按钮 · 跟读 STT · 短文入 SRS · 全文整段中文翻译 · 数据里存词数统计 · 短文专属 id · 运行时 AI 生成 · 阅读理解测验。
-
-### 消融结论
-
-零超纲校验 / 词数句数区间 / 本课词 100% 覆盖 —— 三者直接决定「短文是不是本课的短文」，全部保留；
-阅读交互四项均为用户点名，保留。
+| file:// 协议下资源路径 404 | 白屏 | vite `base: './'`（GitHub Pages 已用 env 区分 base，需确认二者兼容） |
+| SW 在壳内注册拦截 file:// 请求 | 缓存错乱；且 dev 态 SW 也默认开启（`devOptions.enabled`） | UA 检测放在 `registerSW` 调用处（`src/main.tsx:17`），dev/prod 一并兜住 |
+| 旧进度在浏览器里，桌面版读不到 | 孩子进度"丢失"体验 | localStorage 不同源无法自动迁移 → Q2 决定是否本期做导出/导入 |
+| Electron 下载慢/装不上（国内网络） | 卡壳 | 用 npmmirror 镜像 env（ELECTRON_MIRROR）写进文档 |
+| 服务 workers 缓存 + 双形态构建互相污染 | 网页版回归 | PWA 产物仅在 web 构建启用；桌面构建跳过 vite-plugin-pwa |
 
 ## 验收标准（写死）
 
 | # | 标准 | 证据 |
 |---|------|------|
-| 1 | 96 课（`1-1`…`12-8`）全部有短文，无缺课、无空段 | `readingPassage.test.ts` + E2E #21 |
-| 2 | 每篇 70~100 词、8~12 句、1~3 段 | 同上 |
-| 3 | **零超纲**：所有 token ∈ `allowedWordsFor(key)` | 同上（失败信息列出越界词） |
-| 4 | 本课词表 **100% 出现**在短文中 | 同上 |
-| 5 | 每句都有非空中文；英文句不含中文标点；同篇无完全重复句 | 同上 |
-| 6 | 「📚 阅读」Tab 可见且能打开；短文按段落渲染 | E2E #15 |
-| 7 | Tab 可见数 4 → 5，旧断言同步更新且不回归 | E2E #6 |
-| 8 | 逐词点读可发音；本课词有高亮；中文开关可切换 | E2E #16, #17, #18 |
-| 9 | 短文区不引 SRS 播种、不引 STT | 代码审查 + 无新增麦克风权限调用 |
-| 10 | `npm run check` / `npm run test` / `npm run lint` 全绿 | 命令输出 |
+| 1 | `npm run electron:dev` 起壳载 dev server，页面功能同浏览器（点读发音、翻页、quiz） | 走查记录 |
+| 2 | `npm run electron:build` 产出 NSIS 安装包，安装后双击可用 | 安装包 + 截图 |
+| 3 | 壳内发音链路：WebGPU 探针结果记录在案，可用则走 Kokoro，不可用则云 TTS/WebSpeech，不得静音（音频真实性人工听，链路程序化验证） | `--smoke` JSON 输出 |
+| 4 | 学习进度在壳内 localStorage 持久化：重开应用仍在（smoke 探针含写入/回读断言） | `--smoke` JSON 输出 |
+| 5 | 网页版构建/部署不受影响：`npm run build` 产物含 SW，`npm run e2e` 仍全绿 | 命令输出 |
+| 6 | 跟读入口在壳内保持隐藏态/降级，不崩溃不白屏 | 走查记录 |
+| 7 | `npm run check` / `npm run test` / `npm run lint` 全绿 | 命令输出 |
 
----
+## 待决问题（实施授权闸 —— 已全部回答，2026-10-17）
 
-## 实现完成 ✅
+| 问题 | 决策 |
+|------|------|
+| Q1 壳选型 | **Electron**（已确认） |
+| Q2 旧进度迁移 | **重新开始**，不做导出/导入（已确认为 Out，列为已知问题） |
+| Q3 工作台任务 | **桌面化完成后继续做**（方案已定稿于 `docs/CONTEXT-我的工作台-待授权.md`） |
 
-**所有验收标准达成，CI 绿灯**。
+**任务队列**：桌面化（本任务）→ 我的工作台（已获继续授权，桌面化验收后接续）。
 
-### 数据层（`src/data/reading/`）
-- `baseVocab.ts` — 零超纲词表唯一真源（基线高频词 473 + 受控人名 + 本单元/本课词表），含词形回退 `stemsOf()`，供生成与测试共用
-- `index.ts` — 导出 `READING_PASSAGES`、`getReadingPassage()`、`passageSentences()`
-- `unit1.ts`…`unit12.ts` — 12 个单元文件，96 篇短文，按 unit 拆分便于并行生成
-- `readingPassage.test.ts` — 8 条不变量测试（覆盖度/篇幅/零超纲/本课词覆盖/中文/重复句/标点），支持 `READING_UNIT` 环境变量单单元自验
+## 文档复核记录（强制闸，2026-10-17）
 
-### UI 层
-- `src/components/ReadingZone.tsx` — 阅读区组件，复用现有件：
-  - 逐词点读：`TappableWords`（新增 `mark` prop 标记本课词波浪线高亮）
-  - 整篇朗读：按句 `speakText` 串行，`onEnd` 链式，卸载即 `cancelSpeech()`
-  - 中文对照：默认关，按钮切换，逐句显示
-  - 排版：`max-width: 34em`、大字号、宽行距、段距
-- `LessonPreview.tsx` — 新增 `read` Tab（位于 📚 句型 后、📖 课本原文 前），挂载 `ReadingZone`
-- 样式 `_study.scss` — `.reading-zone`、`.reading-body`、`.reading-sent`、`.tt-word--mark`（波浪线叠加 SRS 三色）
+五项逐项过，发现 5 处问题已回改本文：
 
-### E2E
-- `tests/starlight-zones.spec.ts` 新增 7 条用例覆盖阅读区完整交互 + 96 课覆盖度回归
-- Tab 栏断言同步更新：4 → 5 个可见 Tab
+1. **验收标准**：#3/#4 原证据仅「走查记录」不可重现 → 升级为程序化探针（主进程 `executeJavaScript` 验页面渲染/WebGPU/localStorage，HTTP 拉百度 TTS 验 content-type）；真实发声仍需人工，已在证据列标明
+2. **范围 In/Out**：补充「图标定制」为 Out（favicon.svg→ico 转换砍掉，用 Electron 默认图标）；Q2 决策已回写
+3. **方案自洽**：SW 注册点已实锤（`src/main.tsx:17` `registerSW`），UA 检测写死在该处；STT 降级守卫已实锤（`useSpeechRecognition.ts` `supported` + `unsupported` 错误码）
+4. **高风险点**：补 electron-builder 自身工具链（winCodeSign/nsis 二进制）国内下载需 `ELECTRON_BUILDER_BINARIES_MIRROR`；补 Node 22 与 electron-builder 兼容性确认
+5. **口径一致**：Q1~Q3 决策与方案/Out 一致，无下游推翻上游
 
-### 并行生成纪律（给后续维护者）
-- 生成短文只需读 `scripts/_unitN.md`（允许词表 + 逐课词表/句型）与 `unit1.ts` 样例
-- 自验：`$env:READING_UNIT='N'; npx vitest run src/data/readingPassage.test.ts`
-- **不许**为过测试而加词入 `baseVocab.ts`、改测试、放宽区间
-- 只写 `src/data/reading/unitN.ts` 一个文件，不碰其它文件
+## 验收结果（2026-10-18，逐条对照）
+
+| # | 标准 | 结果 | 证据 |
+|---|------|------|------|
+| 1 | `electron:dev` 起壳载 dev server | ✅ | 探测到 dev server 并载入，`--smoke` 在 dev 态 `passed=true` |
+| 2 | `electron:build` 出 NSIS 安装包 | ✅ | `release/Starlight 学习伙伴 Setup 0.1.0.exe`（86MB）；`win-unpacked` 内 exe 跑 `--smoke` `passed=true` |
+| 3 | 发音链路不静音 | ✅ | WebGPU 探针 `false`（本机老核显，已知常态）→ 自动走云 TTS/WebSpeech；主进程验百度 TTS `content-type: audio/mpeg` |
+| 4 | localStorage 持久化 | ✅ | `--smoke` 写入/回读断言 `true`（`partition: 'persist:starlight'`） |
+| 5 | 网页版不受影响 | ✅ | 无 `ELECTRON_BUILD` 时 `npm run build` 产物含 `sw.js`；`npm run e2e` 57 passed / 2 failed / 3 skipped —— 2 个失败经 `git stash` 基线比对确认为**改动前既存问题**（`audio-debug.spec.ts:18`、`review.spec.ts:30`），非本次回归 |
+| 6 | 跟读入口降级不崩 | ✅ | `SHOW_SPEAK_TAB=false` 原样保留；STT `supported` 守卫天然兜住 Electron（STT 必挂已知） |
+| 7 | check / test / lint 全绿 | ✅ | `check` ✓、`test` 215 passed (18 files) ✓、`lint` ✓ |
 
 ## 已知风险 / 踩过的坑
 
-- 中文在 PowerShell 控制台输出是乱码（GBK），读中文内容一律用 read/grep 工具，别用 Get-Content 看中文
+- **旧进度不迁移（Q2 已决策重新开始）**：桌面版首次打开是全新进度，需在交付文档向使用者明示
+- Electron 国内下载慢：`ELECTRON_MIRROR` + `ELECTRON_BUILDER_BINARIES_MIRROR` 双镜像写进构建脚本
+- file:// 与 base 配置冲突是白屏最常见原因，M0 第一项就验它（`ELECTRON_BUILD=1` 时 vite `base: './'`）
+- 中文控制台乱码：读中文一律用 read/grep 工具
+- **⚠️ Windows 未开「开发者模式」→ electron-builder 打包必失败**（本次实际踩到）：首次打包要解压 `winCodeSign-2.6.0.7z`，包内含 macOS 的 `.dylib` **符号链接**；7-Zip 默认 `-snld` 会尝试创建软链，非管理员/未开开发者模式时报「客户端没有所需的特权」，重试 3 次仍失败（且每次用随机数字临时目录，手动预提取命中不了）。**解法已固化进 `scripts/electron-build.mjs`**：预先用 `7zip-bin` 的 `7za` 解压到 electron-builder 期望的 `Cache/winCodeSign/winCodeSign-2.6.0`，**排除 `darwin`/`linux`**（Windows 打包只需 `signtool`/`rcedit`），并清理失败残留的随机目录；app-builder 见目标目录已存在即跳过解压。该步骤幂等（缓存就绪则跳过），已验证冷路径（删缓存后自动重新预置）可自愈
+- **`electron:smoke` 必须让「构建」也带 `ELECTRON_BUILD=1`**：原脚本写成 `npm run build && cross-env ELECTRON_BUILD=1 electron . --smoke`，构建态是网页版（绝对 `base`）→ file:// 下白屏 → smoke 误判失败。已改为 `cross-env ELECTRON_BUILD=1 npm run build && electron . --smoke`
+- **smoke 判定口径**：WebGPU 仅信息项（老核显/虚拟机拿不到适配器是已知常态），硬门槛是「非白屏 + localStorage + 云 TTS 可达」，否则会误判本机为失败

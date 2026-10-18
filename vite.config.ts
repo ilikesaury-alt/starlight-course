@@ -9,9 +9,14 @@ import { fileURLToPath, URL } from 'node:url'
 // GitHub Pages 部署时自动设置子路径,本地开发/Cloudflare Pages 用根路径
 // GITHUB_REPOSITORY 格式为 "用户名/仓库名",提取仓库名作为 base
 const repoName = process.env.GITHUB_REPOSITORY?.split('/')[1] || ''
-const base = repoName && repoName !== `${process.env.GITHUB_REPOSITORY?.split('/')[0]}.github.io`
-  ? `/${repoName}/`
-  : '/'
+// 桌面版（Electron）经 file:// 加载 dist/index.html，绝对路径 /assets/... 会 404 导致白屏，
+// 故桌面构建强制相对 base。网页版（GitHub Pages / 本地）保持原逻辑不变。
+const base =
+  process.env.ELECTRON_BUILD === '1'
+    ? './'
+    : repoName && repoName !== `${process.env.GITHUB_REPOSITORY?.split('/')[0]}.github.io`
+      ? `/${repoName}/`
+      : '/'
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -53,7 +58,12 @@ export default defineConfig({
       },
     }),
     tsconfigPaths(),
+    // 桌面版（Electron）不生成 Service Worker 产物：壳内是 file:// 协议，SW 无法接管，
+    // 且 102 条预缓存资源会白打进安装包。用插件自带的 disable 开关（而非整个插件不加载）——
+    // 虚拟模块 virtual:pwa-register 仍需可解析，否则 main.tsx 的静态 import 会让构建失败。
+    // 运行时另有一道 UA 守卫（见 src/main.tsx），双层保证 Electron 内不注册 SW。
     VitePWA({
+      disable: process.env.ELECTRON_BUILD === '1',
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg'],
       manifest: {

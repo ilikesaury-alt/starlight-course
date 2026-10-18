@@ -2,6 +2,8 @@
 dist/
 dist-ssr/
 dev-dist/
+# 桌面版打包产物（NSIS 安装包 + win-unpacked，非源码）
+release/
 # 重建时的临时备份目录（如 dist_bak_*），非源码、不应提交
 dist_bak*/
 
