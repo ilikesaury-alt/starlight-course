@@ -1,0 +1,412 @@
+// ============================================================
+//  听写练习 Dictation（/dictation + DictationPlayer）
+//  ------------------------------------------------------------
+//  儿童向：大字号、大触控目标、清晰的成功/失败反馈色；
+//  音素格子与金字塔是「自然拼读桥接」的可视化，需一眼看清分段。
+// ============================================================
+@use 'mixins' as *;
+
+// ---------- 设置阶段 ----------
+.dt-setup-block {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: 14px;
+  margin-top: 12px;
+  box-shadow: var(--shadow-sm);
+}
+.dt-setup-title {
+  font-size: var(--fs-md);
+  font-weight: 800;
+  color: var(--ink);
+  margin-bottom: 10px;
+}
+.dt-setup-hint {
+  font-size: var(--fs-sm);
+  color: var(--ink-soft);
+  line-height: 1.6;
+  margin: 8px 0 0;
+}
+
+// 分段选择器（模式 / 长度）
+.dt-seg {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.dt-seg-btn {
+  flex: 1;
+  min-height: 44px;
+  padding: 10px 12px;
+  border-radius: var(--r-md);
+  border: 2px solid var(--line-2);
+  background: var(--card);
+  color: var(--ink-soft);
+  font-size: var(--fs-base);
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--ease, 0.15s);
+  &:active { transform: scale(0.97); }
+  &.active {
+    background: var(--mc-soft, var(--brand-soft));
+    border-color: var(--mc, var(--brand));
+    color: var(--brand-deep);
+  }
+}
+
+.dt-check-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: var(--fs-base);
+  font-weight: 600;
+  min-height: 44px;
+  cursor: pointer;
+  input { width: 20px; height: 20px; }
+}
+.dt-count { color: var(--mc, var(--brand)); margin-left: 2px; }
+
+.dt-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.dt-start-row {
+  text-align: center;
+  margin-top: 20px;
+}
+.dt-empty-tip {
+  font-size: var(--fs-sm);
+  color: var(--ink-soft);
+  margin-top: 10px;
+}
+.dt-foot-links {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 18px;
+}
+
+// ---------- 练习阶段 ----------
+.dt-player {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--r-xl, 24px);
+  padding: 16px;
+  margin-top: 12px;
+  box-shadow: var(--shadow);
+  transition: border-color 0.2s ease;
+  &.is-correct { border-color: var(--ok); }
+  &.is-wrong, &.is-revealed { border-color: var(--no); }
+}
+
+.dt-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.dt-progress {
+  font-size: var(--fs-base);
+  color: var(--ink-soft);
+  b { color: var(--mc, var(--brand-deep)); font-size: var(--fs-lg); }
+}
+.dt-listen { display: flex; gap: 8px; }
+
+.dt-lead {
+  font-size: var(--fs-md);
+  color: var(--ink);
+  font-weight: 600;
+  margin: 12px 0 6px;
+}
+
+.dt-mean {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-3);
+  border-radius: var(--r-md);
+  padding: 8px 12px;
+  margin-bottom: 12px;
+}
+.dt-mean-emoji { font-size: 22px; }
+.dt-mean-zh { font-size: var(--fs-base); color: var(--ink-soft); font-weight: 600; }
+
+// 听音写词
+.dt-spell { display: flex; flex-direction: column; gap: 10px; }
+.dt-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 14px 16px;
+  border-radius: var(--r-md);
+  border: 2px solid var(--line-2);
+  font-size: var(--fs-xl, 18px);
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-align: center;
+  background: var(--card);
+  color: var(--ink);
+  outline: none;
+  &:focus { border-color: var(--mc, var(--brand)); }
+  &:disabled { background: var(--bg-3); }
+}
+.dt-check { width: 100%; }
+
+// 屏幕字母盘（触屏友好，不阻挡键盘输入）
+.dt-keyboard {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  margin-top: 4px;
+}
+.dt-key {
+  min-height: 42px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--line);
+  background: var(--bg-3);
+  color: var(--ink);
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  cursor: pointer;
+  &:active { transform: scale(0.94); }
+  &:disabled { opacity: 0.5; }
+}
+.dt-key-del { grid-column: span 2; background: var(--sun-soft, #fef3c7); }
+
+// 三选一
+.dt-choices { display: flex; flex-direction: column; gap: 10px; }
+.dt-choice {
+  min-height: 52px;
+  border-radius: var(--r-md);
+  border: 2px solid var(--line-2);
+  background: var(--card);
+  color: var(--ink);
+  font-size: var(--fs-lg);
+  font-weight: 800;
+  letter-spacing: 1px;
+  cursor: pointer;
+  &:active { transform: scale(0.98); }
+  &.is-answer {
+    border-color: var(--ok);
+    background: var(--ok-soft);
+    color: var(--ok-deep);
+  }
+}
+
+// ---------- 反馈 ----------
+.dt-feedback {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: var(--r-md);
+  font-size: var(--fs-md);
+  font-weight: 700;
+  line-height: 1.6;
+  &.ok { background: var(--ok-soft); color: var(--ok-deep); }
+  &.warn { background: var(--sun-soft, #fef3c7); color: #92400e; }
+  &.bad { background: var(--no-soft); color: var(--no-deep); }
+}
+.dt-answer {
+  font-size: var(--fs-xl, 18px);
+  letter-spacing: 1px;
+  text-decoration: underline;
+}
+.dt-reveal-hint { font-weight: 500; font-size: var(--fs-sm); margin-top: 4px; opacity: 0.9; }
+.dt-retry {
+  margin-top: 10px;
+  padding: 10px 18px;
+  min-height: 44px;
+  border-radius: var(--r-pill);
+  border: none;
+  background: var(--mc, var(--brand-deep));
+  color: #fff;
+  font-size: var(--fs-base);
+  font-weight: 700;
+  cursor: pointer;
+  &:active { transform: scale(0.96); }
+}
+
+// ---------- 自然拼读桥接 ----------
+.dt-phonics {
+  margin-top: 16px;
+  padding: 14px;
+  border-radius: var(--r-md);
+  background: var(--mc-soft, var(--brand-soft));
+  border: 1px dashed var(--mc, var(--brand));
+}
+.dt-phonics-title {
+  font-size: var(--fs-sm);
+  font-weight: 800;
+  color: var(--brand-deep);
+  margin-bottom: 10px;
+  &:not(:first-child) { margin-top: 14px; }
+}
+
+// 音素格子（Elkonin box）
+.dt-boxes {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.dt-box {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px 6px 14px;
+  border-radius: var(--r-sm);
+  background: var(--card);
+  border: 2px solid var(--mc, var(--brand));
+  box-shadow: var(--shadow-sm);
+}
+.dt-box-text {
+  font-size: var(--fs-xl, 18px);
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: var(--brand-deep);
+  min-width: 22px;
+  text-align: center;
+}
+
+// 金字塔拼写
+.dt-pyramid {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-start;
+}
+.dt-pyramid-step {
+  font-size: var(--fs-md);
+  font-weight: 800;
+  letter-spacing: 3px;
+  color: var(--ink-mute);
+  opacity: 0.35;
+  padding: 2px 8px;
+  border-radius: var(--r-sm);
+  transition: var(--ease, 0.2s);
+  &.is-on {
+    opacity: 1;
+    color: var(--brand-deep);
+    background: var(--card);
+    box-shadow: var(--shadow-sm);
+  }
+}
+.dt-pyramid-next {
+  margin-top: 8px;
+  padding: 8px 14px;
+  min-height: 40px;
+  border-radius: var(--r-pill);
+  border: none;
+  background: var(--card);
+  color: var(--brand-deep);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  &:active { transform: scale(0.96); }
+}
+
+.dt-hint-btn {
+  margin-top: 14px;
+  width: 100%;
+  padding: 12px;
+  min-height: 44px;
+  border-radius: var(--r-md);
+  border: 1px dashed var(--line-2);
+  background: var(--bg-3);
+  color: var(--ink-soft);
+  font-size: var(--fs-base);
+  font-weight: 700;
+  cursor: pointer;
+  &:active { background: var(--line); }
+}
+
+// ---------- 会话报告 ----------
+.dt-report {
+  text-align: center;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--r-xl, 24px);
+  padding: 24px 16px;
+  margin-top: 12px;
+  box-shadow: var(--shadow);
+}
+.dt-report-emoji { font-size: 56px; }
+.dt-report-title {
+  font-size: var(--fs-xl, 18px);
+  margin: 8px 0 16px;
+  color: var(--brand-deep);
+}
+.dt-report-stats {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.dt-stat {
+  flex: 1;
+  min-width: 88px;
+  background: var(--mc-soft, var(--brand-soft));
+  border-radius: var(--r-md);
+  padding: 12px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.dt-stat-num {
+  font-size: var(--fs-2xl, 22px);
+  font-weight: 800;
+  color: var(--brand-deep);
+}
+.dt-stat-label { font-size: var(--fs-xs); color: var(--ink-soft); font-weight: 600; }
+
+.dt-stars {
+  font-size: 26px;
+  letter-spacing: 2px;
+  margin: 14px 0;
+  animation: pop 0.4s ease;
+}
+
+.dt-missed { margin-top: 8px; text-align: left; }
+.dt-missed-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.dt-missed-chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  background: var(--no-soft);
+  color: var(--no-deep);
+  border-radius: var(--r-pill);
+  padding: 6px 12px;
+  font-size: var(--fs-base);
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+.dt-missed-zh { font-size: var(--fs-xs); font-weight: 500; opacity: 0.85; letter-spacing: 0; }
+
+.dt-perfect {
+  font-size: var(--fs-md);
+  font-weight: 700;
+  color: var(--ok-deep);
+  margin: 10px 0;
+}
+
+.dt-report-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 18px;
+}
+
+@media (min-width: 520px) {
+  .dt-keyboard { grid-template-columns: repeat(9, 1fr); }
+  .dt-choices { flex-direction: row; }
+  .dt-choice { flex: 1; }
+}

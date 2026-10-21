@@ -61,7 +61,9 @@
   grid-template-columns: 1fr 1fr;
   gap: 12px;
   margin-top: 4px;
-  & > a:last-child { grid-column: 1 / -1; }
+  // 卡片总数为奇数时，最后一张满宽收边（5 张时代的规则）；
+  // 偶数张（如现6 张）则整齐两两配对，不加满宽，避免留半行空洞。
+  & > a:last-child:nth-child(odd) { grid-column: 1 / -1; }
 }
 
 // ---------- 快速入口 ----------

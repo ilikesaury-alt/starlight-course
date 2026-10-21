@@ -130,6 +130,14 @@ export default function CourseEntries() {
           </div>
           <span className="fg-home-arrow">›</span>
         </Link>
+        <Link to="/dictation" className="dt-home-entry">
+          <span className="dt-home-emoji">✍️</span>
+          <div className="dt-home-body">
+            <div className="dt-home-title">听写练习</div>
+            <div className="dt-home-sub">听音写词 · 自然拼读 · 三年级上册英语单词</div>
+          </div>
+          <span className="dt-home-arrow">›</span>
+        </Link>
       </div>
 
       <div className="quick-row">

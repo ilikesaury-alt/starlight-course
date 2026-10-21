@@ -1,122 +1,175 @@
-# 本次需求 CONTEXT —— 将项目改造为桌面版应用
+# 本次需求 CONTEXT · 英语听写 + 自然拼读模块
 
-> 工作流：dev-task（日常开发任务）。状态：**✅ 已完成（2026-10-18），7 条验收标准全部通过**。
-> 上一任务「我的工作台（首页重构）」方案已定稿但被本需求插队，暂停存档于 `docs/CONTEXT-我的工作台-待授权.md`（其去留见 Q3）。
+> 流程：dev-task-flow（标准档 🟡）。本文件是贯穿「对齐→方案→验收」的单一活文档。
+> 状态：第 3.5 步文档复核前。下方「待决点」需在写代码前由用户确认。
 
-## 元信息（Step 0 准备）
-
-| 项 | 值 |
-|----|----|
-| 分支 / 基线 commit | `main` @ `35f31f7` |
-| 编码 / 实现 Agent | 主会话（ZCode，待授权后执行） |
-| 对抗审查 | `general` 子 Agent（交叉对抗） |
-| 单测 / E2E | vitest / Playwright（E2E 仍跑浏览器形态；桌面壳用手工走查 + 打包冒烟） |
-| 测试环境 | ✅ node v22.22.2 / Windows 10 |
-| 重量档 | 🟡 **标准档**（加壳不改业务代码，但有 M0 验证点与双形态构建权衡） |
+## 元信息
+- 模式组合：规划/实现用当前会话模型；交叉对抗审查用 general-purpose 子 Agent；人工 Review 由用户。
+- 定档：🟡 标准（多文件、含 SRS/错题本状态写入、有方案权衡）。
 
 ## 要解决的问题
+- **用户画像**：8 岁，三年级上册；两年听力启蒙（Little Fox / Big Muzzy），日常刷百词斩反复刷词。
+- **痛点**：今年三年级开始做单词听写，发现"很简单的词都不会写"。
+- **根因（已分析）**：听/说/理解 ≠ 拼写。两年练的全是前三者，"音→形"反向编码（拼写）从未专门练；百词斩是"认词/再认"而非"写词产出"。三年级体系突然要求听写，需求从"听懂"跳到"写对"，落差大、非退步。
+- **本功能目标**：补上"自然拼读 + 拼写"这座桥，让已有听力优势转化为拼写能力，对应学校听写节奏。
 
-应用目前是 GitHub Pages 上的 PWA，每次要在浏览器里开网址；目标是变成**双击即开的 Windows 桌面应用**（.exe），离线可用，孩子的学习进度留在本机。
+## 范围（In / Out）
+- **In（本版本）**：
+  - 首页独立入口「✍️ 听写练习」+ 独立路由 `/dictation`。
+  - 内容**只从 eng3a（三年级上册英语）** 来：单元（Welcome / Unit 1–6）+ 可选剧本词。
+  - 听音写词（键盘 + 移动端屏幕字母盘）。
+  - 自然拼读桥接：音素格子（Elkonin box）/ 金字塔拼写 / 拼读提示阶梯。
+  - 即时反馈：两试一揭（第一次错可改+给线索，第二次错揭答案）。
+  - 结果回灌：错词进错题本 `/wrong`；每词结果进 SRS `/smart`。
+  - 会话报告：正确率、连对、得分星、错词清单。
+- **Out（本版本不做，留 Phase 2）**：
+  - 跨模块取词（starlight / flyguy / 错题混合自适应）。
+  - 手写字母输入。
+  - 成就徽章系统、自适应选词（按 SRS 到期）。
 
-## 外部调研结论（Step 1，2026-10-17）
+## 数据规格（输入/输出）与边界、异常处理
+- **输入（取词源，全部复用现有，零新增词库）**：
+  - `src/data/modules.ts` → `eng3aMeta.items`（单元 + 剧本）+ `getWords(itemId)`，覆盖 单元重点词 + 补充词（moreWords）+ 剧本重点词。
+  - 子集：全单元词 / 仅错题（`getWrongWords('eng3a')`）/ 长度过滤（短词优先）。
+- **输出（写入）**：
+  - 错词：`addWrongWord({ en, zh, module:'eng3a', from })` → 错题本。
+  - 复习：`recordReview(en, correct, 'eng3a')` → SRS 调度。
+  - 本轮临时状态（streak / 正确数 / 错词列表）放组件 `useState`，结束生成报告，无需持久化。
+- **异常处理**：
+  - 取词为空（如"仅错题"但错题本空）：提示并给兜底入口（去全单元词 / 先去学）。
+  - 语音不可用（WebSpeech 缺失/被拦截）：沿用现有 `speakService` 兜底链 + SafeBoundary；按钮降级仍可键盘输入。
+  - 首屏需用户手势激活音频（移动端自动播放策略）：进词自动朗读放在真实点击之后。
 
-| 事实 | 来源 | 影响 |
-|------|------|------|
-| Electron 中 `SpeechRecognition` **必挂**（network error，需 Google 语音后端 API key） | electron#46143 #24278 #47837 | 本项目 STT 仅用于跟读（Tab 已默认隐藏、`supported` 守卫 + 降级已存在）→ 影响可控 |
-| Electron 支持 WebGPU，onnxruntime-web/Kokoro 有在 Electron 跑通的先例 | transformers.js#1231、kokoro#4 | Kokoro 神经 TTS 可保留，但需 M0 实测目标机器 |
-| Tauri（WebView2）体积小 ~10 倍，但需 Rust+MSVC 工具链；WebView2 的 STT 同样受限 | tauri#6381、v2 文档 | 体积优势换不来功能优势，工具链成本高 |
-| 云 TTS（百度/有道 `<audio>` 直连 + no-referrer）与 localStorage 持久化在 Electron 中行为同浏览器 | 架构等价 | 业务代码预期零改动 |
+## 关键决策与取舍
+- **独立入口而非课内 Tab**：用户选 B。理由——直击痛点、闭环最短、操作步骤最少。
+- **内容先只 eng3a**：用户指定。降低一版复杂度，数据现成。
+- **听音写词为核心，而非看词抄写**：正中"音→形"短板。
+- **两试一揭而非一次判死**：降低 8 岁孩子挫败感。
+- **不新增持久化字段**：避免 localStorage 迁移（version 已到 8），全部复用 `wrongWords` + `srsCards` + 组件临时态。
+- **phonics 用轻量规则**（CVC / digraph th,sh,ch,ck / 魔术 e），不追求语言学精确，只要"分段对应"够用。
 
-## 已确认方案（Step 2 think）
-
-### 第一性原理
-
-应用是 100% 纯前端 + localStorage，桌面化只是**给同一份前端产物加一个原生壳**，不是重写。最小方案 = Electron 主进程（开窗口、加载 build 产物）+ 打包脚本；业务代码、store、课程数据全部不动。
-
-### 方案对比
-
-| 方案 | 做法 | 收益 | 代价 | 风险 |
-|------|------|------|------|------|
-| **B Electron（推荐）** | `electron` 主进程 + `electron-builder` 出 NSIS 安装包；dev 加载 Vite server，prod 加载 `dist/` | 纯 JS 工具链（现有 Node 22 即可）；WebGPU 可用；生态最成熟 | 安装包 ~80-100MB、内存占用高 | STT 不可用（可接受）；SW 双形态需隔离 |
-| A Tauri | WebView2 壳 | 包 ~10MB | 需 Rust + MSVC 工具链；STT 同样不可用 | 工具链装不上即卡死 |
-| C 保持 PWA | 不做 | 零成本 | 不满足需求 | — |
-
-### 关键设计
-
-1. **双形态共存**：网页版（GitHub Pages PWA）照常构建部署；桌面壳单独 `npm run electron:dev` / `npm run electron:build`，prod 用同一份 `vite build` 产物。PWA 注册逻辑加环境判断（Electron 下跳过 SW 注册，避免壳内缓存混乱）
-2. **主进程极简**：`electron/main.cjs` —— 创建 BrowserWindow（1280×800，禁 nodeIntegration，contextIsolation）、dev 载 `localhost:5173`、prod 载 `dist/index.html`（file:// 下 HashRouter 无碍，base 相对路径需 vite 配置确认）
-3. **STT 降级**：不动代码——现有 `useSpeechRecognition` 的 `supported` 守卫 + 家长确认降级天然兜住 Electron 场景；E2E 不测 STT
-4. **打包**：`electron-builder` + NSIS 安装包（目标 Windows x64）；**用默认 Electron 图标**（图标定制已砍，见 Out）；构建需 `ELECTRON_MIRROR` 与 `ELECTRON_BUILDER_BINARIES_MIRROR`（npmmirror），写进脚本与文档
-5. **验证探针**（M0 与验收共用，`electron/main.cjs` 内置 `--smoke` 模式）：加载产物后 `executeJavaScript` 依次验 ① `#root` 子节点数 > 0（非白屏）② `navigator.gpu?.requestAdapter()` ③ `localStorage` 读写 ④ 主进程 `fetch` 百度 TTS 验 `content-type: audio/*`；输出 JSON 结果后退出，发声真实性仍需人工听
-6. **不做的**（奥卡姆）：自动更新、多窗口、系统托盘、跨平台打包（mac/linux）、数据导出导入、图标定制、STT 替代方案（whisper 本地化另开需求）
-
-### M0（最大不确定性前置验证，动手第一步）
-
-**先做最小壳验证三件事，不过立即回改方案**：
-1. Electron 窗口加载 `dist/` 产物 → 页面白屏与否（file:// + HashRouter + 相对 base）
-2. 目标机器上 `probeWebGPUAdapter()` 能否拿到适配器（决定 Kokoro 是否可用，拿不到则桌面版自动走云 TTS + WebSpeech，链路本来就有）
-3. 百度/有道 `<audio>` 云 TTS 与 localStorage 持久化在壳内正常
-
-### 对抗性审查
-
-| 反例 | 风险 | 处置 |
-|------|------|------|
-| file:// 协议下资源路径 404 | 白屏 | vite `base: './'`（GitHub Pages 已用 env 区分 base，需确认二者兼容） |
-| SW 在壳内注册拦截 file:// 请求 | 缓存错乱；且 dev 态 SW 也默认开启（`devOptions.enabled`） | UA 检测放在 `registerSW` 调用处（`src/main.tsx:17`），dev/prod 一并兜住 |
-| 旧进度在浏览器里，桌面版读不到 | 孩子进度"丢失"体验 | localStorage 不同源无法自动迁移 → Q2 决定是否本期做导出/导入 |
-| Electron 下载慢/装不上（国内网络） | 卡壳 | 用 npmmirror 镜像 env（ELECTRON_MIRROR）写进文档 |
-| 服务 workers 缓存 + 双形态构建互相污染 | 网页版回归 | PWA 产物仅在 web 构建启用；桌面构建跳过 vite-plugin-pwa |
+## 约束
+- 技术栈：React 18 + TS + Vite + Zustand + Tailwind（既有）。HashRouter。
+- 配色：复用工 3a 主题（蓝 #2563eb / #dbeafe）与 `moduleThemeVars`。
+- 语音：复用 `SpeakButton` / `speakText` 既有英文兜底链。
+- 复用现有星规 `quizStars`、错题本 `WrongBook`、智能复习 `/smart`。
+- 过 `npm run check` + `npm run lint`。
 
 ## 验收标准（写死）
+1. 首页出现独立「✍️ 听写练习」卡片，点击进入 `/dictation`。
+2. `/dictation` 可按 eng3a 单元（含剧本可选）选范围，并支持"仅错题 / 长度过滤"子集。
+3. 进入练习后自动朗读单词（用户手势后）；提供 🔊 重听与慢速。
+4. 孩子听音后写词：键盘 + 移动端屏幕字母盘均可输入。
+5. 反馈规则：第一次错 → 红 + 拼读线索（可重听/看音素格子），可改；第二次错 → 揭晓正确拼写 + 音素拆分布局；对 → 绿 + 鼓励 + 自动进下一词。
+6. 自然拼读桥接：每词提供音素格子（按词长动态 N 格，可逐音素朗读）与金字塔拼写提示。
+7. 拼写错误的词进入错题本（`/wrong` 中 `module='eng3a'` 可见）；每词对错结果写入 SRS（`recordReview`）。
+8. 一轮结束显示会话报告：正确率%、最长连对、得分星、错词清单（可再听写一次）。
+9. 所有验收项对应功能在 `npm run check` + `npm run lint` 下无类型/lint 错误。
 
-| # | 标准 | 证据 |
-|---|------|------|
-| 1 | `npm run electron:dev` 起壳载 dev server，页面功能同浏览器（点读发音、翻页、quiz） | 走查记录 |
-| 2 | `npm run electron:build` 产出 NSIS 安装包，安装后双击可用 | 安装包 + 截图 |
-| 3 | 壳内发音链路：WebGPU 探针结果记录在案，可用则走 Kokoro，不可用则云 TTS/WebSpeech，不得静音（音频真实性人工听，链路程序化验证） | `--smoke` JSON 输出 |
-| 4 | 学习进度在壳内 localStorage 持久化：重开应用仍在（smoke 探针含写入/回读断言） | `--smoke` JSON 输出 |
-| 5 | 网页版构建/部署不受影响：`npm run build` 产物含 SW，`npm run e2e` 仍全绿 | 命令输出 |
-| 6 | 跟读入口在壳内保持隐藏态/降级，不崩溃不白屏 | 走查记录 |
-| 7 | `npm run check` / `npm run test` / `npm run lint` 全绿 | 命令输出 |
-
-## 待决问题（实施授权闸 —— 已全部回答，2026-10-17）
-
-| 问题 | 决策 |
-|------|------|
-| Q1 壳选型 | **Electron**（已确认） |
-| Q2 旧进度迁移 | **重新开始**，不做导出/导入（已确认为 Out，列为已知问题） |
-| Q3 工作台任务 | **桌面化完成后继续做**（方案已定稿于 `docs/CONTEXT-我的工作台-待授权.md`） |
-
-**任务队列**：桌面化（本任务）→ 我的工作台（已获继续授权，桌面化验收后接续）。
-
-## 文档复核记录（强制闸，2026-10-17）
-
-五项逐项过，发现 5 处问题已回改本文：
-
-1. **验收标准**：#3/#4 原证据仅「走查记录」不可重现 → 升级为程序化探针（主进程 `executeJavaScript` 验页面渲染/WebGPU/localStorage，HTTP 拉百度 TTS 验 content-type）；真实发声仍需人工，已在证据列标明
-2. **范围 In/Out**：补充「图标定制」为 Out（favicon.svg→ico 转换砍掉，用 Electron 默认图标）；Q2 决策已回写
-3. **方案自洽**：SW 注册点已实锤（`src/main.tsx:17` `registerSW`），UA 检测写死在该处；STT 降级守卫已实锤（`useSpeechRecognition.ts` `supported` + `unsupported` 错误码）
-4. **高风险点**：补 electron-builder 自身工具链（winCodeSign/nsis 二进制）国内下载需 `ELECTRON_BUILDER_BINARIES_MIRROR`；补 Node 22 与 electron-builder 兼容性确认
-5. **口径一致**：Q1~Q3 决策与方案/Out 一致，无下游推翻上游
-
-## 验收结果（2026-10-18，逐条对照）
-
-| # | 标准 | 结果 | 证据 |
-|---|------|------|------|
-| 1 | `electron:dev` 起壳载 dev server | ✅ | 探测到 dev server 并载入，`--smoke` 在 dev 态 `passed=true` |
-| 2 | `electron:build` 出 NSIS 安装包 | ✅ | `release/Starlight 学习伙伴 Setup 0.1.0.exe`（86MB）；`win-unpacked` 内 exe 跑 `--smoke` `passed=true` |
-| 3 | 发音链路不静音 | ✅ | WebGPU 探针 `false`（本机老核显，已知常态）→ 自动走云 TTS/WebSpeech；主进程验百度 TTS `content-type: audio/mpeg` |
-| 4 | localStorage 持久化 | ✅ | `--smoke` 写入/回读断言 `true`（`partition: 'persist:starlight'`） |
-| 5 | 网页版不受影响 | ✅ | 无 `ELECTRON_BUILD` 时 `npm run build` 产物含 `sw.js`；`npm run e2e` 57 passed / 2 failed / 3 skipped —— 2 个失败经 `git stash` 基线比对确认为**改动前既存问题**（`audio-debug.spec.ts:18`、`review.spec.ts:30`），非本次回归 |
-| 6 | 跟读入口降级不崩 | ✅ | `SHOW_SPEAK_TAB=false` 原样保留；STT `supported` 守卫天然兜住 Electron（STT 必挂已知） |
-| 7 | check / test / lint 全绿 | ✅ | `check` ✓、`test` 215 passed (18 files) ✓、`lint` ✓ |
+## 术语表
+| Business Term | Code Naming | Description |
+|---|---|---|
+| 听写 | Dictation | 听音写词练习 |
+| 音素格子 | phonemeBoxes / Elkonin box | 把单词按音素切分可视化 |
+| 金字塔拼写 | spellingPyramid | c/ca/cat 逐步展开提示 |
+| 两试一揭 | two-try-then-reveal | 第一次错可改，第二次错揭答案 |
+| 仅错题 | wrong-only | 从 eng3a 错题本取词 |
 
 ## 已知风险 / 踩过的坑
+- 语音三防护已在本 App 建立（`speakService` 兜底链 + SafeBoundary），沿用即可。
+- 首屏音频需用户手势激活（移动端自动播放策略）——进词朗读须放真实点击后。
+- `version: 8` 的 localStorage 迁移已有逻辑，不新增持久化字段以免触发迁移风险。
 
-- **旧进度不迁移（Q2 已决策重新开始）**：桌面版首次打开是全新进度，需在交付文档向使用者明示
-- Electron 国内下载慢：`ELECTRON_MIRROR` + `ELECTRON_BUILDER_BINARIES_MIRROR` 双镜像写进构建脚本
-- file:// 与 base 配置冲突是白屏最常见原因，M0 第一项就验它（`ELECTRON_BUILD=1` 时 vite `base: './'`）
-- 中文控制台乱码：读中文一律用 read/grep 工具
-- **⚠️ Windows 未开「开发者模式」→ electron-builder 打包必失败**（本次实际踩到）：首次打包要解压 `winCodeSign-2.6.0.7z`，包内含 macOS 的 `.dylib` **符号链接**；7-Zip 默认 `-snld` 会尝试创建软链，非管理员/未开开发者模式时报「客户端没有所需的特权」，重试 3 次仍失败（且每次用随机数字临时目录，手动预提取命中不了）。**解法已固化进 `scripts/electron-build.mjs`**：预先用 `7zip-bin` 的 `7za` 解压到 electron-builder 期望的 `Cache/winCodeSign/winCodeSign-2.6.0`，**排除 `darwin`/`linux`**（Windows 打包只需 `signtool`/`rcedit`），并清理失败残留的随机目录；app-builder 见目标目录已存在即跳过解压。该步骤幂等（缓存就绪则跳过），已验证冷路径（删缓存后自动重新预置）可自愈
-- **`electron:smoke` 必须让「构建」也带 `ELECTRON_BUILD=1`**：原脚本写成 `npm run build && cross-env ELECTRON_BUILD=1 electron . --smoke`，构建态是网页版（绝对 `base`）→ file:// 下白屏 → smoke 误判失败。已改为 `cross-env ELECTRON_BUILD=1 npm run build && electron . --smoke`
-- **smoke 判定口径**：WebGPU 仅信息项（老核显/虚拟机拿不到适配器是已知常态），硬门槛是「非白屏 + localStorage + 云 TTS 可达」，否则会误判本机为失败
+## 待决点（写代码前需用户确认）
+- D1（已定=B）：练习主形态 = 听音写词 + 三选一拼写（默认听音写词）。
+- D2（已定=不做）：第一版不做手写字母输入，留 Phase 2。
+- D3（已定=接受）：phonics 用轻量规则（非语言学精确）。
+- D4（已定=保留）：设计稿 `docs/dictation-design.md` 保留作参考。
+
+## 已确认方案
+> 见下方「方案设计」段。本段由 design-plan 产出，含 code-reality-check 现状基线。
+
+### 方案设计（design-plan · 标准档 🟡）
+
+**问题本质（第一性原理）**：孩子两年练的是「听→理解/说」的单向输入，缺的是「听→形」反向编码 + 音素↔字母映射（phonics）。功能本质不是"再认词库"，而是**把已听懂的声音，转成可写出的字母序列**，并在过程中显式教音素切分。
+
+**方法触发表**：
+- 改造/沿用现有方案（独立入口复用 eng3a 取词 + 既有 SRS/错题本写入 + 既有语音/星规）→ **第一性原理**已做（重定义问题本质）。
+- 方案为本会话所出 → **对抗性审查**必跑（第 3.5 复核 + 第 5 步子 Agent）。
+- 新增机制（独立 DictationPage + DictationPlayer + phonics 工具 + 屏幕字母盘）→ **奥卡姆剃刀**已自检（删可删项见下）。
+- 拆模块划边界 → **高内聚低耦合**已自检（页面/播放器/工具分离）。
+- 无"拿不准收益"的机制 → 消融实验未触发。
+
+**方案对比（核心形态取舍）**：
+| 方案 | 做法 | 收益 | 代价 | 风险 |
+|---|---|---|---|---|
+| A 只听音写词 | 听→键盘/字母盘写 | 最贴音→形 | 起步门槛高，易挫败 | 低 |
+| B（推荐）听音写词+三选一 | 两种模式，默认听音写词 | 起步友好+核心训练都在 | 多一套 UI | 低 |
+| C 只三选一 | 给3拼法选对 | 最易 | 不练"写"，治标 | 偏离核心 |
+→ 选 B：三选一作起步缓冲，听音写词作核心，二者共享同一取词/反馈/回灌管线。
+
+**推荐方案 + 模块边界**：
+1. `src/pages/DictationPage.tsx`（路由 `/dictation`，lazy）：范围选择 + 模式选择 + 流程编排 + 会话报告。
+2. `src/components/DictationPlayer.tsx`：单轮（听→写/选→反馈→音素格子/金字塔）。
+3. `src/data/phonics.ts`（待建）：phonemeBoxes / spellingPyramid / phonicsHint（轻量规则）。
+4. `src/App.tsx`：加 `/dictation` 路由（lazy）。
+5. `src/components/CourseEntries.tsx`：首页加独立卡片。
+6. 样式：复用既有 `.page/.btn/.card/.speak-btn` 与主题令牌；少量 dictation 专属 class。
+
+**现状标注（code-reality-check 已逐项核实）**：
+- `eng3aMeta.items` / `getWords(itemId)`（`src/data/modules.ts`）：**已存在**，覆盖单元+剧本重点词+补充词。
+- `getWrongWords('eng3a')` / `addWrongWord` / `recordReview`（`src/store/useCourseStore.ts`）：**已存在**，错题本+SRS写入接口就绪。
+- `SpeakButton` / `speakText`（`src/components/SpeakButton.tsx` / `src/utils/speak.ts`）：**已存在**，英文兜底链复用。
+- `quizStars`（`src/utils/stars.ts`）：**已存在**，会话报告得分星复用。
+- 路由结构（`src/App.tsx` HashRouter + lazy）：**已存在**，加一路由即可。
+- 首页入口（`src/components/CourseEntries.tsx`）：**已存在**，加一张卡片即可。
+- `phonics.ts`：**待建**（本方案新建，轻量规则）。
+- `DictationPage` / `DictationPlayer`：**待建**。
+
+**高风险点**：
+- 音频激活：移动端首屏自动朗读需用户手势，进词朗读放真实点击后（沿用现有 SafeBoundary）。
+- 状态写入一致性：错词/复习写入沿用既有 store 接口，不新增持久化字段（避 version 8 迁移）。
+- 屏幕字母盘在桌面/移动端都要可达，且不影响键盘输入。
+
+**奥卡姆剃刀自检**：不做手写（D2）、不做跨模块/自适应（Phase 2）、不新增持久化——本版本机制已最简。
+
+## 验收证据
+
+### 第 4 步 实现证据
+- `src/data/phonics.test.ts`：8 项通过（音素格子 CVC/digraph/魔术e/清理、金字塔、提示文本、短词判定）
+- `src/utils/dictation.test.ts`：13 项通过（取词去重/长度过滤/干扰项变形/编辑距离/选项唯一/洗牌不污染入参）
+- `src/pages/DictationPage.test.tsx`：3 项通过（设置页渲染+词池非空、空错题本禁用+兜底提示、渲染不加星）
+- 全量回归：`npm run test` → **21 文件 / 239 项通过**，无失败
+- 静态：`npm run check` 通过；`npm run lint` 零告警
+- 构建：`npm run build` 成功，`DictationPage` 独立 chunk（50.43 kB / gzip 8.29 kB）
+
+### 第 5 步 交叉对抗审查（处置留痕）
+> 原计划交 reviewer 子 Agent，**该子 Agent 超时失败（1800s 无输出）**，未重跑；改由主 Agent 直接执行对抗审查（读代码 + 写探针脚本 + 真实词切分验证）。
+
+| # | 问题 | 定位 | 严重度 | 处置 |
+|---|---|---|---|---|
+| A1 | `earnStars()` 写在 JSX 里，内部调 `addStars` → 每次重渲染重复加星，刷新/重渲染会把星星刷爆 | DictationPage.tsx:320（原） | **阻塞** | 已修：改为进入 report 时 `setStars`+`addStars` 各一次；新增 `stars` state + 回归测试「渲染不加星」 |
+| A2 | 末尾词结算时 `correctCount` 被 setTimeout 闭包捕获为旧值 → 正确率/星数算错 | DictationPage.tsx handleAdvance | **阻塞** | 已修：新增 `correctRef` 镜像，结算读 ref 而非 state |
+| A3 | 三选一干扰项是随机字母串（如 `xqz`）→ 孩子一眼排除，三选一退化成「找哪个像单词」，练不到音→形 | dictation.ts pickDistractors（原） | **重要** | 已修：改为对原词做小变形（换元音/换辅音/双写/删字母/相邻换位/魔术e），并加两条测试（共享字母数、编辑距离≤2）守住 |
+| A4 | `wrongWords` 只依赖 `[phase]`，本轮写入的错词回到设置页读不到 → 「只练错题本」是过期快照 | DictationPage.tsx useMemo | **重要** | 已修：改用 `setupEpoch` 显式触发，`backToSetup` 递增 |
+| A5 | 计分口径未显式化：第一次错（已 settle(false)）后改对，UI 显示🎉但计错 | DictationPlayer.tsx settle | 建议 | 判定为**设计如此**（首次独立写对才是掌握度），已补注释写清口径，避免后人误改 |
+| A6 | 音素切分教学准确性抽查（apple→`a\|p\|p\|le`、banana→逐字母、cake→`c\|a\|ke`、chick→`ch\|i\|ck`） | phonics.ts | 建议 | 判定**可接受**：轻量规则定位为「分段对应」，不声称音素学精确；D3 已与用户确认接受此精度 |
+| A7 | 未使用 import / dead code（`LETTERS` 常量、`streak`/`allWords` 变量） | dictation.ts / DictationPage.tsx | 建议 | 已清（lint 零告警即为证据） |
+| A8 | 越界检查（手写/跨模块/自适应） | 全部改动 | — | **无越界**：未实现手写、未跨模块取词、无自适应选词，符合 CONTEXT Out of scope |
+
+结论：A1/A2 两个阻塞级问题已修复并被测试守住；A3/A4 重要问题已修复；无遗留阻塞。
+
+## 流程状态
+- 第 0 步 定档：🟡 标准（已完成）
+- 第 1 步 准备：CONTEXT.md 已初始化；测试环境（vitest/tsc/lint）可用（第 4 步确认）。
+- 第 2 步 需求对齐：草稿已沉淀，D1–D4 已确认（B/不做/接受/保留）。
+- 第 3 步 方案设计：已完成（含 code-reality-check 现状基线，全部已存在项已核实）。
+- 第 3.5 步 复核：已完成（六项逐项过，用户已授权实现）。
+- 第 4 步 实现：已完成（M0 通过：取词/干扰项/选项纯逻辑先测红；改动落地；既有 239 项测试全绿）。
+- 第 5 步 交叉对抗审查：已完成（子 Agent 超时 → 主 Agent 代执行；8 项发现，2 阻塞 2 重要均已修，逐条留痕于上方表格）。
+- 第 6 步 人工 Review：待用户执行。
+- 第 7 步 交付文档：待做。
+- 第 8 步 提交/MR：待做（须标 E2E pending）。
+- 第 9 步 HANDOFF：待做。
+- 第 10 步 复盘：待做。
+- 第 11 步 E2E：待用户手动跑。
