@@ -1,8 +1,14 @@
 // ============================================================
 //  听写练习 Dictation（/dictation + DictationPlayer）
 //  ------------------------------------------------------------
-//  儿童向：大字号、大触控目标、清晰的成功/失败反馈色；
+//  儿童向：大字号、大触控目标、清晰的成功/失败反馈色。
 //  音素格子与金字塔是「自然拼读桥接」的可视化，需一眼看清分段。
+//
+//  ⭐ 2026-10 视觉重构（对齐儿童拼写类应用通行做法）：
+//    · 「一字一盒」字母格：写错能直接看见**是第几个字母**错，漏写补虚线空格；
+//    · 听音做成页面唯一主操作（大圆按钮 + 换词自动播），不用再找小喇叭；
+//    · 反馈横幅 = 图标 + 标题 + 说明 + 明确动作，取代一句灰字；
+//    · 全部颜色/圆角/阴影走 _tokens 的设计令牌，不写死色值（主题色随 --mc 变化）。
 // ============================================================
 @use 'mixins' as *;
 
@@ -11,33 +17,113 @@
   background: var(--card);
   border: 1px solid var(--line);
   border-radius: var(--r-lg);
-  padding: 14px;
-  margin-top: 12px;
+  padding: var(--sp-4);
+  margin-top: var(--sp-3);
   box-shadow: var(--shadow-sm);
 }
 .dt-setup-title {
   font-size: var(--fs-md);
   font-weight: 800;
   color: var(--ink);
-  margin-bottom: 10px;
+  margin-bottom: var(--sp-3);
 }
 .dt-setup-hint {
   font-size: var(--fs-sm);
   color: var(--ink-soft);
   line-height: 1.6;
-  margin: 8px 0 0;
+  margin: var(--sp-2) 0 0;
 }
 
-// 分段选择器（模式 / 长度）
+// 模式二选一：大卡片，一眼看懂区别（比分段控件更适合儿童）
+.dt-modes {
+  display: grid;
+  gap: var(--sp-2);
+}
+@media (min-width: 520px) {
+  .dt-modes { grid-template-columns: 1fr 1fr; }
+}
+.dt-mode {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  text-align: left;
+  padding: var(--sp-3) var(--sp-4);
+  min-height: 68px;
+  border-radius: var(--r-md);
+  border: 2px solid var(--line-2);
+  background: var(--card);
+  color: var(--ink-soft);
+  transition: border-color var(--ease), background var(--ease), transform var(--ease);
+  @include press(0.98);
+  &.active {
+    border-color: var(--mc, var(--brand));
+    background: var(--mc-soft, var(--brand-soft));
+    color: var(--brand-deep);
+    box-shadow: var(--shadow-sm);
+    .dt-mode-check { opacity: 1; transform: scale(1); }
+  }
+}
+.dt-mode-emoji {
+  font-size: 30px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.dt-mode-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.dt-mode-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-base);
+  font-weight: 800;
+}
+.dt-mode-tag {
+  padding: 1px 8px;
+  border-radius: var(--r-pill);
+  background: var(--sun-soft);
+  color: var(--sun-ink);
+  font-size: var(--fs-xs);
+  font-weight: 800;
+}
+.dt-mode-desc {
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  line-height: 1.4;
+  opacity: 0.9;
+}
+.dt-mode-check {
+  margin-left: auto;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--mc, var(--brand));
+  color: #fff;
+  font-size: var(--fs-sm);
+  font-weight: 800;
+  opacity: 0;
+  transform: scale(0.6);
+  transition: var(--ease);
+}
+
+// 分段选择器（词的长短）
 .dt-seg {
   display: flex;
-  gap: 8px;
+  gap: var(--sp-2);
   flex-wrap: wrap;
 }
 .dt-seg-btn {
   flex: 1;
   min-height: 44px;
-  padding: 10px 12px;
+  padding: var(--sp-2) var(--sp-3);
   border-radius: var(--r-md);
   border: 2px solid var(--line-2);
   background: var(--card);
@@ -45,8 +131,8 @@
   font-size: var(--fs-base);
   font-weight: 700;
   cursor: pointer;
-  transition: var(--ease, 0.15s);
-  &:active { transform: scale(0.97); }
+  transition: var(--ease);
+  @include press(0.97);
   &.active {
     background: var(--mc-soft, var(--brand-soft));
     border-color: var(--mc, var(--brand));
@@ -57,220 +143,494 @@
 .dt-check-row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--sp-2);
   font-size: var(--fs-base);
   font-weight: 600;
   min-height: 44px;
   cursor: pointer;
-  input { width: 20px; height: 20px; }
+  input { width: 20px; height: 20px; accent-color: var(--mc, var(--brand)); }
 }
-.dt-count { color: var(--mc, var(--brand)); margin-left: 2px; }
+.dt-count { color: var(--mc, var(--brand-deep)); margin-left: 2px; }
 
 .dt-chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 10px;
+  gap: var(--sp-2);
+  margin-top: var(--sp-3);
 }
 
 .dt-start-row {
   text-align: center;
-  margin-top: 20px;
+  margin-top: var(--sp-5);
+}
+// 主按钮：满宽 + 大触控目标 + 主题色阴影，设置页唯一 CTA
+.dt-start-btn {
+  width: 100%;
+  min-height: 56px;
+  font-size: var(--fs-lg);
+  background: linear-gradient(135deg, var(--mc, var(--brand-deep)), var(--brand-deep));
+  box-shadow: var(--shadow-lg);
 }
 .dt-empty-tip {
   font-size: var(--fs-sm);
   color: var(--ink-soft);
-  margin-top: 10px;
+  margin-top: var(--sp-3);
 }
 .dt-foot-links {
   display: flex;
-  gap: 10px;
+  gap: var(--sp-2);
   justify-content: center;
   flex-wrap: wrap;
-  margin-top: 18px;
+  margin-top: var(--sp-5);
 }
 
 // ---------- 练习阶段 ----------
 .dt-player {
   background: var(--card);
   border: 1px solid var(--line);
-  border-radius: var(--r-xl, 24px);
-  padding: 16px;
-  margin-top: 12px;
+  border-radius: var(--r-xl);
+  padding: var(--sp-4);
+  margin-top: var(--sp-3);
   box-shadow: var(--shadow);
-  transition: border-color 0.2s ease;
-  &.is-correct { border-color: var(--ok); }
-  &.is-wrong, &.is-revealed { border-color: var(--no); }
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  &.is-correct { border-color: var(--ok); box-shadow: 0 8px 24px rgba(16, 185, 129, 0.18); }
+  &.is-wrong { border-color: var(--warn); }
+  &.is-revealed { border-color: var(--no); }
 }
 
 .dt-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  gap: var(--sp-2);
   flex-wrap: wrap;
 }
 .dt-progress {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-width: 0;
+}
+.dt-progress-text {
   font-size: var(--fs-base);
   color: var(--ink-soft);
+  font-weight: 600;
+  white-space: nowrap;
   b { color: var(--mc, var(--brand-deep)); font-size: var(--fs-lg); }
 }
-.dt-listen { display: flex; gap: 8px; }
+// 逐词小圆点：一眼看到「还有几个词」
+.dt-progress-track {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.dt-pip {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--line-2);
+  &.is-done { background: var(--ok); }
+  &.is-now {
+    background: var(--mc, var(--brand));
+    transform: scale(1.4);
+    box-shadow: 0 0 0 3px var(--mc-soft, var(--brand-soft));
+  }
+}
+.dt-top-right {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin-left: auto;
+}
+.dt-score-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: var(--r-pill);
+  background: var(--ok-soft);
+  color: var(--ok-deep);
+  font-size: var(--fs-sm);
+  font-weight: 800;
+}
+.dt-exit {
+  padding: 6px 10px;
+  min-height: 36px;
+  border-radius: var(--r-pill);
+  background: var(--bg-3);
+  color: var(--ink-soft);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  transition: var(--ease);
+  &:active { transform: scale(0.94); background: var(--line); }
+}
+
+// ---------- 听音：本页唯一主操作 ----------
+.dt-listen {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  margin-top: var(--sp-4);
+}
+// 主播放按钮：放大 SpeakButton 的圆钮（复用 .speak-btn 结构，仅放大尺寸）
+.dt-listen-main .speak-btn {
+  width: 76px;
+  height: 76px;
+  font-size: 30px;
+  background: linear-gradient(135deg, var(--mc, var(--brand-deep)), var(--brand-deep));
+  box-shadow: var(--shadow-lg);
+}
+.dt-listen-side {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.dt-listen-title {
+  font-size: var(--fs-lg);
+  font-weight: 800;
+  color: var(--ink);
+  line-height: 1.2;
+}
+.dt-listen-slow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--ink-soft);
+}
 
 .dt-lead {
   font-size: var(--fs-md);
-  color: var(--ink);
+  color: var(--ink-soft);
   font-weight: 600;
-  margin: 12px 0 6px;
+  margin: var(--sp-4) 0 var(--sp-2);
+  text-align: center;
 }
 
 .dt-mean {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--sp-2);
   background: var(--bg-3);
   border-radius: var(--r-md);
-  padding: 8px 12px;
-  margin-bottom: 12px;
+  padding: var(--sp-2) var(--sp-3);
+  margin-bottom: var(--sp-3);
 }
-.dt-mean-emoji { font-size: 22px; }
+.dt-mean-emoji { font-size: 26px; }
 .dt-mean-zh { font-size: var(--fs-base); color: var(--ink-soft); font-weight: 600; }
 
-// 听音写词
-.dt-spell { display: flex; flex-direction: column; gap: 10px; }
+// ---------- 字母盒（一字一盒） ----------
+.dt-spell { display: flex; flex-direction: column; gap: var(--sp-3); }
+
+.dt-slots {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--sp-2);
+  padding: var(--sp-3) var(--sp-2);
+  min-height: 84px;
+  border-radius: var(--r-md);
+  background: var(--bg-2);
+  border: 2px dashed var(--line-2);
+  transition: border-color var(--ease);
+}
+// 真输入框透明覆盖：保留物理键盘输入与 Playwright 可 fill，视觉上只看到字母盒。
+// 不能用 display:none / visibility:hidden —— 前者让 Playwright 判定不可见，
+// 后者连 fill() 都被拒；opacity:0 + 绝对定位铺满可同时满足「可交互」与「不可见」。
 .dt-input {
+  position: absolute;
+  inset: 0;
   width: 100%;
-  box-sizing: border-box;
-  padding: 14px 16px;
-  border-radius: var(--r-md);
-  border: 2px solid var(--line-2);
-  font-size: var(--fs-xl, 18px);
+  height: 100%;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: transparent;
+  caret-color: transparent;
+  font-size: var(--fs-xl);
   font-weight: 700;
-  letter-spacing: 2px;
   text-align: center;
-  background: var(--card);
-  color: var(--ink);
   outline: none;
-  &:focus { border-color: var(--mc, var(--brand)); }
-  &:disabled { background: var(--bg-3); }
+  opacity: 0;
+  cursor: text;
 }
-.dt-check { width: 100%; }
-
-// 屏幕字母盘（触屏友好，不阻挡键盘输入）
-.dt-keyboard {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 6px;
-  margin-top: 4px;
-}
-.dt-key {
-  min-height: 42px;
+.dt-slot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 60px;
   border-radius: var(--r-sm);
-  border: 1px solid var(--line);
-  background: var(--bg-3);
-  color: var(--ink);
-  font-size: var(--fs-lg);
-  font-weight: 700;
-  cursor: pointer;
-  &:active { transform: scale(0.94); }
-  &:disabled { opacity: 0.5; }
-}
-.dt-key-del { grid-column: span 2; background: var(--sun-soft, #fef3c7); }
-
-// 三选一
-.dt-choices { display: flex; flex-direction: column; gap: 10px; }
-.dt-choice {
-  min-height: 52px;
-  border-radius: var(--r-md);
-  border: 2px solid var(--line-2);
   background: var(--card);
-  color: var(--ink);
-  font-size: var(--fs-lg);
+  border: 2px solid var(--line-2);
+  font-size: var(--fs-3xl);
   font-weight: 800;
-  letter-spacing: 1px;
-  cursor: pointer;
-  &:active { transform: scale(0.98); }
-  &.is-answer {
+  color: var(--ink);
+  font-family: var(--font-cute);
+  transition: border-color var(--ease), background var(--ease), transform var(--ease);
+  // 撇号等固定符号格（let's 的 '）：去掉方框只显示符号，别和字母格抢注意力，
+  // 也避免孩子误以为「这里也要打一个字母」
+  &.is-punct {
+    width: 18px;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    color: var(--ink-mute);
+  }
+  // 已写但未判定的字母：弹入动画，给孩子「写进去了」的确认
+  &.is-filled { animation: slot-pop 0.18s var(--ease-pop); }
+  // 待写的光标格：主题色虚边，告诉孩子「下一个写这里」
+  &.is-caret {
+    border-color: var(--mc, var(--brand));
+    border-style: dashed;
+    box-shadow: 0 0 0 3px var(--mc-soft, var(--brand-soft));
+  }
+  // 漏写的字母：虚线空格，一眼知道还差几个
+  &.is-missing {
+    border-style: dashed;
+    border-color: var(--no);
+    background: var(--no-soft);
+  }
+  &.is-ok {
     border-color: var(--ok);
     background: var(--ok-soft);
     color: var(--ok-deep);
   }
+  // 写错的字母：红 + 抖一下，指出「就是这个」
+  &.is-bad {
+    border-color: var(--no);
+    background: var(--no-soft);
+    color: var(--no-deep);
+    animation: slot-shake 0.4s ease;
+  }
+}
+@keyframes slot-pop {
+  0% { transform: scale(0.7); }
+  100% { transform: scale(1); }
+}
+@keyframes slot-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+// 逐格反馈文案（「第 n 个字母不对」）
+.dt-slot-hint {
+  margin: 0;
+  text-align: center;
+  font-size: var(--fs-base);
+  font-weight: 700;
+  color: var(--warn);
 }
 
-// ---------- 反馈 ----------
-.dt-feedback {
-  margin-top: 12px;
-  padding: 12px 14px;
+// 屏幕字母托盘：明确「这是给你点字母的」，不再是散在页面里的一堆方块
+.dt-tray {
+  padding: var(--sp-3);
   border-radius: var(--r-md);
-  font-size: var(--fs-md);
-  font-weight: 700;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+}
+.dt-tray-title {
+  font-size: var(--fs-sm);
+  font-weight: 800;
+  color: var(--ink-soft);
+  margin-bottom: var(--sp-2);
+}
+.dt-keyboard {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+.dt-key {
+  min-height: 44px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  font-size: var(--fs-lg);
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--ease), background var(--ease);
+  @include press(0.92);
+  &:disabled { opacity: 0.45; box-shadow: none; }
+}
+.dt-key-del {
+  grid-column: span 2;
+  background: var(--sun-soft);
+  color: var(--sun-ink);
+}
+.dt-check { min-height: 52px; font-size: var(--fs-lg); }
+
+// ---------- 三选一 ----------
+.dt-choices { display: flex; flex-direction: column; gap: var(--sp-3); }
+.dt-choice {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  min-height: 60px;
+  padding: var(--sp-3) var(--sp-4);
+  border-radius: var(--r-md);
+  border: 2px solid var(--line-2);
+  background: var(--card);
+  color: var(--ink);
+  font-size: var(--fs-xl);
+  font-weight: 800;
+  letter-spacing: 2px;
+  font-family: var(--font-cute);
+  cursor: pointer;
+  transition: border-color var(--ease), background var(--ease), transform var(--ease);
+  @include press(0.98);
+  // A/B/C 前缀：让孩子能用「选 B」交流，也避免误点相邻项
+  .dt-choice-letter {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--bg-3);
+    color: var(--brand-deep);
+    font-size: var(--fs-sm);
+    font-family: var(--font-sans);
+  }
+  .dt-choice-text { flex: 1; text-align: left; }
+  &.is-picked-wrong {
+    border-color: var(--no);
+    background: var(--no-soft);
+    color: var(--no-deep);
+    animation: slot-shake 0.4s ease;
+    .dt-choice-letter { background: var(--no-deep); color: #fff; }
+  }
+  &.is-answer {
+    border-color: var(--ok);
+    background: var(--ok-soft);
+    color: var(--ok-deep);
+    .dt-choice-letter { background: var(--ok-deep); color: #fff; }
+  }
+  &:disabled { cursor: default; }
+}
+
+// ---------- 反馈横幅（图标 + 标题 + 说明 + 动作） ----------
+.dt-feedback {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-3);
+  margin-top: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
+  border-radius: var(--r-md);
+  font-size: var(--fs-base);
+  font-weight: 600;
   line-height: 1.6;
-  &.ok { background: var(--ok-soft); color: var(--ok-deep); }
-  &.warn { background: var(--sun-soft, #fef3c7); color: #92400e; }
-  &.bad { background: var(--no-soft); color: var(--no-deep); }
+  animation: slide-down 0.3s ease;
+  border-left: 4px solid;
+  .dt-fb-icon { font-size: 28px; line-height: 1.2; flex-shrink: 0; }
+  .dt-fb-body { min-width: 0; flex: 1; }
+  .dt-fb-title { font-size: var(--fs-md); font-weight: 800; }
+  .dt-fb-text { font-weight: 500; margin-top: 2px; }
+  &.ok {
+    background: var(--ok-soft);
+    border-color: var(--ok);
+    color: var(--ok-deep);
+  }
+  &.warn {
+    background: var(--warn-soft);
+    border-color: var(--warn);
+    color: var(--sun-ink);
+  }
+  &.bad {
+    background: var(--no-soft);
+    border-color: var(--no);
+    color: var(--no-deep);
+  }
 }
 .dt-answer {
-  font-size: var(--fs-xl, 18px);
-  letter-spacing: 1px;
+  font-size: var(--fs-2xl);
+  letter-spacing: 2px;
+  font-family: var(--font-cute);
   text-decoration: underline;
+  text-underline-offset: 4px;
 }
-.dt-reveal-hint { font-weight: 500; font-size: var(--fs-sm); margin-top: 4px; opacity: 0.9; }
+.dt-reveal-hint { font-weight: 500; font-size: var(--fs-sm); margin-top: 2px; opacity: 0.9; }
 .dt-retry {
-  margin-top: 10px;
-  padding: 10px 18px;
+  margin-top: var(--sp-3);
+  padding: var(--sp-2) var(--sp-4);
   min-height: 44px;
   border-radius: var(--r-pill);
   border: none;
-  background: var(--mc, var(--brand-deep));
+  background: var(--ink);
   color: #fff;
   font-size: var(--fs-base);
   font-weight: 700;
   cursor: pointer;
-  &:active { transform: scale(0.96); }
+  @include press(0.96);
 }
 
 // ---------- 自然拼读桥接 ----------
 .dt-phonics {
-  margin-top: 16px;
-  padding: 14px;
+  margin-top: var(--sp-4);
+  padding: var(--sp-4);
   border-radius: var(--r-md);
   background: var(--mc-soft, var(--brand-soft));
-  border: 1px dashed var(--mc, var(--brand));
+  border: 1px solid var(--mc, var(--brand));
+  animation: slide-down 0.3s ease;
 }
 .dt-phonics-title {
   font-size: var(--fs-sm);
   font-weight: 800;
   color: var(--brand-deep);
-  margin-bottom: 10px;
-  &:not(:first-child) { margin-top: 14px; }
+  margin-bottom: var(--sp-3);
+  &:not(:first-child) { margin-top: var(--sp-4); }
 }
 
 // 音素格子（Elkonin box）
 .dt-boxes {
   display: flex;
-  gap: 8px;
+  gap: var(--sp-2);
   flex-wrap: wrap;
 }
 .dt-box {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 10px 6px 14px;
+  gap: 4px;
+  padding: 4px 6px 4px 4px;
   border-radius: var(--r-sm);
   background: var(--card);
   border: 2px solid var(--mc, var(--brand));
   box-shadow: var(--shadow-sm);
 }
+// 格子序号：把「这是第几段音」说明白
+.dt-box-num {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--mc, var(--brand));
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
 .dt-box-text {
-  font-size: var(--fs-xl, 18px);
+  font-size: var(--fs-2xl);
   font-weight: 800;
   letter-spacing: 2px;
   color: var(--brand-deep);
-  min-width: 22px;
+  min-width: 24px;
   text-align: center;
+  font-family: var(--font-cute);
+}
+// 格子里的播放钮缩小，别和主播放钮抢注意力
+.dt-box .speak-btn {
+  width: 34px;
+  height: 34px;
+  font-size: 14px;
 }
 
-// 金字塔拼写
+// 金字塔拼写：逐阶点亮
 .dt-pyramid {
   display: flex;
   flex-direction: column;
@@ -278,14 +638,15 @@
   align-items: flex-start;
 }
 .dt-pyramid-step {
-  font-size: var(--fs-md);
+  font-size: var(--fs-lg);
   font-weight: 800;
-  letter-spacing: 3px;
+  letter-spacing: 4px;
   color: var(--ink-mute);
   opacity: 0.35;
-  padding: 2px 8px;
+  padding: 2px var(--sp-2);
   border-radius: var(--r-sm);
-  transition: var(--ease, 0.2s);
+  font-family: var(--font-cute);
+  transition: var(--ease);
   &.is-on {
     opacity: 1;
     color: var(--brand-deep);
@@ -294,8 +655,8 @@
   }
 }
 .dt-pyramid-next {
-  margin-top: 8px;
-  padding: 8px 14px;
+  margin-top: var(--sp-2);
+  padding: var(--sp-2) var(--sp-4);
   min-height: 40px;
   border-radius: var(--r-pill);
   border: none;
@@ -305,14 +666,14 @@
   font-weight: 700;
   box-shadow: var(--shadow-sm);
   cursor: pointer;
-  &:active { transform: scale(0.96); }
+  @include press(0.96);
 }
 
 .dt-hint-btn {
-  margin-top: 14px;
+  margin-top: var(--sp-4);
   width: 100%;
-  padding: 12px;
-  min-height: 44px;
+  padding: var(--sp-3);
+  min-height: 48px;
   border-radius: var(--r-md);
   border: 1px dashed var(--line-2);
   background: var(--bg-3);
@@ -320,7 +681,8 @@
   font-size: var(--fs-base);
   font-weight: 700;
   cursor: pointer;
-  &:active { background: var(--line); }
+  transition: var(--ease);
+  &:active { background: var(--line); transform: scale(0.98); }
 }
 
 // ---------- 会话报告 ----------
@@ -328,53 +690,105 @@
   text-align: center;
   background: var(--card);
   border: 1px solid var(--line);
-  border-radius: var(--r-xl, 24px);
-  padding: 24px 16px;
-  margin-top: 12px;
+  border-radius: var(--r-xl);
+  padding: var(--sp-6) var(--sp-4);
+  margin-top: var(--sp-3);
   box-shadow: var(--shadow);
 }
-.dt-report-emoji { font-size: 56px; }
+.dt-report-emoji { font-size: 64px; animation: result-bounce 0.6s ease; }
 .dt-report-title {
-  font-size: var(--fs-xl, 18px);
-  margin: 8px 0 16px;
+  font-size: var(--fs-2xl);
+  font-weight: 800;
+  margin: var(--sp-2) 0 var(--sp-4);
   color: var(--brand-deep);
+  font-family: var(--font-cute);
 }
+
+// 正确率环：最在意的数字放最大
+.dt-ring {
+  position: relative;
+  width: 148px;
+  height: 148px;
+  margin: 0 auto var(--sp-4);
+  svg {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+  }
+}
+.dt-ring-bg {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 12;
+}
+.dt-ring-fill {
+  fill: none;
+  stroke: var(--ok);
+  stroke-width: 12;
+  stroke-linecap: round;
+  // 周长 = 2πr ≈ 326.7；dashoffset 由内联样式按正确率算，这里只放过渡动画
+  transition: stroke-dashoffset 0.9s ease;
+}
+.dt-ring-num {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--fs-4xl);
+  font-weight: 800;
+  color: var(--ok-deep);
+  font-family: var(--font-cute);
+}
+
 .dt-report-stats {
   display: flex;
   justify-content: center;
-  gap: 10px;
+  gap: var(--sp-3);
   flex-wrap: wrap;
 }
 .dt-stat {
   flex: 1;
-  min-width: 88px;
+  min-width: 92px;
   background: var(--mc-soft, var(--brand-soft));
   border-radius: var(--r-md);
-  padding: 12px 8px;
+  padding: var(--sp-3) var(--sp-2);
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
 .dt-stat-num {
-  font-size: var(--fs-2xl, 22px);
+  font-size: var(--fs-3xl);
   font-weight: 800;
   color: var(--brand-deep);
+  font-family: var(--font-cute);
 }
 .dt-stat-label { font-size: var(--fs-xs); color: var(--ink-soft); font-weight: 600; }
 
+// 星星：逐颗点亮（已获得 = 实星，未获得 = 灰星），孩子知道差几颗
 .dt-stars {
-  font-size: 26px;
-  letter-spacing: 2px;
-  margin: 14px 0;
-  animation: pop 0.4s ease;
+  font-size: 30px;
+  letter-spacing: 6px;
+  margin: var(--sp-4) 0 var(--sp-2);
+  line-height: 1;
+}
+.dt-star {
+  display: inline-block;
+  &.is-on { animation: star-pop 0.4s var(--ease-pop) both; }
+  &:not(.is-on) { filter: grayscale(1); opacity: 0.3; }
+}
+@keyframes star-pop {
+  0% { transform: scale(0) rotate(-180deg); }
+  60% { transform: scale(1.25) rotate(10deg); }
+  100% { transform: scale(1) rotate(0); }
 }
 
-.dt-missed { margin-top: 8px; text-align: left; }
+.dt-missed { margin-top: var(--sp-4); text-align: left; }
 .dt-missed-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 8px;
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-2);
 }
 .dt-missed-chip {
   display: inline-flex;
@@ -383,7 +797,7 @@
   background: var(--no-soft);
   color: var(--no-deep);
   border-radius: var(--r-pill);
-  padding: 6px 12px;
+  padding: 6px var(--sp-3);
   font-size: var(--fs-base);
   font-weight: 800;
   letter-spacing: 0.5px;
@@ -394,19 +808,38 @@
   font-size: var(--fs-md);
   font-weight: 700;
   color: var(--ok-deep);
-  margin: 10px 0;
+  margin: var(--sp-3) 0;
 }
 
 .dt-report-actions {
   display: flex;
-  gap: 10px;
+  gap: var(--sp-2);
   justify-content: center;
   flex-wrap: wrap;
-  margin-top: 18px;
+  margin-top: var(--sp-5);
 }
 
 @media (min-width: 520px) {
   .dt-keyboard { grid-template-columns: repeat(9, 1fr); }
   .dt-choices { flex-direction: row; }
   .dt-choice { flex: 1; }
+  // 桌面端主播放钮更大、字母格更舒展（远距离阅读友好）
+  .dt-slot { width: 56px; height: 72px; }
+  .dt-listen-main .speak-btn { width: 88px; height: 88px; font-size: 34px; }
+}
+
+// 可访问性：偏好减少动效时关掉所有弹入/抖动/点亮动画（保留颜色反馈）
+@media (prefers-reduced-motion: reduce) {
+  .dt-slot,
+  .dt-slot.is-filled,
+  .dt-slot.is-bad,
+  .dt-choice.is-picked-wrong,
+  .dt-star.is-on,
+  .dt-report-emoji,
+  .dt-feedback,
+  .dt-phonics {
+    animation: none;
+  }
+  .dt-star.is-on { transform: none; }
+  .dt-pip.is-now { transform: none; }
 }

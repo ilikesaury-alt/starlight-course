@@ -173,32 +173,41 @@ export default function DictationPage() {
         {phase === 'setup' && (
           <>
             <p className="lead">
-              三年级上册英语单词，听音写词。写错也别怕，会教你<b>把声音拆成字母</b>。
+              三年级上册英语单词，听音写词。写错也别怕，我们会<b>把声音拆成字母</b>教给你。
             </p>
 
+            {/* 模式：大卡片二选一（比下拉/分段控件更醒目，孩子一眼看懂区别） */}
             <section className="dt-setup-block">
-              <div className="dt-setup-title">🎚️ 练习模式</div>
-              <div className="dt-seg">
-                <button
-                  type="button"
-                  className={`dt-seg-btn${mode === 'spell' ? ' active' : ''}`}
-                  onClick={() => setMode('spell')}
-                >
-                  ✍️ 听音写词
-                </button>
-                <button
-                  type="button"
-                  className={`dt-seg-btn${mode === 'choice' ? ' active' : ''}`}
-                  onClick={() => setMode('choice')}
-                >
-                  🔍 三选一
-                </button>
+              <div className="dt-setup-title">🎚️ 选一种玩法</div>
+              <div className="dt-modes">
+                {(
+                  [
+                    ['spell', '✍️', '听音写词', '听发音，把字母一个一个写进方格里', '推荐'],
+                    ['choice', '🔍', '三选一', '听发音，从三个拼法里挑出对的', ''],
+                  ] as [Mode, string, string, string, string][]
+                ).map(([val, emoji, title, desc, tag]) => (
+                  <button
+                    key={val}
+                    type="button"
+                    className={`dt-mode${mode === val ? ' active' : ''}`}
+                    onClick={() => setMode(val)}
+                    aria-pressed={mode === val}
+                    // 显式可访问名：emoji 与标题都在名字里（视觉上 emoji 是装饰，
+                    // 但读屏/自动化定位都要能靠「🔍 三选一」找到这张卡）
+                    aria-label={`${emoji} ${title}`}
+                  >
+                    <span className="dt-mode-emoji" aria-hidden="true">{emoji}</span>
+                    <span className="dt-mode-text">
+                      <span className="dt-mode-title">
+                        {title}
+                        {tag && <b className="dt-mode-tag">{tag}</b>}
+                      </span>
+                      <span className="dt-mode-desc">{desc}</span>
+                    </span>
+                    <span className="dt-mode-check" aria-hidden="true">✓</span>
+                  </button>
+                ))}
               </div>
-              <p className="dt-setup-hint">
-                {mode === 'spell'
-                  ? '听发音，把单词完整写出来（核心训练，推荐）。'
-                  : '听发音，从三个拼法里选出正确的那个（起步更轻松）。'}
-              </p>
             </section>
 
             <section className="dt-setup-block">
@@ -231,8 +240,9 @@ export default function DictationPage() {
                         type="button"
                         className={`chip${selected.includes(it.id) ? ' active' : ''}`}
                         onClick={() => toggleUnit(it.id)}
+                        aria-pressed={selected.includes(it.id)}
                       >
-                        {it.emoji} {it.titleZh || it.title}
+                        <span aria-hidden="true">{it.emoji}</span> {it.titleZh || it.title}
                       </button>
                     ))}
                   </div>
@@ -255,20 +265,21 @@ export default function DictationPage() {
                     type="button"
                     className={`dt-seg-btn${lengthFilter === val ? ' active' : ''}`}
                     onClick={() => setLengthFilter(val)}
+                    aria-pressed={lengthFilter === val}
                   >
                     {label}
                   </button>
                 ))}
               </div>
               <p className="dt-setup-hint">
-                先从短词开始，把「声音→字母」练熟，再挑战长词，容易建立信心。
+                先从短词开始，把「声音 → 字母」练熟，再挑战长词，容易建立信心。
               </p>
             </section>
 
             <div className="dt-start-row">
               <button
                 type="button"
-                className="btn btn--lg"
+                className="btn btn--lg dt-start-btn"
                 onClick={start}
                 disabled={previewCount === 0}
               >
@@ -298,8 +309,10 @@ export default function DictationPage() {
             index={cursor}
             total={round.length}
             mode={mode}
+            correctCount={correctCount}
             onSettled={handleSettled}
             onAdvance={handleAdvance}
+            onExit={backToSetup}
           />
         )}
 
@@ -308,13 +321,35 @@ export default function DictationPage() {
           <div className="dt-report">
             <div className="dt-report-emoji">{correctCount === round.length ? '🏆' : '🌟'}</div>
             <h2 className="dt-report-title">这一轮完成啦！</h2>
+
+            {/* 正确率环：把最在意的数字放到最大，一眼看到成绩。
+                注意：.dt-ring-num 同时是「正确率」这一项的 .dt-stat-num ——
+                下游 e2e 与统计口径都以「第一个 .dt-stat-num == 正确率」为准，
+                改成环内文字后不能再动这个类名组合，否则正确率断言会失效。 */}
+            <div className="dt-ring">
+              <svg viewBox="0 0 120 120" aria-hidden="true">
+                <circle className="dt-ring-bg" cx="60" cy="60" r="52" />
+                <circle
+                  className="dt-ring-fill"
+                  cx="60"
+                  cy="60"
+                  r="52"
+                  strokeDasharray={2 * Math.PI * 52}
+                  strokeDashoffset={
+                    2 * Math.PI * 52 *
+                    (1 - (round.length > 0 ? correctCount / round.length : 0))
+                  }
+                />
+              </svg>
+              <span
+                className="dt-stat-num dt-ring-num"
+                aria-label={`正确率 ${round.length > 0 ? Math.round((correctCount / round.length) * 100) : 0}%`}
+              >
+                {round.length > 0 ? Math.round((correctCount / round.length) * 100) : 0}%
+              </span>
+            </div>
+
             <div className="dt-report-stats">
-              <div className="dt-stat">
-                <span className="dt-stat-num">
-                  {round.length > 0 ? Math.round((correctCount / round.length) * 100) : 0}%
-                </span>
-                <span className="dt-stat-label">正确率</span>
-              </div>
               <div className="dt-stat">
                 <span className="dt-stat-num">
                   {correctCount}/{round.length}
@@ -325,10 +360,22 @@ export default function DictationPage() {
                 <span className="dt-stat-num">{maxStreak}</span>
                 <span className="dt-stat-label">最长连对</span>
               </div>
+              <div className="dt-stat">
+                <span className="dt-stat-num">{missed.length}</span>
+                <span className="dt-stat-label">要再练</span>
+              </div>
             </div>
 
             <div className="dt-stars" aria-label="获得星数">
-              {'⭐'.repeat(stars)}
+              {Array.from({ length: 5 }, (_, i) => (
+                <span
+                  key={i}
+                  className={`dt-star${i < stars ? ' is-on' : ''}`}
+                  style={{ animationDelay: `${i * 0.12}s` }}
+                >
+                  ⭐
+                </span>
+              ))}
             </div>
 
             {missed.length > 0 ? (
@@ -351,7 +398,7 @@ export default function DictationPage() {
             )}
 
             <div className="dt-report-actions">
-              <button type="button" className="btn" onClick={start}>
+              <button type="button" className="btn btn--lg dt-start-btn" onClick={start}>
                 🔁 再来一轮
               </button>
               <button type="button" className="btn btn--soft" onClick={backToSetup}>

@@ -13,6 +13,8 @@ import { test, expect } from '@playwright/test'
  *   T7  音素格子分段展示
  *   T8  金字塔逐阶展开
  *   T12 星数只结算一次（回到设置页不应重复加星）
+ *   T17 一字一盒：写错时逐格标色 + 漏写虚线格（UI 重构新增）
+ *   T18 ✕ 退出：中途退出回设置页，不产生星星（UI 重构新增）
  *
  * 说明：headless 下 speechSynthesis 已被 playwright.config 的 initScript mock，
  * 故本 spec 不验证「真的能出声」——出声需真机人工确认（交付文档已标注）。
@@ -57,53 +59,22 @@ test.describe('T3 空错题本兜底', () => {
 })
 
 test.describe('T4/T5 听音写词与两试一揭', () => {
-  test('T4 输入正确拼写 → 绿字鼓励（真覆盖答对分支）', async ({ page }) => {
+  test('T4 输入正确拼写 → 绿字鼓励并自动进下一词', async ({ page }) => {
     await page.getByRole('button', { name: /开始听写/ }).click()
-    const input = page.locator('input.dt-input')
 
-    // headless 无 TTS，无法靠听音作答；也不能用「提示」泄底（那就测不到答对分支）。
-    // 做法：先故意答错两次拿到答案，再重开若干轮，用该答案逐词尝试，直到命中。
-    let answer = ''
-    for (let round = 0; round < 8 && !answer; round++) {
-      await input.fill('qqqqq')
-      await page.getByRole('button', { name: '✅ 检查' }).click()
-      await input.fill('qqqqq')
-      await page.getByRole('button', { name: '✅ 检查' }).click()
-      answer = ((await page.locator('.dt-answer').textContent()) ?? '').trim()
-      await page.getByRole('button', { name: /下一个/ }).click()
-      if (await page.locator('.dt-report').count()) {
-        await page.getByRole('button', { name: /再来一轮/ }).click()
-      }
-    }
-    expect(answer.length).toBeGreaterThan(0)
+    // headless 无 TTS，没法靠听音作答。用「我拼不出来」的音素格子拼出答案：
+    // 这里验证的是「答对分支」本身，不靠随机抽样猜词，避免用例偶发超时。
+    await page.getByRole('button', { name: /我拼不出来/ }).click()
+    const answer = (await page.locator('.dt-box-text').allTextContents()).join('').trim()
+    expect(answer.length).toBeGreaterThan(1)
 
-    let hit = false
-    for (let i = 0; i < 40 && !hit; i++) {
-      if (await page.locator('.dt-report').count()) break
-      await input.fill(answer)
-      await page.getByRole('button', { name: '✅ 检查' }).click()
-      if (await page.locator('.dt-feedback.ok').count()) {
-        hit = true
-        break
-      }
-      // 没中就继续推进到下一词
-      await input.fill(answer)
-      await page.getByRole('button', { name: '✅ 检查' }).click()
-      if (await page.locator('.dt-feedback.bad').count()) {
-        await page.getByRole('button', { name: /下一个/ }).click()
-      }
-    }
+    await page.locator('input.dt-input').fill(answer)
+    await page.getByRole('button', { name: '✅ 检查' }).click()
 
-    if (hit) {
-      // 命中：绿字鼓励（自动推进由 setTimeout 完成，UI 已给出成功反馈）
-      await expect(page.locator('.dt-feedback.ok')).toBeVisible()
-    } else {
-      // 未命中：明确标注而非静默通过（同一范围随机抽取，不保证 10 词内出现）
-      test.info().annotations.push({
-        type: 'warn',
-        description: `本轮未抽到 ${answer}，答对分支未验证（随机抽样限制，非功能缺陷）`,
-      })
-    }
+    await expect(page.locator('.dt-feedback.ok')).toBeVisible()
+    await expect(page.locator('.dt-slot.is-bad')).toHaveCount(0)
+    // 约 1.1s 后自动推进到第 2 个词
+    await expect(page.locator('.dt-progress-text')).toContainText('第 2', { timeout: 5000 })
   })
 
   test('T5 两试一揭：第一次错显示线索可改，第二次错揭晓答案', async ({ page }) => {
@@ -182,6 +153,50 @@ test.describe('T12 星数只结算一次（回归）', () => {
   })
 })
 
+test.describe('T17 一字一盒（字母盒）', () => {
+  test('写错时逐格标色：对→绿 / 错→红 / 漏→虚线，并给出「第几个字母」提示', async ({ page }) => {
+    // 长词保证答案 ≥5 字母，才留得出「漏写」的空间
+    await page.getByRole('button', { name: /长词/ }).click()
+    await page.getByRole('button', { name: /开始听写/ }).click()
+
+    // 不靠听音拿答案：音素格子拼起来就是单词本身（headless 无 TTS）
+    await page.getByRole('button', { name: /我拼不出来/ }).click()
+    const answer = (await page.locator('.dt-box-text').allTextContents()).join('').trim()
+    expect(answer.length).toBeGreaterThan(4)
+
+    // 字母格数与答案字母数一致（一字一盒；空格/撇号是装饰格，不进「可写格」计数）
+    await expect(page.locator('.dt-slot:not(.is-punct)')).toHaveCount(answer.length)
+
+    // 首位写错 + 末两位漏写
+    const typed = `z${answer.slice(1, -2)}`
+    await page.locator('input.dt-input').fill(typed)
+    await page.getByRole('button', { name: '✅ 检查' }).click()
+
+    await expect(page.locator('.dt-feedback.warn')).toBeVisible()
+    await expect(page.locator('.dt-slot.is-bad')).toHaveCount(1)
+    await expect(page.locator('.dt-slot.is-missing')).toHaveCount(2)
+    await expect(page.locator('.dt-slot.is-ok')).toHaveCount(answer.length - 3)
+    // 人话提示指向第 1 个字母（而不是只给一个「错了」）
+    await expect(page.getByText(/第 1 个字母不对/)).toBeVisible()
+  })
+})
+
+test.describe('T18 ✕ 退出', () => {
+  test('中途退出回到设置页，且不产生星星', async ({ page }) => {
+    await page.getByRole('button', { name: /开始听写/ }).click()
+    await expect(page.locator('.dt-player')).toBeVisible()
+
+    await page.getByRole('button', { name: /退出/ }).click()
+    await expect(page.locator('.dt-modes')).toBeVisible()
+    await expect(page.locator('.dt-player')).toHaveCount(0)
+
+    const stars = await page.evaluate(
+      () => (JSON.parse(localStorage.getItem('starlight-course') ?? '{}')?.state?.totalStars ?? 0) as number,
+    )
+    expect(stars).toBe(0)
+  })
+})
+
 test.describe('边界：完整走完一轮', () => {
   test('用「答错→揭晓→下一个」走完一轮，进入报告页且数值自洽', async ({ page }) => {
     await page.getByRole('button', { name: /开始听写/ }).click()
@@ -205,7 +220,8 @@ test.describe('边界：完整走完一轮', () => {
     }
     await expect(page.locator('.dt-report')).toBeVisible()
     await expect(page.getByText('这一轮完成啦！')).toBeVisible()
-    // 正确率应为 0%（全答错）
+    // 正确率环（UI 重构后的主视觉）与首个统计项都应显示 0%
+    await expect(page.locator('.dt-ring')).toBeVisible()
     await expect(page.locator('.dt-stat-num').first()).toHaveText('0%')
     // 错词清单应列出本轮词
     expect(await page.locator('.dt-missed-chip').count()).toBeGreaterThan(0)
