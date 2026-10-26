@@ -85,6 +85,16 @@ npm run electron:build  # 打包 Windows NSIS 安装包（产物在 release/）
 - Extensions: `src/data/extensionTopics.ts` is a hand-curated theme word bank (52 themes, ~630 en/zh/emoji words) covering all 96 lessons — no open RAZ dataset exists (Reading A-Z is copyrighted), so the bank is maintained by hand. **`EXT_LIMIT = 5` words per lesson** (hard cap, shared by auto-fill and manual entry). `suggestExtensions()` picks by theme, drops lesson words + already-added words, and rotates by `round` so 「换一批」 really changes the batch. Auto-fill runs **once per lesson** when the list is first empty; `store.extensionRound` remembers the round so deleting words never triggers a refill
 - Sentence frames: `src/data/sentenceFrame.ts` holds 98 hand-written fill-in-the-blank frames — **every one of the 96 lessons has at least one**, so 「🧩 句型」 never shows 「这一课还没有句型框架卡。」 (that empty state existed while coverage was 2 cards per 12 units). Frames are seeded into the shared review pool **only when the lesson is opened** (`seedSentenceFrames` in `LessonPreview`), so the pool grows with study progress instead of pre-occupying review seats. `frameZh` supports **single blanks only** (`zhOptions` holds whole-sentence Chinese — a template swap produces broken Chinese), and a few lessons whose every sentence is an "A or B?" choice use a **zero-blank** card where the child reads the whole sentence. `sentenceFrame.test.ts` machine-checks the invariants, including that filling in the correct answer reproduces a sentence the lesson actually teaches (that check caught two pilot frames hung on the wrong lesson)
 
+- Phonics: `src/data/phonics.ts` 的音素切分口径**对齐《字母积木》(Alphablocks / BBC CBeebies) 的教学分级** —— 孩子正在看的动画是这套片，app 必须跟动画对得上号，否则提示反而干扰：
+  - L1-2 单字母 / L3 字母小队（两三个字母合成一个音：`ch`/`ai`/`igh`/`ar`/`er`…）/ L4 手拉手（辅音簇各发各的音：`st`/`bl`/`-nd`）/ L5 魔法E（`e` **单独成格**、自己不发声、但让前面元音发长音）/ 特别篇双写（`ll`/`ss`/`ff` 合成一个音）
+  - 旧口径有四处**正好教反了**（2026-10 已改，别回退）：① 魔法E 的 e 被吐进前一格（`cake → c/a/ke`）且自相矛盾（`cake` 吐 e、`blue` 留 e）；② 双写被拆成两格（旧注释写「按一个音处理」但代码给了两格）；③ 字母小队只认 15 个，`ar/or/er/ir/ur/igh` 全缺（`father → f/a/th/e/r`）；④ 完全没有「手拉手」概念
+  - **魔法E 的 e 必须是独立的一格**（动画里 E 是一块会飞的独立积木），不能并入前一格
+  - 切分是**规则优先 + 例外兜底**：规则判不了的英语不规则词走 `OVERRIDES` 人工表（`welcome`/`picture`/`orange`/`umbrella`/`people`…），不引入发音词典
+  - ⚠️ 短音词不吃魔法E（`come`/`have`/`love`/`one` 结尾的 e 不发音）—— 用**词表**判定而不是后缀规则（后缀会把 `stone` 误判成短音 `one`）
+  - ⚠️ 多词词条按**空格分段**后再逐词切，否则 `next to` 的 `t t` 会被误判成双写 `tt`、`is my` 的 `s m` 会被误判成手拉手
+  - 不变量：**所有片段拼起来 === 原词字母序列**（`phonics.test.ts` 钉住；e2e 靠 `.dt-box-text` 拼答案）
+  - 改规则时先用真实词表跑一遍：`src/data/eng3a.ts` 里 229 个词，旧口径有 47% 退化成逐字母拆分，新口径降到 32%
+
 ## File Structure
 ```
 src/

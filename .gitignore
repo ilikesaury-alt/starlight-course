@@ -93,3 +93,6 @@ scripts/_ocr_*.txt
 scripts/_toc_*.png
 scripts/ocr_book.py
 
+# pi 编码代理的临时任务输出（本次会话产生，不入库）
+.pi/
+

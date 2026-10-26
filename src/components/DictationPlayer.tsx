@@ -29,7 +29,7 @@
 // ============================================================
 import { useEffect, useMemo, useRef, useState } from 'react'
 import SpeakButton from './SpeakButton'
-import { phonemeBoxes, spellingPyramid } from '@/data/phonics'
+import { phonemeSegments, spellingPyramid } from '@/data/phonics'
 import { buildChoices, type Choice } from '@/utils/dictation'
 import type { DictationWord } from '@/utils/dictation'
 import {
@@ -88,7 +88,7 @@ export default function DictationPlayer({
   const inputRef = useRef<HTMLInputElement | null>(null)
   const wordKey = `${word.en}|${index}`
 
-  const boxes = useMemo(() => phonemeBoxes(answer), [answer])
+  const boxes = useMemo(() => phonemeSegments(answer), [answer])
   const pyramid = useMemo(() => spellingPyramid(answer), [answer])
   /** 答案的纯字母序列（与 phonemeBoxes 一致地剔掉非字母，长度即字母数） */
   const answerLetters = useMemo(() => spellingLetters(answer).split(''), [answer])
@@ -427,12 +427,22 @@ export default function DictationPlayer({
       {(showBoxes || status === 'wrong' || status === 'revealed') && (
         <section className="dt-phonics">
           <div className="dt-phonics-title">🔤 把声音拆成字母（自然拼读）</div>
+          <p className="dt-phonics-legend">
+            和《字母积木》一样：<b>字母小队</b>合成一个音，<b>手拉手</b>各发各的音，
+            <b>魔法E</b>自己不出声、但让前面的元音发长音。
+          </p>
           <div className="dt-boxes" aria-label="音素格子">
             {boxes.map((b, i) => (
-              <span className="dt-box" key={i}>
+              <span className={`dt-box dt-box--${b.kind}`} key={i}>
                 <span className="dt-box-num" aria-hidden="true">{i + 1}</span>
-                <span className="dt-box-text">{b}</span>
-                <SpeakButton text={b} label={b} />
+                <span className="dt-box-text">{b.text}</span>
+                {/* 魔法E / 不发音字母：点一下读的是"字母名"，对孩子没用 —— 不给喇叭 */}
+                {b.kind !== 'magic-e' && b.kind !== 'silent' && (
+                  <SpeakButton text={b.text} label={b.text} />
+                )}
+                <span className="dt-box-tag" aria-hidden="true">
+                  {b.kind === 'letter' ? '' : b.label}
+                </span>
               </span>
             ))}
           </div>

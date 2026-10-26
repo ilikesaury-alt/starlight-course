@@ -583,6 +583,14 @@
   margin-bottom: var(--sp-3);
   &:not(:first-child) { margin-top: var(--sp-4); }
 }
+// 口径说明：告诉孩子这些格子对应动画里的哪个概念
+.dt-phonics-legend {
+  margin: 0 0 var(--sp-3);
+  font-size: var(--fs-xs);
+  line-height: 1.6;
+  color: var(--ink-mute);
+  b { color: var(--brand-deep); }
+}
 
 // 音素格子（Elkonin box）
 .dt-boxes {
@@ -628,6 +636,59 @@
   width: 34px;
   height: 34px;
   font-size: 14px;
+}
+// 概念标签：告诉孩子这格是"字母小队"还是"手拉手"……
+// 单字母格不显示标签（每格都写"字母"纯属噪音，只在有特殊概念时才提示）
+.dt-box-tag {
+  align-self: flex-end;
+  padding: 1px 5px;
+  border-radius: var(--r-pill);
+  background: var(--mc-soft, var(--brand-soft));
+  color: var(--brand-deep);
+  font-size: 10px;
+  font-weight: 800;
+  white-space: nowrap;
+  line-height: 1.6;
+  &:empty { display: none; }
+}
+
+// 按概念给格子不同的视觉身份（颜色 + 边框），和动画的"积木合体"感对应
+.dt-box--team {
+  border-color: #f59e0b;
+  background: #fffbeb;
+  .dt-box-num { background: #f59e0b; }
+  .dt-box-text { color: #b45309; }
+}
+.dt-box--blend {
+  border-color: #0ea5e9;
+  background: #f0f9ff;
+  .dt-box-num { background: #0ea5e9; }
+  .dt-box-text { color: #0369a1; }
+}
+.dt-box--double {
+  border-color: #8b5cf6;
+  background: #f5f3ff;
+  .dt-box-num { background: #8b5cf6; }
+  .dt-box-text { color: #6d28d9; }
+}
+.dt-box--magic-vowel,
+.dt-box--magic-e {
+  border-color: #ec4899;
+  background: #fdf2f8;
+  .dt-box-num { background: #ec4899; }
+  .dt-box-text { color: #be185d; }
+}
+// 魔法E 是不发声的"魔法积木"：虚线边框 + 淡一点，一眼看出它不参与发音
+.dt-box--magic-e {
+  border-style: dashed;
+  opacity: 0.9;
+}
+.dt-box--silent {
+  border-color: #94a3b8;
+  background: #f8fafc;
+  border-style: dotted;
+  .dt-box-num { background: #94a3b8; }
+  .dt-box-text { color: #64748b; }
 }
 
 // 金字塔拼写：逐阶点亮
