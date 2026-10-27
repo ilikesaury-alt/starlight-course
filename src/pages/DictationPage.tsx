@@ -45,7 +45,7 @@ export default function DictationPage() {
   const getWrongWords = useCourseStore((s) => s.getWrongWords)
 
   const [phase, setPhase] = useState<Phase>('setup')
-  const [mode, setMode] = useState<Mode>('spell')
+  const [mode, setMode] = useState<Mode>('choice')
   const [lengthFilter, setLengthFilter] = useState<LengthFilter>('all')
   const [wrongOnly, setWrongOnly] = useState(false)
   /** 选中的单元/剧本 slug；空集合表示"全部单元" */
@@ -176,56 +176,81 @@ export default function DictationPage() {
               三年级上册英语单词，听音写词。写错也别怕，我们会<b>把声音拆成字母</b>教给你。
             </p>
 
-            {/* 模式：大卡片二选一（比下拉/分段控件更醒目，孩子一眼看懂区别） */}
+            {/* ---------------- 难度阶梯（A） ----------------
+                原来这里是「选玩法 + 选范围 + 选长短」三面决策墙：孩子进来要先做
+                4 组选择才能开始练，6~9 岁根本做不了这种决定。现在只留一件事——
+                「我现在练到哪一步」，其余全部收进下面的「家长设置」。 */}
             <section className="dt-setup-block">
-              <div className="dt-setup-title">🎚️ 选一种玩法</div>
-              <div className="dt-modes">
-                {(
-                  [
-                    ['spell', '✍️', '听音写词', '听发音，把字母一个一个写进方格里', '推荐'],
-                    ['choice', '🔍', '三选一', '听发音，从三个拼法里挑出对的', ''],
-                  ] as [Mode, string, string, string, string][]
-                ).map(([val, emoji, title, desc, tag]) => (
-                  <button
-                    key={val}
-                    type="button"
-                    className={`dt-mode${mode === val ? ' active' : ''}`}
-                    onClick={() => setMode(val)}
-                    aria-pressed={mode === val}
-                    // 显式可访问名：emoji 与标题都在名字里（视觉上 emoji 是装饰，
-                    // 但读屏/自动化定位都要能靠「🔍 三选一」找到这张卡）
-                    aria-label={`${emoji} ${title}`}
-                  >
-                    <span className="dt-mode-emoji" aria-hidden="true">{emoji}</span>
-                    <span className="dt-mode-text">
-                      <span className="dt-mode-title">
-                        {title}
-                        {tag && <b className="dt-mode-tag">{tag}</b>}
-                      </span>
-                      <span className="dt-mode-desc">{desc}</span>
+              <div className="dt-setup-title">🎯 现在练哪一步</div>
+              <div className="dt-ladder">
+                <button
+                  type="button"
+                  className={`dt-step${mode === 'choice' ? ' active' : ''}`}
+                  onClick={() => setMode('choice')}
+                  aria-label="🔍 三选一"
+                  aria-pressed={mode === 'choice'}
+                >
+                  <span className="dt-step-no" aria-hidden="true">①</span>
+                  <span className="dt-step-emoji" aria-hidden="true">🔍</span>
+                  <span className="dt-step-text">
+                    <span className="dt-step-title">
+                      先认 · 三选一
+                      <b className="dt-mode-tag">从这里开始</b>
                     </span>
-                    <span className="dt-mode-check" aria-hidden="true">✓</span>
-                  </button>
-                ))}
+                    <span className="dt-step-desc">听一听，哪个拼得对</span>
+                  </span>
+                  <span className="dt-mode-check" aria-hidden="true">✓</span>
+                </button>
+
+                {/* ② 不在本页内完成，而是跳去字母积木：把「音 → 字母」变成可点的积木，
+                    正是音-写不同步阶段最缺的那座桥。 */}
+                <Link to="/alphablocks" className="dt-step dt-step--link">
+                  <span className="dt-step-no" aria-hidden="true">②</span>
+                  <span className="dt-step-emoji" aria-hidden="true">🧱</span>
+                  <span className="dt-step-text">
+                    <span className="dt-step-title">再拼 · 搭积木</span>
+                    <span className="dt-step-desc">把词拆成一块块声音搭出来</span>
+                  </span>
+                  <span className="dt-step-go" aria-hidden="true">去练 ›</span>
+                </Link>
+
+                <button
+                  type="button"
+                  className={`dt-step${mode === 'spell' ? ' active' : ''}`}
+                  onClick={() => setMode('spell')}
+                  aria-label="✍️ 听音写词"
+                  aria-pressed={mode === 'spell'}
+                >
+                  <span className="dt-step-no" aria-hidden="true">③</span>
+                  <span className="dt-step-emoji" aria-hidden="true">✍️</span>
+                  <span className="dt-step-text">
+                    <span className="dt-step-title">后写 · 听音写词</span>
+                    <span className="dt-step-desc">一个字母一个字母写出来</span>
+                  </span>
+                  <span className="dt-mode-check" aria-hidden="true">✓</span>
+                </button>
               </div>
             </section>
 
-            <section className="dt-setup-block">
-              <div className="dt-setup-title">📚 选范围</div>
-              <label className="dt-check-row">
-                <input
-                  type="checkbox"
-                  checked={wrongOnly}
-                  onChange={(e) => setWrongOnly(e.target.checked)}
-                />
-                <span>
-                  只练错题本里的词
-                  {wrongWords.length > 0 && <b className="dt-count">（{wrongWords.length}）</b>}
-                </span>
-              </label>
+            {/* ---------------- 家长设置：范围 / 长短 ----------------
+                孩子不需要看到这些；家长偶尔要调。用 <details> 默认收起：
+                既省掉一面决策墙，又不用新做弹窗。 */}
+            <details className="dt-parent-box">
+              <summary className="dt-parent-summary">👨‍👩‍👧 家长设置（范围 / 长短）</summary>
+              <div className="dt-parent-body">
+                <label className="dt-check-row">
+                  <input
+                    type="checkbox"
+                    checked={wrongOnly}
+                    onChange={(e) => setWrongOnly(e.target.checked)}
+                  />
+                  <span>
+                    只练错题本里的词
+                    {wrongWords.length > 0 && <b className="dt-count">（{wrongWords.length}）</b>}
+                  </span>
+                </label>
 
-              {!wrongOnly && (
-                <>
+                {!wrongOnly && (
                   <div className="dt-chips">
                     <button
                       type="button"
@@ -246,35 +271,33 @@ export default function DictationPage() {
                       </button>
                     ))}
                   </div>
-                </>
-              )}
-            </section>
+                )}
 
-            <section className="dt-setup-block">
-              <div className="dt-setup-title">📏 词的长短</div>
-              <div className="dt-seg">
-                {(
-                  [
-                    ['all', '全部'],
-                    ['short', '短词（≤4 字母）'],
-                    ['long', '长词'],
-                  ] as [LengthFilter, string][]
-                ).map(([val, label]) => (
-                  <button
-                    key={val}
-                    type="button"
-                    className={`dt-seg-btn${lengthFilter === val ? ' active' : ''}`}
-                    onClick={() => setLengthFilter(val)}
-                    aria-pressed={lengthFilter === val}
-                  >
-                    {label}
-                  </button>
-                ))}
+                <div className="dt-setup-title dt-setup-title--sub">📏 词的长短</div>
+                <div className="dt-seg">
+                  {(
+                    [
+                      ['all', '全部'],
+                      ['short', '短词（≤4 字母）'],
+                      ['long', '长词'],
+                    ] as [LengthFilter, string][]
+                  ).map(([val, label]) => (
+                    <button
+                      key={val}
+                      type="button"
+                      className={`dt-seg-btn${lengthFilter === val ? ' active' : ''}`}
+                      onClick={() => setLengthFilter(val)}
+                      aria-pressed={lengthFilter === val}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+                <p className="dt-setup-hint">
+                  先从短词开始，把「声音 → 字母」练熟，再挑战长词，容易建立信心。
+                </p>
               </div>
-              <p className="dt-setup-hint">
-                先从短词开始，把「声音 → 字母」练熟，再挑战长词，容易建立信心。
-              </p>
-            </section>
+            </details>
 
             <div className="dt-start-row">
               <button

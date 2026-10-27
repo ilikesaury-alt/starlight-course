@@ -83,6 +83,8 @@ export default function DictationPlayer({
   const [pyramidStep, setPyramidStep] = useState(0)
   /** 三选一里孩子点错的那一项，用于把它标红（而不是只标绿正确项） */
   const [pickedIdx, setPickedIdx] = useState<number | null>(null)
+  /** 「数音」已点亮的格子数（B：先数音，再写） */
+  const [litCount, setLitCount] = useState(0)
   const settledRef = useRef(false)
   const advanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const inputRef = useRef<HTMLInputElement | null>(null)
@@ -101,6 +103,26 @@ export default function DictationPlayer({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [wordKey, mode],
   )
+
+  /* ---------- B：每词先「数音」 ----------
+     听音写词最大的难点不是「记不住字母」，而是**不知道声音怎么切成块**。
+     大人会不自觉做音素切分，孩子不会。所以词一出来先不丢 26 个字母给他，
+     而是把「这个词有几个音」逐个亮出来（只数数量，不给字母、不给结构标签）——
+     建立「词是音拼成的」这个前提，再动手写。
+
+     ⚠️ 刻意只数「音」的数量、不显示任何字母或概念标签：
+        一旦显示字母就等于直接给答案，只剩抄写。数量本身就是那座桥
+        （ boat 3 个音 / 4 个字母，孩子看到「3 个音填 4 格」就懂了字母小队）。 */
+  const soundCount = boxes.length
+  useEffect(() => {
+    if (mode !== 'spell') return
+    setLitCount(0)
+    const timers: number[] = []
+    for (let i = 1; i <= soundCount; i++) {
+      timers.push(window.setTimeout(() => setLitCount(i), 240 * i))
+    }
+    return () => timers.forEach((t) => clearTimeout(t))
+  }, [wordKey, mode, soundCount])
 
   // 换词：重置本轮所有状态
   useEffect(() => {
@@ -281,6 +303,23 @@ export default function DictationPlayer({
         <div className="dt-mean">
           <span className="dt-mean-emoji">{word.emoji || '🔤'}</span>
           <span className="dt-mean-zh">{word.zh}</span>
+        </div>
+      )}
+
+      {/* ---------- B：先数音（只在还没开始写时显示，避免堆杂物） ---------- */}
+      {mode === 'spell' && status === 'idle' && !input.trim() && (
+        <div className="dt-count" aria-label={`先数一数，这个词有 ${soundCount} 个音`}>
+          <div className="dt-count-title">
+            👂 先数一数：这个词有 <b className="dt-count-num">{soundCount}</b> 个音
+          </div>
+          <div className="dt-count-boxes" aria-hidden="true">
+            {Array.from({ length: soundCount }, (_, i) => (
+              <span key={i} className={`dt-count-box${i < litCount ? ' is-lit' : ''}`} />
+            ))}
+          </div>
+          <div className="dt-count-hint">
+            一个音可能就是一个字母，也可能是几个字母合起来发一个音。
+          </div>
         </div>
       )}
 

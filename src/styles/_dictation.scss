@@ -904,3 +904,171 @@
   .dt-star.is-on { transform: none; }
   .dt-pip.is-now { transform: none; }
 }
+
+/* ============================================================
+   难度阶梯（① 先认 · ② 再拼 · ③ 后写）
+   ------------------------------------------------------------
+   取代原来的「选玩法 + 选范围 + 选长短」三面决策墙：
+   孩子只需要回答「我现在练到哪一步」，不必先做 4 组选择。
+   ============================================================ */
+.dt-ladder {
+  display: grid;
+  gap: var(--sp-2);
+}
+.dt-step {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  text-align: left;
+  padding: var(--sp-3) var(--sp-4);
+  min-height: 72px;
+  border-radius: var(--r-md);
+  border: 2px solid var(--line-2);
+  background: var(--card);
+  color: var(--ink-soft);
+  text-decoration: none;
+  transition: border-color var(--ease), background var(--ease), transform var(--ease);
+  @include press(0.98);
+
+  &.active {
+    border-color: var(--mc, var(--brand));
+    background: var(--mc-soft, var(--brand-soft));
+    color: var(--brand-deep);
+    box-shadow: var(--shadow-sm);
+    .dt-mode-check { opacity: 1; transform: scale(1); }
+  }
+  /* ② 是跳去字母积木的链接，用虚线边框区别于「就地选择」的两项 */
+  &--link {
+    border-style: dashed;
+    .dt-step-go {
+      margin-left: auto;
+      flex-shrink: 0;
+      font-size: var(--fs-sm);
+      font-weight: 800;
+      color: var(--brand-deep);
+    }
+  }
+}
+.dt-step-no {
+  flex-shrink: 0;
+  width: 22px;
+  font-size: var(--fs-base);
+  font-weight: 900;
+  color: var(--brand-deep);
+  opacity: 0.7;
+}
+.dt-step-emoji {
+  flex-shrink: 0;
+  font-size: 30px;
+  line-height: 1;
+}
+.dt-step-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.dt-step-title {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: var(--fs-base);
+  font-weight: 800;
+}
+.dt-step-desc {
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  line-height: 1.4;
+  opacity: 0.9;
+}
+
+/* 家长设置：默认收起的 <details>，孩子看不到杂物，家长要调时再展开 */
+.dt-parent-box {
+  margin-top: var(--sp-3);
+  border-radius: var(--r-md);
+  border: 1px dashed var(--line-2);
+  background: var(--card);
+  overflow: hidden;
+
+  &[open] { border-style: solid; }
+}
+.dt-parent-summary {
+  cursor: pointer;
+  padding: var(--sp-3) var(--sp-4);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--ink-soft);
+  list-style: none;
+  &::-webkit-details-marker { display: none; }
+  &::after {
+    content: '▾';
+    float: right;
+    opacity: 0.6;
+    transition: transform var(--ease);
+  }
+  .dt-parent-box[open] &::after { transform: rotate(180deg); }
+}
+.dt-parent-body {
+  padding: 0 var(--sp-4) var(--sp-4);
+  display: grid;
+  gap: var(--sp-3);
+}
+.dt-setup-title--sub { margin-top: 0; }
+
+/* ============================================================
+   「先数一数」——音-写不同步阶段的那座桥（B）
+   ------------------------------------------------------------
+   只数「有几个音」，**不显示任何字母、不给结构标签**。
+   一旦显示字母就等于直接给答案，只剩抄写；数量本身就是线索：
+   boat 是 3 个音、4 个字母 —— 孩子看到「3 个音填 4 格」就懂了字母小队。
+   ============================================================ */
+.dt-count {
+  margin: var(--sp-3) 0 0;
+  padding: var(--sp-3) var(--sp-4);
+  border-radius: var(--r-md);
+  background: var(--sky2-soft, #e0f2fe);
+  border: 2px dashed var(--sky2, #38bdf8);
+  text-align: center;
+}
+.dt-count-title {
+  font-size: var(--fs-sm);
+  font-weight: 800;
+  color: var(--ink);
+}
+.dt-count-num {
+  display: inline-block;
+  min-width: 1.4em;
+  font-size: var(--fs-lg);
+  color: var(--brand-deep);
+}
+.dt-count-boxes {
+  display: flex;
+  justify-content: center;
+  gap: var(--sp-2);
+  margin: var(--sp-2) 0;
+  min-height: 34px;
+}
+.dt-count-box {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  border: 2px solid var(--sky2, #38bdf8);
+  background: transparent;
+  opacity: 0.45;
+  transition: opacity 0.25s var(--ease), transform 0.25s var(--ease), background 0.25s var(--ease);
+
+  &.is-lit {
+    opacity: 1;
+    background: var(--sky2, #38bdf8);
+    transform: scale(1.12);
+  }
+}
+.dt-count-hint {
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  color: var(--ink-soft);
+  opacity: 0.85;
+  line-height: 1.5;
+}

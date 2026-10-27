@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test, expect, type Page } from '@playwright/test'
 
 /**
  * 听写练习（/dictation）端到端测试 —— dev-task-flow 第 11 步 E2E。
@@ -21,6 +21,25 @@ import { test, expect } from '@playwright/test'
  */
 
 const DICTATION = '#/dictation'
+
+/**
+ * 家长设置默认收起（孩子进来不该看到范围/长短这些杂物）。
+ * 需要调范围或词长短的用例，先展开它。
+ */
+async function openParentSettings(page: Page) {
+  const box = page.locator('details.dt-parent-box')
+  if (!(await box.evaluate((el: HTMLDetailsElement) => el.open))) {
+    await box.locator('summary').click()
+  }
+}
+
+/**
+ * 入口是难度阶梯，默认停在「① 先认 · 三选一」（音-写不同步阶段先练认）。
+ * 凡是要操作 input.dt-input 的用例，先显式选「③ 后写 · 听音写词」。
+ */
+async function chooseSpell(page: Page) {
+  await page.getByRole('button', { name: /听音写词/ }).click()
+}
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/')
@@ -52,6 +71,7 @@ test.describe('T1/T2 入口与词池', () => {
 
 test.describe('T3 空错题本兜底', () => {
   test('勾选只练错题本时按钮禁用并给出提示', async ({ page }) => {
+    await openParentSettings(page)
     await page.getByRole('checkbox').check()
     await expect(page.getByRole('button', { name: /开始听写/ })).toBeDisabled()
     await expect(page.getByText(/错题本里还没有英语错词/)).toBeVisible()
@@ -60,6 +80,7 @@ test.describe('T3 空错题本兜底', () => {
 
 test.describe('T4/T5 听音写词与两试一揭', () => {
   test('T4 输入正确拼写 → 绿字鼓励并自动进下一词', async ({ page }) => {
+    await chooseSpell(page)
     await page.getByRole('button', { name: /开始听写/ }).click()
 
     // headless 无 TTS，没法靠听音作答。用「我拼不出来」的音素格子拼出答案：
@@ -78,6 +99,7 @@ test.describe('T4/T5 听音写词与两试一揭', () => {
   })
 
   test('T5 两试一揭：第一次错显示线索可改，第二次错揭晓答案', async ({ page }) => {
+    await chooseSpell(page)
     await page.getByRole('button', { name: /开始听写/ }).click()
     const input = page.locator('input.dt-input')
 
@@ -114,8 +136,52 @@ test.describe('T6 三选一干扰项质量', () => {
   })
 })
 
+test.describe('T19 入口改难度阶梯（A）', () => {
+  test('默认停在「① 先认」，家长设置默认收起', async ({ page }) => {
+    // 阶梯三项都在
+    await expect(page.locator('.dt-step')).toHaveCount(3)
+    // 默认是 ① 三选一（音-写不同步阶段先练认，不是一上来就写）
+    await expect(page.getByRole('button', { name: /🔍 三选一/ })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    )
+    await expect(page.getByRole('button', { name: /✍️ 听音写词/ })).toHaveAttribute(
+      'aria-pressed',
+      'false',
+    )
+    // ② 是跳去字母积木的链接，不是就地选择
+    await expect(page.locator('.dt-step--link')).toHaveAttribute('href', /#\/alphablocks/)
+
+    // 家长设置（范围/长短）默认收起，孩子看不到决策墙
+    const box = page.locator('details.dt-parent-box')
+    expect(await box.evaluate((el: HTMLDetailsElement) => el.open)).toBe(false)
+  })
+})
+
+test.describe('T20 每词先数音（B）', () => {
+  test('听音写词里先显示音数，格子数与音素数一致且不泄字母', async ({ page }) => {
+    await chooseSpell(page)
+    await page.getByRole('button', { name: /开始听写/ }).click()
+    await expect(page.locator('.dt-player')).toBeVisible()
+
+    // 「先数一数」提示出现
+    const count = page.locator('.dt-count')
+    await expect(count).toBeVisible()
+    await expect(count).toContainText('个音')
+
+    // 音格数量 = 该词的音素数，且格子里**没有任何字母**（只数音，不给答案）
+    const litTotal = await page.locator('.dt-count-box').count()
+    expect(litTotal).toBeGreaterThan(0)
+    expect((await page.locator('.dt-count-boxes').textContent())?.trim()).toBe('')
+
+    // 亮灯是逐个发生的（最终全部亮起）
+    await expect(page.locator('.dt-count-box.is-lit')).toHaveCount(litTotal, { timeout: 8000 })
+  })
+})
+
 test.describe('T7/T8 自然拼读桥接', () => {
   test('T7 音素格子按音素分段，每格可点', async ({ page }) => {
+    await chooseSpell(page)
     await page.getByRole('button', { name: /开始听写/ }).click()
     // 主动要提示（不泄露答案）
     await page.getByRole('button', { name: /我拼不出来/ }).click()
@@ -126,6 +192,7 @@ test.describe('T7/T8 自然拼读桥接', () => {
   })
 
   test('T8 金字塔逐阶展开（点一次多一个字母）', async ({ page }) => {
+    await chooseSpell(page)
     await page.getByRole('button', { name: /开始听写/ }).click()
     await page.getByRole('button', { name: /我拼不出来/ }).click()
     const onSteps = () => page.locator('.dt-pyramid-step.is-on')
@@ -142,8 +209,9 @@ test.describe('T12 星数只结算一次（回归）', () => {
       () => (JSON.parse(localStorage.getItem('starlight-course') ?? '{}')?.state?.totalStars ?? 0) as number,
     )
     expect(stars).toBe(0)
-    // 触发多次重渲染（切换模式/长度/范围），星数仍应不变
+    // 触发多次重渲染（切换阶梯 / 长度），星数仍应不变
     await page.getByRole('button', { name: /三选一/ }).click()
+    await openParentSettings(page)
     await page.getByRole('button', { name: /短词/ }).click()
     await page.getByRole('button', { name: /听音写词/ }).click()
     const after = await page.evaluate(
@@ -156,6 +224,8 @@ test.describe('T12 星数只结算一次（回归）', () => {
 test.describe('T17 一字一盒（字母盒）', () => {
   test('写错时逐格标色：对→绿 / 错→红 / 漏→虚线，并给出「第几个字母」提示', async ({ page }) => {
     // 长词保证答案 ≥5 字母，才留得出「漏写」的空间
+    await chooseSpell(page)
+    await openParentSettings(page)
     await page.getByRole('button', { name: /长词/ }).click()
     await page.getByRole('button', { name: /开始听写/ }).click()
 
@@ -187,7 +257,8 @@ test.describe('T18 ✕ 退出', () => {
     await expect(page.locator('.dt-player')).toBeVisible()
 
     await page.getByRole('button', { name: /退出/ }).click()
-    await expect(page.locator('.dt-modes')).toBeVisible()
+    // 设置页结构已从「选玩法 .dt-modes」改成「难度阶梯 .dt-ladder」
+    await expect(page.locator('.dt-ladder')).toBeVisible()
     await expect(page.locator('.dt-player')).toHaveCount(0)
 
     const stars = await page.evaluate(
@@ -199,6 +270,7 @@ test.describe('T18 ✕ 退出', () => {
 
 test.describe('边界：完整走完一轮', () => {
   test('用「答错→揭晓→下一个」走完一轮，进入报告页且数值自洽', async ({ page }) => {
+    await chooseSpell(page)
     await page.getByRole('button', { name: /开始听写/ }).click()
     // 本轮最多 10 词；全部答错以最快路径推进，验证流程不卡死 + 报告页可达
     for (let i = 0; i < 30; i++) {

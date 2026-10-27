@@ -77,6 +77,15 @@ npm run electron:build  # 打包 Windows NSIS 安装包（产物在 release/）
   - **原生合成器是最后一级，必须传 `lastResort: true`**：无视「假死冷却期」每次都真试一次。冷却期只用于省掉空转；若在最后一级照常硬判失败，就会出现「前一句还能响、之后整段静默」
   - Kokoro 默认开启（`kokoro.ts` 的 `readEnabledFlag()` 返回 `true`）；偶发「模型就绪但推理中途失败 → 回退跨域音频被自动播放策略拦截」时，控制台执行 `localStorage.setItem('starlight.kokoro.enabled','0')` 并刷新即可回到稳定链路
   - `SpeakButton` 只是 `speakService` 的 UI 封装，**播放逻辑不在组件里**
+- 听写入口 (`/dictation`) 是**难度阶梯**，不是「选玩法」：
+  - ① 先认 · 三选一（**默认停在这里**）→ ② 再拼 · 搭积木（链到 `/alphablocks`，虚线框表示「去别处练」）→ ③ 后写 · 听音写词。
+  - 家长设置（只练错题本 / 单元 chips / 词的长短）收进 `<details class="dt-parent-box">` **默认收起**。
+  - 为什么：原来的「玩法 + 范围 + 长短」是 4 组连续决策，6~9 岁做不了；`mode` 默认值从 `spell` 改成 `choice` 也是这个原因 —— **音-写不同步阶段要先练认**，一上来从 26 个字母里凭空拼等于先懵一遍。
+  - e2e 因此要显式选模式：`tests/dictation.spec.ts` 的 `chooseSpell()` / `openParentSettings()` 两个 helper 就是干这个的，改入口结构时同步改它们。
+- **「先数一数」（`DictationPlayer` 的 `.dt-count`）是音-写不同步阶段的关键桥**：
+  - 听音写词每个词进场时逐个亮出「这个词有 N 个音」，**只数数量，绝不显示字母或概念标签** —— 显示字母就等于给答案，只剩抄写。
+  - 真正的教学价值在**音数 ≠ 字母格数**：`show` 是 2 个音 / 4 个字母（`sh`+`ow`）、`mother` 是 4 个音 / 6 个字母（`th`+`er`）。孩子看到「2 个音要填 4 格」就自己悟到字母小队，不需要先讲概念。
+  - 面板只在 `status==='idle' && !input.trim() && mode==='spell'` 时出现：开始打字就让位，答错后由警告横幅和音素格子接管，不堆杂物。
 - Speaking: STT is the native `SpeechRecognition` API via `useSpeechRecognition` (no back-end, no API key). Judgement is fully automatic: the engine's alternatives are all scored (best match wins), transient failures (`no-speech`/`aborted`/`network`) auto-re-listen up to 2 times, and only on terminal failure does the child get a **跳过这句** button — there is no 家长确认 path
 - 「🗣️ 跟读」Tab **默认隐藏**（`LessonPreview` 的 `SHOW_SPEAK_TAB = false`）：麦克风跟读在目标设备上用不上，五个标签也太挤。这只是收起入口 —— 渲染分支、`SentenceReader`、`useSentenceReader`、自动换句播放全部原样保留，把 flag 改回 `true` 即恢复（同时把 `tests/starlight-zones.spec.ts` 里 `跟读区（降级闭环）` 的 `describe.skip` 改回 `describe`）。句子仍会在打开课时照常 `seedCards` 进复习池，隐藏 Tab 不影响 SRS
 - Target platform: **desktop Chrome / Edge on Windows** (WebGPU for Kokoro, localhost for the mic secure context). Firefox / Safari / mobile are not committed to
