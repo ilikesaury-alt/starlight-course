@@ -97,6 +97,7 @@ npm run electron:build  # 打包 Windows NSIS 安装包（产物在 release/）
 - Phonics: `src/data/phonics.ts` 的音素切分口径**对齐《字母积木》(Alphablocks / BBC CBeebies) 的教学分级** —— 孩子正在看的动画是这套片，app 必须跟动画对得上号，否则提示反而干扰：
   - L1-2 单字母 / L3 字母小队（两三个字母合成一个音：`ch`/`ai`/`igh`/`ar`/`er`…）/ L4 手拉手（辅音簇各发各的音：`st`/`bl`/`-nd`）/ L5 魔法E（`e` **单独成格**、自己不发声、但让前面元音发长音）/ 特别篇双写（`ll`/`ss`/`ff` 合成一个音）
   - 旧口径有四处**正好教反了**（2026-10 已改，别回退）：① 魔法E 的 e 被吐进前一格（`cake → c/a/ke`）且自相矛盾（`cake` 吐 e、`blue` 留 e）；② 双写被拆成两格（旧注释写「按一个音处理」但代码给了两格）；③ 字母小队只认 15 个，`ar/or/er/ir/ur/igh` 全缺（`father → f/a/th/e/r`）；④ 完全没有「手拉手」概念
+  - 2026-10-27 又修四处（别回退）：⑤ `thr` 不是手拉手——th 自己是小队，`three → th/r/ee`（积木库的 `three` 已从绿级挪到黄级）；⑥ 词尾 e 是**唯一元音**时必须发音（`the/she/he/me/we/be`，旧口径标成不发音是语音学错误）；⑦ `two` 的 w、`listen` 的 t 不发音，进 OVERRIDES；⑧ `orange` 的 `nge` 不是一个音（n/g 各发各的、e 不发音），进 OVERRIDES
   - **魔法E 的 e 必须是独立的一格**（动画里 E 是一块会飞的独立积木），不能并入前一格
   - 切分是**规则优先 + 例外兜底**：规则判不了的英语不规则词走 `OVERRIDES` 人工表（`welcome`/`picture`/`orange`/`umbrella`/`people`…），不引入发音词典
   - ⚠️ 短音词不吃魔法E（`come`/`have`/`love`/`one` 结尾的 e 不发音）—— 用**词表**判定而不是后缀规则（后缀会把 `stone` 误判成短音 `one`）
