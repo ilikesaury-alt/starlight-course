@@ -102,22 +102,24 @@ test.describe('A5 按正确顺序搭完', () => {
       const wait = (ms: number) => new Promise((r) => setTimeout(r, ms))
       const filled = () => document.querySelectorAll('.ab-slot.filled').length
       const total = () => document.querySelectorAll('.ab-slot').length
-      // 依次点「能推进」的块，直到填满
+      // 依次点「能推进」的块直到填满。
+      // ⚠️ 用 .ab-hint（拼完即出现且不会消失）做完成信号，
+      // 不用 .ab-next-btn —— 它 1.6s 后随自动跳词一起消失，容易错过。
       for (let guard = 0; guard < 40; guard++) {
-        if (document.querySelector('.ab-next-btn')) break
+        if (document.querySelector('.ab-hint')) break
         if (filled() >= total()) break
         const before = filled()
         let advanced = false
         for (const b of [...document.querySelectorAll('.ab-block')] as HTMLButtonElement[]) {
           if (b.disabled) continue
           b.click()
-          await wait(150)
+          await wait(130)
           if (filled() > before) { advanced = true; break }
-          await wait(560)
-          if (document.querySelector('.ab-next-btn')) break
+          await wait(500)
+          if (document.querySelector('.ab-hint')) break
         }
         if (!advanced) break
-        await wait(100)
+        await wait(80)
       }
       return {
         slots: [...document.querySelectorAll('.ab-slot')].map((s) => s.textContent?.trim() ?? ''),
@@ -136,7 +138,7 @@ test.describe('A5 按正确顺序搭完', () => {
 })
 
 test.describe('A6 错块反馈 + 错题本', () => {
-  test('点错块显示提示，该词进错题本且 module=alphablocks', async ({ page }) => {
+  test('点错块只提示不结算；拼完后该词进错题本且 module=alphablocks', async ({ page }) => {
     await page.locator('.ab-level').nth(4).click()
     await page.getByRole('button', { name: /看词拆积木/ }).click()
     await page.getByRole('button', { name: /开始练习/ }).click()
@@ -144,43 +146,62 @@ test.describe('A6 错块反馈 + 错题本', () => {
 
     const word = await page.locator('.ab-word-full').textContent()
 
-    // 点一个必然错的块：反复试点，直到 filled 不变
-    const hitWrong = await page.evaluate(async () => {
+    // 1) 先点一个错块：应只出现提示，**不能**已经把词入错题本
+    const wrongMsg = await page.evaluate(async () => {
       const wait = (ms: number) => new Promise((r) => setTimeout(r, ms))
       const filled = () => document.querySelectorAll('.ab-slot.filled').length
       for (const b of [...document.querySelectorAll('.ab-block')] as HTMLButtonElement[]) {
         const before = filled()
         b.click()
         await wait(200)
-        if (filled() === before) {
-          return document.querySelector('.ab-wrong')?.textContent ?? null
-        }
+        if (filled() === before) return document.querySelector('.ab-wrong')?.textContent ?? null
         await wait(100)
-        break // 第一块就对了，换下一轮（正常不会走到这）
+        break
       }
       return null
     })
+    expect(wrongMsg).toContain('这块不对')
 
-    // 首个块可能恰好正确；若如此，再试一次别的（保证至少命中一次错块）
-    let msg = hitWrong
-    if (!msg) {
-      msg = await page.evaluate(async () => {
-        const wait = (ms: number) => new Promise((r) => setTimeout(r, ms))
-        const filled = () => document.querySelectorAll('.ab-slot.filled').length
+    // 此时尚未拼完 → 不该已入错题本（避免“界面还在练、后台已判死”）
+    const beforeDone = await page.evaluate(() => {
+      const st = JSON.parse(localStorage.getItem('starlight-course') ?? '{}')?.state ?? {}
+      return (st.wrongWords ?? []).length
+    })
+    expect(beforeDone).toBe(0)
+
+    // 2) 继续把词拼完 → 才结算，该词进错题本。
+    //    ⚠️ 不要等 .ab-next-btn：拼完 1.6s 后组件会自动跳到下一词，
+    //    按钮是个瞬时状态，等它很容易错过（踩过）。改为盯持久化结果。
+    await page.evaluate(async () => {
+      const wait = (ms: number) => new Promise((r) => setTimeout(r, ms))
+      const filled = () => document.querySelectorAll('.ab-slot.filled').length
+      const total = () => document.querySelectorAll('.ab-slot').length
+      for (let guard = 0; guard < 30; guard++) {
+        if (document.querySelector('.ab-hint')) break // 已拼完
+        if (filled() >= total()) break
+        const before = filled()
+        let advanced = false
         for (const b of [...document.querySelectorAll('.ab-block')] as HTMLButtonElement[]) {
           if (b.disabled) continue
-          const before = filled()
           b.click()
-          await wait(200)
-          if (filled() === before) return document.querySelector('.ab-wrong')?.textContent ?? null
-          await wait(100)
+          await wait(130)
+          if (filled() > before) { advanced = true; break }
+          await wait(500)
         }
-        return null
-      })
-    }
-    expect(msg).toContain('这块不对')
+        if (!advanced) break
+      }
+    })
 
-    // 错词进错题本
+    // 拼完后同步结算 → 错题本应出现该词（module=alphablocks）
+    await page.waitForFunction(
+      (w) => {
+        const st = JSON.parse(localStorage.getItem('starlight-course') ?? '{}')?.state ?? {}
+        return (st.wrongWords ?? []).some((x: { en: string; module: string }) => x.en === w && x.module === 'alphablocks')
+      },
+      word,
+      { timeout: 10_000 },
+    )
+
     const wrong = await page.evaluate(() => {
       const st = JSON.parse(localStorage.getItem('starlight-course') ?? '{}')?.state ?? {}
       return (st.wrongWords ?? []).map((w: { en: string; module: string }) => `${w.en}|${w.module}`)
@@ -196,15 +217,17 @@ test.describe('A7 重复块按位置判（tight / nine）', () => {
   test.setTimeout(120_000)
 
   test('文本相同但位置不对的块必须被拒绝', async ({ page }) => {
-    // 需要抽到含重复块的词；最多试 20 轮
+    // 需要抽到含重复块的词（tight 在黄级、nine 在蓝级，都只占少数），
+    // 所以交替在两级上抽，最多 40 轮。
     let target: { word: string; dups: string[]; dupCount: number } | null = null
-    for (let i = 0; i < 20 && !target; i++) {
-      // 同上：必须带时间戳 query 强制重载，否则会停在上一个词的 .ab-player
+    for (let i = 0; i < 40 && !target; i++) {
+      // 必须带时间戳 query 强制重载，否则会停在上一个词的 .ab-player
       await page.goto(`/?t=${Date.now()}-${i}${AB}`)
       await page.evaluate(() => localStorage.clear())
       await page.reload()
       await expect(page.locator('.ab-level')).toHaveCount(5, { timeout: 15_000 })
-      await page.locator('.ab-level').nth(2).click()
+      // 交替黄级(2) / 蓝级(4)
+      await page.locator('.ab-level').nth(i % 2 === 0 ? 2 : 4).click()
       await page.getByRole('button', { name: /看词拆积木/ }).click()
       await page.getByRole('button', { name: /开始练习/ }).click()
       await expect(page.locator('.ab-player')).toBeVisible()
@@ -219,7 +242,7 @@ test.describe('A7 重复块按位置判（tight / nine）', () => {
       if (r.dupCount > 0) target = { word: r.word, dups: r.dups, dupCount: r.dupCount }
     }
 
-    test.skip(!target, '20 轮内未抽到含重复块的词（tight / nine）')
+    test.skip(!target, '40 轮内未抽到含重复块的词（tight / nine）')
     // 抽到了：第一个重复块被接受后，第二个同文本块必须被拒
     const rejected = await page.evaluate(async (dupText: string) => {
       const wait = (ms: number) => new Promise((r) => setTimeout(r, ms))

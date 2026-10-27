@@ -74,7 +74,11 @@ export default function AlphablocksPage() {
   const [usedPoolIdx, setUsedPoolIdx] = useState<Set<number>>(new Set())
   const [wrongFlash, setWrongFlash] = useState(false)
   const [solved, setSolved] = useState(false)
+  /** 本词是否曾经点错过（拼完时用来决定计错 + 诚实提示） */
+  const [hadWrong, setHadWrong] = useState(false)
   const settledRef = useRef(false)
+  /** 本词是否曾经点错过（用于“拼完才结算”的判定） */
+  const hadWrongRef = useRef(false)
   const advanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const meta = blockLevelMeta(level)
@@ -103,7 +107,9 @@ export default function AlphablocksPage() {
     setUsedPoolIdx(new Set())
     setWrongFlash(false)
     setSolved(false)
+    setHadWrong(false)
     settledRef.current = false
+    hadWrongRef.current = false
     if (advanceTimer.current) {
       clearTimeout(advanceTimer.current)
       advanceTimer.current = null
@@ -146,6 +152,15 @@ export default function AlphablocksPage() {
     [current?.en, level, decoys.length],
   )
 
+  /**
+   * 结算一道题。
+   *
+   * ⚠️ 只能在**拼完整个词**时调用（不是第一次点错就叫）。
+   * 早期实现在“第一次点错块”时就 settle(false) 并锁死 settledRef，
+   * 于是孩子接着把词拼对、看到槽位全绿 + 「下一个」，报告却是 0 分 ——
+   * 界面告诉他“成功了”、计分告诉他“错了”，这是最坑的一种反馈矛盾。
+   * 现在的口径：**拼完才算，中途错过一次就计错**（对齐听写页“首次能否独立写对”）。
+   */
   const settle = (correct: boolean) => {
     if (settledRef.current || !current) return
     settledRef.current = true
@@ -196,13 +211,16 @@ export default function AlphablocksPage() {
       const next = [...placed, text]
       setPlaced(next)
       if (next.length === answerBlocks.length) {
+        // 拼完了才结算：中途点错过 → 计错（但 UI 仍走完、给鼓励）
         setSolved(true)
-        settle(true)
+        settle(!hadWrongRef.current)
         advanceTimer.current = setTimeout(handleAdvance, 1600)
       }
     } else {
+      // 点错：只记一笔 + 震一下，**不结算**（否则就无法区分“拼对但绕过弯”和“真不会”）
+      hadWrongRef.current = true
+      setHadWrong(true)
       setWrongFlash(true)
-      settle(false)
       setTimeout(() => setWrongFlash(false), 700)
     }
   }
@@ -347,14 +365,23 @@ export default function AlphablocksPage() {
 
             {/* ---- 概念提示（搭完才给，别提前泄底） ---- */}
             {solved && (
-              <p className="ab-hint" role="status">
-                {answerBlocks.map((s, i) => (
-                  <span key={i} className={`ab-hint-seg ab-k-${s.kind}`}>
-                    {s.text}
-                    {s.kind !== 'letter' && <i>{s.label}</i>}
-                  </span>
-                ))}
-              </p>
+              <>
+                <p className="ab-hint" role="status">
+                  {answerBlocks.map((s, i) => (
+                    <span key={i} className={`ab-hint-seg ab-k-${s.kind}`}>
+                      {s.text}
+                      {s.kind !== 'letter' && <i>{s.label}</i>}
+                    </span>
+                  ))}
+                </p>
+                {/* 中途点错过 → 诚实告诉孩子，否则“槽位全绿”会让人以为全对，
+                    但计分已是错，两边对不上（这个反馈矛盾踩过） */}
+                {hadWrong && (
+                  <p className="ab-hint-warn" role="status">
+                    这个词中途点错过一次，已经记进错题本了 —— 下次试试一次就搭对～
+                  </p>
+                )}
+              </>
             )}
 
             {wrongFlash && (
