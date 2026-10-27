@@ -97,7 +97,7 @@ const TEAMS2 = [
 const BLENDS3 = ['str', 'spr', 'spl', 'scr', 'squ', 'thr']
 const BLENDS2 = [
   'bl', 'br', 'cl', 'cr', 'dr', 'fl', 'fr', 'gl', 'gr', 'pl', 'pr',
-  'sc', 'sk', 'sm', 'sn', 'sp', 'st', 'sw', 'tw',
+  'sc', 'sk', 'sm', 'sn', 'sp', 'st', 'sw', 'tr', 'tw',
   // 词尾手拉手
   'nd', 'nk', 'mp', 'ft', 'pt', 'ct', 'ld', 'lf', 'lt', 'nt',
 ]

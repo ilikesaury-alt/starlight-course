@@ -138,6 +138,14 @@ export default function CourseEntries() {
           </div>
           <span className="dt-home-arrow">›</span>
         </Link>
+        <Link to="/alphablocks" className="ab-home-entry">
+          <span className="ab-home-emoji">🧱</span>
+          <div className="ab-home-body">
+            <div className="ab-home-title">字母积木</div>
+            <div className="ab-home-sub">看完《字母积木》来练稳固 · 听音搭积木</div>
+          </div>
+          <span className="ab-home-arrow">›</span>
+        </Link>
       </div>
 
       <div className="quick-row">

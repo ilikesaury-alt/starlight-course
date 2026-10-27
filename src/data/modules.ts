@@ -13,7 +13,7 @@ import { eng3aUnits, eng3aPlays, ENG3A_THEME, collectEngUnitWords, collectEngPla
 import { FG_THEME, RG_THEME } from './story-themes'
 import type { Story } from './story-types'
 
-export type ModuleId = 'starlight' | 'flyguy' | 'rocketgirl' | 'chinese' | 'eng3a'
+export type ModuleId = 'starlight' | 'flyguy' | 'rocketgirl' | 'chinese' | 'eng3a' | 'alphablocks'
 
 export interface ReviewItem {
   /** 单元 slug（Starlight）或故事 slug（故事类） */
@@ -217,6 +217,18 @@ export const MODULES: Record<ModuleId, ModuleMeta> = {
   rocketgirl: rocketGirlMeta,
   chinese: chineseMeta,
   eng3a: eng3aMeta,
+  // 字母积木：练习型模块（无课程单元，仅 SRS/错题回灌用）
+  alphablocks: {
+    id: 'alphablocks',
+    label: 'Alphablocks',
+    labelZh: '字母积木',
+    color: '#ea580c',
+    colorSoft: '#ffedd5',
+    kind: 'unit',
+    items: [],
+    getWords: () => [],
+    load: async () => ({ items: [], getWords: () => [] }),
+  },
 }
 
 export const MODULE_LIST: ModuleMeta[] = [starlightMeta, flyGuyMeta, rocketGirlMeta, chineseMeta, eng3aMeta]

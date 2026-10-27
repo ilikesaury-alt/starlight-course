@@ -95,6 +95,12 @@ npm run electron:build  # 打包 Windows NSIS 安装包（产物在 release/）
   - 不变量：**所有片段拼起来 === 原词字母序列**（`phonics.test.ts` 钉住；e2e 靠 `.dt-box-text` 拼答案）
   - 改规则时先用真实词表跑一遍：`src/data/eng3a.ts` 里 229 个词，旧口径有 47% 退化成逐字母拆分，新口径降到 32%
 
+- Alphablocks 练习 (`/alphablocks`)：看完《字母积木》动画的“练稳固”入口。**词源不用 eng3a 课程词，而是一份专用词库 `src/data/alphablocks.ts`** —— 孩子看的是动画，要练的必须是动画里出现的词，才能和画面里的词对上号（课程词继续走 `/dictation`，互不干扰）。
+  - 词库按动画官方五级（红橙黄绿蓝）+ 特别篇双写分组，每级对应一个教学点；单测 `alphablocks.test.ts` **强制校验词库与教学点匹配**（黄级每词必须含 team、绿级必须含 blend、蓝级大部分含 magic-e、特别篇必须含 double）
+  - ❗**候选积木堆必须真洗牌**：早期实现的 `shuffleStable()` 直接 `return list`，导致正确块总按答案顺序排在前面，孩子从左往右点就对了 —— 练习完全失效。e2e A4 盯着这条
+  - ❗**判定必须按位置不按文本**：`tight → t/igh/t`、`nine → n/i/n/e` 有重复块，只比文本的话孩子把第 3 位的 `t` 先点上去也算对。现在用 `usedPoolIdx`（已用块下标）+ 比对“下一个所需块”来判，e2e A7 盯着这条
+  - 复用 `phonemeSegments` 的概念分类给积木配色/标签；星规复用 `quizStars`；错词回灌错题本与 SRS，`module='alphablocks'`（已加入 `ModuleId` 联合类型，不新增持久化字段，因此 **无需升 localStorage version**）
+
 ## File Structure
 ```
 src/
