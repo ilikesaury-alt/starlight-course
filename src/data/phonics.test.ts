@@ -80,10 +80,17 @@ describe('phonemeSegments · L3 字母小队（两三个字母合成一个音）
 })
 
 describe('phonemeSegments · L4 手拉手（辅音簇，各发各的音）', () => {
-  it('词首手拉手：st / bl / tr / thr', () => {
+  it('词首手拉手：st / bl / tr', () => {
     expect(seg('stand')).toEqual(['st', 'a', 'nd'])
     expect(seg('black')).toEqual(['bl', 'a', 'ck'])
-    expect(seg('three')).toEqual(['thr', 'ee'])
+    expect(seg('train')).toEqual(['tr', 'ai', 'n'])
+  })
+
+  it('thr 不是手拉手：th 自己是小队，r 单独一格（three / bathroom）', () => {
+    expect(seg('three')).toEqual(['th', 'r', 'ee'])
+    expect(seg('bathroom')).toEqual(['b', 'a', 'th', 'r', 'oo', 'm'])
+    // 手拉手的定义是"每个字母各发各的音"，thr 里的 h 不单独发声，所以不能当手拉手
+    expect(kinds('three')).not.toContain('blend')
   })
 
   it('词尾手拉手：-nd', () => {
@@ -157,10 +164,17 @@ describe('phonemeSegments · 不发音的字母', () => {
     expect(kinds('write')[0]).toBe('silent')
   })
 
-  it('the / she / me 的结尾 e 不发音', () => {
-    expect(kinds('the')).toEqual(['team', 'silent'])
-    expect(kinds('she')).toEqual(['team', 'silent'])
-    expect(kinds('me')).toEqual(['letter', 'silent'])
+  it('the / she / me 的结尾 e 必须发音（它是词里唯一的元音）', () => {
+    // /ðə/ /ʃiː/ /miː/ —— e 没了这个词就发不出声；旧口径把它标成不发音是语音学错误
+    expect(kinds('the')).toEqual(['team', 'letter'])
+    expect(kinds('she')).toEqual(['team', 'letter'])
+    expect(kinds('me')).toEqual(['letter', 'letter'])
+    expect(kinds('he')).toEqual(['letter', 'letter'])
+    expect(kinds('we')).toEqual(['letter', 'letter'])
+    expect(kinds('be')).toEqual(['letter', 'letter'])
+    // 对照：有其他元音的词，结尾 e 才不发音（table / please）
+    expect(kinds('table')).toContain('silent')
+    expect(kinds('please')).toContain('silent')
   })
 })
 
@@ -174,9 +188,20 @@ describe('phonemeSegments · 课程真实词（旧口径出错最多的那些）
     expect(kinds('umbrella')).toEqual(['letter', 'letter', 'blend', 'silent', 'double', 'letter'])
   })
 
-  it('orange：nge 是小队，a 是短音（不是魔法E）', () => {
-    expect(seg('orange')).toEqual(['or', 'a', 'nge'])
+  it('orange：n 和 g 各发各的音，结尾 e 不发音（nge 不是一个音）', () => {
+    expect(seg('orange')).toEqual(['or', 'a', 'n', 'g', 'e'])
+    expect(kinds('orange')).toEqual(['team', 'letter', 'letter', 'letter', 'silent'])
     expect(kinds('orange')).not.toContain('magic-e')
+  })
+
+  it('two 的 w 不发音（tw 在这里不是手拉手）', () => {
+    expect(seg('two')).toEqual(['t', 'w', 'o'])
+    expect(kinds('two')).toEqual(['letter', 'silent', 'letter'])
+  })
+
+  it('listen 的 t 不发音（st 在这里不是手拉手）', () => {
+    expect(seg('listen')).toEqual(['l', 'i', 's', 't', 'e', 'n'])
+    expect(kinds('listen')).toEqual(['letter', 'letter', 'letter', 'silent', 'letter', 'letter'])
   })
 
   it('purple / picture：ur 是小队，结尾 e 不发音', () => {

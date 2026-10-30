@@ -151,6 +151,8 @@ export const BLOCK_WORDS: Record<BlockLevel, BlockWord[]> = {
     // 教学点：ee —— sleep / sheep / tree
     w('sleep', '睡觉', '😴'), w('sheep', '绵羊', '🐑'), w('tree', '树', '🌳'),
     w('green', '绿色', '🟢'), w('meet', '见面', '🤝'),
+    // 教学点：th + ee 小队 —— three（thr 不是手拉手，th 自己就是小队）
+    w('three', '三', '3️⃣'),
     // 教学点：ai / ay —— rain / day / play
     w('rain', '雨', '🌧️'), w('day', '白天', '🌤️'), w('play', '玩', '🎮'),
     w('snail', '蜗牛', '🐌'),
@@ -167,8 +169,8 @@ export const BLOCK_WORDS: Record<BlockLevel, BlockWord[]> = {
   green: [
     // 教学点：st- 开头 —— star / stop / stick
     w('star', '星星', '⭐'), w('stop', '停', '🛑'), w('stick', '棍子', '🥢'),
-    // 教学点：tr- / thr- 开头 —— train / three
-    w('train', '火车', '🚆'), w('three', '三', '3️⃣'), w('trap', '陷阱', '🪤'),
+    // 教学点：tr- 开头 —— train / trap
+    w('train', '火车', '🚆'), w('trap', '陷阱', '🪤'),
     // 教学点：bl- / br- 开头 —— blue / bread
     w('blue', '蓝色', '🔵'), w('bread', '面包', '🍞'), w('branch', '树枝', '🌿'),
     // 教学点：-nd 结尾 —— hand / sand

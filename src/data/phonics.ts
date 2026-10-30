@@ -94,7 +94,9 @@ const TEAMS2 = [
 ]
 
 // ---- L4 手拉手：辅音簇，**每个字母各发各的音** ----
-const BLENDS3 = ['str', 'spr', 'spl', 'scr', 'squ', 'thr']
+// ⚠️ 不含 thr：th 自己就是字母小队（/θ/ 一个音），"thr" 里的 h 并不单独发声，
+//    当手拉手会让 three 数出 3 个音（实际 2 个：/θr/ + /iː/）。three → th / r / ee。
+const BLENDS3 = ['str', 'spr', 'spl', 'scr', 'squ']
 const BLENDS2 = [
   'bl', 'br', 'cl', 'cr', 'dr', 'fl', 'fr', 'gl', 'gr', 'pl', 'pr',
   'sc', 'sk', 'sm', 'sn', 'sp', 'st', 'sw', 'tr', 'tw',
@@ -138,6 +140,12 @@ const SILENT_START: [string, string][] = [
  * 每一条都要求 text 拼起来 === 单词本身（测试会钉住）。
  */
 const OVERRIDES: Record<string, [string, SegmentKind][]> = {
+  // two: /tuː/ —— w 不发音，tw 在这里不是手拉手
+  two: [['t', 'letter'], ['w', 'silent'], ['o', 'letter']],
+  // listen: /ˈlɪsən/ —— t 不发音（st 不是手拉手），e 发弱元音
+  listen: [['l', 'letter'], ['i', 'letter'], ['s', 'letter'], ['t', 'silent'], ['e', 'letter'], ['n', 'letter']],
+  // orange: /ˈɒrɪndʒ/ —— nge 不是一个音（n 和 g 各发各的），结尾 e 不发音
+  orange: [['or', 'team'], ['a', 'letter'], ['n', 'letter'], ['g', 'letter'], ['e', 'silent']],
   // welcome = /ˈwelkəm/：结尾 e 不发音，也**没有**把 o 变长音
   welcome: [['w', 'letter'], ['e', 'letter'], ['l', 'letter'], ['c', 'letter'], ['o', 'letter'], ['m', 'letter'], ['e', 'silent']],
   // picture = /ˈpɪktʃə(r)/：ur 是小队，结尾 e 不发音
@@ -328,8 +336,11 @@ export function phonemeSegments(word: string): PhonicsSegment[] {
       const core = w.slice(0, -1)
       return [...scanCore(core, 0, magicIdx), makeSegment('e', 'magic-e')]
     }
-    // 不发声的 e（the / she / me …）
+    // 词里没有其他元音时，结尾的 e 就是**唯一的元音**，必须发音
+    // （the / she / he / me / we / be —— /ðə/ /ʃiː/ /hiː/…，e 没了这个词就发不出声）。
+    // 有其他元音时才轮到「不发音的 e」（table / please / share …）。
     const segs = scanCore(w, 0, -1)
+    if (!/[aeiou]/.test(w.slice(0, -1))) return segs
     return markTrailingSilentE(segs)
   }
 
