@@ -1,9 +1,10 @@
 import { test, expect } from '@playwright/test'
 import { STARLIGHT_PASSAGE } from '../src/data/starlight-passage'
-import { READING_PASSAGES } from '../src/data/reading'
 
 /**
- * M0 拓展词 / M1+M2 跟读降级 / M3 句型框架 / M5 课文点读 / 📚 阅读短文 的 E2E。
+ * M0 拓展词 / M1+M2 跟读降级 / M3 句型框架 / M5 课文点读 的 E2E。
+ *
+ * 「📚 阅读短文」已提升为独立模块（/#/reading），其 E2E 整段迁到 tests/reading.spec.ts。
  *
  * 关键前提：
  * - 跟读全程自动判定，没有「家长确认」：识别不可用只留常驻说明；权限被拒 / 听不清
@@ -162,13 +163,15 @@ test.describe('拓展词自动填充', () => {
 })
 
 test.describe('Tab 栏', () => {
-  test('「🗣️ 跟读」Tab 已隐藏，只剩六个标签', async ({ page }) => {
+  test('「🗣️ 跟读」「📚 阅读」已移出课内 Tab，只剩五个标签', async ({ page }) => {
     await page.goto(LESSON)
     // 隐藏是 SHOW_SPEAK_TAB=false：只收入口，跟读相关代码与组件原样保留
     await expect(page.getByRole('button', { name: /跟读/ })).toHaveCount(0)
-    await expect(page.locator('.tab-btn')).toHaveCount(6)
+    // 阅读已提升为独立模块（/#/reading），课内不再占 Tab
+    await expect(page.getByRole('button', { name: /阅读/ })).toHaveCount(0)
+    await expect(page.locator('.tab-btn')).toHaveCount(5)
     // 「📖 课本原文」已拆成「🎭 外教对话」+「📖 课文」，不再三重堆叠（见 docs/lesson-detail-ui-research.md）
-    for (const name of [/单词卡/, /句型/, /外教对话/, /课文/, /闯关/, /阅读/]) {
+    for (const name of [/单词卡/, /句型/, /外教对话/, /课文/, /闯关/]) {
       await expect(page.getByRole('button', { name })).toBeVisible()
     }
     // 旧 Tab 名「课本原文」已不存在（已改名为「课文」，外教对话拆成独立 Tab）
@@ -358,163 +361,6 @@ test.describe('课文点读', () => {
       for (let l = 1; l <= 8; l++) {
         const p = STARLIGHT_PASSAGE[`${u}-${l}`]
         if (!p || p.lines.length === 0) missing.push(`${u}-${l}`)
-      }
-    }
-    expect(missing).toEqual([])
-  })
-})
-
-/**
- * 📚 阅读短文区：每课一段连贯短文（点词读 + 本课词高亮 + 逐句朗读 + 中文开关）。
- *
- * 这里刻意**不验证「真的出声了」**：发声链路（云 TTS / WebSpeech）在 headless 里既不稳定
- * 也要联网，验了只会变成假绿。验的是「点了会进入朗读态、再点会停」这条 UI 契约。
- */
-test.describe('📚 阅读短文区', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto(LESSON)
-    await page.locator('.tab-bar').getByRole('button', { name: /阅读/ }).click()
-  })
-
-  test('打开后按段落渲染短文，标题中英文都在', async ({ page }) => {
-    await expect(page.locator('.reading-zone')).toBeVisible()
-    await expect(page.locator('.reading-para').first()).toBeVisible()
-    // 8~12 句、1~3 段是数据不变量，这里只确认渲染出了真实句子而不是空壳
-    expect(await page.locator('.reading-sent').count()).toBeGreaterThanOrEqual(8)
-    expect(await page.locator('.reading-para').count()).toBeGreaterThanOrEqual(1)
-    await expect(page.locator('.reading-title')).toBeVisible()
-    await expect(page.locator('.reading-title-zh')).toBeVisible()
-  })
-
-  test('本课词有高亮标记', async ({ page }) => {
-    // 1-1 的词表：hello / good / great / name / friend，短文里必然出现
-    await expect(page.locator('.reading-zone .tt-word--mark').first()).toBeVisible()
-    expect(await page.locator('.reading-zone .tt-word--mark').count()).toBeGreaterThanOrEqual(5)
-  })
-
-  test('点单词弹释义', async ({ page }) => {
-    await page.locator('.reading-zone .tt-word', { hasText: 'hello' }).first().click()
-    await expect(page.locator('.reading-zone .tt-pop')).toBeVisible()
-  })
-
-  test('中文对照默认关，开关可切换', async ({ page }) => {
-    const toggle = page.getByTestId('reading-zh-toggle')
-    await expect(page.locator('.reading-zh')).toHaveCount(0)
-    await expect(toggle).toHaveAttribute('aria-pressed', 'false')
-
-    await toggle.click()
-    await expect(page.locator('.reading-zh').first()).toBeVisible()
-    // 逐句都有中文：句子数与译文行数一一对应
-    await expect(page.locator('.reading-zh')).toHaveCount(await page.locator('.reading-sent').count())
-    await expect(toggle).toHaveAttribute('aria-pressed', 'true')
-
-    await toggle.click()
-    await expect(page.locator('.reading-zh')).toHaveCount(0)
-  })
-
-  // 回归：.reading-sent 一度是横向 flex，导致「显示中文」时译文被排到英文右侧、
-  // 和正文挤在一起。这里用几何关系钉死「中文必须在英文下方且左对齐」。
-  test('显示中文时译文排在英文下方，不跟正文挤在一起', async ({ page }) => {
-    await page.getByTestId('reading-zh-toggle').click()
-
-    const geo = await page.evaluate(() => {
-      const sent = document.querySelector('.reading-sent')!
-      const row = sent.querySelector('.reading-sent-row')!
-      const zh = sent.querySelector('.reading-zh')!
-      const r = row.getBoundingClientRect()
-      const z = zh.getBoundingClientRect()
-      return { enBottom: r.bottom, zhTop: z.top, enLeft: r.left, zhLeft: z.left }
-    })
-
-    // 译文顶部不高于英文底部（容 2px 抗锯齿/子像素误差）
-    expect(geo.zhTop).toBeGreaterThanOrEqual(geo.enBottom - 2)
-    // 译文与英文左对齐，不是被挤到右边
-    expect(Math.abs(geo.zhLeft - geo.enLeft)).toBeLessThan(6)
-  })
-
-  test('「听整篇」进入朗读态，再点停止', async ({ page }) => {
-    const btn = page.getByTestId('reading-play-all')
-    await expect(btn).toHaveText(/听整篇/)
-
-    await btn.click()
-    // onStart 是同步回调，所以这一步不依赖音频真的出来
-    await expect(btn).toHaveText(/停止朗读/)
-
-    await btn.click()
-    await expect(btn).toHaveText(/听整篇/)
-  })
-
-  // 2026-10-10 逐句朗读：每句右侧一个独立小喇叭，点一下只读这一句。
-  // force: true 是因为上一句点击会触发 scrollIntoView，Playwright 的动作性检查
-  // 会与滚动竞态；真实用户的点击不存在这个问题（el.click() 已验证）。
-  test('逐句朗读：每句一个小喇叭，点一下读这句、再点一下停', async ({ page }) => {
-    const sayBtns = page.locator('.reading-say')
-    const sentCount = await page.locator('.reading-sent').count()
-    // 句子数与喇叭数一一对应：没有「整篇一个按钮」也没有重复按钮
-    await expect(sayBtns).toHaveCount(sentCount)
-
-    // 点第 1 句 → 只有它在「播放中」
-    await sayBtns.first().click()
-    await expect(sayBtns.first()).toHaveAttribute('data-busy', '1')
-    await expect(sayBtns.nth(1)).toHaveAttribute('data-busy', '0')
-
-    // 再点同一句 → 停
-    await sayBtns.first().click({ force: true })
-    await expect(sayBtns.first()).toHaveAttribute('data-busy', '0')
-  })
-
-  test('朗读时非当前句淡化（focus dimming），停后恢复', async ({ page }) => {
-    // 不朗读时全部句子不透明，孩子可以正常整篇扫读
-    await expect(page.locator('.reading-zone')).not.toHaveClass(/is-playing/)
-
-    await page.locator('.reading-say').first().click()
-    await expect(page.locator('.reading-zone')).toHaveClass(/is-playing/)
-
-    // 停掉后淡化撤销
-    await page.locator('.reading-say').first().click({ force: true })
-    await expect(page.locator('.reading-zone')).not.toHaveClass(/is-playing/)
-  })
-
-  // 2026-10-10：SRS 三色记忆状态默认不染色（否则一句英文被渲染成一串彩色方块，
-  // 孩子看不出「这是一句话」——阅读体验烂的最大单点成因）。改成显式开关。
-  test('记忆状态默认关闭，句子无彩色底；打开后才按 SRS 三色着色', async ({ page }) => {
-    const firstWord = page.locator('.reading-zone .tt-word').first()
-    // 默认透明底：句子读起来像一句话
-    await expect(firstWord).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
-
-    await page.getByTestId('memory-toggle').click()
-    // 打开后至少有一部分词被染上三色之一（1-1 首词多为「未知」灰）
-    await expect(firstWord).not.toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
-
-    // 再点关闭 → 恢复透明
-    await page.getByTestId('memory-toggle').click()
-    await expect(firstWord).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
-  })
-
-  test('点词与整句共用同一套语速（全局慢速开关）', async ({ page }) => {
-    const slowBtn = page.getByTestId('slow-toggle')
-    await expect(slowBtn).toHaveAttribute('aria-pressed', 'false')
-    // 慢速是全局一个开关，不是每句一个按钮
-    await slowBtn.click()
-    await expect(slowBtn).toHaveAttribute('aria-pressed', 'true')
-    await expect(slowBtn).toHaveText(/慢速中/)
-    // 开关跨区共享：切到课文区仍是慢速中
-    await page.locator('.tab-bar').getByRole('button', { name: /课文/ }).click()
-    await expect(page.getByTestId('slow-toggle')).toHaveAttribute('aria-pressed', 'true')
-  })
-
-  test('切走 Tab 会卸载阅读区（朗读串行链随之断开）', async ({ page }) => {
-    await page.getByTestId('reading-play-all').click()
-    await page.locator('.tab-bar').getByRole('button', { name: /闯关/ }).click()
-    await expect(page.locator('.reading-zone')).toHaveCount(0)
-  })
-
-  test('全 96 课都有阅读短文（覆盖度回归）', () => {
-    const missing: string[] = []
-    for (let u = 1; u <= 12; u++) {
-      for (let l = 1; l <= 8; l++) {
-        const p = READING_PASSAGES[`${u}-${l}`]
-        if (!p || p.paragraphs.length === 0) missing.push(`${u}-${l}`)
       }
     }
     expect(missing).toEqual([])

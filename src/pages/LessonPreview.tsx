@@ -1,10 +1,9 @@
-// Starlight 单课学习页：五区布局
+// Starlight 单课学习页：五区布局（原「📚 阅读区」已提升为独立模块 /#/reading，见 docs/specs/reading-module.md）
 //   🎴 单词区 —— 逐词翻卡 + 本课词表 + ➕ E 课堂拓展词（录入 / 删除）
 //   🧩 句型区 —— 句子框架卡：填空 + 说出整句
 //   🎭 对话区 —— 外教课堂对话（真实上课语气，替代原来和课本原文挤在一个 Tab 的三重展示）
 //   📖 课文区 —— 教材 PDF 提取的真实课文，逐词可点、可听、带中文
 //   🎯 闯关   —— 从课本原文挖空生成选词填空，题量不足时用本课单词与单元测验补足
-//   📚 阅读区 —— 每课一段连贯短文：逐词点读 + 本课词高亮 + 逐句朗读 + 中文对照开关
 //
 // 页面级 UI 约定（依据 docs/lesson-detail-ui-research.md）：
 //   · 慢速朗读与「记忆状态着色」是全局开关（PlayTools），不再每句配慢速按钮
@@ -24,7 +23,6 @@ import Breadcrumb from '@/components/Breadcrumb'
 import ExtensionWordEntry from '@/components/ExtensionWordEntry'
 import SentenceReader from '@/components/SentenceReader'
 import SentenceFrameCard from '@/components/SentenceFrameCard'
-import ReadingZone from '@/components/ReadingZone'
 import LessonDialogueBox from '@/components/LessonDialogueBox'
 import PlayTools from '@/components/PlayTools'
 import ZoneCard from '@/components/ZoneCard'
@@ -34,7 +32,6 @@ import { getModule, STARLIGHT_THEME, type Sentence, type Word } from '@/data/sta
 import { getLessonBook } from '@/data/starlight-book'
 import { getPassage } from '@/data/starlight-passage'
 import { getLessonDialogue } from '@/data/lessonDialogue'
-import { getReadingPassage } from '@/data/reading'
 import { passageToTurns } from '@/utils/passageDialogue'
 import { framesOfLesson, frameCardKey } from '@/data/sentenceFrame'
 import { useCourseStore } from '@/store/useCourseStore'
@@ -46,9 +43,9 @@ import { buildClozeQuiz, buildListeningQuiz, buildWordQuiz } from '@/utils/bookQ
 import { boxLevel } from '@/utils/boxLevel'
 
 // 六个区：「跟读」Tab 已按需求隐藏（SHOW_SPEAK_TAB=false），入口收起来但代码保留。
-// 顺序即 Tab 栏顺序：单词卡 → 句型 → 外教对话 → 课本原文 → 闯关 → 阅读。
-// 阅读放最后：它是课后自选动作，不与「学新课」抢位置。
-type Tab = 'vocab' | 'speak' | 'frame' | 'dialogue' | 'book' | 'quiz' | 'read'
+// 顺序即 Tab 栏顺序：单词卡 → 句型 → 外教对话 → 课本原文 → 闯关。
+// 「📚 阅读」已提升为独立模块（/reading），不再占课内 Tab。
+type Tab = 'vocab' | 'speak' | 'frame' | 'dialogue' | 'book' | 'quiz'
 
 /**
  * 「🗣️ 跟读」Tab 开关。
@@ -147,8 +144,6 @@ export default function LessonPreview() {
   const frames = mod && lesson ? framesOfLesson(mod.slug, lesson.id) : []
   // 课文点读（D）：试点课有提取出的 passage，其余课回落到 BookTextView
   const passage = mod && lesson ? getPassage(mod.id, lesson.id) : undefined
-  // 📚 阅读短文：每课一段连贯短文，用词严格限定在本课/本单元词表 + 基线高频词
-  const reading = mod && lesson ? getReadingPassage(mod.id, lesson.id) : undefined
   // 课本原文拆解成课堂对话（外教 ↔ 孩子），替代原来的扁平句子清单
   const passageTurns = useMemo(() => passageToTurns(passage?.lines ?? []), [passage])
   // 点读区整句中文索引：课本 textZh（人工翻译） > 本单元句子表；都查不到时逐词拼粗释义
@@ -301,13 +296,6 @@ export default function LessonPreview() {
           >
             🎯 闯关
           </button>
-          <button
-            type="button"
-            className={'tab-btn' + (tab === 'read' ? ' active' : '')}
-            onClick={() => setTab('read')}
-          >
-            📚 阅读
-          </button>
         </div>
 
         {tab === 'vocab' && (
@@ -378,24 +366,6 @@ export default function LessonPreview() {
                 ))}
               </ZoneCard>
             </>
-          )
-        )}
-        {tab === 'read' && (
-          reading ? (
-            <ZoneCard
-              title="📚 今日阅读短文"
-              side="🧒 自己读一遍 · 点词听发音"
-              mcStyle={mcStyle}
-              className="reading-zone-card"
-            >
-              <p className="zone-lead">
-                用这一课学过的词写的一个小故事。
-                <span className="sent-hint">点每句的小喇叭听这一句，再自己指着读一句；读得出来的词就是学会了</span>
-              </p>
-              <ReadingZone passage={reading} vocab={words} boxOf={(en) => srsCards[en]?.box} />
-            </ZoneCard>
-          ) : (
-            <div className="empty"><p>这一课还没有阅读短文。</p></div>
           )
         )}
         {tab === 'dialogue' && (
