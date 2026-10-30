@@ -145,7 +145,7 @@ export default function Eng3aUnit() {
       <div className="page-nav">
         <Link to="/eng3a" className="back-link">← 英语课程</Link>
         <div className="lesson-nav">
-          <Link to="/eng3a/play" className="btn btn-soft">🎭 去小剧场</Link>
+          <Link to="/eng3a/play" className="btn btn--soft">🎭 去小剧场</Link>
         </div>
       </div>
     </div>

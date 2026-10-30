@@ -109,7 +109,7 @@ export default function Progress() {
       </div>
 
       <div style={{ textAlign: 'center', marginTop: '24px' }}>
-        <button type="button" className="btn btn-soft" onClick={() => setShowReset(true)}>
+        <button type="button" className="btn btn--soft" onClick={() => setShowReset(true)}>
           🔄 重置全部数据
         </button>
       </div>

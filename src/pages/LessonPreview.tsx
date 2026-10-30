@@ -322,10 +322,10 @@ export default function LessonPreview() {
                 <span className="sent-hint">读得好会点亮星星，读不准可以再试，没听清会自动再听一次</span>
               </p>
               <div className="speak-nav">
-                <button type="button" className="btn btn-soft" disabled={sentIdx === 0}
+                <button type="button" className="btn btn--soft" disabled={sentIdx === 0}
                   onClick={() => { setSentAutoPlay(true); setSentIdx((i) => Math.max(0, i - 1)) }}>← 上一句</button>
                 <span className="speak-count">{sentIdx + 1} / {sentences.length}</span>
-                <button type="button" className="btn btn-soft" disabled={sentIdx >= sentences.length - 1}
+                <button type="button" className="btn btn--soft" disabled={sentIdx >= sentences.length - 1}
                   onClick={() => { setSentAutoPlay(true); setSentIdx((i) => Math.min(sentences.length - 1, i + 1)) }}>下一句 →</button>
               </div>
               <SentenceReader
@@ -431,9 +431,9 @@ export default function LessonPreview() {
             resultTitle="闯关完成！"
             resultLinks={
               <>
-                <Link to="/wrong" className="btn btn-soft">📋 看错题本</Link>
-                <Link to={`/preview/${unitId}`} className="btn btn-soft">← 课程列表</Link>
-                <Link to="/smart" className="btn btn-soft">🧠 去复习</Link>
+                <Link to="/wrong" className="btn btn--soft">📋 看错题本</Link>
+                <Link to={`/preview/${unitId}`} className="btn btn--soft">← 课程列表</Link>
+                <Link to="/smart" className="btn btn--soft">🧠 去复习</Link>
               </>
             }
             onPick={({ en, correct }) => recordPick(en, correct)}
@@ -524,7 +524,7 @@ function VocabTab({ words, mcStyle }: { words: Word[]; mcStyle: React.CSSPropert
             <div className="fc-self-check">
               <button
                 type="button"
-                className="btn btn-soft"
+                className="btn btn--soft"
                 onClick={() => selfAssess(w.en, false)}
               >
                 😅 还不会
@@ -555,7 +555,7 @@ function VocabTab({ words, mcStyle }: { words: Word[]; mcStyle: React.CSSPropert
       </div>
 
       <div className="fc-controls">
-        <button type="button" className="btn btn-soft" onClick={prev}>← 上一个</button>
+        <button type="button" className="btn btn--soft" onClick={prev}>← 上一个</button>
         <button type="button" className="btn" onClick={next}>下一个 →</button>
       </div>
 
@@ -617,7 +617,7 @@ function ExtensionSection({
         <span className="ext-actions">
           <button
             type="button"
-            className="btn btn-soft"
+            className="btn btn--soft"
             disabled={!canAutoFill}
             onClick={onAutoFill}
             title={canAutoFill ? '按本课主题补一批拓展词' : '全是手动录入的词，没有可替换的'}
@@ -626,7 +626,7 @@ function ExtensionSection({
           </button>
           <button
             type="button"
-            className="btn btn-soft"
+            className="btn btn--soft"
             disabled={full}
             onClick={onOpenEntry}
             title={full ? `本课拓展词已达上限 ${EXT_LIMIT} 个` : '手动录入一个拓展词'}

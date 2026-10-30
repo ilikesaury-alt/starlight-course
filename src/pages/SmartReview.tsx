@@ -223,7 +223,7 @@ export default function SmartReview() {
               去预习新内容或做听力测验吧!
             </p>
             <div className="smart-empty-actions">
-              <Link to={previewTo} className="btn btn-sun">📖 去预习</Link>
+              <Link to={previewTo} className="btn btn--sun">📖 去预习</Link>
             </div>
           </div>
         </SafeBoundary>
@@ -303,11 +303,11 @@ export default function SmartReview() {
             </p>
 
             <div className="result-actions">
-              <button type="button" className="btn btn-sun" onClick={reload}>
+              <button type="button" className="btn btn--sun" onClick={reload}>
                 🔁 再复习一轮
               </button>
-              <Link to="/wrong" className="btn btn-soft">📋 错题本</Link>
-              <Link to="/" className="btn btn-soft">返回首页</Link>
+              <Link to="/wrong" className="btn btn--soft">📋 错题本</Link>
+              <Link to="/" className="btn btn--soft">返回首页</Link>
             </div>
           </div>
         </SafeBoundary>

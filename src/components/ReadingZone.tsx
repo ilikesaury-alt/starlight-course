@@ -151,13 +151,13 @@ export default function ReadingZone({ passage, vocab, boxOf }: Props) {
   return (
     // is-playing：整篇/单句朗读中，用于 focus dimming（非当前句降到 32%）
     <div className={'reading-zone' + (playing ? ' is-playing' : '')}>
-      <PlayTools hint="点单词听发音 · 带波浪线的是本课学过的词">
-        <button type="button" className="btn btn-soft" onClick={playAll} data-testid="reading-play-all">
+      <PlayTools hint="点单词听发音 · 金色波浪线的是本课学过的词（宝藏词）">
+        <button type="button" className="btn btn--soft" onClick={playAll} data-testid="reading-play-all">
           {playing ? '⏸ 停止朗读' : '🔊 听整篇'}
         </button>
         <button
           type="button"
-          className={'btn btn-soft' + (showZh ? ' active' : '')}
+          className={'btn btn--soft' + (showZh ? ' active' : '')}
           onClick={() => setShowZh((v) => !v)}
           aria-pressed={showZh}
           data-testid="reading-zh-toggle"

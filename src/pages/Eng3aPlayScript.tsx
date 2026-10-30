@@ -166,7 +166,7 @@ export default function Eng3aPlayScript() {
         {done ? (
           <p style={{ color: 'var(--ok)', fontWeight: 600 }}>✅ 这个剧本已经演过啦</p>
         ) : (
-          <button type="button" className="btn btn-soft" onClick={() => markDone(play.slug)}>
+          <button type="button" className="btn btn--soft" onClick={() => markDone(play.slug)}>
             ✅ 我们演完啦
           </button>
         )}
@@ -176,7 +176,7 @@ export default function Eng3aPlayScript() {
         <Link to="/eng3a/play" className="back-link">← 小剧场</Link>
         <div className="lesson-nav">
           {prevPlay && (
-            <Link to={`/eng3a/play/${prevPlay.slug}`} className="btn btn-soft">
+            <Link to={`/eng3a/play/${prevPlay.slug}`} className="btn btn--soft">
               ← {prevPlay.titleZh}
             </Link>
           )}

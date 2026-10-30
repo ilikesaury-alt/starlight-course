@@ -43,7 +43,7 @@ export default function LessonList() {
       <SafeBoundary label="课程列表">
         <button
           type="button"
-          className="btn btn-soft btn-sm"
+          className="btn btn--soft btn--sm"
           style={{ marginTop: '14px' }}
           onClick={() => setShowGuide((v) => !v)}
         >
@@ -107,7 +107,7 @@ export default function LessonList() {
           <div style={{ textAlign: 'center', marginTop: '22px' }}>
             <button
               type="button"
-              className="btn btn-sun btn-lg"
+              className="btn btn--sun btn--lg"
               onClick={() => setShowUnitDone(true)}
             >
               ✅ 标记本单元预习完成

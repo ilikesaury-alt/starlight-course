@@ -39,6 +39,74 @@ function openLesson(key: string) {
   fireEvent.click(screen.getByTestId(`rm-lesson-${key}`))
 }
 
+describe('ReadingPage · 「学过的词宝藏」视觉母题', () => {
+  // 单元卡的宝藏指示器：N = 该单元各课课本词**去重**后的数量。
+  // 为什么去重：同一单元 8 课会反复出现 hello/name 这类共词，
+  // 计数重复会让「💎 120 词」看起来像虚数，反而不可信。
+  it('单元卡显示「💎 N 词」，N = 本单元课本词去重计数', () => {
+    renderPage()
+    for (const m of modules) {
+      const head = document.querySelector(`.rm-unit[data-unit="${m.id}"] .rm-unit-head`)!
+      const badge = head.querySelector('.rm-unit-treasure')!
+      const expected = new Set(
+        m.lessons.flatMap((l) => l.words.map((w) => w.en.toLowerCase()))
+      ).size
+      expect(badge.textContent).toContain(String(expected))
+      // 去重必须真的生效：去重数必然小于逐词累加数
+      const raw = m.lessons.reduce((n, l) => n + l.words.length, 0)
+      expect(expected).toBeLessThanOrEqual(raw)
+    }
+  })
+
+  it('首屏说清楚「只用了你学过的词」，并给出真实的宝藏词示例', () => {
+    renderPage()
+    const hero = document.querySelector('.rm-hero')!
+    // h1 = 模块名
+    expect(hero.querySelector('h1.rm-hero-title')?.textContent).toContain('阅读小故事')
+    // 母题写成大字陈述句
+    expect(hero.querySelector('.rm-hero-statement')?.textContent).toContain('学过的词')
+    // 示例词来自真实课表（不是写死的装饰词），且带宝藏标记类
+    const teasers = Array.from(hero.querySelectorAll('.rm-hero-word'))
+    expect(teasers.length).toBeGreaterThanOrEqual(3)
+    const unit1Words = new Set(
+      modules[0].lessons.flatMap((l) => l.words.map((w) => w.en.toLowerCase()))
+    )
+    for (const t of teasers) {
+      expect(unit1Words.has(t.textContent!.toLowerCase())).toBe(true)
+    }
+  })
+
+  it('阅读器里的本课词带宝藏标记类（供 CSS 上金边/柔光）', () => {
+    renderPage()
+    openLesson('1-1')
+    const marks = document.querySelectorAll('.reading-zone .tt-word--mark')
+    expect(marks.length).toBeGreaterThanOrEqual(5)
+    // 标记类必须在 .reading-module 作用域内可被样式命中（CSS 作用域限定）
+    const scope = document.querySelector('.reading-module')!
+    expect(scope.contains(marks[0])).toBe(true)
+  })
+})
+
+describe('ReadingPage · 阅读器开关是软按钮（不是实心深色）', () => {
+  // 回归：代码里曾写 'btn btn-soft'，但 CSS 只定义了 '.btn--soft'（双连字符），
+  // 于是这些开关全部落回 .btn 的实心深色底 —— 开关看不出开/关，且与整页风格脱节。
+  it('阅读器与播放工具的开关都用 btn--soft（单连字符 btn-soft 在 CSS 里不存在）', () => {
+    renderPage()
+    openLesson('1-1')
+    const toggles = [
+      screen.getByTestId('reading-play-all'),
+      screen.getByTestId('reading-zh-toggle'),
+      screen.getByTestId('slow-toggle'),
+      screen.getByTestId('memory-toggle'),
+    ]
+    for (const el of toggles) {
+      expect(el.className).toContain('btn--soft')
+      // 反向断言：不能出现单连字符写法（正则要避开 btn--soft 本身）
+      expect(el.className).not.toMatch(/(?<!-)\bbtn-soft\b/)
+    }
+  })
+})
+
 describe('ReadingPage · 全量覆盖', () => {
   it('渲染 12 个单元、96 课阅读入口', () => {
     renderPage()

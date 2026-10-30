@@ -48,7 +48,7 @@ export default class SafeBoundary extends Component<Props, State> {
         <div className="safe-boundary-actions">
           <button
             type="button"
-            className="btn btn-soft"
+            className="btn btn--soft"
             onClick={() =>
               this.setState((s) => ({ hasError: false, attempt: s.attempt + 1 }))
             }

@@ -13,7 +13,7 @@ import { useSlowMode, toggleSlowMode } from '@/utils/slowMode'
 import { useMemoryState, toggleMemoryState } from '@/utils/memoryState'
 
 interface Props {
-  /** 右侧说明文字，如「点单词听发音 · 带波浪线的是本课学过的词」 */
+  /** 右侧说明文字，如「点单词听发音 · 金色波浪线的是本课学过的词」 */
   hint?: React.ReactNode
   /** 额外插在按钮后的子节点（如「听整篇」「显示中文」等区块自己的操作） */
   children?: React.ReactNode
@@ -28,7 +28,7 @@ export default function PlayTools({ hint, children }: Props) {
       {children}
       <button
         type="button"
-        className={'btn btn-soft' + (slow ? ' active' : '')}
+        className={'btn btn--soft' + (slow ? ' active' : '')}
         onClick={() => toggleSlowMode()}
         aria-pressed={slow}
         title="慢速朗读：点词和整句都会放慢"
@@ -38,7 +38,7 @@ export default function PlayTools({ hint, children }: Props) {
       </button>
       <button
         type="button"
-        className={'btn btn-soft' + (mem ? ' active' : '')}
+        className={'btn btn--soft' + (mem ? ' active' : '')}
         onClick={() => toggleMemoryState()}
         aria-pressed={mem}
         title="按记忆强度给单词上色：熟=绿 / 模糊=黄 / 未知=灰"

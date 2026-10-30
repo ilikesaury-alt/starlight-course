@@ -80,7 +80,7 @@ export default function ExtensionWordEntry({ open, existing, onSubmit, onCancel 
         </label>
         {error && <p className="ext-entry-error">{error}</p>}
         <div className="ext-entry-actions">
-          <button type="button" className="btn btn-soft" onClick={onCancel}>取消</button>
+          <button type="button" className="btn btn--soft" onClick={onCancel}>取消</button>
           <button type="button" className="btn" onClick={submit}>保存</button>
         </div>
       </div>
