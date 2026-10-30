@@ -146,6 +146,14 @@ export default function CourseEntries() {
           </div>
           <span className="ab-home-arrow">›</span>
         </Link>
+        <Link to="/reading" className="rd-home-entry">
+          <span className="rd-home-emoji">📚</span>
+          <div className="rd-home-body">
+            <div className="rd-home-title">阅读小故事</div>
+            <div className="rd-home-sub">Starlight 96 篇 · 用每课学过的词写的小故事</div>
+          </div>
+          <span className="rd-home-arrow">›</span>
+        </Link>
       </div>
 
       <div className="quick-row">

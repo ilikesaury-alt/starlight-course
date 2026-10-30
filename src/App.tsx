@@ -32,6 +32,7 @@ const Eng3aPlay = lazy(() => import('@/pages/Eng3aPlay'))
 const Eng3aPlayScript = lazy(() => import('@/pages/Eng3aPlayScript'))
 const DictationPage = lazy(() => import('@/pages/DictationPage'))
 const AlphablocksPage = lazy(() => import('@/pages/AlphablocksPage'))
+const ReadingPage = lazy(() => import('@/pages/ReadingPage'))
 const NotFound = lazy(() => import('@/pages/NotFound'))
 
 // 分包加载中的兜底:轻量居中提示(儿童向文案)
@@ -86,6 +87,7 @@ function AppRoutes() {
           <Route path="/eng3a/:unitId/:lessonId" element={<Eng3aLesson />} />
           <Route path="/dictation" element={<DictationPage />} />
           <Route path="/alphablocks" element={<AlphablocksPage />} />
+          <Route path="/reading" element={<ReadingPage />} />
           {/* 兜底:HashRouter 下任何写错/失效的 hash 路径都走这里,避免白屏 */}
           <Route path="*" element={<NotFound />} />
         </Routes>
