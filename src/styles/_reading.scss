@@ -1,35 +1,127 @@
 // ============================================================
-//  Reading module (📚 /reading) — 单页聚合的阅读短文入口
+//  分包加载骨架（page-loading）
+//  页面 chunk 冷启动时先出骨架再出内容，避免首屏“空白一下”。
+// ============================================================
+
+.page-loading {
+  padding: 20px 16px;
+  .pl-skeleton { display: grid; gap: 12px; }
+  .pl-line {
+    height: 16px;
+    border-radius: var(--r-sm);
+    background: linear-gradient(90deg, var(--bg-2) 25%, var(--card) 50%, var(--bg-2) 75%);
+    background-size: 200% 100%;
+    animation: pl-shimmer 1.4s ease-in-out infinite;
+  }
+  .pl-line--title { height: 34px; width: 62%; }
+  .pl-line--short { width: 44%; }
+  .pl-cards { display: grid; gap: 10px; margin-top: 6px; }
+  .pl-card {
+    height: 62px;
+    border-radius: var(--r-md);
+    background: linear-gradient(90deg, var(--bg-2) 25%, var(--card) 50%, var(--bg-2) 75%);
+    background-size: 200% 100%;
+    animation: pl-shimmer 1.4s ease-in-out infinite;
+  }
+  .pl-note {
+    text-align: center;
+    color: var(--ink-soft);
+    font-size: var(--fs-sm);
+    margin: 18px 0 0;
+  }
+}
+
+@keyframes pl-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+// reduced-motion：去掉流动高光，保留静态底色（内容仍可见）
+@media (prefers-reduced-motion: reduce) {
+  .page-loading .pl-line,
+  .page-loading .pl-card { animation: none; }
+}
+
 //  单元用原生 <details> 折叠；课卡片就地展开 ReadingZone。
 //  正文排版样式沿用 _study.scss 的 .reading-*（阅读器本身零改动）。
+//
+//  视觉母题：「学过的词宝藏」（docs/specs/reading-ui-beautify.md）
+//    这 96 篇只用了课本学过的词写成 —— 本 app 独有的产物。
+//    页面围绕它组织：首屏主视觉讲清这件事 + 单元卡 💎 词数 + 阅读器里的宝藏词。
 // ============================================================
 
 .reading-module {
   // 靛蓝主题令牌由 moduleThemeVars(READING_THEME) 注入 --mc / --mc-soft
   .rm-hero {
     display: flex;
-    align-items: center;
-    gap: 12px;
+    align-items: flex-start;
+    gap: 14px;
     background: linear-gradient(135deg, var(--mc-soft, #eef2ff) 0%, #fff 100%);
     border: 2px solid var(--mc, #6366f1);
     border-radius: var(--r-lg);
-    padding: 14px 16px;
+    padding: 18px 16px;
     margin: 12px 0;
     box-shadow: var(--shadow-sm);
   }
-  .rm-hero-emoji { font-size: 40px; line-height: 1; }
+  .rm-hero-emoji {
+    font-size: 44px;
+    line-height: 1;
+    flex: 0 0 auto;
+    // 图章与标题顶部对齐，不居中（居中会在多行文字旁显得孤立）
+    margin-top: 2px;
+  }
+  .rm-hero-main { min-width: 0; flex: 1 1 auto; }
   .rm-hero-title {
+    // h1 = 模块名。字号比母题小：主次靠尺度，不靠两个大字抢。
     font-size: var(--fs-lg);
     font-weight: 800;
-    color: var(--mc, #6366f1);
+    color: var(--ink);
     margin: 0 0 4px;
     line-height: 1.2;
+  }
+  .rm-hero-statement {
+    // 母题：整个页面最独特的事实，用大尺度讲清楚
+    // （原实现把它塞在副标题小注里，等于主次反了）。
+    font-size: clamp(22px, 5.4vw, 32px);
+    font-weight: 900;
+    color: var(--mc, #6366f1);
+    margin: 0 0 10px;
+    line-height: 1.24;
+    letter-spacing: -0.01em;
+    b {
+      // 「学过的词」是母题本身，给它一层更暖的强调色（品牌已有的星星黄）
+      color: var(--sun-deep, #b45309);
+      background: linear-gradient(transparent 62%, var(--sun-soft, #fef3c7) 62%);
+      padding: 0 2px;
+      // 不许在词中间断行：否则窄屏上「学过的」和「词」被拆成两行
+      white-space: nowrap;
+    }
   }
   .rm-hero-sub {
     font-size: var(--fs-sm);
     color: var(--ink-soft);
-    line-height: 1.6;
-    margin: 0;
+    line-height: 1.65;
+    margin: 0 0 12px;
+    b { color: var(--mc, #6366f1); }
+  }
+  // 宝藏词示例：真实课表词，且真的能点、能发音
+  .rm-hero-words { display: flex; flex-wrap: wrap; gap: 8px; }
+  .rm-hero-word {
+    font: inherit;
+    font-size: var(--fs-base);
+    font-weight: 800;
+    color: var(--mc, #6366f1);
+    background: #fff;
+    border: 1.5px solid var(--mc, #6366f1);
+    border-radius: var(--r-pill);
+    padding: 4px 14px;
+    cursor: pointer;
+    transition: transform 0.12s, background 0.15s, color 0.15s;
+    &:hover { background: var(--mc, #6366f1); color: #fff; }
+    &:active { transform: scale(0.94); }
+    &:focus-visible { outline: 3px solid var(--mc, #6366f1); outline-offset: 2px; }
+    // 交互时闪一下：复用品牌已有的 twinkle（不新增动效库）
+    &:hover { animation: twinkle 0.5s ease-in-out; }
   }
 
   .rm-units { display: grid; gap: 10px; }
@@ -54,6 +146,8 @@
     border-left: 4px solid transparent;
     transition: background 0.15s, border-color 0.15s;
     &:hover { background: var(--mc-soft, #eef2ff); }
+    // 徽章在右侧，头部内容挤不下了就换行（否则标题被挤成两行、中文被截断）
+    flex-wrap: wrap;
   }
   .rm-unit[open] > .rm-unit-head {
     background: var(--mc-soft, #eef2ff);
@@ -66,17 +160,26 @@
     font-weight: 800;
     color: var(--ink);
     min-width: 0;
-  }
-  .rm-unit-zh {
+    // 标题优先占位：中文副标题可以被挤掉，标题不能
+    flex: 0 1 auto;
+  }  .rm-unit-zh {
     font-size: var(--fs-sm);
     color: var(--ink-soft);
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    // 中文副标题是次要信息：宽度不够时先让它缩，没宽度了整块换行
+    flex: 1 1 auto;
   }
-  .rm-unit-count {
+  // 两枚徽章成组：作为一整块推到右侧，宽度不够时整组换行（不拆散）
+  .rm-unit-badges {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: 0 0 auto;
     margin-left: auto;
+  }  .rm-unit-count {
     flex: 0 0 auto;
     font-size: var(--fs-xs);
     font-weight: 700;
@@ -85,6 +188,17 @@
     border-radius: var(--r-pill);
     padding: 2px 9px;
   }
+  // 宝藏指示器：这个单元的故事一共用到了几个学过的词（去重后的真实数量）
+  .rm-unit-treasure {
+    flex: 0 0 auto;
+    font-size: var(--fs-xs);
+    font-weight: 800;
+    color: var(--sun-deep, #b45309);
+    background: var(--sun-soft, #fef3c7);
+    border-radius: var(--r-pill);
+    padding: 2px 9px;
+    white-space: nowrap;
+  }
 
   // ---------- 课卡片 ----------
   .rm-lessons {
@@ -92,6 +206,12 @@
     gap: 6px;
     padding: 10px 12px 12px;
     grid-template-columns: 1fr;
+  }
+  .rm-lesson-wrap {
+    // 展开阅读器的那一格要**跨满两列**：
+    // 否则桌面端阅读器被挤在左半列、右半列整片空着
+    // （taste-skill：一半屏幕空着 = 布局没想清楚）。
+    &.is-open { grid-column: 1 / -1; }
   }
   .rm-lesson-wrap.is-open > .rm-lesson { border-radius: var(--r-md) var(--r-md) 0 0; }
 
@@ -163,6 +283,62 @@
     border-top: none;
     margin-top: 0;
   }
+
+  // ---------- 空态（缺短文时）----------
+  // 原来的空态只有一行灰字，看着像加载失败而不是「还没编好」。
+  .rm-empty {
+    padding: 26px 18px;
+    border-top: 1px dashed var(--line);
+    .rm-empty-emoji { font-size: 34px; margin-bottom: 6px; }
+    .rm-empty-title {
+      color: var(--ink);
+      font-weight: 800;
+      font-size: var(--fs-base);
+      margin-bottom: 6px;
+    }
+    .rm-empty-hint {
+      color: var(--ink-soft);
+      font-size: var(--fs-sm);
+      line-height: 1.6;
+      max-width: 34em;
+      margin: 0 auto;
+    }
+  }
+
+  // ---------- 宝藏词（本课学过的词）----------
+  // .tt-word--mark 是**全站**词标记样式（课文/句型/对话/阅读都在用），
+  // 所以这里只在 .reading-module 作用域内加「宝藏」质感，不影响其它页。
+  .reading-zone .tt-word--mark {
+    // 宝藏感靠「深金字 + 金色波浪线 + 略高对比底」，
+    // 不靠大面积金底 —— 大底色在 16px 正文里太脏，还抢句子的轮廓。
+    color: var(--sun-deep, #b45309);
+    background: linear-gradient(transparent 74%, rgba(250, 204, 21, 0.55) 74%);
+    text-decoration: underline wavy var(--sun-deep, #b45309) 2px;
+    text-underline-offset: 4px;
+    font-weight: 800;
+    border-radius: 4px;
+    padding: 0 2px;
+    transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+    // 交互时才闪：阅读时不打扰，点词才有「捡到宝藏」的仪式感
+    &:hover,
+    &:focus-visible,
+    &:active {
+      animation: twinkle 0.5s ease-in-out;
+      background: linear-gradient(transparent 60%, rgba(250, 204, 21, 0.75) 60%);
+      box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.26);
+    }
+    &:focus-visible { outline: 2px solid var(--sun-deep, #b45309); outline-offset: 2px; }
+  }
+  // 记忆状态开着时，三色底色优先（不然两种底色叠在一起看不清），
+  // 但**金色波浪线保留** —— 那是「这个词你学过」的信号，与记忆强度是两回事。
+  &.sr-mem .reading-zone .tt-word--mark {
+    background: transparent;
+    text-decoration: underline wavy var(--sun-deep, #b45309) 2px;
+    font-weight: 800;
+  }
+  &.sr-mem .reading-zone .tt-word--mark.tt-word--known { color: #14532d; }
+  &.sr-mem .reading-zone .tt-word--mark.tt-word--vague { color: #713f12; }
+  &.sr-mem .reading-zone .tt-word--mark.tt-word--unknown { color: var(--ink-soft); }
 }
 
 @media (min-width: 640px) {

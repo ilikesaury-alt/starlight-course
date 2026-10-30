@@ -36,10 +36,22 @@ const ReadingPage = lazy(() => import('@/pages/ReadingPage'))
 const NotFound = lazy(() => import('@/pages/NotFound'))
 
 // 分包加载中的兜底:轻量居中提示(儿童向文案)
+// 加一层骨架:阅读模块 chunk 含 96 篇短文，冷启动时先出骨架再出内容，
+// 避免首屏“空白一下”。
 function PageLoading() {
   return (
-    <div className="empty" role="status" aria-label="页面加载中">
-      <p>📖 正在翻开这一页…</p>
+    <div className="page-loading" role="status" aria-label="页面加载中">
+      <div className="pl-skeleton" aria-hidden="true">
+        <div className="pl-line pl-line--title" />
+        <div className="pl-line" />
+        <div className="pl-line pl-line--short" />
+        <div className="pl-cards">
+          <div className="pl-card" />
+          <div className="pl-card" />
+          <div className="pl-card" />
+        </div>
+      </div>
+      <p className="pl-note">📖 正在翻开这一页…</p>
     </div>
   )
 }
