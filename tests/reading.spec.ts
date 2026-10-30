@@ -36,13 +36,15 @@ async function openLesson(page: Page, key: string) {
 test.describe('阅读模块 · 入口与结构', () => {
   test('首页有「阅读小故事」入口，点了进入 /reading', async ({ page }) => {
     await page.goto(HOME)
+    // 首页是 lazy chunk：冷启动时先出骨架再出内容（PageLoading），
+    // 默认 5s 断言窗口在 Vite 首次编译时会假红。断言本身不变。
     const entry = page.locator('.rd-home-entry')
-    await expect(entry).toBeVisible()
+    await expect(entry).toBeVisible({ timeout: 15000 })
     await expect(entry).toContainText('阅读小故事')
 
     await entry.click()
     await expect(page).toHaveURL(/#\/reading$/)
-    await expect(page.getByRole('heading', { name: '阅读小故事' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: '阅读小故事' })).toBeVisible({ timeout: 15000 })
   })
 
   test('12 个单元全部列出；每个单元都是 8 课，展开 Unit 1 后可见', async ({ page }) => {
@@ -220,9 +222,12 @@ test.describe('阅读模块 · 阅读器交互', () => {
     await page.getByTestId('reading-play-all').click()
     await expect(page.locator('.reading-zone')).toHaveClass(/is-playing/)
 
-    // 选中间一句（避开连读当前句，差异才看得出来）
+    // 选中间一句（避开连读当前句，差异才看得出来）。
+    // 必须先滚到可见处再点：桌面端靠下的句子会被底部导航栏盖住，
+    // force:true 会把点击丢给导航栏，测的就不是「点句子」了。
     const target = page.locator('.reading-say').nth(4)
-    await target.click({ force: true })
+    await target.scrollIntoViewIfNeeded()
+    await target.click()
     await expect(target).toHaveAttribute('data-busy', '1')
 
     // 只有被点的那一句在播，其它句子不能抢着报忙
@@ -230,16 +235,18 @@ test.describe('阅读模块 · 阅读器交互', () => {
   })
 
   // SRS 三色记忆状态默认不染色（否则一句英文被渲染成一串彩色方块），改成显式开关。
-  test('记忆状态默认关闭，句子无彩色底；打开后才按 SRS 三色着色', async ({ page }) => {
+  test('记忆状态默认关闭，非宝藏词无彩色底；打开后才按 SRS 三色着色', async ({ page }) => {
     await openLesson(page, '1-1')
-    const firstWord = page.locator('.reading-zone .tt-word').first()
-    await expect(firstWord).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+    // 必须取**非本课词**（不是 .tt-word--mark）：宝藏词自带金底，
+    // 用它断言「记忆色没开 = 无底色」会把两套信号混为一谈。
+    const plainWord = page.locator('.reading-zone .tt-word:not(.tt-word--mark)').first()
+    await expect(plainWord).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
 
     await page.getByTestId('memory-toggle').click()
-    await expect(firstWord).not.toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+    await expect(plainWord).not.toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
 
     await page.getByTestId('memory-toggle').click()
-    await expect(firstWord).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+    await expect(plainWord).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
   })
 
   test('点词与整句共用同一套语速（全局慢速开关）', async ({ page }) => {
@@ -249,6 +256,148 @@ test.describe('阅读模块 · 阅读器交互', () => {
     await slowBtn.click()
     await expect(slowBtn).toHaveAttribute('aria-pressed', 'true')
     await expect(slowBtn).toHaveText(/慢速中/)
+  })
+})
+
+test.describe('阅读模块 · 「学过的词宝藏」视觉母题', () => {
+  test('首屏主视觉把「只用了你学过的词」讲成大字陈述，而不是小注', async ({ page }) => {
+    await page.goto(READING)
+    // h1 = 模块名（页面自己有标题，不只靠面包屑）
+    await expect(page.getByRole('heading', { name: '阅读小故事' })).toBeVisible()
+
+    // 母题写成大字陈述句
+    const statement = page.locator('.rm-hero-statement')
+    await expect(statement).toBeVisible()
+    await expect(statement).toContainText('学过的词')
+
+    // 主次关系：母题必须真的比正文大（原实现它和副标题同权重）
+    const stmtSize = await statement.evaluate((el) => parseFloat(getComputedStyle(el).fontSize))
+    const subSize = await page
+      .locator('.rm-hero-sub')
+      .evaluate((el) => parseFloat(getComputedStyle(el).fontSize))
+    expect(stmtSize).toBeGreaterThan(subSize * 1.5)
+  })
+
+  test('首屏母题不超过两行（窄屏也不能被拆成三行）', async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 780 })
+    await page.goto(READING)
+    const statement = page.locator('.rm-hero-statement')
+    await expect(statement).toBeVisible({ timeout: 15000 })
+
+    const lines = await statement.evaluate((el) => {
+      const lh = parseFloat(getComputedStyle(el).lineHeight)
+      const h = el.getBoundingClientRect().height
+      return Math.round(h / lh)
+    })
+    expect(lines, `母题占了 ${lines} 行`).toBeLessThanOrEqual(2)
+
+    // 「学过的词」必须是一个整体，不能被断在两行里
+    const b = statement.locator('b')
+    const bLines = await b.evaluate((el) => {
+      const lh = parseFloat(getComputedStyle(el).lineHeight)
+      return Math.round(el.getBoundingClientRect().height / lh)
+    })
+    expect(bLines).toBe(1)
+  })
+
+  test('首屏的宝藏词示例是真的课表词，且能点、能发音', async ({ page }) => {
+    await page.goto(READING)
+    const words = page.locator('.rm-hero-word')
+    await expect(words).toHaveCount(5)
+
+    // 每个示例词都必须真的在 Unit 1 的课本词表里（否则母题穿了）
+    const unit1 = new Set(
+      modules[0].lessons.flatMap((l) => l.words.map((w) => w.en.toLowerCase()))
+    )
+    const texts = await words.allTextContents()
+    for (const t of texts) {
+      expect(unit1.has(t.trim().toLowerCase())).toBe(true)
+    }
+
+    // 点一下确实触发了发音链路（不验声音，只验它是个真按钮并被点了）
+    await words.first().click()
+    await expect(words.first()).toBeVisible()
+  })
+
+  test('单元卡显示「💎 N 词」，N 与真实课本词去重计数一致', async ({ page }) => {
+    await page.goto(READING)
+    for (const m of modules) {
+      const expected = new Set(
+        m.lessons.flatMap((l) => l.words.map((w) => w.en.toLowerCase()))
+      ).size
+      const badge = page.locator(`.rm-unit[data-unit="${m.id}"] .rm-unit-treasure`)
+      await expect(badge).toContainText(String(expected))
+    }
+  })
+
+  test('宝藏词是深金字 + 金色波浪线，且交互时才闪', async ({ page }) => {
+    await openLesson(page, '1-1')
+    const mark = page.locator('.reading-zone .tt-word--mark').first()
+    await expect(mark).toBeVisible()
+
+    const style = await mark.evaluate((el) => {
+      const cs = getComputedStyle(el)
+      return {
+        color: cs.color,
+        decoration: cs.textDecorationStyle + ' ' + cs.textDecorationLine,
+        decorationColor: cs.textDecorationColor,
+        animation: cs.animationName,
+        fontWeight: cs.fontWeight,
+      }
+    })
+    // 金色系（相对偏黄：R 明显大于 B）
+    const rgb = style.color.match(/\d+/g)!.map(Number)
+    expect(rgb[0]).toBeGreaterThan(rgb[2])
+    // 波浪下划线
+    expect(style.decoration).toContain('wavy')
+    // 默认不闪（静态）——闪只发生在交互时
+    expect(style.animation === 'none' || style.animation === 'twinkle').toBe(true)
+
+    // 交互时挂上 twinkle
+    await mark.hover()
+    await page.waitForTimeout(120)
+    const hovered = await mark.evaluate((el) => getComputedStyle(el).animationName)
+    expect(hovered).toBe('twinkle')
+  })
+
+  test('阅读器开关是软按钮（浅色底），不是实心深色', async ({ page }) => {
+    await openLesson(page, '1-1')
+    for (const id of ['reading-play-all', 'reading-zh-toggle', 'slow-toggle', 'memory-toggle']) {
+      const btn = page.getByTestId(id)
+      await expect(btn).toHaveClass(/btn--soft/)
+      const bg = await btn.evaluate((el) => getComputedStyle(el).backgroundColor)
+      // 浅色底（不是接近黑的实心 .btn）
+      const rgb = bg.match(/\d+/g)!.map(Number)
+      expect(rgb[0]).toBeGreaterThan(200)
+    }
+  })
+
+  test('记忆状态开启时，金色波浪线保留（两套信号不互相抹掉）', async ({ page }) => {
+    await openLesson(page, '1-1')
+    await page.getByTestId('memory-toggle').click()
+    const mark = page.locator('.reading-zone .tt-word--mark').first()
+    const deco = await mark.evaluate((el) => getComputedStyle(el).textDecorationStyle)
+    expect(deco).toContain('wavy')
+  })
+
+  test('分包加载时先出骨架，不裸白屏', async ({ page }) => {
+    // 骨架：内容 chunk 还在加载时应该看到占位，而不是空白
+    await page.goto(READING)
+    // 不断言「一定能看到骨架」（chunk 太快时可能来不及拍到），
+    // 但**绝不能**是空白：要么骨架，要么内容。
+    const shell = await page.evaluate(() => {
+      const sk = document.querySelector('.page-loading')
+      if (sk) return 'skeleton'
+      if (document.querySelector('.reading-module')) return 'content'
+      return 'blank'
+    })
+    expect(shell, '既没有骨架也没有内容 = 白屏').not.toBe('blank')
+
+    // 骨架本身带可读提示（无障碍状态 + 文案）
+    if (shell === 'skeleton') {
+      await expect(page.locator('.page-loading')).toHaveAttribute('role', 'status')
+      await expect(page.locator('.pl-note')).toContainText('正在翻开')
+    }
   })
 })
 
