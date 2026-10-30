@@ -381,22 +381,32 @@ test.describe('阅读模块 · 「学过的词宝藏」视觉母题', () => {
   })
 
   test('分包加载时先出骨架，不裸白屏', async ({ page }) => {
-    // 骨架：内容 chunk 还在加载时应该看到占位，而不是空白
     await page.goto(READING)
     // 不断言「一定能看到骨架」（chunk 太快时可能来不及拍到），
     // 但**绝不能**是空白：要么骨架，要么内容。
+    // ⚠️ 必须在**同一次 evaluate 里**把状态和属性一起取回：
+    //    分开断言会跨过「骨架 → 内容」的切换点（chunk 加载完骨架就没了），
+    //    那样断言的是竞态，不是产品行为。
     const shell = await page.evaluate(() => {
       const sk = document.querySelector('.page-loading')
-      if (sk) return 'skeleton'
-      if (document.querySelector('.reading-module')) return 'content'
-      return 'blank'
+      if (sk) {
+        return {
+          kind: 'skeleton',
+          role: sk.getAttribute('role'),
+          note: sk.querySelector('.pl-note')?.textContent ?? '',
+          hasSkeleton: !!sk.querySelector('.pl-skeleton'),
+        }
+      }
+      if (document.querySelector('.reading-module')) return { kind: 'content' }
+      return { kind: 'blank' }
     })
-    expect(shell, '既没有骨架也没有内容 = 白屏').not.toBe('blank')
 
-    // 骨架本身带可读提示（无障碍状态 + 文案）
-    if (shell === 'skeleton') {
-      await expect(page.locator('.page-loading')).toHaveAttribute('role', 'status')
-      await expect(page.locator('.pl-note')).toContainText('正在翻开')
+    expect(shell.kind, '既没有骨架也没有内容 = 白屏').not.toBe('blank')
+
+    if (shell.kind === 'skeleton') {
+      expect(shell.role).toBe('status')
+      expect(shell.note).toContain('正在翻开')
+      expect(shell.hasSkeleton).toBe(true)
     }
   })
 })
