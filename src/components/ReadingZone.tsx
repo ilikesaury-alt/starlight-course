@@ -114,12 +114,16 @@ export default function ReadingZone({ passage, vocab, boxOf }: Props) {
     playFrom(0)
   }
 
-  // 单独朗读某一句（逐句朗读）：不打断整篇连读的高亮，但和整篇互锁。
-  // 点「听整篇」进行中时，单句按钮仍可点，点了会抢占（speakText 内部会结束上一个会话）。
+  // 单独朗读某一句（逐句朗读）：和整篇连读**互锁**——先断链再起句。
+  // 不能依赖「speakText 内部会抢占上一个会话」：它会**先同步触发**链上上一句的
+  // onEnd，链内立刻 playFrom(i+1) 另起一个新会话；等外层回到 speakText 继续执行时，
+  // 自己的 sid 已过期（guard 全失败）却把 activeEnd 覆盖成自己的 done。
+  // 现象：孩子点的这一句不读，反而跳到下一句。
   const playOne = (i: number) => {
     // 再点一次正在播的这一句 = 停止。必须读 busyRef：读 busyIdx state 会因渲染未提交
     // 而拿到旧值，导致连点同句停不下来。
     if (busyRef.current === i) { stop(); return }
+    if (chainRef.current) stop()
     const sid = ++sentSid.current
     busyRef.current = i
     setBusyIdx(i)
