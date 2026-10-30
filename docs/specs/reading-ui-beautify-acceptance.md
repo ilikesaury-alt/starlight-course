@@ -75,9 +75,11 @@
 
 多 worker 并行时，冷启动的 Vite 首次编译会超出默认 5s 断言窗口，出现假红：
 
-- `alphablocks.spec.ts` A2、`audio-debug.spec.ts`「默认不挂载面板」：**单独跑 11/11 全通过**；
-- 本轮另有一次失败来自我在跑 E2E 期间删掉自己的临时截图脚本（`zz-final.spec.ts`）—— 已清理；
+- `alphablocks.spec.ts` A2/A6、`audio-debug.spec.ts`「默认不挂载面板」、`dictation.spec.ts`「完整走完一轮」：**单独跑 22/22 + 11/11 全通过**；
+- 另一次失败来自我在跑 E2E 期间删掉自己的临时截图脚本（`zz-final.spec.ts` / `zz-btnvisual.spec.ts`）—— 已清理，本次提交的工作树无任何临时文件；
 - 处置：门禁统一用 `--workers=1`；相关断言已放宽到 15000ms。
+
+**与本次改动无关的硬证据**：`tests/alphablocks.spec.ts`、`tests/dictation.spec.ts`、`src/pages/AlphablocksPage.tsx`、`src/pages/DictationPage.tsx` 四个文件**本轮 diff 为空**（它们本来就是正确的 `btn--` 双连字符写法）。
 
 ### 2.8 连带影响（已核实，非回归）
 
