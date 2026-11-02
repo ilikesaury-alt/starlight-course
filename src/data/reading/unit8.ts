@@ -6,49 +6,68 @@
 //      'd' 不在词表里，会被判超纲。同一意思用 "I want ..." 或 "I would like ..."。
 //   2. lesson.title 不是词表（allowedWordsFor 只收 words），所以 Quiz 那课
 //      正文里不能出现 'quiz'，用 'game' 代替。
+//   3. Unit 8 同样没有 by / land / orange / first / let / deep / past 这些词
+//      （by、orange 是上一轮 Agent 在本单元栽过的坑），也不要用所有格 "Ben's" ——
+//      切词后是 "ben's"，不在词表里。
+//
+// 2026-11-02 文体改写：8 篇全部从头重写成「一个小故事」——
+//   分类不是上一堂课，而是让孩子在情节里「发现」一个食物家族：
+//   8-1 Mia 认不出箱子里的果子，最后把答案讲给一只小猴子听（问句回到开头，答案换了位置）；
+//   8-2 Ben 把南瓜猜成球、把花椰菜当成花、被洋葱辣哭，最后反过来告诉妈妈「蔬菜」；
+//   8-3 Dad 带 Leo 出海，Leo 把鱿鱼错认成鱼，爸爸一句话点破，爸爸的「往下看」
+//     到结尾变成 Leo 对小鸟说的「看，给你」；
+//   8-4 Kate 以为海苔是公园捡的叶子，尝过之后把问题反手丢给 Ben；
+//   8-5 Sam 第一次吃中国菜，同一句「你喜欢中国菜吗」最后由 Anna 问回来；
+//   8-6 食物游戏里 Leo 先错后对，那个「错」就是故事里的小问题；
+//   8-7 Sam 以为鱼不算肉，爸爸一句话点破；「你想要什么」从爸爸转到 Sam 再转到小狗；
+//   8-8 野餐要先说对盘子名字才能吃，四个家族一段一段对上，最后四口人一起吃。
+// 对话推进 + 结尾回声 + 段落即叙事节拍，中文同步改成温暖口语的讲法。
 import type { ReadingPassage } from './index'
 
 export const unit8: Record<string, ReadingPassage> = {
   '8-1': {
     title: 'The Fruit Plate',
-    titleZh: '水果拼盘',
+    titleZh: '一盘水果',
     paragraphs: [
       [
-        { en: 'Today Mia is very hungry.', zh: '今天 Mia 很饿。' },
-        { en: 'Mom puts a big plate on the table.', zh: '妈妈把一个大盘子放在桌子上。' },
-        { en: "Mom asks, 'What would you like?'", zh: '妈妈问：“你想要什么？”' },
-        { en: "Mia says, 'I want kiwifruit and dragon fruit, please.'", zh: 'Mia 说：“我想要猕猴桃和火龙果，谢谢。”' },
-        { en: 'Mom gives her a pineapple and lychees.', zh: '妈妈又给了她一个菠萝和几颗荔枝。' },
+        { en: 'Mom comes home with a big box.', zh: '妈妈拎着一个大箱子回家啦。' },
+        { en: '"What is in the box?" Mia asks.', zh: '“箱子里装的是什么呀？”Mia 问。' },
+        { en: '"Fruit!" says Mom. "Look at them."', zh: '“是水果！”妈妈说，“快看呀。”' },
       ],
       [
-        { en: 'A small monkey comes to the door.', zh: '一只小猴子来到门口。' },
-        { en: "Mia asks, 'Do you like fruit?'", zh: 'Mia 问：“你喜欢水果吗？”' },
-        { en: "The monkey says, 'I love pineapples!'", zh: '猴子说：“我爱吃菠萝！”' },
-        { en: 'They share one lychee and laugh.', zh: '他们分着吃一颗荔枝，笑了起来。' },
-        { en: 'Now Mia and the little monkey are friends.', zh: '现在 Mia 和小猴子是好朋友了。' },
-        { en: 'What fruit will they eat tomorrow?', zh: '明天他们会吃什么呢？' },
+        { en: '"What would you like?" Mom asks.', zh: '“那你想要哪个呀？”妈妈问。' },
+        { en: 'Mia touches the green one. "I want this."', zh: 'Mia 摸了摸那个绿色的：“我要这个。”' },
+        { en: '"That is a kiwifruit," says Mom.', zh: '“这是猕猴桃。”妈妈说。' },
+        { en: '"And the big one with leaves on top?" Mia asks.', zh: '“那个顶上长着叶子的大家伙呢？”Mia 问。' },
+        { en: '"A pineapple," says Mom. "Try a little."', zh: '“是菠萝。”妈妈说，“尝一小口。”' },
+      ],
+      [
+        { en: 'Then Mia sees a red one. "Is it an animal?"', zh: '这会儿 Mia 又看见一个红的：“它是个小动物吗？”' },
+        { en: '"It is a dragon fruit," says Mom. "The white ones are lychees."', zh: '“那是火龙果。”妈妈说，“这些白白的小家伙是荔枝。”' },
+        { en: 'A monkey comes and asks, "What are these?"', zh: '小猴子跑到门口，探头问：“这些是什么呀？”' },
+        { en: '"Fruit!" says Mia. "They are all one family!"', zh: '“是水果！”Mia 说，“它们都是一家人呢！”' },
       ],
     ],
   },
   '8-2': {
     title: 'The Vegetable Box',
-    titleZh: '装蔬菜的箱子',
+    titleZh: '一箱蔬菜',
     paragraphs: [
       [
-        { en: 'Ben is in the yard with Mom.', zh: 'Ben 和妈妈在院子里。' },
-        { en: 'There are many vegetables on the grass.', zh: '草地上有很多蔬菜。' },
-        { en: "Mom asks, 'What do you want?'", zh: '妈妈问：“你想要什么？”' },
-        { en: "Ben says, 'I want cauliflowers and a pumpkin.'", zh: 'Ben 说：“我想要花椰菜和一个南瓜。”' },
-        { en: "'I want one big eggplant too!'", zh: '“我还要一个大茄子！”' },
-        { en: 'Ben finds an onion under a big leaf.', zh: 'Ben 在一片大叶子下面找到了一颗洋葱。' },
+        { en: 'Ben finds a big box in the yard.', zh: 'Ben 在院子里发现一个大箱子。' },
+        { en: '"What is in the box?" Ben asks.', zh: '“箱子里是什么呀？”Ben 问。' },
+        { en: '"Vegetables!" says Mom. "Carry them in."', zh: '“是蔬菜！”妈妈说，“帮我们搬进去。”' },
       ],
       [
-        { en: 'They put all of them in a box.', zh: '他们把所有东西都放进一个箱子。' },
-        { en: 'The box is big, so Ben carries it.', zh: '箱子很大，所以 Ben 提着它。' },
-        { en: "Mom says, 'Let's cook soup now.'", zh: '妈妈说：“我们现在煮汤吧。”' },
-        { en: 'They wash the cauliflower and the onion.', zh: '他们把花椰菜和洋葱洗干净。' },
-        { en: 'The soup is hot and very nice.', zh: '汤又热又好喝。' },
-        { en: 'Ben wants more soup tomorrow, too.', zh: '明天 Ben 还想喝汤。' },
+        { en: '"Is this a ball?" Ben asks. "No, a pumpkin," says Mom.', zh: '“这是球吗？”Ben 问。“不是，是南瓜。”妈妈说。' },
+        { en: '"Is that a flower?" Ben asks. "A cauliflower," says Mom.', zh: '“那是花吗？”Ben 问。“是花椰菜。”妈妈说。' },
+        { en: '"And the purple one?" Ben asks. "An eggplant," says Mom.', zh: '“那个紫紫的呢？”Ben 问。“是茄子。”妈妈说。' },
+        { en: '"And this small round one?" Ben asks. "An onion," says Mom.', zh: '“这个小小的圆球呢？”Ben 问。“是洋葱。”妈妈说。' },
+      ],
+      [
+        { en: 'The onion makes his eyes water. Ben cries.', zh: '洋葱把 Ben 的眼泪都弄出来啦。' },
+        { en: 'They wash them all and make a big soup.', zh: '他们把菜都洗干净，做了一大锅汤。' },
+        { en: '"What is this?" Mom asks. "Vegetables!" says Ben, and he smiles.', zh: '“这些是什么呀？”妈妈问。“蔬菜！”Ben 笑着说。' },
       ],
     ],
   },
@@ -57,108 +76,117 @@ export const unit8: Record<string, ReadingPassage> = {
     titleZh: '船上的海鲜',
     paragraphs: [
       [
-        { en: 'Dad and Leo take a boat today.', zh: '今天 Dad 和 Leo 坐船出门。' },
-        { en: 'The water is cold this morning.', zh: '今天早上水很凉。' },
-        { en: "Dad asks, 'What would you like?'", zh: 'Dad 问：“你想要什么？”' },
-        { en: "Leo says, 'I want a crab!'", zh: 'Leo 说：“我想要一只螃蟹！”' },
-        { en: "'I want some shrimps and oysters!'", zh: '“我还要一些虾和牡蛎！”' },
-        { en: 'Dad finds one big squid in the boat.', zh: 'Dad 在船上找到了一只大鱿鱼。' },
+        { en: 'Dad and Leo take a boat out.', zh: '今天 Dad 和 Leo 坐船出海啦。' },
+        { en: 'The sea is big and cold.', zh: '大海又大又凉。' },
+        { en: '"Look down, Leo!" says Dad.', zh: '“往下看，Leo！”爸爸说。' },
+        { en: '"What is that?" says Leo. "Is it a crab?"', zh: '“那是什么呀？”Leo 问，“是螃蟹吗？”' },
       ],
       [
-        { en: 'Leo puts the squid in his box.', zh: 'Leo 把鱿鱼放进他的箱子。' },
-        { en: 'A little bird flies near the boat.', zh: '一只小鸟飞到船边。' },
-        { en: "The bird says, 'Can I have a shrimp?'", zh: '小鸟说：“可以给我一只虾吗？”' },
-        { en: "Leo says, 'Yes! Here you are.'", zh: 'Leo 说：“当然！给你。”' },
-        { en: 'The bird is very happy now.', zh: '小鸟现在非常开心。' },
-        { en: 'Leo wants more seafood at home.', zh: 'Leo 回家还想再吃海鲜。' },
+        { en: '"Yes, it is a crab!" says Dad. "Look down."', zh: '“对，是螃蟹！”爸爸说，“再往下看。”' },
+        { en: 'A squid comes close with long arms.', zh: '一只鱿鱼游过来，长长的触手一甩一甩。' },
+        { en: '"Is it a fish?" asks Leo.', zh: '“它是鱼吗？”Leo 问。' },
+        { en: '"It is a squid," says Dad. "These are oysters."', zh: '“是鱿鱼。”爸爸说，“这些是牡蛎。”' },
+        { en: '"And the small pink ones?" asks Leo. "Shrimps," says Dad.', zh: '“那些小小的粉粉的呢？”Leo 问。“是虾。”爸爸说。' },
+      ],
+      [
+        { en: 'A bird comes down to the boat.', zh: '一只小鸟落到船上。' },
+        { en: '"Can I have a shrimp?" asks the bird. "Look, here you are!" says Leo.', zh: '“可以给我一只虾吗？”小鸟问。“看，给你啦！”Leo 说。' },
       ],
     ],
   },
   '8-4': {
     title: 'Snacks in My Bag',
-    titleZh: '书包里的零食',
+    titleZh: '一袋零食',
     paragraphs: [
       [
-        { en: 'Kate comes home after school.', zh: 'Kate 放学回家。' },
-        { en: 'She is hungry and very sleepy.', zh: '她又饿又困。' },
-        { en: 'Mom puts snacks in her bag.', zh: '妈妈在她的书包里放了一些零食。' },
-        { en: 'There are cookies, raisins and chocolate.', zh: '里面有饼干、葡萄干和巧克力。' },
-        { en: "Mom asks, 'What snacks do you want?'", zh: '妈妈问：“你想要什么零食？”' },
-        { en: "Kate says, 'I want chocolate and cookies!'", zh: 'Kate 说：“我想要巧克力和饼干！”' },
+        { en: 'Kate comes home after school.', zh: 'Kate 放学回家啦。' },
+        { en: 'She is hungry and very sleepy.', zh: '她又饿又困，眼皮都耷拉下来了。' },
+        { en: 'Mom puts a bag on the table.', zh: '妈妈把一个袋子放在桌上。' },
+        { en: '"What snacks do you want?" asks Mom.', zh: '“你想吃点什么零食呀？”妈妈问。' },
       ],
       [
-        { en: 'Kate also finds some nori in the bag.', zh: 'Kate 还在书包里找到了海苔。' },
-        { en: 'Ben comes to the door to play.', zh: 'Ben 来到门口找她玩。' },
-        { en: 'They share the raisins with Ben.', zh: '他们把葡萄干分给 Ben。' },
-        { en: "Ben says, 'The nori is very good!'", zh: 'Ben 说：“海苔真好吃！”' },
-        { en: 'Kate laughs and they sing a song.', zh: 'Kate 笑了，他们一起唱歌。' },
-        { en: 'Tomorrow Mom will bring more snacks.', zh: '明天妈妈还会带更多零食。' },
+        { en: '"I want a cookie and some chocolate," says Kate.', zh: '“我要饼干，还要巧克力。”Kate 说。' },
+        { en: 'In the bag she finds many raisins.', zh: '袋子里还有好多葡萄干。' },
+        { en: 'Then she sees a green thing like a leaf.', zh: '接着她看见一片绿绿的东西，像片叶子。' },
+        { en: '"Is this a leaf from the park?" asks Kate.', zh: '“这是从公园捡来的叶子吗？”Kate 问。' },
+      ],
+      [
+        { en: '"No, it is nori," says Mom. "It is a snack."', zh: '“不是啦，这是海苔。”妈妈说，“它也是零食哦。”' },
+        { en: 'Kate tries it. "It is good!"', zh: 'Kate 尝了一口：“真好吃！”' },
+        { en: 'Ben comes to the door. They share it.', zh: 'Ben 跑到门口来，两个孩子分着吃。' },
+        { en: '"What snacks do you want?" asks Kate. "Nori!" says Ben.', zh: '“你想吃点什么零食呀？”Kate 问。“海苔！”Ben 说。' },
       ],
     ],
   },
   '8-5': {
     title: 'Chinese Food at Home',
-    titleZh: '中国家常饭',
+    titleZh: '家里的中国菜',
     paragraphs: [
       [
-        { en: 'Anna comes home with her friend Sam.', zh: 'Anna 和朋友 Sam 一起回家。' },
-        { en: 'Mom cooks Chinese food for them.', zh: '妈妈给他们做中国菜。' },
-        { en: "Mom asks, 'Do you like Chinese food?'", zh: '妈妈问：“你喜欢中国菜吗？”' },
-        { en: "Sam says, 'Yes! It is very good.'", zh: 'Sam 说：“喜欢！非常好吃。”' },
-        { en: "'What would you like to eat?'", zh: '“你想要吃什么？”' },
-        { en: "Anna says, 'I want dumplings and steamed buns, please.'", zh: 'Anna 说：“我想要饺子和馒头，谢谢。”' },
+        { en: 'Anna and Sam walk home with Mom.', zh: 'Anna 和 Sam 跟 Mom 一起走回家。' },
+        { en: 'Mom is cooking Chinese food.', zh: 'Mom 正在做中国菜呢。' },
+        { en: '"Do you like Chinese food?" asks Mom.', zh: '“你喜欢中国菜吗？”Mom 问。' },
+        { en: '"I do! What is all this?" says Sam.', zh: '“喜欢！这些都是什么呀？”Sam 说。' },
       ],
       [
-        { en: 'Mom puts eight dumplings on the plate.', zh: '妈妈在盘子里放了八个饺子。' },
-        { en: 'Sam wants rice and hot soup.', zh: 'Sam 想要米饭和热汤。' },
-        { en: 'They also eat noodles and steamed buns at the table.', zh: '他们还在桌子上吃面条和馒头。' },
-        { en: 'The food is warm and very nice.', zh: '饭菜又暖和又好吃。' },
-        { en: 'Anna is sleepy and very happy.', zh: 'Anna 困了，可她很开心。' },
-        { en: "'Come again tomorrow!' Anna says.", zh: 'Anna 说：“明天还来！”' },
+        { en: '"These are dumplings," says Mom. "Try one."', zh: '“这些是饺子。”Mom 说，“尝一个。”' },
+        { en: 'Sam tries one. "Wow, it is good!"', zh: 'Sam 夹起一个：“哇，太好吃啦！”' },
+        { en: '"And those white balls?" asks Sam.', zh: '“那些白白的大圆球是什么呀？”Sam 问。' },
+        { en: '"Steamed buns," says Mom. "They are made of dough."', zh: '“是馒头。”Mom 说，“都是面团做的。”' },
+        { en: 'Then Mom brings noodles.', zh: 'Mom 又端来了面条。' },
+      ],
+      [
+        { en: 'Sam eats the noodles and some rice.', zh: 'Sam 吃了面条，还吃了米饭。' },
+        { en: '"They do not look the same," says Sam. "But they are good."', zh: '“它们看起来不一样，”Sam 说，“可都好吃。”' },
+        { en: '"Do you like Chinese food?" asks Anna. "Yes!" says Sam.', zh: '“你喜欢中国菜吗？”Anna 问。“喜欢！”Sam 说。' },
       ],
     ],
   },
   '8-6': {
     title: 'The Food Game',
-    titleZh: '食物大挑战',
+    titleZh: '食物分类游戏',
     paragraphs: [
       [
-        { en: 'Today Leo and Mia play a food game.', zh: '今天 Leo 和 Mia 玩食物游戏。' },
-        { en: 'Mia puts four things on the table.', zh: 'Mia 把四样东西放在桌子上。' },
-        { en: "'What are these?' asks Leo.", zh: 'Leo 问：“这些是什么？”' },
-        { en: "'They are fruit: kiwifruit and lychee.'", zh: '“它们是水果：猕猴桃和荔枝。”' },
-        { en: "'Yes! I know these,' says Mia.", zh: 'Mia 说：“对呀！我认识它们。”' },
-        { en: "'Now look at these two vegetables.'", zh: '“现在看这两样蔬菜。”' },
+        { en: 'Mia and Leo play a food game.', zh: 'Mia 和 Leo 玩食物分类游戏。' },
+        { en: 'Mia puts food on the table.', zh: 'Mia 把食物一样一样摆在桌上。' },
+        { en: '"Put each one on its plate," says Mia.', zh: '“把每一样都放到对的盘子里。”Mia 说。' },
+        { en: 'Leo is fast. He puts the apple with the chocolate.', zh: 'Leo 手快，一下就把苹果和巧克力放到了一起。' },
       ],
       [
-        { en: "'They are onion and pumpkin.'", zh: '“它们是洋葱和南瓜。”' },
-        { en: 'Leo wants some seafood for the game.', zh: 'Leo 想要一些海鲜来继续游戏。' },
-        { en: 'Mia gives him a crab and a shrimp.', zh: 'Mia 给了他一只螃蟹和一只虾。' },
-        { en: "'What snack do you want?' Mia asks.", zh: 'Mia 问：“你想要什么零食？”' },
-        { en: "'I want chocolate, thank you!'", zh: '“我想要巧克力，谢谢！”' },
-        { en: 'Leo is happy. Now the game is fun.', zh: 'Leo 很开心。这个游戏真好玩。' },
+        { en: '"No, they are not a family," says Mia.', zh: '“不对，它们不是一家人。”Mia 说。' },
+        { en: '"The apple is fruit. The chocolate is a snack."', zh: '“苹果是水果，巧克力是零食。”' },
+        { en: '"Oh," says Leo. He puts the chocolate away.', zh: '“哦。”Leo 说着，把巧克力拿开了。' },
+        { en: 'Now he puts the pumpkin and the onion together.', zh: '这回他把洋葱和南瓜放到一起。' },
+      ],
+      [
+        { en: '"Yes! Those are vegetables," says Mia.', zh: '“对啦！那些是蔬菜。”Mia 说。' },
+        { en: 'Then Leo finds the crab and the shrimp.', zh: '接着 Leo 找到了螃蟹和虾。' },
+        { en: '"Seafood!" says Leo. "And fruit!"', zh: '“海鲜！”Leo 说，“还有水果！”' },
+        { en: '"Now you know them all," says Mia, and she smiles.', zh: '“现在你全都认识啦。”Mia 笑着说。' },
       ],
     ],
   },
   '8-7': {
     title: 'Dad Cooks Meat',
-    titleZh: '爸爸做肉菜',
+    titleZh: '爸爸做的肉菜',
     paragraphs: [
       [
-        { en: 'Sam and Dad cook meat at home.', zh: 'Sam 和爸爸在家做肉菜。' },
-        { en: 'Dad puts beef and pork on the plate.', zh: '爸爸把牛肉和猪肉放在盘子里。' },
-        { en: "'What do you want?' asks Dad.", zh: '爸爸问：“你想要什么？”' },
-        { en: "'I want some beef, please,' says Sam.", zh: 'Sam 说：“我想要一些牛肉，谢谢。”' },
-        { en: "'I want some chicken too!'", zh: '“我还要一些鸡肉！”' },
-        { en: 'Dad gives Sam some fish as well.', zh: '爸爸也给 Sam 一些鱼肉。' },
+        { en: 'Sam and Dad cook food at home.', zh: 'Sam 和 Dad 在家做饭。' },
+        { en: 'Dad puts beef on the plate.', zh: 'Dad 把牛肉放在盘子里。' },
+        { en: '"What do you want?" asks Dad.', zh: '“你想要什么呀？”Dad 问。' },
+        { en: '"I want some beef and some pork," says Sam.', zh: '“我想要一些牛肉，还要一些猪肉。”Sam 说。' },
       ],
       [
-        { en: 'The dog sits under the table.', zh: '狗坐在桌子下面。' },
-        { en: 'He looks at the meat with big eyes.', zh: '它用大眼睛看着这些肉。' },
-        { en: "'Can I have some pork?' says the dog.", zh: '狗说：“可以给我一些猪肉吗？”' },
-        { en: 'Sam gives the dog a little meat.', zh: 'Sam 给狗一点肉。' },
-        { en: 'Now the dog jumps and smiles.', zh: '现在狗又跳又笑。' },
-        { en: 'Tomorrow Dad will cook chicken again.', zh: '明天爸爸还会做鸡肉。' },
+        { en: '"Here is some chicken too," says Dad.', zh: '“这里还有一些鸡肉。”Dad 说。' },
+        { en: 'Then Dad opens a box and shows a fish.', zh: '接着 Dad 打开一个盒子，露出一条鱼。' },
+        { en: '"But fish lives in the water!" says Sam.', zh: '“可是鱼住在水里呀！”Sam 说。' },
+        { en: '"Yes, but we eat fish. It is meat too."', zh: '“对呀，可我们吃鱼，鱼也是肉呢。”' },
+      ],
+      [
+        { en: 'The dog comes and sits near the table.', zh: '小狗走过来，坐在桌子边上。' },
+        { en: '"What do you want?" asks Sam.', zh: '“你想要什么呀？”Sam 问小狗。' },
+        { en: '"Some pork, please," says the dog.', zh: '“我要一些猪肉，谢谢。”小狗说。' },
+        { en: '"Here you are," says Sam, and the dog smiles.', zh: '“给你。”Sam 说，小狗笑得眼睛都眯起来了。' },
       ],
     ],
   },
@@ -167,21 +195,25 @@ export const unit8: Record<string, ReadingPassage> = {
     titleZh: '公园里的四盘菜',
     paragraphs: [
       [
-        { en: 'Today Mom and Dad go to the park.', zh: '今天 Mom 和 Dad 去公园。' },
-        { en: 'They open four plates on the table.', zh: '他们在桌子上摆好四个盘子。' },
-        { en: "'Kate asks, 'What are these?'", zh: 'Kate 问：“这些是什么？”' },
-        { en: "'They are fruit: pineapple and lychee.'", zh: '“它们是水果：菠萝和荔枝。”' },
-        { en: "'Yes! Those are fruit,' says Ben.", zh: 'Ben 说：“对！那些是水果。”' },
-        { en: "'What are these green ones?'", zh: '“这些绿色的又是什么？”' },
-        { en: "'They are vegetables: pumpkin and onion.'", zh: '“它们是蔬菜：南瓜和洋葱。”' },
+        { en: 'Mom and Dad put four plates on the table.', zh: 'Mom 和 Dad 在公园的桌上摆好四个盘子。' },
+        { en: 'Kate and Ben sit down in the park.', zh: 'Kate 和 Ben 在公园里坐下来。' },
+        { en: '"Eat from a plate you can name," says Mom.', zh: '“你能说出盘子里是什么，才能吃哦。”Mom 说。' },
+        { en: '"What is on that plate?" asks Kate.', zh: '“那个盘子里是什么呀？”Kate 问。' },
       ],
       [
-        { en: "'And what is on that big plate?'", zh: '“那个大盘子里是什么？”' },
-        { en: "'They are meat: beef and pork.'", zh: '“它们是肉：牛肉和猪肉。”' },
-        { en: 'Mom also has seafood for everyone.', zh: 'Mom 还准备了一些海鲜。' },
-        { en: "'I want some fish and some shrimp!'", zh: '“我想要一些鱼肉和一些虾！”' },
-        { en: 'What will they cook at home?', zh: '他们回家会做什么菜呢？' },
+        { en: '"Pineapple and lychee," says Mom. "Fruit!" says Ben, and he eats one.', zh: '“菠萝和荔枝。”Mom 说。“水果！”Ben 说，拿起一个就吃。' },
+        { en: 'Kate looks at the green plate.', zh: 'Kate 看向那个绿绿的盘子。' },
+        { en: '"Pumpkin and onion," says Kate. "Vegetables!" says Ben.', zh: '“南瓜和洋葱。”Kate 说。“蔬菜！”Ben 说。' },
+        { en: '"Yes! That is a family," says Mom.', zh: '“对！那是一家人。”Mom 说。' },
+      ],
+      [
+        { en: '"And the brown plate?" asks Ben.', zh: '“那棕色那个盘子呢？”Ben 问。' },
+        { en: '"Beef and pork," says Mom. "That is meat."', zh: '“牛肉和猪肉。”Mom 说，“那是肉。”' },
+        { en: '"What is on that plate?" asks Ben.', zh: '“那个盘子里是什么呀？”Ben 问。' },
+        { en: '"Seafood: crab and shrimp," says Kate. "Now we can eat!"', zh: '“海鲜：螃蟹和虾。”Kate 说，“现在我们可以吃啦！”' },
       ],
     ],
   },
 }
+// 2026-11-02 文体改写：8 篇全部重写为「小故事」——分类从清单变成情节里的发现，
+// 每篇都有对话、因果链和结尾回声；词数 89~96 / 句数 10~12 / 段数 3，零超纲。

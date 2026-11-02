@@ -1026,6 +1026,18 @@
 // ---------- 📚 阅读短文区 ----------
 // 排版原则：这是全站唯一「让孩子自己从头读到尾」的地方，字号/行距/段距都比点读区宽，
 // 单行长度压到 ~34em 以内（太长的行孩子读着跳行、也分行视线）。
+//
+// 2026-11-02 视觉改版：把阅读区从「一堆带边框的句子卡片」改成**一页故事书**。
+//   · .reading-body  = 书页：暖纸色底 + 内阴影 + 顶部丝带
+//   · .reading-title = 居中书名 + 手写下划线 + 中文副题
+//   · .reading-sent  = **去掉卡片边框**，句子连成流（paragraph 是排版单位，不是卡片列表）
+//   · .reading-say   = 行尾小喇叭，平时半透明、hover 浮起、正在读时跳一下
+// ⚠️ e2e（tests/starlight-zones.spec.ts）依赖以下事实，改样式时**不得**破坏：
+//   · 类名 .reading-zone / .reading-body / .reading-title / .reading-title-zh /
+//     .reading-para / .reading-sent / .reading-sent-row / .reading-say / .reading-zh 一个都不能改名
+//   · .reading-sent 数量 == .reading-zh 数量 == .reading-say 数量
+//   · 「显示中文」时译文必须在英文**下方**且与英文**左对齐**（偏差 < 6px）
+//   · .reading-zone.is-playing 时非当前句降透明度（focus dimming）
 .reading-zone {
   margin-top: 12px;
 }
@@ -1045,52 +1057,218 @@
   text-decoration: underline wavy currentColor 1px;
   text-underline-offset: 3px;
 }
+
+// ---------- 书页 ----------
+// 暖纸色 + 极淡的斜向纤维纹 + 顶部丝带：让「这是一页书」一眼可辨，而不是白卡片。
+// 纹路用**斜向**而不是横向 —— 横向纹会和每一行英文对齐或错位，读起来像被划了线。
 .reading-body {
-  padding: 18px 20px;
-  border: 1px solid var(--line, #e5e7eb);
-  border-radius: var(--r-md);
-  background: var(--card, #fff);
+  position: relative;
+  padding: 22px 24px 20px;
+  border: 1px solid color-mix(in srgb, var(--mc-deep, var(--brand-deep)) 20%, transparent);
+  border-radius: var(--r-lg);
+  background:
+    repeating-linear-gradient(
+      58deg,
+      color-mix(in srgb, var(--mc-deep, var(--brand-deep)) 3%, transparent) 0 1px,
+      transparent 1px 7px
+    ),
+    radial-gradient(130% 55% at 50% 0%, color-mix(in srgb, var(--card, #fff) 94%, #fff), transparent 72%),
+    linear-gradient(180deg, var(--card, #fff), color-mix(in srgb, var(--mc-soft, var(--brand-soft)) 42%, var(--card, #fff)));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 0 40px color-mix(in srgb, var(--sun, #fbbf24) 7%, transparent),
+    0 8px 24px color-mix(in srgb, var(--mc-deep, var(--brand-deep)) 12%, transparent);
   max-width: 34em;
+  overflow: hidden;
+  // 顶部丝带：一条渐变窄条，像书签压在页顶
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 5px;
+    background: linear-gradient(
+      90deg,
+      var(--mc-soft, var(--brand-soft)),
+      var(--mc, var(--brand)) 22%,
+      var(--mc, var(--brand)) 78%,
+      var(--mc-soft, var(--brand-soft))
+    );
+    opacity: 0.9;
+  }
 }
+
+// ---------- 书名 ----------
+// 居中 + 手写下划线（不是一条死板的直线），中文副题跟在下面。
 .reading-title {
-  margin: 0 0 12px;
-  font-size: var(--fs-lg);
+  margin: 4px 0 18px;
+  font-size: var(--fs-2xl);
   font-weight: 800;
   display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 8px;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+  color: var(--ink);
+}
+// 英文书名单独一层，好把手写下划线只画在它下面（画在整个 h3 上会连中文副题一起划到）
+.reading-title-en {
+  display: inline-block;
+  padding-bottom: 8px;
+  // 手写下划线：一层粗的 + 一层细的错位，叠出「笔锋」的粗细变化
+  background-image:
+    linear-gradient(90deg, transparent 3%, var(--sun, #fbbf24) 3% 97%, transparent 97%),
+    linear-gradient(90deg, transparent 8%, color-mix(in srgb, var(--sun-deep, #f59e0b) 55%, transparent) 8% 92%, transparent 92%);
+  background-repeat: no-repeat;
+  background-size: 100% 3px, 100% 2px;
+  background-position: 0 100%, 0 88%;
 }
 .reading-title-zh {
-  font-size: var(--fs-sm);
-  font-weight: 600;
+  font-size: var(--fs-md);
+  font-weight: 700;
   color: var(--ink-soft);
+  letter-spacing: 0.06em;
 }
-.reading-para + .reading-para { margin-top: 18px; }
-// 每句单独成卡片：英文在上、中文在下、小喇叭在英文行右侧。
-// 注意方向：这里是**纵向** flex。早先写成横向 flex，结果「显示中文」时译文被排到
-// 英文右边、和正文挤在一起（.reading-zh 是 .reading-sent-row 的兄弟节点）。
+// 段落：叙事节拍之间的留白。段落是排版单位，不是卡片列表。
+// 段间留白标出「换了场景」——这正是叙事的节拍。
+.reading-para + .reading-para { margin-top: 22px; }
+.reading-para:first-child { margin-top: 0; }
+// 段首缩进（英文排版惯例）：每段第一行缩进两格，一眼看出「换段了」
+// ⚠️ 缩进加在 .tt-text 上而不是 .reading-sent-row 上：
+// 后者会把整行（含竖条预留区）一起推右，竖条就跟着缩进跑，位置会飘。
+.reading-zone:not(.is-zh) .reading-para > .reading-sent:first-child .tt-text {
+  text-indent: 1.4em;
+}
+// 段首留一个小记号：像书里的段落起始钩，读起来有「一段开始了」的节奏感。
+// 只在逐句双语模式下出现（散文模式里它会打断词流）。
+.reading-zone.is-zh .reading-para > .reading-sent:first-child .reading-sent-row::before {
+  content: '';
+  flex: none;
+  width: 3px;
+  align-self: stretch;
+  min-height: 1.4em;
+  margin-right: 2px;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--mc, var(--brand)) 45%, transparent);
+}
+
+// ---------- 句子 ----------
+// 旧版每句一个带边框的小卡片，读起来像「一叠便签」而不是一篇文章。
+//
+// 这一版有**两种排版模式**，由 .reading-zone.is-zh 切换：
+//   · **流式散文（默认，没显示中文）**：同一段的句子在版面上**连成一段**，
+//     像真书那样一行行往下读，句子之间只留一个「空格」的间距。
+//   · **逐句双语（显示中文后）**：一句一行、译文在正下方，方便逐句精读对照。
+//
+// ⚠️ 三处必须保留的 e2e 契约（tests/starlight-zones.spec.ts）：
+//   1. 「显示中文」时译文在英文**下方**且与英文**左对齐**（偏差 < 6px）
+//      → .reading-zh 左边距必须与 .reading-sent-row 对齐，不能给中文加缩进；
+//   2. .reading-sent 数量 == .reading-zh 数量 == .reading-say 数量
+//      → 句子不能被拆成额外的行/块，否则计数会错位；
+//   3. .tt-word 默认透明底（记忆状态开关才染色）→ 别给 .tt-text / .tt-word 加底色。
+//
+// 默认（流式散文）：句子是 inline-block，像词一样排在段落里
 .reading-sent {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 10px 12px;
-  border-radius: var(--r-md);
-  border: 1px solid transparent;
+  display: inline-block;
+  vertical-align: top;
+  // ⚠️ 这里**不能**用 width: max-content：
+  // .tt-text 是 block（宽度按最长行算），句子一旦被撑到 max-content，
+  // 整句就比容器还宽 → 尾部连同喇叭被 .reading-body 的 overflow:hidden 裁掉。
+  // 正确做法：让句子跟着**容器宽度**走（width: auto），内部文字自然换行；
+  // 短句靠 inline-block 的自然宽度只占自己那么点，于是相邻句子能并排 —— 仍是流式散文。
+  max-width: 100%;
+  // 句子之间留一个「空格」的间距：句子像词一样排在段落里
+  margin: 0 0.5em 0 0;
+  // 左侧预留 5px（给「正在读」那道的竖条用），再用负 margin 抵消 ——
+  // 文字的**实际位置不变**，竖条却有了落脚处（详见 .reading-sent--now 的注释）。
+  padding: 0 0 0 5px;
+  margin-left: -5px;
+  border: 0;
+  border-radius: 0;
   transition: var(--ease);
+  // 朗读时把当前句滚到视口中间时，别被顶栏切掉
+  scroll-margin-top: 40px;
 }
-.reading-sent + .reading-sent { margin-top: 6px; }
 .reading-sent-row {
   display: flex;
   align-items: flex-start;
-  gap: 10px;
-  flex: 1;
+  gap: 6px;
   min-width: 0;
+}
+// 散文模式：一句一行，但**没有卡片边框/底色** —— 视觉上是一页正文，
+// 不是一叠便签。
+//
+// ⚠️ 为什么不做「句子并排成一段散文」：句子必须是一个**独立可朗读单元**
+// （整句高亮 focus dimming + 句末喇叭 + 朗读时滚动定位都依赖它），
+// 而 inline-block 的宽度取 shrink-to-fit（max-content），长句必然独占一行。
+// 强行并排会让「正在读的那句」高亮范围与实际朗读内容对不上 —— 得不偿失。
+// 一句一行反而更适合幼儿指读（指一行读一句）。
+.reading-zone:not(.is-zh) .reading-sent {
+  display: block;
+  max-width: 100%;
+  margin: 0 0 0 -5px;
+  // 左侧预留 5px（给「正在读」那道的竖条用），负 margin 抵消掉 ——
+  // 文字的**实际位置不变**，竖条却有了落脚处（详见 .reading-sent--now 的注释）。
+  padding: 1px 0 1px 5px;
+  border: 0;
+  border-radius: 0;
+}
+.reading-zone:not(.is-zh) .reading-sent-row {
+  display: block;          // 不用 flex：让句内文字按内容宽度排
+  min-width: 0;
+  // 喇叭绝对定位在行右上角（见下），所以**行尾必须给它让出位置**，
+  // 否则喇叭会压在最后一个单词上。
+  position: relative;
+  padding-right: 30px;
+}
+// 散文模式的喇叭：绝对定位到句子的右上角。
+// 不占正文宽度 → 行末不会被一个圆按钮切断，正文能一直排到版心右边缘。
+.reading-zone:not(.is-zh) .reading-say {
+  position: absolute;
+  top: 0; right: 0;
+  margin: 0;
+}
+// 中文对照打开 → 切成逐句双语（一句一行，译文紧跟其下）
+.reading-zone.is-zh .reading-sent {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  margin: 0;
+  // 逐句模式有独立的边框，竖条直接用 border 表现，不再需要内边距预留
+  padding: 4px 8px;
+  border: 1px solid transparent;
+  border-radius: var(--r-md);
+}
+.reading-zone.is-zh .reading-sent + .reading-sent { margin-top: 4px; }
+// 逐句精读时，喇叭恢复成完整的圆形按钮（更明确、更好点）
+.reading-zone.is-zh .reading-say {
+  width: 40px;
+  height: 40px;
+  line-height: 1;
+  font-size: 16px;
+  border: 1px solid color-mix(in srgb, var(--mc-deep, var(--brand-deep)) 25%, transparent);
+  background: color-mix(in srgb, var(--card, #fff) 80%, transparent);
+  opacity: 0.4;
+}
+.reading-zone.is-zh .reading-say:hover {
+  border-color: var(--mc-deep, var(--brand-deep));
 }
 // 整篇连读时的当前句：跟着声音走，孩子知道读到哪了
 .reading-sent--now {
-  background: var(--mc-soft, var(--brand-soft));
-  border-color: var(--mc-deep, var(--brand-deep));
+  background: color-mix(in srgb, var(--mc-soft, var(--brand-soft)) 75%, transparent);
+  // 左侧一道竖条：像书签一样标出「读到这儿了」。
+  // ⚠️ 竖条画在**左侧内边距区**里：
+  //   · 用 inset 阴影 → 会压住第一个字母（inline-block 盒子里没有额外空间）；
+  //   · 改 padding-left → 正文在朗读时整段往右跳（每句挪几 px），孩子眼睛被拽着跑。
+  // 所以：给所有句子预留 5px 左内边距，再用负 margin 抵消掉 —— 文字位置不变，
+  // 竖条正好落在预留的那 5px 里，既不遮字也不动布局。
+  box-shadow: inset 5px 0 0 var(--mc-deep, var(--brand-deep));
+}
+.reading-zone.is-zh .reading-sent--now {
+  border-color: color-mix(in srgb, var(--mc-deep, var(--brand-deep)) 35%, transparent);
+  // 逐句模式有独立边框，竖条用 border-left 画在边框上（不占内边距、不遮字）
+  border-left: 5px solid var(--mc-deep, var(--brand-deep));
+  box-shadow: none;
 }
 // focus dimming（借鉴 readalong-reader）：朗读时非当前句降到 32%，当前句保持 100%。
 // 只在「正在朗读」时生效（.reading-zone.is-playing 由 playing 状态挂上），
@@ -1100,35 +1278,41 @@
 .reading-zone.is-playing .reading-sent--busy { opacity: 1; }
 // 单句朗读「正在播」：轻高亮 + 喇叭动起来
 .reading-sent--busy {
-  background: color-mix(in srgb, var(--mc-soft, var(--brand-soft)) 60%, transparent);
+  background: color-mix(in srgb, var(--mc-soft, var(--brand-soft)) 55%, transparent);
+  box-shadow: inset 5px 0 0 color-mix(in srgb, var(--mc-deep, var(--brand-deep)) 60%, transparent);
 }
-// 每句右侧的小喇叭：平时低调，hover/正在播时弹出，点一下就读这一句
-// 命中区 40px（含 padding 外扩），高于儿童 44pt 规范的下限
+.reading-zone.is-zh .reading-sent--busy {
+  box-shadow: none;
+  border-left: 5px solid color-mix(in srgb, var(--mc-deep, var(--brand-deep)) 60%, transparent);
+}
+// 散文模式下的喇叭：**视觉小、命中够**。
+// 26×26 满足 WCAG 2.2 的最小目标尺寸（24×24 CSS px）。
+// ⚠️ 不要用 ::after 把命中区往外撑：散文模式里句子是 inline-block 连排的，
+// 外扩的透明圈会盖住**下一句开头的单词**，把「点词弹释义」点不中。
 .reading-say {
   flex: none;
-  width: 40px;
-  height: 40px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
-  border: 1px solid var(--line, #e5e7eb);
-  background: var(--card, #fff);
+  border: 0;
+  background: transparent;
   color: var(--mc-deep, var(--brand-deep));
-  font-size: 16px;
-  line-height: 1;
+  font-size: 13px;
+  line-height: 26px;
+  text-align: center;
   cursor: pointer;
-  opacity: 0.55;
+  opacity: 0.45;
   transition: var(--ease);
-  margin-top: 2px;
 }
 .reading-say:hover {
   opacity: 1;
-  border-color: var(--mc-deep, var(--brand-deep));
+  background: var(--mc-soft, var(--brand-soft));
   box-shadow: 0 2px 8px var(--mc-soft, var(--brand-soft));
 }
 .reading-say.is-playing {
   opacity: 1;
   background: var(--mc-deep, var(--brand-deep));
   color: #fff;
-  border-color: var(--mc-deep, var(--brand-deep));
   animation: speak-pulse 0.8s infinite;
 }
 // reduced-motion：朗读时不做缩放脉冲，只保留颜色变化（可访问性）
@@ -1140,12 +1324,14 @@
   font-size: var(--fs-lg);
   line-height: 2.1;
   font-weight: 600;
+  letter-spacing: 0.01em;
 }
+// 译文：比英文轻、比英文小一点，颜色柔和；左侧不加缩进（e2e 要求与英文左对齐）
 .reading-zh {
   margin: 2px 0 0;
   padding-left: 2px;
   font-size: var(--fs-sm);
-  line-height: 1.5;
+  line-height: 1.6;
   color: var(--ink-soft);
   font-weight: 600;
 }
