@@ -116,12 +116,12 @@ export default function SentenceReader({ sentence, zh, onPass, autoPlay = false 
         </button>
         {/* 录音 / 示范进行中给一个明确的取消出口：不用干等它结束或出错 */}
         {stage && (
-          <button type="button" className="btn btn-soft" onClick={reader.cancel}>
+          <button type="button" className="btn btn--soft" onClick={reader.cancel}>
             ⏹ 停一下
           </button>
         )}
         {scored && !passed && (
-          <button type="button" className="btn btn-soft" onClick={reader.start}>🔁 再试一次</button>
+          <button type="button" className="btn btn--soft" onClick={reader.start}>🔁 再试一次</button>
         )}
       </div>
 
@@ -153,7 +153,7 @@ export default function SentenceReader({ sentence, zh, onPass, autoPlay = false 
           </p>
           {reader.supported && (
             <div className="sr-fallback-actions">
-              <button type="button" className="btn btn-soft" onClick={reader.skip}>
+              <button type="button" className="btn btn--soft" onClick={reader.skip}>
                 ➡️ 跳过这句
               </button>
             </div>

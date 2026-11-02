@@ -40,7 +40,7 @@ export default function LessonDialogueBox({
       <PlayTools hint="点单词听发音">
         <button
           type="button"
-          className={'btn btn-soft' + (showZh ? ' active' : '')}
+          className={'btn btn--soft' + (showZh ? ' active' : '')}
           onClick={() => setShowZh((v) => !v)}
           aria-pressed={showZh}
           data-testid="dialogue-zh-toggle"

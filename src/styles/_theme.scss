@@ -54,6 +54,8 @@
 @include home-entry('dt-home', #ccfbf1, #a7f3d0, #14b8a6, #115e59, #0f766e, #14b8a6, rgba(20, 184, 166, 0.25), rgba(20, 184, 166, 0.45));
 // 字母积木入口：砖橙主题（呼应动画积木的温暖色）
 @include home-entry('ab-home', #ffedd5, #fed7aa, #ea580c, #9a3412, #c2410c, #ea580c, rgba(234, 88, 12, 0.25), rgba(234, 88, 12, 0.45));
+// 阅读模块入口：靛蓝主题（与「学新课」的所有暖色入口区分，突出「自选阅读」）
+@include home-entry('rd-home', #e0e7ff, #c7d2fe, #6366f1, #312e81, #3730a3, #6366f1, rgba(99, 102, 241, 0.25), rgba(99, 102, 241, 0.45));
 // 入口卡片进度/到期徽章（全部主题共用，挂在 -body 内）
 .home-entry-badge {
   display: inline-flex;

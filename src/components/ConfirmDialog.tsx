@@ -35,12 +35,12 @@ export default function ConfirmDialog({
         <h2 className="confirm-title">{title}</h2>
         {message && <p className="confirm-message">{message}</p>}
         <div className="confirm-actions">
-          <button type="button" className="btn btn-soft" onClick={onCancel}>
+          <button type="button" className="btn btn--soft" onClick={onCancel}>
             {cancelText}
           </button>
           <button
             type="button"
-            className={danger ? 'btn btn-danger' : 'btn btn-sun'}
+            className={danger ? 'btn btn--danger' : 'btn btn--sun'}
             onClick={onConfirm}
           >
             {confirmText}

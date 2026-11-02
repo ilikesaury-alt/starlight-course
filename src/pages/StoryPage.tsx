@@ -97,9 +97,9 @@ export default function StoryPage({
 
   const resultLinks = (
     <>
-      <Link to="/wrong" className="btn btn-soft">📋 看错题本</Link>
-      <Link to="/smart" className="btn btn-soft">🧠 去复习</Link>
-      <Link to={basePath} className="btn btn-soft">{moduleEmoji} 返回故事列表</Link>
+      <Link to="/wrong" className="btn btn--soft">📋 看错题本</Link>
+      <Link to="/smart" className="btn btn--soft">🧠 去复习</Link>
+      <Link to={basePath} className="btn btn--soft">{moduleEmoji} 返回故事列表</Link>
     </>
   )
 
@@ -153,7 +153,7 @@ export default function StoryPage({
         <Link to={basePath} className="back-link">← 故事列表</Link>
         <div className="lesson-nav">
           {prevStory && (
-            <Link to={`${basePath}/${prevStory.slug}`} className="btn btn-soft">← 上一关</Link>
+            <Link to={`${basePath}/${prevStory.slug}`} className="btn btn--soft">← 上一关</Link>
           )}
           {nextStory && (
             <Link to={`${basePath}/${nextStory.slug}`} className="btn">下一关 →</Link>
@@ -166,7 +166,7 @@ export default function StoryPage({
         {storyDone ? (
           <p style={{ color: 'var(--ok)', fontWeight: 600 }}>✅ 本关已完成学习</p>
         ) : (
-          <button type="button" className="btn btn-soft" onClick={() => setShowStoryDone(true)}>
+          <button type="button" className="btn btn--soft" onClick={() => setShowStoryDone(true)}>
             ✅ 标记本关完成
           </button>
         )}
@@ -246,7 +246,7 @@ function VocabTab({ words, mc }: { words: StoryWord[]; mc: React.CSSProperties }
       </div>
 
       <div className="fc-controls">
-        <button type="button" className="btn btn-soft" onClick={prev}>← 上一个</button>
+        <button type="button" className="btn btn--soft" onClick={prev}>← 上一个</button>
         <button type="button" className="btn" onClick={next}>下一个 →</button>
       </div>
 

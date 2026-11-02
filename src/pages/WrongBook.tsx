@@ -93,10 +93,10 @@ export default function WrongBook() {
               resultTitle="重测完成！"
               resultLinks={
                 <>
-                  <button type="button" className="btn btn-soft" onClick={() => setQuizItems(null)}>
+                  <button type="button" className="btn btn--soft" onClick={() => setQuizItems(null)}>
                     📋 返回错题本
                   </button>
-                  <Link to="/smart" className="btn btn-soft">🧠 去复习</Link>
+                  <Link to="/smart" className="btn btn--soft">🧠 去复习</Link>
                 </>
               }
               onPick={handlePick}
@@ -158,7 +158,7 @@ export default function WrongBook() {
               </button>
               <button
                 type="button"
-                className="btn btn-soft"
+                className="btn btn--soft"
                 onClick={() => setShowClear(true)}
               >
                 🧹 清空全部

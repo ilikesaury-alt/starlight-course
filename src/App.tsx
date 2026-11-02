@@ -32,13 +32,26 @@ const Eng3aPlay = lazy(() => import('@/pages/Eng3aPlay'))
 const Eng3aPlayScript = lazy(() => import('@/pages/Eng3aPlayScript'))
 const DictationPage = lazy(() => import('@/pages/DictationPage'))
 const AlphablocksPage = lazy(() => import('@/pages/AlphablocksPage'))
+const ReadingPage = lazy(() => import('@/pages/ReadingPage'))
 const NotFound = lazy(() => import('@/pages/NotFound'))
 
 // 分包加载中的兜底:轻量居中提示(儿童向文案)
+// 加一层骨架:阅读模块 chunk 含 96 篇短文，冷启动时先出骨架再出内容，
+// 避免首屏“空白一下”。
 function PageLoading() {
   return (
-    <div className="empty" role="status" aria-label="页面加载中">
-      <p>📖 正在翻开这一页…</p>
+    <div className="page-loading" role="status" aria-label="页面加载中">
+      <div className="pl-skeleton" aria-hidden="true">
+        <div className="pl-line pl-line--title" />
+        <div className="pl-line" />
+        <div className="pl-line pl-line--short" />
+        <div className="pl-cards">
+          <div className="pl-card" />
+          <div className="pl-card" />
+          <div className="pl-card" />
+        </div>
+      </div>
+      <p className="pl-note">📖 正在翻开这一页…</p>
     </div>
   )
 }
@@ -86,6 +99,7 @@ function AppRoutes() {
           <Route path="/eng3a/:unitId/:lessonId" element={<Eng3aLesson />} />
           <Route path="/dictation" element={<DictationPage />} />
           <Route path="/alphablocks" element={<AlphablocksPage />} />
+          <Route path="/reading" element={<ReadingPage />} />
           {/* 兜底:HashRouter 下任何写错/失效的 hash 路径都走这里,避免白屏 */}
           <Route path="*" element={<NotFound />} />
         </Routes>

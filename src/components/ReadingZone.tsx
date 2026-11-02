@@ -108,6 +108,10 @@ export default function ReadingZone({ passage, vocab, boxOf }: Props) {
         scrollToSent(idx)
       },
       onEnd: () => {
+        // ⚠️ 必须判 chainRef：本会话可能已被**抢占**（孩子在连读中点了某一句 →
+        // playOne 会先 stop() 把 chainRef 置 false）。此时不能复位 UI ——
+        // 否则整篇的 onEnd 会把「正在播的那一句」的动画和高亮一起清掉。
+        if (!chainRef.current) return
         chainRef.current = false
         setPlaying(false)
         setNowIdx(-1)
@@ -115,12 +119,16 @@ export default function ReadingZone({ passage, vocab, boxOf }: Props) {
     })
   }
 
-  // 单独朗读某一句（逐句朗读）：不打断整篇连读的高亮，但和整篇互锁。
-  // 点「听整篇」进行中时，单句按钮仍可点，点了会抢占（speakText 内部会结束上一个会话）。
+  // 单独朗读某一句（逐句朗读）：和整篇连读**互锁**——先断链再起句。
+  // 不能依赖「speakText 内部会抢占上一个会话」：它会**先同步触发**上一段的
+  // onEnd，若那段是链式连读就会立刻另起一个新会话；等外层回到 speakText 继续执行时，
+  // 自己的 sid 已过期（guard 全失败）却把 activeEnd 覆盖成自己的 done。
+  // 现象：孩子点的这一句不读，反而跳到下一句。
   const playOne = (i: number) => {
     // 再点一次正在播的这一句 = 停止。必须读 busyRef：读 busyIdx state 会因渲染未提交
     // 而拿到旧值，导致连点同句停不下来。
     if (busyRef.current === i) { stop(); return }
+    if (chainRef.current) stop()
     const sid = ++sentSid.current
     busyRef.current = i
     setBusyIdx(i)
@@ -150,13 +158,13 @@ export default function ReadingZone({ passage, vocab, boxOf }: Props) {
     // is-zh：显示中文对照时，切成「逐句双语」排版（一句一行、译文紧跟其下）。
     //        不显示中文时是「流式散文」排版（同一段的句子连成一段）。
     <div className={'reading-zone' + (playing ? ' is-playing' : '') + (showZh ? ' is-zh' : '')}>
-      <PlayTools hint="点单词听发音 · 带波浪线的是本课学过的词">
-        <button type="button" className="btn btn-soft" onClick={playAll} data-testid="reading-play-all">
+      <PlayTools hint="点单词听发音 · 金色波浪线的是本课学过的词（宝藏词）">
+        <button type="button" className="btn btn--soft" onClick={playAll} data-testid="reading-play-all">
           {playing ? '⏸ 停止朗读' : '🔊 听整篇'}
         </button>
         <button
           type="button"
-          className={'btn btn-soft' + (showZh ? ' active' : '')}
+          className={'btn btn--soft' + (showZh ? ' active' : '')}
           onClick={() => setShowZh((v) => !v)}
           aria-pressed={showZh}
           data-testid="reading-zh-toggle"

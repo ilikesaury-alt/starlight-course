@@ -89,9 +89,9 @@ export default function UnitQuiz() {
           resultTitle="单元测验完成！"
           resultLinks={
             <>
-              <Link to="/wrong" className="btn btn-soft">📋 看错题本</Link>
-              <Link to={`/preview/${unitId}`} className="btn btn-soft">← 课程列表</Link>
-              <Link to="/smart" className="btn btn-soft">🧠 去复习</Link>
+              <Link to="/wrong" className="btn btn--soft">📋 看错题本</Link>
+              <Link to={`/preview/${unitId}`} className="btn btn--soft">← 课程列表</Link>
+              <Link to="/smart" className="btn btn--soft">🧠 去复习</Link>
             </>
           }
           onPick={({ en, correct }) => recordPick(en, correct)}

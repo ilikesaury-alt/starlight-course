@@ -234,9 +234,9 @@ function QuizTab({
         <div className="cn-quiz-last">⭐ 本次获得 {quizStars(correct, total)} 颗星星</div>
         {lastResult && <div className="cn-quiz-last">最近成绩：{lastResult.score}/{lastResult.total}</div>}
         <div className="result-actions">
-          <button type="button" className="btn btn-sun" onClick={start}>🔁 再测一次</button>
-          <Link to="/wrong" className="btn btn-soft">📋 错题本</Link>
-          <Link to="/smart" className="btn btn-soft">🧠 去复习</Link>
+          <button type="button" className="btn btn--sun" onClick={start}>🔁 再测一次</button>
+          <Link to="/wrong" className="btn btn--soft">📋 错题本</Link>
+          <Link to="/smart" className="btn btn--soft">🧠 去复习</Link>
         </div>
       </div>
     )

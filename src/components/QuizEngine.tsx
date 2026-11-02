@@ -145,7 +145,7 @@ export default function QuizEngine({
               : '错题已加入错题本，再练练一定行！'}
           </p>
           <div className="result-actions">
-            <button type="button" className="btn btn-sun" onClick={restart}>🔁 再做一次</button>
+            <button type="button" className="btn btn--sun" onClick={restart}>🔁 再做一次</button>
             {resultLinks}
           </div>
         </div>
@@ -209,7 +209,7 @@ export default function QuizEngine({
           )}
           <div className="quiz-controls">
             {isAnswered && (
-              <button type="button" className={'btn ' + (isCorrect ? 'btn-sun' : '')} onClick={goNext}>
+              <button type="button" className={'btn ' + (isCorrect ? 'btn--sun' : '')} onClick={goNext}>
                 {idx + 1 >= quiz.length ? '查看结果 🏁' : '下一题 →'}
               </button>
             )}
