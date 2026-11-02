@@ -787,6 +787,14 @@ button.en3-board {
   box-shadow: var(--shadow-sm);
 }
 .en3-script-line.narr { border-left-color: var(--line-2); background: var(--bg-3); }
+/* 正在朗读的那一行：跟着声音走，孩子能对上读到哪句 */
+.en3-script-line.is-speaking {
+  border-color: var(--mc, #2563eb);
+  border-left-width: 7px;
+  background: color-mix(in srgb, var(--mc, #2563eb) 8%, var(--card));
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--mc, #2563eb) 22%, transparent), var(--shadow-sm);
+}
+.en3-script-line.is-speaking .en3-script-en { color: var(--ink); }
 .en3-script-speaker {
   display: inline-block;
   font-size: var(--fs-xs);

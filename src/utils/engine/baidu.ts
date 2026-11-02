@@ -27,6 +27,8 @@ import { playUrl } from './playUrl'
 export interface BaiduOptions {
   /** 播放速率（慢速 0.6 / 正常 1） */
   rate?: number
+  /** 语速档位（1 最慢 ~ 5 最快）；默认 BAIDU_DEFAULT_SPD */
+  spd?: number
   /** 代次守卫 */
   guard?: () => boolean
   /** 创建出 audio 元素时回调，便于上层接管取消逻辑 */
@@ -36,10 +38,22 @@ export interface BaiduOptions {
 }
 
 /** 引擎实际请求的 URL（导出便于单测断言编码与参数） */
-export function buildBaiduTtsUrl(text: string, lang: 'en' | 'zh'): string {
+export function buildBaiduTtsUrl(text: string, lang: 'en' | 'zh', spd = 2): string {
   const lan = lang === 'zh' ? 'zh' : 'en'
-  return `https://fanyi.baidu.com/gettts?lan=${lan}&spd=5&source=web&text=${encodeURIComponent(text)}`
+  return `https://fanyi.baidu.com/gettts?lan=${lan}&spd=${spd}&source=web&text=${encodeURIComponent(text)}`
 }
+
+/**
+ * 百度语速档位。
+ *
+ * 实测（2026-11-02，同一句话对比各档音频时长）：
+ *   spd=1 → 3204ms ｜ spd=2 → 3060ms ｜ spd=3 → 3096ms ｜ spd=4 → 2340ms ｜ spd=5 → 2232ms
+ * 5 档最快，比 1~3 档短约 30%。对幼儿点读/跟读来说偏快 —— 原实现用 spd=5，
+ * 这正是「朗读不好听」的直接来源之一（句子一串就过，孩子跟不上）。
+ * 故默认改用 spd=2（慢速档），慢速朗读再降到 spd=1。
+ */
+export const BAIDU_DEFAULT_SPD = 2
+export const BAIDU_SLOW_SPD = 1
 
 /**
  * 整段 / 分片请求时「先百度还是先有道」。
@@ -65,7 +79,7 @@ export function playBaiduAudio(
   lang: 'en' | 'zh',
   opts: BaiduOptions = {},
 ): Promise<PlayOutcome> {
-  return playUrl(buildBaiduTtsUrl(text, lang), {
+  return playUrl(buildBaiduTtsUrl(text, lang, opts.spd ?? BAIDU_DEFAULT_SPD), {
     guard: opts.guard,
     onAudio: opts.onAudio,
     playbackRate: opts.rate ?? 1,

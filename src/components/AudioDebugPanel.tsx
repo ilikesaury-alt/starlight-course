@@ -20,6 +20,7 @@ import {
   isAudioDebug,
   readAudioEnv,
   subscribeTrace,
+  type EngineName,
   type TraceEvent,
 } from '@/utils/engine/engineTrace'
 import {
@@ -50,6 +51,16 @@ const STATUS_COLOR: Record<TraceEvent['status'], string> = {
   blocked: '#b54708',
   aborted: '#667085',
   note: '#175cd3',
+}
+
+/** 引擎名的中文标签（诊断面板用；一眼看出「这次到底是谁在响」） */
+const ENGINE_LABEL: Record<EngineName, string> = {
+  'edge-neural': 'Edge神经',
+  'edge-tts': 'Edge旧库',
+  kokoro: 'Kokoro',
+  baidu: '百度',
+  youdao: '有道',
+  webspeech: '原生',
 }
 
 function timeOf(at: number): string {
@@ -188,7 +199,7 @@ export default function AudioDebugPanel() {
             .map((e) => (
               <li key={e.id} style={{ borderBottom: '1px solid #2a2a31', padding: '2px 0' }}>
                 <span style={{ color: '#6b7280' }}>{timeOf(e.at)}</span>{' '}
-                <b>{e.engine}</b>{' '}
+                <b>{ENGINE_LABEL[e.engine] ?? e.engine}</b>{' '}
                 <span style={{ color: STATUS_COLOR[e.status] }}>{STATUS_TEXT[e.status]}</span>{' '}
                 <span style={{ color: '#6b7280' }}>{e.ms}ms</span>
                 {e.text && <span style={{ color: '#9aa4b2' }}>「{e.text}」</span>}

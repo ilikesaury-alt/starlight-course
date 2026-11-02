@@ -30,7 +30,7 @@ try {
   /* 初始化失败不影响发音主链路 */
 }
 
-export type EngineName = 'kokoro' | 'edge-tts' | 'youdao' | 'baidu' | 'webspeech'
+export type EngineName = 'kokoro' | 'edge-neural' | 'edge-tts' | 'youdao' | 'baidu' | 'webspeech'
 
 export type EngineStatus = 'success' | 'failed' | 'blocked' | 'aborted' | 'note'
 

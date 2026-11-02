@@ -29,6 +29,8 @@ import {
   isEdgeReady,
   warmupEdgeTts,
 } from './engine/edgeTts'
+import { speakWithEdgeNeural, canUseEdgeNeural } from './engine/edgeNeural'
+import { speakSegmented } from './engine/segmentedSpeak'
 import { unlockAudio } from './audioUnlock'
 import { traceEngine, traceNote, type EngineName } from './engine/engineTrace'
 
@@ -47,6 +49,18 @@ export interface SpeakOptions {
   lang?: 'en' | 'zh'
   onStart?: () => void
   onEnd?: () => void
+  /**
+   * 分段朗读：把多句**一次合成**成整段播放，播放中按时间轴回调当前句序号。
+   *
+   * 存在的理由（实测数据见 engine/segmentedSpeak.ts 头注）：
+   * 逐句朗读每句之间要插一次网络往返（TTFB 300~450ms），5 句就有约 2 秒断点，
+   * 听起来「一顿一顿」。分段朗读只发一次请求、句间停顿更自然。
+   *
+   * 传了它就**不再**走单句 speakText 串行 —— 调用方负责用 onSegment 驱动高亮。
+   */
+  segments?: string[]
+  /** 分段朗读时，当前播放到第几句（从 0 开始） */
+  onSegment?: (index: number) => void
 }
 
 // ---------- 会话状态（模块级单例）----------
@@ -229,9 +243,39 @@ export function speakText(text: string, opts: SpeakOptions = {}) {
   // ---- 构建有界兜底链（优先级从高到低，互不递归）----
   const chain: ChainStep[] = []
   const zh = lang === 'zh'
+  const segments = opts.segments?.filter((s) => s && s.trim()) ?? []
+  /** 是否走「分段朗读」模式（整段一次合成 + 时间轴推进高亮） */
+  const segmentedMode = segments.length > 1
+
+  // 微软神经语音（48kbps 神经音色，中英文统一，句子自然连贯）——
+  // 仅在「服务端会放行」的环境可用：Edge 浏览器。
+  // 服务端校验 User-Agent 里的 `Edg/`，网页 JS 改不了 UA，故 Chrome/Firefox 必然 403，
+  // 这里用 canUseEdgeNeural() 精确判断，避免每次朗读都白等一次失败握手。
+  if (canUseEdgeNeural()) {
+    chain.push({
+      name: 'edge-neural',
+      run: () => speakWithEdgeNeural(text, lang, { slow, guard, onAudio }),
+    })
+  } else if (segmentedMode) {
+    // 分段朗读（整段一次合成）：把多句合并成一个请求播放，句间不插网络往返。
+    // 逐句朗读每句之间要插一次网络往返（实测 TTFB 300~450ms/句），
+    // 5 句话就有约 2 秒断点，听起来「一顿一顿」—— 这是朗读体验最大的隐性损耗。
+    chain.push({
+      name: 'baidu',
+      run: () =>
+        speakSegmented(segments, {
+          lang,
+          slow,
+          guard,
+          onAudio,
+          onSegment: opts.onSegment,
+        }),
+    })
+  }
 
   if (zh) {
-    // 中文：Edge TTS（仅 Edge 且已预热）→ 云 TTS（百度恒优先，有道中文几乎恒空白；
+    // 中文：微软神经语音（可用时置顶）→ Edge TTS（旧 CDN 库，v1 令牌已失效，
+    //          仅作历史兼容）→ 云 TTS（百度恒优先，有道中文几乎恒空白；
     //          整段→分片→原生兜底）→ WebSpeech
     if (isEdgeTtsEnabled() && isEdgeBrowser()) {
       if (isEdgeReady()) {
@@ -240,10 +284,14 @@ export function speakText(text: string, opts: SpeakOptions = {}) {
         warmupEdgeTts() // 模块尚未预热：后台预热，首次点击仍走有道保证跟手
       }
     }
-    chain.push({ name: 'youdao', run: () => playYoudaoResilient(text, 'zh', slow ? 0.6 : 1, guard, onAudio) })
+    chain.push({
+      name: 'youdao',
+      run: () => playYoudaoResilient(text, 'zh', 1, guard, onAudio, slow),
+    })
   } else {
-    // 英文：Kokoro（快设备优先；慢设备退到云 TTS 之后当离线备份）→
-    //      云 TTS（整句先百度、单词先有道，整段→分片→原生兜底）→ WebSpeech
+    // 英文：微软神经语音（可用时置顶）→ Kokoro（快设备优先；慢设备退到云 TTS
+    //      之后当离线备份）→ 云 TTS（整句先百度、单词先有道，整段→分片→原生兜底）
+    //      → WebSpeech
     let kokoroBackup: ChainStep | null = null
     if (isKokoroEnabled()) {
       if (isKokoroReady()) {
@@ -264,14 +312,23 @@ export function speakText(text: string, opts: SpeakOptions = {}) {
         warmupKokoro()
       }
     }
-    chain.push({ name: 'youdao', run: () => playYoudaoResilient(text, 'en', slow ? 0.6 : 1, guard, onAudio) })
+    chain.push({
+      name: 'youdao',
+      run: () => playYoudaoResilient(text, 'en', 1, guard, onAudio, slow),
+    })
     // 云端也全军覆没（典型：离线）时才轮到 Kokoro 备份，再往后才是原生合成器
     if (kokoroBackup) chain.push(kokoroBackup)
   }
   // 兜底链最后一级：传 lastResort，让原生合成器无视假死冷却期。
   // 否则一旦引擎假死被判「死亡」，冷却期内每次点击都直接失败 —— 而此时
   // 已经没有下一级可降级，表现就是「前一句还能响，之后整段没声音」。
-  chain.push({ name: 'webspeech', run: () => speakWithWebSpeech(text, { lang, rate, guard, lastResort: true }) })
+  //
+  // ⚠️ 慢速只给**原生合成器**降 rate（0.6）：云 TTS 走源端慢速档（spd=1），
+  // 原生合成器没有「源端慢速」这个概念，只能靠 rate 放慢。
+  chain.push({
+    name: 'webspeech',
+    run: () => speakWithWebSpeech(text, { lang, rate: slow ? 0.6 : rate, guard, lastResort: true }),
+  })
 
   // 请求级硬预算：无论如何都会复位 UI（不取消音频，让其自然结束）。
   // 下限取 25s：慢网（实测安卓 5G 单词 1.6s、整句撞满 8s 超时）下，

@@ -30,11 +30,18 @@ import { PlayOutcome } from './types'
 import { playUrl } from './playUrl'
 import { speakWithWebSpeech } from './webSpeech'
 import { traceNote } from './engineTrace'
-import { playBaiduAudio, preferBaiduFirst } from './baidu'
+import {
+  playBaiduAudio,
+  preferBaiduFirst,
+  BAIDU_DEFAULT_SPD,
+  BAIDU_SLOW_SPD,
+} from './baidu'
 
 export interface YoudaoOptions {
   /** 播放速率（慢速 0.6 / 正常 1） */
   rate?: number
+  /** 百度语速档位（慢速朗读用更慢的档，见 baidu.ts 的实测数据） */
+  spd?: number
   /** 代次守卫 */
   guard?: () => boolean
   /** 创建出 audio 元素时回调，便于上层接管取消逻辑 */
@@ -166,6 +173,17 @@ let breakerUntil = 0
 type CloudEngine = 'youdao' | 'baidu'
 
 /**
+ * 「百度整段」的语速档位：慢速朗读用更慢的**源**语速，而不是把快音频慢放。
+ *
+ * 慢放（playbackRate 0.6）会引入金属感与轻微变调，听着「不像人在说话」；
+ * 源头慢速档（spd=1）则是微软/百度合成的自然慢速人声。对幼儿跟读来说，
+ * 「慢而自然」远好于「慢而糊」——这是本次朗读体验改进的核心之一。
+ */
+function baiduSpd(slow: boolean): number {
+  return slow ? BAIDU_SLOW_SPD : BAIDU_DEFAULT_SPD
+}
+
+/**
  * 试一次「整段」请求。
  *
  * 整段用较短的超时（`WHOLE_LOAD_TIMEOUT`）：慢网实测「单词 1.6s 响、整句撞满 8s 超时」，
@@ -178,10 +196,17 @@ function playWhole(
   rate: number,
   guard: () => boolean,
   onAudio?: (el: HTMLAudioElement) => void,
+  slow = false,
 ): Promise<PlayOutcome> {
   return eng === 'youdao'
     ? playYoudaoAudio(text, lang, { rate, guard, onAudio, loadTimeout: WHOLE_LOAD_TIMEOUT })
-    : playBaiduAudio(text, lang, { rate, guard, onAudio, loadTimeout: WHOLE_LOAD_TIMEOUT })
+    : playBaiduAudio(text, lang, {
+        rate,
+        guard,
+        onAudio,
+        loadTimeout: WHOLE_LOAD_TIMEOUT,
+        spd: baiduSpd(slow),
+      })
 }
 
 /** 当前是否处于熔断期（应跳过**有道**，但百度 / 原生合成器仍可用） */
@@ -219,6 +244,7 @@ export async function playYoudaoResilient(
   rate: number,
   guard: () => boolean,
   onAudio?: (el: HTMLAudioElement) => void,
+  slow = false,
 ): Promise<PlayOutcome> {
   if (!guard()) return { status: 'aborted' }
 
@@ -236,7 +262,7 @@ export async function playYoudaoResilient(
   for (const eng of order) {
     if (eng === 'youdao' && !youdaoAllowed()) continue
     triedWhole = true
-    const out = await playWhole(eng, text, lang, rate, guard, onAudio)
+    const out = await playWhole(eng, text, lang, rate, guard, onAudio, slow)
     if (out.status === 'success') {
       if (eng === 'youdao') onHit()
       return ok(eng)
@@ -284,7 +310,7 @@ export async function playYoudaoResilient(
         const out =
           eng === 'youdao'
             ? await playYoudaoAudio(piece, lang, { rate, guard, onAudio })
-            : await playBaiduAudio(piece, lang, { rate, guard, onAudio })
+            : await playBaiduAudio(piece, lang, { rate, guard, onAudio, spd: baiduSpd(slow) })
         if (out.status === 'success') {
           hit = eng
           if (eng === 'youdao') anyYoudaoHit = true

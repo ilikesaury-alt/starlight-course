@@ -23,6 +23,8 @@ export default function Eng3aPlayScript() {
   const seedCards = useCourseStore((s) => s.seedCards)
 
   const [role, setRole] = useState<string>('全部')
+  // 正在朗读的台词序号（跟着声音高亮当前行）
+  const [nowLine, setNowLine] = useState(-1)
 
   // 进剧本即把重点词播种进 SRS（module='eng3a'），进入智能复习到期调度
   useEffect(() => {
@@ -66,8 +68,15 @@ export default function Eng3aPlayScript() {
     role === '全部' ? play.lines : play.lines.filter((l) => l.speaker === role)
 
   const readAll = () => {
-    const text = visibleLines.map((l) => l.en).join(' ')
-    speakText(text, { lang: 'en' })
+    // 整剧朗读：**一次合成整段**再播放（而不是一句句轮流合成），
+    // 句间不插网络往返，听起来连贯；同时按时间轴高亮当前台词行。
+    const segs = visibleLines.map((l) => l.en)
+    speakText(segs.join(' '), {
+      lang: 'en',
+      segments: segs,
+      onSegment: (i) => setNowLine(i),
+      onEnd: () => setNowLine(-1),
+    })
   }
 
   const speakerLabel = (name?: string) =>
@@ -117,7 +126,9 @@ export default function Eng3aPlayScript() {
           {visibleLines.map((l, i) => (
             <div
               key={i}
-              className={'en3-script-line' + (l.speaker ? '' : ' narr')}
+              className={
+                'en3-script-line' + (l.speaker ? '' : ' narr') + (nowLine === i ? ' is-speaking' : '')
+              }
               style={l.speaker ? mcStyle : undefined}
             >
               {l.speaker && <span className="en3-script-speaker">{speakerLabel(l.speaker)}</span>}

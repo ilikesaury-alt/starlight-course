@@ -1,9 +1,16 @@
 /**
- * 微软 Edge TTS（云端，免费、免密钥）中文增强引擎。
+ * 微软 Edge TTS（云端，免费、免密钥）中文增强引擎。**已默认停用**（2026-11-02）。
  *
- * 仅在 **Microsoft Edge** 浏览器可用：微软自 2025 年底要求 WebSocket 携带 Edge 专属头，
- * Chrome/Firefox/Safari 前端无法设置该头，连接会失败 —— 此时由 speak.ts 自动回落到原有「有道 → WebSpeech」。
- * 英文仍由 Kokoro(WebGPU) 处理，本模块只负责中文，互不影响。
+ * ⚠️ 为什么停用：这个模块走 CDN 上的 `edge-tts-universal/browser`，而那个库还在发
+ * **v1 版 DRM 令牌**（`Sec-MS-GEC-Version=1-…`）。微软自 2026-10 起已全面拒绝 v1，
+ * 实测本机（Edge 浏览器 + 该库）握手直接失败 —— 留着只会每次朗读白等一次超时。
+ *
+ *   替代方案：`engine/edgeNeural.ts` —— 本项目自己实现的 v2 令牌版神经语音引擎，
+ *   无 CDN 依赖、中英文都支持、48kbps（比百度的 24kbps 清晰一倍）。
+ *   它同样只在 Edge 浏览器可用（服务端校验 UA 里的 `Edg/`），这与本模块的限制一致。
+ *
+ * 保留本文件的原因：万一将来 CDN 库修好 v2 token（或需要回滚），代码还在。
+ * 想启用：控制台执行 `localStorage.setItem('starlight.edgetts.enabled','1')` + 刷新。
  *
  * 设计要点（与 kokoro.ts 一致）：
  *   - 运行时从 CDN（esm.sh）动态导入 edge-tts-universal/browser，不进入构建依赖。
@@ -44,10 +51,12 @@ let edgeModuleLoaded = false
 function readEnabledFlag(): boolean {
   try {
     const v = localStorage.getItem(STORAGE_KEY)
-    if (v === null) return true // 默认开启
+    // 默认**关闭**：CDN 库还在发 v1 令牌，微软自 2026-10 起已全面拒绝 → 必然失败。
+    // 保留代码以备将来（见文件头说明），要启用请显式设 '1'。
+    if (v === null) return false
     return v === '1' || v === 'true'
   } catch {
-    return true
+    return false
   }
 }
 

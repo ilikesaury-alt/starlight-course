@@ -54,8 +54,9 @@ npm run electron:build  # 打包 Windows NSIS 安装包（产物在 release/）
 - ESLint uses react-hooks and react-refresh plugins
 - `react-dev-locator` babel plugin included for development debugging
 - Speech synthesis goes through `src/utils/speakService.ts` — a **bounded fallback chain** (never recursive, never dead-loops), with a per-request hard budget so a play button can never hang:
-  - 英文: **Kokoro**(神经 TTS，**默认关闭**，需显式开启) → 云 TTS（`playYoudaoResilient`：**整句先百度、单词先有道**） → WebSpeech
-  - 中文: **Edge TTS**(仅 Edge 且已预热) → 云 TTS（**百度恒优先**） → WebSpeech
+  - 英文: **微软神经语音**(`edgeNeural`，仅 Edge 浏览器可用，见下「微软神经语音」) → **Kokoro**(神经 TTS，**默认关闭**，需显式开启) → 云 TTS（`playYoudaoResilient`：**整句先百度、单词先有道**） → WebSpeech
+  - 中文: **微软神经语音**(同上) → Edge TTS(旧 CDN 库) → 云 TTS（**百度恒优先**） → WebSpeech
+  - **分段朗读**（`engine/segmentedSpeak.ts`）：传 `speakText(text, {segments, onSegment})` 时**一次合成整段**再播放，句间不插网络往返。这是「朗读不好听」里最被忽略的一半 —— 见下「分段朗读」
   - **Kokoro 默认关闭，英文走「有道 → WebSpeech」（1~3s 出声）**。这是 2026-10-09 实测后**反转**过的判断，别再凭「神经音色更好」打开它：
     - 实测大量机器 WebGPU 拿不到适配器（老 Intel 核显 2016 驱动、**无 `vulkan-1.dll`**、远程桌面 / 虚拟机）→ 只能退 CPU；
     - CPU 上 82M 参数模型实测**每个单词 7~9 秒**。幼儿点读等不了（会在第一个词出声前点掉五六个），还要叠加首次 88MB 下载；
@@ -70,7 +71,25 @@ npm run electron:build  # 打包 Windows NSIS 安装包（产物在 release/）
   - **慢设备自适应（2026-10-09 手机实测一个单词 5~6s、整句 20~60s）**：Kokoro 生成有**按词数放宽的时间预算**（`generateBudgetMs`，6s 基础 + 2s/词、封顶 20s；离线备份场景放宽到 30s），超时判 failed 直接降级云 TTS；生成成功但 >5s 也会把本会话标记为**慢设备**（`isKokoroSlow`）—— 之后 Kokoro 退到云 TTS **之后**只当断网备份（云端 2~3 秒能出声就没必要让孩子干等）。诊断面板显示 `🐢 慢（退到云后）`
     - 该阈值**对 WASM 同样适用且是必需的**：CPU 上每词 7~9s 必然超阈值 → 第一次慢就把 Kokoro 降到云 TTS 之后，后续点击回到 1~3s。曾给 WASM 开过 30s「免判慢」的特例，等于让每次点击都死等 9 秒，是错误的判断（已撤销）。WASM 只是**生成预算**更宽（`wasmBudgetMs`：12s 基础 + 4s/词、封顶 45s），好让第一次能跑完并完成这次「测速」
   - **跟读区的开麦兜底**：`useSentenceReader` 等示范 `onEnd` 开麦，另有 `PHASE_TIMEOUT_MS=12s` 保险 —— 到点先 `cancelSpeech()` 停掉还没播完的示范再开麦，绝不让流程卡在一声不响的等待上，也不让迟到音频盖在孩子跟读上
+  - **微软神经语音**（`engine/edgeNeural.ts`，2026-11-02 新增）——**当前音质最好的引擎**，48kbps 神经音色（对比百度只有 24kbps/16kHz），中英文统一，句子自然连贯。⚠️ 但**只在 Edge 浏览器可用**，原因很硬：
+    - 服务端（`speech.platform.bing.com` 的 WSS 合成接口）**校验 User-Agent 里的 `Edg/`**。2026-11-02 消融实验（每种组合都握手实测）：Edge UA → **101 握手成功**；Chrome UA → 403；无 UA → 403；**Origin / Cookie / Client Hints 全都无关**（普通网页 Origin 即可，不必伪装扩展）
+    - **网页 JS 无法设置 User-Agent**（浏览器受禁头）→ Chrome/Firefox 必然 403。故 `canUseEdgeNeural()` 严格按 `/Edg\//` 判断 UA，Chrome 下**直接跳过该级**，不去白等一次失败握手
+    - ❗**DRM 令牌必须是 v2 格式**：`<16 hex CS64>-<64 hex SHA256>` + `Sec-MS-GEC-Version=2-…`。旧 v1（64 位 hex + `1-`）自 2026-10 起**被服务端全面拒绝**。算法移植自 edge-tts(MIT) 的 `drm.py`（`engine/msGecV2.ts`），单测用 Edge 真实抓包向量逐字节校验（`generateSecMsGecV2(1791888000)` → `492D7694A183A45E-…`）。**别再退回 v1，也别用 CDN 上的 edge-tts-universal —— 它还在发 v1，必然 403**
+    - **微软私有帧格式**（`extractMp3Payload`）：二进制帧 = `00 80` + 2 字节 MP3 同步字 + ascii 元数据头（以 `Path:audio\r\n` 结尾）+ MP3 数据。直接把整帧当 MP3 会多出前导 0x00 字节 → 播放器解码失败 → 「点了没声音」
+    - ⚠️ **浏览器 WebSocket 的二进制帧是 Blob 不是 ArrayBuffer**：`new Uint8Array(ev.data)` 得到空数组。必须 `await ev.data.arrayBuffer()`
+    - 端点无 CORS 头 → 只能 `<audio>` 直连播放，不能 `fetch` 成 blob（与其他引擎统一走 `playUrl`）
+    - 实测性能：握手 0.8~1.6s，首音 1.0~1.7s，整句合成完 1.2~2.4s
+  - **分段朗读**（`engine/segmentedSpeak.ts`）——「朗读不好听」里**最被忽略的一半**：逐句朗读的天然实现是「句1 合成→播放→句2 合成→播放…」，于是**每句之间插一次网络往返**（实测 TTFB 300~450ms/句），5 句话就有约 2 秒断点，听起来「一顿一顿」。实测同一段 5 句：逐句 = 14.9s（5 次往返）vs **合并一次合成 = 11.8s（1 次往返）**；百度在合并时还会压缩句间停顿，听感更连贯
+    - 做法：先**并发**量出每句时长（实测 5 句并发 ≈ 567ms），再把整段合并成**一次**请求播放，用量出的时长当时间窗推进「当前句」高亮
+    - ⚠️ **合并音频比逐段总长短约 30%**（实测合并 9864ms vs 逐段合计 14256ms）→ 时间窗必须**按比例缩放**到合并音频的实际时长，否则高亮越走越滞后
+    - ⚠️ **`timeupdate` 必须在 audio 元素创建时挂**（`playUrl` 的 `onAudio` 回调里），不能等 `playUrl` 返回 —— 它的 `success` 是**播放结束**时才 resolve 的，那时再挂就永远收不到事件
+    - 用法：`speakText(text, { segments: [...], onSegment: (i) => setNowIdx(i) })`。`ReadingZone` 的「听整篇」与 `Eng3aPlayScript` 的「朗读全剧」已改用此路径
+  - **百度语速档位**（`engine/baidu.ts`）：原实现用 `spd=5`（最快），实测同句 spd=1~3 ≈ 3.0s、spd=4~5 ≈ 1.9s —— 对幼儿**偏快**。现已改为默认 `spd=2`、慢速朗读 `spd=1`
+    - ⚠️ **慢速要用「源端慢速档」而不是「播放端慢放」**：慢放（`playbackRate=0.6`）有金属感与轻微变调，听着「不像人在说话」；源端 spd=1 是合成的自然慢速人声。「慢而自然」远好于「慢而糊」
+    - 慢放只保留给**原生合成器**（`webSpeech` rate=0.6）—— 它没有「源端慢速」这个概念
   - **有道不是通用 TTS**（实测 `dict.youdao.com`）：单词稳定，整句约 **65% 返回 HTTP 500**，中文几乎只回**同一段 48ms 空白音频**（不同文本字节完全相同）。所以它只能当「锦上添花」，句子发音的真正底线是云 TTS + 设备自带的 WebSpeech —— 这条链路必须保证任何设备（含手机）都能出声
+  - **Chrome 网页端拿不到神经音色**（2026-11-02 全面实测）：Google Translate TTS 国内**连接超时**；有道整句 500；搜狗/腾讯/讯飞/阿里/火山全部不可用；微软的 HTTP 合成接口全 404/403（只有 `voices/list` 可直连）。**唯一可用的是百度**（整句 12/12 成功，TTFB 385~925ms）。所以 Chrome 端的质量上限就是百度的 24kbps/16kHz —— 想再提升只能等微软放开 UA 校验
+  - ⚠️ **Windows 上的原生合成器没有英文本地嗓音**（实测本机：只有 zh-CN Huihui/Kangkang/Yaoyao + en-US Google 远端）。Google 远端嗓音在国内 `speak()` 既不 onstart 也不 onerror（静默无回调）→ 英文句子的最终兜底**不可靠**，这也是「整句朗读必须有云 TTS 兜底」的原因
   - **百度云 TTS 是「句子没声」的解药**（`engine/baidu.ts`，实测 `fanyi.baidu.com/gettts` 整句 8/8、中文 3/3 返回真实音频，TTFB ≈ 480ms）。⚠️ **带非百度的 Referer 就回 0 字节 `text/html`**（`Origin` 头无害、`Referer` 有罪），所以 `index.html` 必须保留 `<meta name="referrer" content="no-referrer">` —— 删掉它 `<audio>` 会拿到空 HTML（`MEDIA_ERR_SRC_NOT_SUPPORTED`），整句重新变静音。百度也没有 CORS 头，只能 `<audio>` 直连播放、不能 `fetch` 成 blob（统一走 `playUrl`）
   - **空白音频 = 失败**：`playUrl` 把时长 < 200ms 的片段判 `failed`（而非 `onended` 就当成功），否则兜底链会停在静音上、后面所有引擎都不再发声，表现为「点了完全没声音」且无任何报错
   - **整段（按序双引擎）→ 分片（同序双引擎）→ 原生兜底**（`playYoudaoResilient`）；连续拿不到有效音频时熔断 60s，**只跳过有道**（百度与原生照常），避免每句都白等一串必然失败的请求。借道别的引擎出声时结果带 `via`，诊断面板按实际引擎记名
@@ -93,6 +112,12 @@ npm run electron:build  # 打包 Windows NSIS 安装包（产物在 release/）
 - SRS: `src/data/srs.ts` holds card types + Leitner-compat derived fields, `src/data/fsrsScheduler.ts` holds the FSRS kernel (ts-fsrs). FSRS state lives in the nested `SrsCard.fsrs`; `box/nextReview/streak` are derived and kept in sync for the old UI
 - Extensions: `src/data/extensionTopics.ts` is a hand-curated theme word bank (52 themes, ~630 en/zh/emoji words) covering all 96 lessons — no open RAZ dataset exists (Reading A-Z is copyrighted), so the bank is maintained by hand. **`EXT_LIMIT = 5` words per lesson** (hard cap, shared by auto-fill and manual entry). `suggestExtensions()` picks by theme, drops lesson words + already-added words, and rotates by `round` so 「换一批」 really changes the batch. Auto-fill runs **once per lesson** when the list is first empty; `store.extensionRound` remembers the round so deleting words never triggers a refill
 - Sentence frames: `src/data/sentenceFrame.ts` holds 98 hand-written fill-in-the-blank frames — **every one of the 96 lessons has at least one**, so 「🧩 句型」 never shows 「这一课还没有句型框架卡。」 (that empty state existed while coverage was 2 cards per 12 units). Frames are seeded into the shared review pool **only when the lesson is opened** (`seedSentenceFrames` in `LessonPreview`), so the pool grows with study progress instead of pre-occupying review seats. `frameZh` supports **single blanks only** (`zhOptions` holds whole-sentence Chinese — a template swap produces broken Chinese), and a few lessons whose every sentence is an "A or B?" choice use a **zero-blank** card where the child reads the whole sentence. `sentenceFrame.test.ts` machine-checks the invariants, including that filling in the correct answer reproduces a sentence the lesson actually teaches (that check caught two pilot frames hung on the wrong lesson)
+- 阅读短文（`src/data/reading/unit1..12.ts`，96 篇，每课一段 70~100 词）：**2026-11-02 起全部重写为「小故事」文体**，规格见 `docs/reading-passage-style.md`（含定稿样例 1-1/1-2 与 9 条文体要求）。旧版是互不相关的句子清单（例句集），新版每篇 = 完整因果链 + 对话推进 + 结尾回声余韵，段落 = 叙事节拍，中文同步改成温暖口语。**硬约束不变**（`readingPassage.test.ts` 8 条）：零超纲（`allowedWordsFor` 口径）、本课词 100% 出现、70~100 词 / 8~12 句 / 1~3 段、每句有中文、英文无中文标点、同篇无重复句
+  - **改写/新增短文先读 `docs/reading-passage-style.md`**，再跑 `node scripts/check-reading.mjs N --stats`（N = 单元号）自验。❗这个脚本**不依赖 vitest/vite server**（只用 esbuild 现场打包 TS 再 import），**12 个 Agent 并行改写时不会互相抢 `node_modules/.vite` 缓存**导致假失败；单测 `readingPassage.test.ts` 仍是 CI 的唯一权威口径（用 `$env:READING_UNIT='N'` 只校验单单元）
+  - `--brief` 模式打印该单元的**精确允许词表 + 逐课词表 + 本课句型**：`node scripts/check-reading.mjs N --brief`。写之前先看它，别凭感觉猜词
+  - ⚠️ 常见超纲词（多个 Agent 栽过）：`by` `land` `lands` `orange` `first` `let` `end` `race` `full` `quiz` `winner` `grow` `sunny` `soon` `meow` `softly` `beautiful` `wonderful` `street` `seaside`
+  - ⚠️ **多词词条可以如实写出来**（旧注释说「写不出来」是误判）：单测的「本课词 100%」是 `w.split(' ').every(part => fullText.includes(part))` —— 按空格拆开做**子串**匹配，不是拿整串比 token 集合；且 `sea/world/umbrella/tennis/merry/round/bumper/ferris/wheel` 早就在 `BASE_WORDS` 里。**不要为绕开多词词条而牺牲内容质量**
+  - 阅读区视觉：`.reading-body` 是「书页」（暖纸色 + 斜向纤维纹 + 顶部丝带），`.reading-title` 居中带手写下划线；**两种排版模式**由 `.reading-zone.is-zh` 切换 —— 默认「流式散文」（句子 inline-block 连成一段），显示中文后切「逐句双语」（一句一行、译文紧跟其下）。改样式**不得破坏** e2e 契约（`tests/starlight-zones.spec.ts`）：类名一个都不能改、`.reading-sent` == `.reading-zh` == `.reading-say` 数量、译文必须在英文**下方**且与英文**左对齐**（偏差 < 6px）、`.tt-word` 默认透明底
 
 - Phonics: `src/data/phonics.ts` 的音素切分口径**对齐《字母积木》(Alphablocks / BBC CBeebies) 的教学分级** —— 孩子正在看的动画是这套片，app 必须跟动画对得上号，否则提示反而干扰：
   - L1-2 单字母 / L3 字母小队（两三个字母合成一个音：`ch`/`ai`/`igh`/`ar`/`er`…）/ L4 手拉手（辅音簇各发各的音：`st`/`bl`/`-nd`）/ L5 魔法E（`e` **单独成格**、自己不发声、但让前面元音发长音）/ 特别篇双写（`ll`/`ss`/`ff` 合成一个音）
@@ -118,7 +143,7 @@ src/
 ├── pages/         # page components (Home, LessonPreview, SmartReview, etc.)
 ├── hooks/         # useSettleQuiz(结算) / useSpeechRecognition(STT) / useSentenceReader(跟读编排)
 ├── data/          # 课程内容(starlight.ts, lessons.ts) + sentenceFrame.ts(句型框架) + extensionTopics.ts(拓展词主题库) + srs.ts / fsrsScheduler.ts
-├── utils/         # stars.ts(星规) / similarity.ts(跟读评分) / reviewQueue.ts(复习配额) / speakService + engine/(youdao·baidu·webSpeech·kokoro·edgeTts)
+├── utils/         # stars.ts(星规) / similarity.ts(跟读评分) / reviewQueue.ts(复习配额) / speakService + engine/(youdao·baidu·webSpeech·kokoro·edgeTts·edgeNeural·msGecV2·segmentedSpeak)
 └── store/         # Zustand state management (含 starlightExtensions 拓展词 + extensionRound 填充轮次)
 ```
 

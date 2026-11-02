@@ -89,29 +89,30 @@ export default function ReadingZone({ passage, vocab, boxOf }: Props) {
     sentRefs.current[i]?.scrollIntoView({ block: 'center', behavior: 'smooth' })
   }
 
-  // 按句串行朗读：第 i 句播完（onEnd）接第 i+1 句；播到末尾自己收尾。
-  // speakService 保证 onEnd 必达（请求级硬预算），所以这条链不会卡死。
-  const playFrom = (i: number) => {
-    if (i >= sentences.length) {
-      chainRef.current = false
-      setPlaying(false)
-      setNowIdx(-1)
-      return
-    }
-    setNowIdx(i)
-    scrollToSent(i)
-    speakText(cleanForSpeak(sentences[i].en), {
-      slow,
-      onStart: () => setPlaying(true),
-      onEnd: () => { if (chainRef.current) playFrom(i + 1) },
-    })
-  }
-
   const playAll = () => {
     // 再点一次正在播的按钮 = 停止，别让孩子以为卡住了
     if (playing) { stop(); return }
     chainRef.current = true
-    playFrom(0)
+    // 整篇连读：**一次合成整段**再播放，而不是一句一句轮流合成。
+    // 逐句轮流合成时每句之间要插一次网络往返（实测 TTFB 300~450ms/句），
+    // 5 句话就有约 2 秒断点，听起来「一顿一顿」；整段合成只发一次请求，
+    // 句间停顿也更自然（实测同一段 4 句：逐句 10.8s + 4 次往返 vs 合并 7.5s + 1 次往返）。
+    const segs = sentences.map((s) => cleanForSpeak(s.en))
+    speakText(segs.join(' '), {
+      slow,
+      segments: segs,
+      onStart: () => setPlaying(true),
+      onSegment: (idx) => {
+        if (!chainRef.current) return
+        setNowIdx(idx)
+        scrollToSent(idx)
+      },
+      onEnd: () => {
+        chainRef.current = false
+        setPlaying(false)
+        setNowIdx(-1)
+      },
+    })
   }
 
   // 单独朗读某一句（逐句朗读）：不打断整篇连读的高亮，但和整篇互锁。
@@ -146,7 +147,9 @@ export default function ReadingZone({ passage, vocab, boxOf }: Props) {
 
   return (
     // is-playing：整篇/单句朗读中，用于 focus dimming（非当前句降到 32%）
-    <div className={'reading-zone' + (playing ? ' is-playing' : '')}>
+    // is-zh：显示中文对照时，切成「逐句双语」排版（一句一行、译文紧跟其下）。
+    //        不显示中文时是「流式散文」排版（同一段的句子连成一段）。
+    <div className={'reading-zone' + (playing ? ' is-playing' : '') + (showZh ? ' is-zh' : '')}>
       <PlayTools hint="点单词听发音 · 带波浪线的是本课学过的词">
         <button type="button" className="btn btn-soft" onClick={playAll} data-testid="reading-play-all">
           {playing ? '⏸ 停止朗读' : '🔊 听整篇'}
@@ -164,7 +167,7 @@ export default function ReadingZone({ passage, vocab, boxOf }: Props) {
 
       <article className="reading-body">
         <h3 className="reading-title">
-          {passage.title}
+          <span className="reading-title-en">{passage.title}</span>
           <span className="reading-title-zh">{passage.titleZh}</span>
         </h3>
 
