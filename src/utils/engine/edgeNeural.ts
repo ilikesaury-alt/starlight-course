@@ -76,9 +76,29 @@ export function setEdgeNeuralEnabled(enabled: boolean): void {
  * 所以判断必须严格 —— 误判会让每次朗读都白等一次 403。
  */
 export function canUseEdgeNeural(): boolean {
-  if (typeof navigator === 'undefined') return false
   if (!state.enabled) return false
-  return /Edg\//.test(navigator.userAgent)
+  return isEdgeUserAgent(readUserAgent())
+}
+
+/**
+ * UA 是否是 Edge（服务端认的就是 `Edg/` 这个标识）。
+ *
+ * 抽成纯函数有两个好处：
+ *   1. 单测可以直接断言它，**不必依赖运行环境有没有 `navigator` 全局**
+ *      （vitest 默认 node 环境；Node < 21 就没有 `navigator`，测试会直接 ReferenceError）；
+ *   2. 判据集中在一处，将来微软改判据（比如换成 `Edg-A`）只改这一行。
+ */
+export function isEdgeUserAgent(ua: string | undefined | null): boolean {
+  return !!ua && /Edg\//.test(ua)
+}
+
+/** 安全地读当前 UA：没有 navigator（node 环境 / SSR）时返回空串 */
+function readUserAgent(): string {
+  try {
+    return typeof navigator === 'undefined' ? '' : navigator.userAgent || ''
+  } catch {
+    return ''
+  }
 }
 
 /** 生成 SSML（微软协议要求 voice + prosody 包住正文） */

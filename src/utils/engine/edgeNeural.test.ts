@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { buildSsml, extractMp3Payload, canUseEdgeNeural } from './edgeNeural'
+import { buildSsml, extractMp3Payload, canUseEdgeNeural, isEdgeUserAgent } from './edgeNeural'
 import { buildBaiduTtsUrl, BAIDU_DEFAULT_SPD, BAIDU_SLOW_SPD } from './baidu'
 
 describe('edgeNeural（微软神经语音引擎）', () => {
@@ -34,17 +34,45 @@ describe('edgeNeural（微软神经语音引擎）', () => {
     expect(Array.from(extractMp3Payload(frame))).toEqual([0xff, 0xf3])
   })
 
-  it('canUseEdgeNeural：只有 UA 带 Edg/ 才为真（服务端按 UA 校验）', () => {
-    const orig = navigator.userAgent
+  it('isEdgeUserAgent：只有 UA 带 Edg/ 才为真（服务端按 UA 校验）', () => {
+    // 纯函数断言 —— 不碰 navigator 全局，因此与运行环境（node/jsdom）无关
+    expect(
+      isEdgeUserAgent(
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/155.0.0.0 Safari/537.36 Edg/155.0.4283.45',
+      ),
+    ).toBe(true)
+    expect(
+      isEdgeUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/155.0.0.0 Safari/537.36'),
+    ).toBe(false)
+    expect(isEdgeUserAgent(undefined)).toBe(false)
+    expect(isEdgeUserAgent(null)).toBe(false)
+    expect(isEdgeUserAgent('')).toBe(false)
+  })
+
+  it('canUseEdgeNeural 跟随 UA 变化（用 stub 替换全局 navigator）', () => {
+    // ⚠️ 不能直接写 `navigator.userAgent`：vitest 默认 node 环境在 Node < 21 下
+    // **没有 navigator 全局**，裸访问会 ReferenceError（测试直接挂）。
+    // 这里统一走 globalThis + 自建 stub，两种环境都能跑。
+    const g = globalThis as { navigator?: { userAgent?: string } }
+    const had = Object.prototype.hasOwnProperty.call(globalThis, 'navigator')
+    const orig = had ? g.navigator : undefined
     const set = (ua: string) =>
-      Object.defineProperty(globalThis.navigator, 'userAgent', { value: ua, configurable: true })
+      Object.defineProperty(globalThis, 'navigator', {
+        value: { userAgent: ua },
+        configurable: true,
+        writable: true,
+      })
     try {
       set('Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/155.0.0.0 Safari/537.36 Edg/155.0.4283.45')
       expect(canUseEdgeNeural()).toBe(true)
       set('Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/155.0.0.0 Safari/537.36')
       expect(canUseEdgeNeural()).toBe(false)
     } finally {
-      set(orig)
+      if (had) {
+        Object.defineProperty(globalThis, 'navigator', { value: orig, configurable: true, writable: true })
+      } else {
+        delete g.navigator
+      }
     }
   })
 })
