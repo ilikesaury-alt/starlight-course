@@ -4,25 +4,29 @@
 //  组件样式通过 @include 复用这些片段，避免各页面重复书写相同的
 //  圆角 / 阴影 / 按压反馈 / 多行截断等规则，从而保证视觉一致。
 //  用法（在 partial 顶部）：@use 'mixins' as *;
+//
+//  —— 2026-11-04 视觉重整 ——
+//  · `card` 不再带阴影：卡片靠「一档色阶差」或「一根 1px 细边」浮起。
+//  · `btn-base` 圆角从药丸改为 12px：药丸到处用是"AI 模板页"的味道。
+//  · 删掉 `grad-soft` 与 `blob`：渐变底与装饰光斑一律不用。
 // ============================================================
 
-// 通用卡片表面：白底、圆角、细边、轻阴影
+// 通用卡片表面：白底、圆角、细边（**无阴影**）
 @mixin card($radius: var(--r-lg), $pad: var(--sp-4)) {
   background: var(--card);
   border-radius: $radius;
   padding: $pad;
   border: 1px solid var(--line);
-  box-shadow: var(--shadow-sm);
 }
 
-// 按钮基础：内联弹性、圆角药丸、粗体、过渡
+// 按钮基础：内联弹性、12px 圆角、粗体、过渡
 @mixin btn-base {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
   font-weight: 700;
-  border-radius: var(--r-pill);
+  border-radius: var(--r-md);
   cursor: pointer;
   transition: var(--ease);
   border: none;
@@ -31,7 +35,7 @@
   text-decoration: none;
 }
 
-// 按压反馈：缩小 + 阴影变浅（童趣强反馈）
+// 按压反馈：缩小（童趣强反馈）
 @mixin press($scale: 0.96) {
   &:active {
     transform: scale($scale);
@@ -53,14 +57,9 @@
   overflow: hidden;
 }
 
-// 药丸标签（完全圆角小标签）
+// 药丸标签（完全圆角小标签）—— 只用于徽标 / 计数，不用于按钮
 @mixin pill {
   border-radius: var(--r-pill);
-}
-
-// 主题色渐变软底（卡片/横幅左侧条等）
-@mixin grad-soft($from, $to) {
-  background: linear-gradient(135deg, $from, $to);
 }
 
 // 焦点可见环（可访问性，键盘导航）
@@ -70,16 +69,6 @@
     outline: 2px solid $c;
     outline-offset: 2px;
   }
-}
-
-// 绝对定位的装饰光斑（背景纹理）
-@mixin blob($size: 100px, $color: rgba(255, 255, 255, 0.15)) {
-  content: '';
-  position: absolute;
-  width: $size;
-  height: $size;
-  border-radius: 50%;
-  background: $color;
 }
 
 // 滚动条隐藏（横向滑动选择器）

@@ -7,8 +7,12 @@
 @use 'mixins' as *;
 
 // ---------- 应用骨架 App Shell ----------
+// 桌面：顶栏（字标 + 导航）+ 居中内容栏（最大 1240px）。
+// 窄屏：顶栏只留字标，导航变成底部图标栏。
+// 之前的版本是一根 720px 的手机栏居中贴在 1440px 桌面里，两侧各空 360px ——
+// 目标平台本来就是桌面 Chrome/Edge，这里改成真正吃满宽度的桌面骨架。
 .app {
-  max-width: 720px;
+  max-width: 1240px;
   margin: 0 auto;
   min-height: 100%;
   display: flex;
@@ -18,62 +22,76 @@
 }
 
 .app-header {
-  padding: 14px 16px 8px;
+  position: sticky;
+  top: 0;
+  z-index: var(--z-nav);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  gap: 16px;
+  padding: 11px 24px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
 }
 
 .brand {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 9px;
   font-weight: 800;
-  font-size: 18px;
+  font-size: 17px;
+  color: var(--ink);
 }
-.brand-star {
-  color: var(--sun);
-  font-size: 22px;
-  display: inline-block;
-  animation: twinkle 2s ease-in-out infinite;
+// 产品标记：品牌色的浅底方块 + 同色深图标（不是"黑方块加字母"）
+.brand-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  background: var(--brand-soft);
+  color: var(--brand-deep);
+  flex-shrink: 0;
 }
-@keyframes twinkle {
-  0%, 100% { transform: scale(1) rotate(0deg); }
-  50% { transform: scale(1.15) rotate(15deg); }
-}
-.brand-text {
-  background: linear-gradient(90deg, var(--brand), var(--brand-deep));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-.brand-sub {
-  font-size: 13px;
-  color: var(--ink-mute);
-  background: var(--sun-soft);
-  padding: 3px 10px;
-  border-radius: var(--r-pill);
+.brand-text { color: var(--ink); }
+
+// 顶栏导航（桌面）：字标 + 几个朴素链接
+.app-nav { display: none; }
+.app-nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: var(--r-md);
+  font-size: var(--fs-md);
   font-weight: 600;
+  color: var(--ink-soft);
+  transition: var(--ease);
+}
+.app-nav-link:hover { background: var(--bg-3); color: var(--ink); }
+.app-nav-link.is-active {
+  background: var(--brand-soft);
+  color: var(--brand-deep);
+  font-weight: 700;
 }
 
 .app-main {
   flex: 1;
-  padding: 4px 14px 90px; // 底部留空给 nav
+  padding: 10px 24px 96px;
 }
 
-// 底部固定导航（大图标大字，儿童拇指友好）
+// 底部图标栏（窄屏）：大图标大字，儿童拇指友好
 .bottom-nav {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
-  max-width: 720px;
+  max-width: 560px;
   margin: 0 auto;
   display: flex;
   background: var(--card);
   border-top: 1px solid var(--line);
-  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.06);
   z-index: var(--z-nav);
   padding-bottom: env(safe-area-inset-bottom);
 }
@@ -83,17 +101,23 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 9px 4px;
+  gap: 3px;
+  min-height: 56px;
+  padding: 8px 4px;
   color: var(--ink-mute);
-  font-size: 13px;
+  font-size: var(--fs-sm);
   font-weight: 600;
-  gap: 2px;
   transition: color 0.15s;
 }
-.bottom-nav-item .nav-emoji { font-size: 22px; }
+.bottom-nav-item .nav-icon { display: block; }
 .bottom-nav-item.active { color: var(--brand-deep); }
-.bottom-nav-item.active .nav-emoji { transform: scale(1.15); }
 .bottom-nav-item:active { transform: scale(0.95); }
+
+@media (min-width: 900px) {
+  .app-nav { display: flex; gap: 4px; }
+  .bottom-nav { display: none; }
+  .app-main { padding-bottom: 48px; }
+}
 
 .app-footer {
   text-align: center;
@@ -104,19 +128,19 @@
 
 // ---------- 页面通用 Page ----------
 .page { padding-bottom: 8px; }
+// 页面头：模块浅色调 + 同色深字，无渐变、无阴影
 .page-head {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 14px 16px;
+  gap: 14px;
+  padding: 16px 20px;
   border-radius: var(--r-lg);
-  background: linear-gradient(135deg, var(--mc-soft, var(--brand-soft)), var(--brand-tint));
+  background: var(--mc-soft, var(--brand-soft));
   color: var(--brand-deep);
-  box-shadow: var(--shadow);
 }
 .page-emoji { font-size: 34px; }
-.page-kicker { font-size: 12px; opacity: 0.9; font-weight: 700; letter-spacing: 0.5px; }
-.page-title { margin: 2px 0 0; font-size: 17px; }
+.page-kicker { font-size: var(--fs-xs); opacity: 0.95; font-weight: 700; }
+.page-title { margin: 2px 0 0; font-size: var(--fs-xl); font-weight: 800; }
 
 .lead {
   font-size: var(--fs-md);
@@ -170,48 +194,41 @@
 .bc-sep { color: var(--ink-mute); opacity: 0.7; margin: 0 2px; }
 
 // ---------- 按钮 Buttons ----------
+// 扁平：一个填充色，12px 圆角，**无常驻阴影**（按压反馈用 scale，不靠阴影）
 .btn {
   @include btn-base;
-  padding: 14px 22px;
+  padding: 13px 20px;
   min-height: 44px;
   background: var(--brand-deep);
   color: #fff;
   font-size: var(--fs-md);
-  box-shadow: var(--shadow);
-  &:active { transform: scale(0.96); box-shadow: var(--shadow-sm); }
+  &:active { transform: scale(0.96); }
 }
 .btn--soft {
   background: var(--brand-soft);
   color: var(--brand-deep);
-  box-shadow: none;
 }
 .btn--sun {
   background: var(--sun);
   color: var(--sun-ink);
-  box-shadow: var(--shadow-pop);
 }
 .btn--danger {
   background: var(--no-deep);
   color: #fff;
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35);
 }
-.btn--lg { padding: 16px 28px; font-size: var(--fs-lg); }
+.btn--lg { padding: 15px 26px; font-size: var(--fs-lg); }
 .btn--sm { padding: 8px 14px; font-size: var(--fs-md); }
 .btn--block { display: flex; width: 100%; }
 
-// 返回链接（标准按钮尺寸，与 .btn 一致；柔和主题色，不再使用“大药丸”）
-// 复用 btn-base：圆角药丸、无边框、字体继承、行高 1。
-// 与右侧 .btn 在 .page-nav 中通过 align-items:center 自动对齐，无需单独覆盖。
+// 返回链接（与 .btn 同高同圆角，柔和主题色）
 .back-link {
   @include btn-base;
-  padding: 14px 22px;
+  padding: 13px 20px;
   background: var(--mc-soft, var(--brand-soft));
   color: var(--brand-deep);
   font-size: var(--fs-md);
-  box-shadow: none;
   &:active {
     transform: scale(0.96);
-    box-shadow: var(--shadow-sm);
   }
 }
 
@@ -239,7 +256,7 @@
 
 .tip-card {
   background: var(--sun-soft);
-  border-color: var(--sun-deep);
+  border-color: var(--line-2);
 }
 .tip-text {
   margin: 0;
@@ -265,9 +282,9 @@
 .textarea {
   width: 100%;
   box-sizing: border-box;
-  padding: 12px 16px;
+  padding: 11px 14px;
   border-radius: var(--r-md);
-  border: 2px solid var(--line-2);
+  border: 1px solid var(--line-2);
   font-size: var(--fs-md);
   background: var(--card);
   color: var(--ink);

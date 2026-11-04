@@ -93,11 +93,10 @@ export default function TodayTasks() {
 
   return (
     <div className="today-card">
-      <div className="today-head">📅 今日任务</div>
+      <div className="today-head">今日任务</div>
 
       {todayDue > 0 && (
         <Link to="/smart" className="smart-hero-entry">
-          <span className="smart-hero-emoji">🧠</span>
           <div className="smart-hero-body">
             <div className="smart-hero-title">今日复习 · 大脑健身</div>
             <div className="smart-hero-sub">

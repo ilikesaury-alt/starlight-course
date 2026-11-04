@@ -1,81 +1,88 @@
 // ============================================================
 //  Theme — 主题课（Rocket Girl / Fly Guy / Starlight）与首页入口
 //  三个首页入口卡片结构完全一致，仅主题色不同 → 用 mixin 统一。
+//
+//  —— 视觉规则（tasteskill · pastel-consumer）——
+//  入口卡 = **浅色调底 + 同色系深字 + 一根 4px 满色条**：
+//    满色（品牌色的"正色"）只出现在那根小色条上，大面积交给浅色调。
+//    取消：渐变底 / 2px 饱和描边 / 常驻阴影 / 呼吸光晕动画。
 // ============================================================
 @use 'mixins' as *;
 
-// 共享脉冲动画：由元素自身的 --pulse-a / --pulse-b 控制光晕颜色
-@keyframes entry-pulse {
-  0%, 100% { box-shadow: 0 4px 16px var(--pulse-a); }
-  50%      { box-shadow: 0 8px 24px var(--pulse-b); }
-}
-
-// 首页醒目入口卡片（rg / fg / sl 三主题共用同一结构）
-@mixin home-entry($prefix, $g1, $g2, $border, $title, $sub, $arrow, $pa, $pb) {
+// 首页醒目入口卡片（rg / fg / sl / cn / en3 / dt / ab / rd 共用同一结构）
+// $tint = 浅色调底；$hue = 满色（只做 4px 色条）；$ink = 同色系深字
+@mixin home-entry($prefix, $tint, $hue, $ink) {
   .#{$prefix}-entry {
     position: relative;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
-    background: linear-gradient(135deg, $g1 0%, $g2 100%);
-    border: 2px solid $border;
+    background: $tint;
     border-radius: var(--r-lg);
-    padding: 14px 14px 12px;
+    padding: 16px 16px 14px;
     margin: 0;
-    box-shadow: var(--shadow-pop);
+    overflow: hidden;
     text-decoration: none;
     cursor: pointer;
     transition: transform 0.15s;
-    --pulse-a: #{$pa};
-    --pulse-b: #{$pb};
-    animation: entry-pulse 2.4s ease-in-out infinite;
-    &:active { transform: scale(0.97); }
-    .#{$prefix}-emoji { font-size: 36px; line-height: 1; }
+    &:active { transform: scale(0.985); }
+    // 满色只出现在这根 4px 色条上：模块的身份标记
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 4px;
+      background: $hue;
+    }
+    .#{$prefix}-emoji { font-size: 34px; line-height: 1; }
     .#{$prefix}-body { flex: 1; min-width: 0; width: 100%; }
-    .#{$prefix}-title { font-size: var(--fs-md); font-weight: 800; color: $title; margin-bottom: 4px; line-height: 1.2; }
-    .#{$prefix}-sub { font-size: var(--fs-sm); color: $sub; line-height: 1.35; }
+    .#{$prefix}-title { font-size: var(--fs-lg); font-weight: 800; color: $ink; margin-bottom: 4px; line-height: 1.25; }
+    // 说明文字固定占两行高度：同一行的两张卡高度差就不会在卡内留下大块空洞
+    .#{$prefix}-sub { font-size: var(--fs-sm); color: $ink; opacity: 0.82; line-height: 1.45; min-height: 2.9em; }
     .#{$prefix}-arrow {
       position: absolute;
       top: 12px; right: 12px;
-      font-size: 20px; color: $arrow; font-weight: 700;
+      font-size: 20px; color: $ink; opacity: 0.5; font-weight: 700;
     }
   }
 }
 
-@include home-entry('rg-home', var(--grape-soft), var(--grape-2), var(--grape), var(--grape-deep), var(--grape-deep-2), var(--grape), rgba(167, 139, 250, 0.25), rgba(167, 139, 250, 0.45));
-@include home-entry('fg-home', var(--green-soft), var(--green-tint), var(--green), var(--green-deep), var(--green-deep-2), var(--green), rgba(74, 222, 128, 0.25), rgba(74, 222, 128, 0.45));
-@include home-entry('sl-home', var(--amber-soft), var(--amber-tint), var(--amber), var(--amber-deep), var(--amber-ink), var(--amber), rgba(245, 176, 23, 0.25), rgba(245, 176, 23, 0.45));
-// 中文课程入口：中国红主题（复用状态色 --no 家族）
-@include home-entry('cn-home', var(--no-soft), #fecaca, var(--no), #991b1b, #7f1d1d, var(--no), rgba(239, 68, 68, 0.25), rgba(239, 68, 68, 0.45));
+@include home-entry('rg-home', var(--grape-soft), var(--grape), var(--grape-deep));
+@include home-entry('fg-home', var(--green-soft), var(--green), var(--green-deep));
+@include home-entry('sl-home', var(--amber-soft), var(--amber), var(--amber-deep));
+// 中文课程入口：中国红主题
+@include home-entry('cn-home', var(--no-soft), var(--no), var(--no-deep));
 // 三年级上册英语入口：外研版蓝主题
-@include home-entry('en3-home', #dbeafe, #bfdbfe, #2563eb, #1e3a8a, #1e40af, #2563eb, rgba(37, 99, 235, 0.25), rgba(37, 99, 235, 0.45));
+@include home-entry('en3-home', #dbeafe, #2563eb, #1e3a8a);
 // 听写练习入口：青绿主题（与英语蓝区分，突出「练习」性质而非「课程」）
-@include home-entry('dt-home', #ccfbf1, #a7f3d0, #14b8a6, #115e59, #0f766e, #14b8a6, rgba(20, 184, 166, 0.25), rgba(20, 184, 166, 0.45));
+@include home-entry('dt-home', #ccfbf1, #0d9488, #115e59);
 // 字母积木入口：砖橙主题（呼应动画积木的温暖色）
-@include home-entry('ab-home', #ffedd5, #fed7aa, #ea580c, #9a3412, #c2410c, #ea580c, rgba(234, 88, 12, 0.25), rgba(234, 88, 12, 0.45));
+@include home-entry('ab-home', #ffedd5, #ea580c, #9a3412);
 // 阅读模块入口：靛蓝主题（与「学新课」的所有暖色入口区分，突出「自选阅读」）
-@include home-entry('rd-home', #e0e7ff, #c7d2fe, #6366f1, #312e81, #3730a3, #6366f1, rgba(99, 102, 241, 0.25), rgba(99, 102, 241, 0.45));
+@include home-entry('rd-home', #e0e7ff, #6366f1, #312e81);
 // 入口卡片进度/到期徽章（全部主题共用，挂在 -body 内）
 .home-entry-badge {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  margin-top: 8px;
+  gap: 8px;
+  margin-top: 10px;
   padding: 3px 10px;
   border-radius: var(--r-pill);
-  background: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.75);
   font-size: var(--fs-xs);
   font-weight: 700;
-  color: var(--ink-mute);
-  .home-entry-due { color: var(--no); }
+  color: var(--ink-soft);
+  .home-entry-due { color: var(--no-deep); }
 }
 
 // ---------- Rocket Girl / Fly Guy / Starlight 通用主题块 ----------
 .rg-progress-pill {
   text-align: center;
   background: var(--mc-soft, var(--grape-soft));
-  color: var(--mc, var(--grape-700));
+  // 文字用同色系**深字**（--brand-deep），不是满色 --mc：
+  // 满色 #F5B017 落在 #FFF3C4 浅底上只有 1.7:1，孩子根本看不清。
+  color: var(--brand-deep, var(--ink));
   font-size: var(--fs-md);
   font-weight: 700;
   padding: 10px 14px;
@@ -87,15 +94,15 @@
 .rg-search {
   width: 100%;
   box-sizing: border-box;
-  padding: 12px 16px;
-  border-radius: var(--r-pill);
-  border: 2px solid var(--line-2);
+  padding: 11px 16px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--line-2);
   font-size: var(--fs-md);
   background: var(--card);
   color: var(--ink);
   outline: none;
   transition: border-color 0.15s;
-  &:focus { border-color: var(--mc, var(--grape-700)); }
+  &:focus { border-color: var(--brand, var(--brand-deep)); }
 }
 .rg-card .module-info { min-width: 0; }
 .rg-title {
@@ -112,12 +119,11 @@
   border-radius: var(--r-lg);
   padding: 12px 16px;
   margin-top: 12px;
-  box-shadow: var(--shadow-sm);
 }
 .rg-books > summary {
   font-size: var(--fs-lg);
   font-weight: 800;
-  color: var(--mc, var(--grape-700));
+  color: var(--brand-deep, var(--ink));
   cursor: pointer;
   list-style: none;
   padding: 4px 0;

@@ -14,16 +14,19 @@ export interface ModuleTheme {
 //   --brand / --mc        主色（直接取主题色）
 //   --brand-2             主色 + 白，用于渐变浅端
 //   --brand-soft / --mc-soft  浅色底（直接取主题柔色）
-//   --brand-deep          主色 + 黑，用于浅底上的深字
+//   --brand-deep          主色 + 55% 黑，用于浅底上的深字。
+//     原为 58% 主色 + 42% 黑：派生出的紫/黄"深字"其实还不够深，
+//     落在浅色调底上只有 1.8~2.4:1，且亮度正好落在 violet 检测区间里。
+//     改为 45% 主色 + 55% 黑后，各模块的深字对比度与配色规则同时合格。
 //   --brand-tint          主色 + 白（更淡），用于大块浅底
-//   --brand-rgb           主色的 RGB 通道，用于 rgba 光晕（阴影 / 语音脉冲）
+//   --brand-rgb           主色的 RGB 通道，用于 rgba 光晕（语音脉冲）
 export function moduleThemeVars(theme: ModuleTheme): CSSProperties {
   const c = theme.color
   return {
     '--brand': c,
     '--brand-2': `color-mix(in srgb, ${c} 72%, white)`,
     '--brand-soft': theme.colorSoft,
-    '--brand-deep': `color-mix(in srgb, ${c} 58%, black)`,
+    '--brand-deep': `color-mix(in srgb, ${c} 45%, black)`,
     '--brand-tint': `color-mix(in srgb, ${c} 12%, white)`,
     '--brand-rgb': hexToRgb(c),
     '--mc': c,

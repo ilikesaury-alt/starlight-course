@@ -19,12 +19,10 @@ body {
   background: var(--bg);
   color: var(--ink);
   font-family: var(--font-sans);
+  font-size: var(--fs-base);
+  line-height: 1.6;
   -webkit-tap-highlight-color: transparent;
   -webkit-font-smoothing: antialiased;
-  // 童趣背景纹理（极淡双色光斑）
-  background-image:
-    radial-gradient(circle at 20% 10%, rgba(var(--brand-rgb), 0.06) 0%, transparent 40%),
-    radial-gradient(circle at 80% 80%, rgba(var(--sun-rgb), 0.06) 0%, transparent 40%);
 }
 
 button {

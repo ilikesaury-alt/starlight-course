@@ -290,7 +290,8 @@ button.en3-board {
   margin-left: 6px;
   font-size: var(--fs-xs);
   font-weight: 700;
-  color: var(--mc, #2563eb);
+  // --mc 满色落在浅色调底上只有 4.2:1；改用同色系派生深字
+  color: var(--brand-deep, #1e3a8a);
   background: var(--mc-soft, #dbeafe);
   border-radius: var(--r-pill);
   padding: 1px 8px;

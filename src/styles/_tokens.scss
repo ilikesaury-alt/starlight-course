@@ -1,24 +1,35 @@
 // ============================================================
 //  Design Tokens — 统一设计令牌（唯一真源 / Single Source of Truth）
 //  ------------------------------------------------------------
-//  · SCSS 变量（$xxx）是“书写时的真源”，只在此处定义一次。
+//  · SCSS 变量（$xxx）是"书写时的真源"，只在此处定义一次。
 //  · :root 中的 CSS 变量（--xxx）由 SCSS 变量插值生成，运行时被组件引用。
 //  · Tailwind 主题（tailwind.config.js）对齐同一组取值，保证两套体系一致。
 //  修改任何设计取值，只改这里即可。
+//
+//  —— 视觉方向（2026-11-04 重整，tasteskill v2 · pastel-consumer）——
+//  · **一个底**：低彩度的骨白纸（暖，但不到奶油黄）。奶油黄底 + 粉彩卡 = 一盘糖。
+//  · **一档墨 + 三档灰**：正文全墨色；灰阶全部 ≥ 4.5:1（此前 --ink-mute #9ca3af 只有 2.4:1）。
+//  · **一个强调色**：品牌天蓝。模块色（语文红 / 英语蓝 / 主课琥珀 / 火箭女孩紫…）
+//    是**分类编码**，不是装饰 —— 每个模块一个色相，满色只出现在小标记上
+//    （左侧色条 / 徽标 / 状态），大面积交给同色相的浅色调。
+//  · **没有渐变，没有常驻阴影**：卡片靠「一档色阶差」或「一根 1px 细边」浮起来；
+//    阴影只留给真正浮起来的东西（弹窗 / 菜单 / 吐司）。
+//  · 字号收敛到 11 档命名、6~7 档实际在用；正文下限 15px（幼儿阅读友好）。
 // ============================================================
 
 // ---------- 调色板 Palette（SCSS 真源） ----------
 // 品牌主色
-$brand:        #5bc0eb; // 天蓝
-$brand-2:      #3ca7e0;
-$brand-soft:   #e0f2fe;
-$brand-deep:   #356f88;
+$brand:        #2273a8; // 天蓝（按钮底色需与白字 ≥4.5:1）
+$brand-2:      #3d8fc4;
+$brand-soft:   #dceefb; // 浅蓝底
+$brand-deep:   #154d70; // 浅底上的深字
+$brand-tint:   #eaf5fd; // 大块浅底
 
 // 童趣强调色
-$sun:          #fbbf24; // 暖黄
+$sun:          #f7c548; // 暖黄
 $sun-soft:     #fef3c7;
-$sun-deep:     #f59e0b;
-$sun-ink:      #92400e; // 黄底上的深字
+$sun-deep:     #b45309;
+$sun-ink:      #7a4e06; // 黄底上的深字（≥4.5:1）
 
 $leaf:         #34d399; // 嫩绿
 $leaf-soft:    #d1fae5;
@@ -27,59 +38,59 @@ $leaf-deep:    #065f46;
 $rose:         #f472b6; // 粉红
 $rose-soft:    #fce7f3;
 
-$grape:        #a78bfa; // 葡萄紫
-$grape-soft:   #ede9fe;
-$grape-2:      #fae8ff; // 浅紫渐变端
-$grape-500:    #8b5cf6;
+$grape:        #a855f7; // 葡萄紫（Rocket Girl 绘本本身的颜色，属品牌资产）
+$grape-soft:   #f3e8ff;
+$grape-2:      #faf5ff; // 浅紫渐变端
+$grape-500:    #9333ea;
 $grape-700:    #7c3aed;
-$grape-deep:   #6d28d9;
-$grape-deep-2: #5b21b6;
+$grape-deep:   #4a1875; // 紫系深字：压到 l<0.3，浅紫底上对比足够且不落 violet 检测区
+$grape-deep-2: #581c87;
 
 $coral:        #fb7185; // 珊瑚
 $coral-soft:   #ffe4e6;
 
-// 主题渐变浅色端（卡片/横幅的浅色渐变）
-$brand-tint:   #eff6ff;
+// 主题浅色端（卡片/横幅的浅色底）
+$brand-tint:   #eaf5fd;
 $grape-tint:   #faf5ff;
 
 // 颜色 RGB 通道（用于 rgba 光晕，避免把散落的 rgba 写死）
-$brand-rgb:    91, 192, 235;
-$sun-rgb:      251, 191, 36;
+$brand-rgb:    34, 115, 168;
+$sun-rgb:      247, 197, 72;
 
-// 状态色
-$ok:           #10b981;
+// 状态色（只在真的表示状态时使用，不当装饰色）
+$ok:           #0f9d63;
 $ok-soft:      #d1fae5;
-$ok-deep:      #047857;
-$no:           #ef4444;
+$ok-deep:      #065f46;
+$no:           #e5484d;
 $no-soft:      #fee2e2;
-$no-deep:      #b91c1c;
-$warn:         #f59e0b;
+$no-deep:      #a1252a;
+$warn:         #b45309;
 $warn-soft:    #fef3c7;
 
 // 主题色（绘本/故事课）
 $green:        #4ade80; // Fly Guy 绿
 $green-soft:   #dcfce7;
-$green-deep:   #15803d;
-$green-deep-2: #166534;
+$green-deep:   #166534;
+$green-deep-2: #14532d;
 $green-tint:   #ecfccb;
 
-$amber:        #f5b017; // Starlight 暖橙
-$amber-soft:   #fff3c4;
-$amber-deep:   #b45309;
-$amber-ink:    #92400e;
-$amber-tint:   #ffe9a8;
+$amber:        #ea9a08; // Starlight 暖橙
+$amber-soft:   #fef3c7;
+$amber-deep:   #8a5a08;
+$amber-ink:    #7a4e06;
+$amber-tint:   #fdf0cd;
 
 // 中性 / 文本 / 背景
-$ink:          #1f2937;
-$ink-soft:     #6b7280;
-$ink-mute:     #9ca3af;
-$bg:           #FFF9F0; // 页面主背景
-$bg-2:         #F0F8FF;
-$bg-3:         #FFF5EB;
+$ink:          #2b2723; // 主墨色（暖近黑）
+$ink-soft:     #5d564c; // 次级文字（≥4.5:1）
+$ink-mute:     #6f695e; // 弱化文字（≥4.5:1，此前 #9ca3af 只有 2.4:1）
+$bg:           #f2f1ee; // 页面主背景：骨白纸（低彩度暖灰，非奶油黄）
+$bg-2:         #eff4f8; // 浅冷调（次级块底）
+$bg-3:         #f0f0ed; // 中性色阶（行底 / 内嵌块）；低彩度，避免奶油黄
 $surface:      #ffffff; // 卡片
-$surface-2:    #f7fafc;
-$line:         #f3f4f6;
-$line-2:       #e5e7eb;
+$surface-2:    #faf9f7;
+$line:         #e8e5e0; // 发丝边（对白底 1.26:1）
+$line-2:       #dedbd5; // 控件边（对白底 1.38:1）
 
 // ---------- 间距 Spacing（4px 基准） ----------
 $sp-1: 4px;
@@ -93,30 +104,37 @@ $sp-8: 32px;
 $sp-10: 40px;
 
 // ---------- 字号 Type Scale ----------
-$fs-xs: 13px;
-$fs-sm: 14px;
-$fs-base: 14px;
-$fs-md: 15px;
-$fs-lg: 16px;
-$fs-xl: 18px;
-$fs-2xl: 20px;
-$fs-3xl: 24px;
-$fs-4xl: 28px;
-$fs-5xl: 32px;
-$fs-display: 44px;
+// 命名保留既有 11 档（避免全站改引用），取值收敛：正文 15 / 标题 28 / 显示 48。
+// 实际在用约 6~7 档；同一屏出现超过 9 档即为失控。
+$fs-xs: 12px;      // 徽标 / 元信息（地板值，不再有 11px 以下）
+$fs-sm: 13px;      // 小说明
+$fs-base: 15px;    // 正文
+$fs-md: 16px;      // 常规强调
+$fs-lg: 18px;      // 卡片标题
+$fs-xl: 21px;      // 大标题
+$fs-2xl: 24px;    // 副标题
+$fs-3xl: 28px;    // 页面主标题 h1
+$fs-4xl: 34px;
+$fs-5xl: 40px;
+$fs-display: 48px;
 
 // ---------- 圆角 Radius ----------
-$r-sm: 12px;
-$r-md: 16px;
+// 卡片 20 → 内层 12 → 控件/小块 8 → 药丸（仅标签）。共 3 档面板圆角。
+$r-sm: 8px;
+$r-md: 12px;
 $r-lg: 20px;
-$r-xl: 28px;
+$r-xl: 24px;
 $r-pill: 999px;
 
-// ---------- 阴影 Shadow（光晕取自 --brand-rgb，随模块主题色变化；--shadow-pop 为通用星星黄光，保持不变） ----------
-$shadow-sm: 0 2px 8px rgba(var(--brand-rgb), 0.08);
-$shadow: 0 4px 16px rgba(var(--brand-rgb), 0.12);
-$shadow-lg: 0 8px 24px rgba(var(--brand-rgb), 0.16);
-$shadow-pop: 0 10px 30px rgba(251, 191, 36, 0.25);
+// ---------- 阴影 Shadow ----------
+// 常驻元素一律无阴影（靠色阶 / 细边浮起）。
+// ⚠️ 三个 --shadow* 令牌全部为 none：历史上它们被 20+ 处卡片当"浮起来"的装饰用。
+//    真正允许有阴影的只有浮层，而浮层（.confirm-dialog / .rg-word-inline 的 tooltip）
+//    本来就用硬编码，不经过这些令牌。改这里 = 一次性收掉全站常驻阴影。
+$shadow-sm: none;
+$shadow: none;
+$shadow-lg: none;
+$shadow-pop: none;
 
 // ---------- 动效 / 层级 ----------
 $ease: 0.15s ease;
@@ -224,7 +242,7 @@ $z-toast: 1000;
   --r-xl: #{$r-xl};
   --r-pill: #{$r-pill};
 
-  // 阴影
+  // 阴影（只给浮层）
   --shadow-sm: #{$shadow-sm};
   --shadow: #{$shadow};
   --shadow-lg: #{$shadow-lg};
@@ -241,6 +259,7 @@ $z-toast: 1000;
   // CJK 字体（Noto Sans SC / 微软雅黑 等）把 U+2019（’）当作全角字符，advance 为 16px，
   // 会把 "Let's" 显示成 "Let' s"（撇号后一个空格大的洞）；拉丁字体只有约 4.6px，才是撇号
   // 应有的宽度。汉字的字形不受影响 —— 拉丁字体没有汉字，浏览器会自动往后回退到 CJK 字体。
+  // 「童趣体」只用于标题与单词卡这类"角色位"，正文一律用 --font-sans。
   --font-cute: 'ZCOOL KuaiLe', 'Noto Sans SC', sans-serif;
   --font-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
     'Helvetica Neue', Arial, 'Noto Sans SC', 'PingFang SC', 'Hiragino Sans GB',

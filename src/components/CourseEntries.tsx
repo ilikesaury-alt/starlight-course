@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { Type, ChartColumn } from 'lucide-react'
 import { totalEngLessons, eng3aWordCount, eng3aUnits, eng3aPlays } from '@/data/eng3a'
 import { chineseUnits } from '@/data/chinese'
 import { modules as starlightModules } from '@/data/starlight'
@@ -76,8 +77,8 @@ export default function CourseEntries() {
     if (!b || (b.percent === undefined && b.due === 0)) return null
     return (
       <span className="home-entry-badge">
-        {b.percent !== undefined && <span>📊 {b.percent}%</span>}
-        {b.due > 0 && <span className="home-entry-due">🧠 {b.due} 待复习</span>}
+        {b.percent !== undefined && <span>{b.percent}%</span>}
+        {b.due > 0 && <span className="home-entry-due">{b.due} 待复习</span>}
       </span>
     )
   }
@@ -158,12 +159,12 @@ export default function CourseEntries() {
 
       <div className="quick-row">
         <Link to="/alphabet" className="quick-card quick-alphabet">
-          <span className="qc-emoji">🔤</span>
+          <Type size={21} strokeWidth={1.9} className="qc-emoji" aria-hidden="true" />
           <span>字母表</span>
           <span className="qc-sub">26 个字母发音</span>
         </Link>
         <Link to="/progress" className="quick-card quick-progress">
-          <span className="qc-emoji">📊</span>
+          <ChartColumn size={21} strokeWidth={1.9} className="qc-emoji" aria-hidden="true" />
           <span>学习进度</span>
           <span className="qc-sub">星星与成就</span>
         </Link>

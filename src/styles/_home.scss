@@ -5,56 +5,43 @@
 @use 'mixins' as *;
 
 // ---------- 首页 Hero ----------
+// 一个标题 + 一句支撑句。左对齐，不再是「居中大标题 + 一排胶囊」的通用模板头。
+// 桌面时与右侧「今日任务」翻页卡并排（见文件末尾的 .home 栅格），首屏左右都有内容。
 .hero {
-  text-align: center;
-  padding: 20px 8px 24px;
-}
-.hero-emoji {
-  font-size: 52px;
-  margin-bottom: 8px;
-  display: inline-block;
-  animation: bounce-soft 2.5s ease-in-out infinite;
-}
-@keyframes bounce-soft {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
+  padding: 20px 0 18px;
+  max-width: 560px;
 }
 .hero-title {
-  font-size: var(--fs-3xl);
-  margin: 0 0 8px;
+  // 30px 桌面 / 24px 手机：app 屏的标题，不是 landing page 的巨型字
+  font-size: clamp(24px, 2.2vw, 30px);
+  margin: 0 0 10px;
   font-weight: 800;
-  color: var(--brand-deep);
+  color: var(--ink);
+  letter-spacing: -0.01em;
+  line-height: 1.15;
 }
 .hero-sub {
   color: var(--ink-soft);
   font-size: var(--fs-md);
-  margin: 0 0 14px;
+  margin: 0;
+  line-height: 1.65;
+}
+.hero-sub b { color: var(--ink); font-weight: 700; }
+.hero-scope {
+  margin: 16px 0 0;
+  font-size: var(--fs-sm);
+  color: var(--ink-mute);
   line-height: 1.6;
-}
-.hero-sub b { color: var(--brand-deep); }
-.hero-tags {
-  display: flex;
-  gap: 8px;
-  justify-content: center;
-  font-size: var(--fs-base);
-  flex-wrap: wrap;
-}
-.hero-tag {
-  background: var(--card);
-  padding: 6px 12px;
-  border-radius: var(--r-pill);
-  font-weight: 600;
-  box-shadow: var(--shadow-sm);
 }
 
 .section-title {
-  font-size: var(--fs-md);
-  margin: 18px 2px 12px;
+  font-size: var(--fs-lg);
+  margin: 30px 0 12px;
   color: var(--ink);
   font-weight: 800;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
 }
 .home-entries {
   display: grid;
@@ -62,8 +49,12 @@
   gap: 12px;
   margin-top: 4px;
   // 卡片总数为奇数时，最后一张满宽收边（5 张时代的规则）；
-  // 偶数张（如现6 张）则整齐两两配对，不加满宽，避免留半行空洞。
+  // 偶数张（如现 6 张）则整齐两两配对，不加满宽，避免留半行空洞。
   & > a:last-child:nth-child(odd) { grid-column: 1 / -1; }
+}
+// 大桌面 8 张入口排 4 列 × 2 行：卡片比例更像书页，首屏也能看到更多入口
+@media (min-width: 1100px) {
+  .home-entries { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
 
 // ---------- 快速入口 ----------
@@ -73,25 +64,26 @@
   gap: 12px;
 }
 .quick-card {
-  padding: 16px 14px;
-  text-align: center;
+  padding: 14px 16px;
   border-radius: var(--r-lg);
+  background: var(--card);
+  border: 1px solid var(--line);
   font-weight: 700;
-  font-size: var(--fs-base);
+  font-size: var(--fs-md);
   position: relative;
   overflow: hidden;
   transition: var(--ease);
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  &:active { transform: scale(0.97); }
-  .qc-emoji { font-size: 32px; }
-  .qc-sub { font-size: var(--fs-sm); font-weight: 500; opacity: 0.85; }
+  align-items: flex-start;
+  gap: 3px;
+  &:active { transform: scale(0.985); }
+  .qc-emoji { font-size: 22px; color: var(--brand-deep); }
+  .qc-sub { font-size: var(--fs-sm); font-weight: 500; color: var(--ink-soft); }
 }
-.quick-preview { background: var(--brand-soft); color: var(--brand-deep); }
-.quick-alphabet { background: var(--sun-soft); color: var(--sun-ink); }
-.quick-progress { background: var(--grape-soft); color: var(--grape-deep); }
+.quick-preview { color: var(--ink); }
+.quick-alphabet { color: var(--ink); }
+.quick-progress { color: var(--ink); }
 
 // ---------- 模块卡片 ----------
 .module-grid {
@@ -103,32 +95,30 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 14px;
+  padding: 14px 16px;
   border-radius: var(--r-lg);
   background: var(--card);
   border: 1px solid var(--line);
-  box-shadow: var(--shadow-sm);
   position: relative;
   overflow: hidden;
   transition: var(--ease);
-  @include press(0.98);
+  @include press(0.985);
+  // 满色只出现在这根 4px 色条上：模块的身份标记，不是装饰
   &::before {
     content: '';
     position: absolute;
     left: 0; top: 0; bottom: 0;
-    width: 5px;
+    width: 4px;
     background: var(--mc, var(--brand));
   }
 }
 .module-emoji {
-  font-size: 32px;
-  width: 48px;
-  height: 48px;
+  font-size: 30px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--r-md);
-  background: var(--mc-soft, var(--brand-soft));
   flex-shrink: 0;
 }
 .module-info { flex: 1; min-width: 0; }
@@ -136,39 +126,36 @@
   font-size: var(--fs-xs);
   color: var(--ink-mute);
   font-weight: 700;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
 }
 .module-title { font-size: var(--fs-lg); font-weight: 700; margin: 1px 0; }
-.module-zh { font-size: var(--fs-base); color: var(--ink-soft); }
+.module-zh { font-size: var(--fs-sm); color: var(--ink-soft); }
 .module-arrow { color: var(--ink-mute); font-size: 20px; flex-shrink: 0; }
 .module-lessons-badge {
   font-size: var(--fs-xs);
   color: var(--brand-deep);
   font-weight: 700;
   background: var(--mc-soft, var(--brand-soft));
-  padding: 3px 8px;
+  padding: 3px 9px;
   border-radius: var(--r-pill);
 }
 
 // ---------- 单元横幅 ----------
+// 模块浅色调 + 同色深字，**无渐变、无装饰光斑、无阴影**
 .unit-banner {
   display: flex;
   align-items: center;
   gap: 14px;
   padding: 18px;
   border-radius: var(--r-xl);
-  background: linear-gradient(135deg, var(--mc-soft, var(--brand-soft)), var(--brand-tint));
+  background: var(--mc-soft, var(--brand-soft));
   color: var(--brand-deep);
-  box-shadow: var(--shadow);
   position: relative;
   overflow: hidden;
-  &::after { @include blob(100px, rgba(255, 255, 255, 0.5)); right: -20px; top: -20px; }
 }
 .unit-emoji { font-size: 44px; position: relative; z-index: 1; }
-.unit-num { font-size: var(--fs-sm); opacity: 0.9; font-weight: 700; letter-spacing: 0.5px; }
-.unit-title { margin: 2px 0; font-size: var(--fs-2xl); position: relative; z-index: 1; }
-.unit-zh { font-size: var(--fs-md); opacity: 0.9; position: relative; z-index: 1; }
+.unit-num { font-size: var(--fs-sm); opacity: 0.95; font-weight: 700; }
+.unit-title { margin: 2px 0; font-size: var(--fs-2xl); font-weight: 800; position: relative; z-index: 1; }
+.unit-zh { font-size: var(--fs-md); opacity: 0.95; position: relative; z-index: 1; }
 
 // ---------- 模式标识 ----------
 .mode-badge {
@@ -228,8 +215,7 @@
   gap: 12px;
   padding: 14px 16px;
   border-radius: var(--r-md);
-  background: linear-gradient(135deg, var(--mc-soft, var(--brand-soft)), #fff);
-  border: 2px dashed var(--mc, var(--brand));
+  background: var(--mc-soft, var(--brand-soft));
   font-size: var(--fs-md);
 }
 .lesson-quiz-emoji { font-size: 26px; }
@@ -238,36 +224,45 @@
 .lesson-quiz-sub { font-size: var(--fs-sm); color: var(--ink-soft); margin-top: 2px; }
 
 // ---------- 课程内标签切换 ----------
-.tab-bar { display: flex; gap: 10px; margin: 14px 0 8px; }
+// 下划线标签：一根 1px 通栏细线 + 2px 选中指示条（不是一排药丸）
+.tab-bar {
+  display: flex;
+  gap: 22px;
+  margin: 14px 0 0;
+  border-bottom: 1px solid var(--line);
+  overflow-x: auto;
+  @include no-scrollbar;
+}
 .tab-btn {
-  flex: 1;
+  flex: none;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 12px 8px;
-  border-radius: var(--r-md);
-  background: var(--card);
-  border: 2px solid var(--line-2);
+  padding: 10px 2px 11px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
   font-size: var(--fs-md);
   font-weight: 700;
   color: var(--ink-soft);
   transition: var(--ease);
+  white-space: nowrap;
   &:active { transform: scale(0.97); }
   &.active {
-    background: var(--mc-soft, var(--brand-soft));
     color: var(--brand-deep);
-    border-color: var(--mc, var(--brand));
-    box-shadow: var(--shadow-sm);
+    border-bottom-color: var(--mc, var(--brand));
+    font-weight: 800;
   }
 }
 a.lesson-link {
   text-decoration: none;
-  transition: transform var(--ease), box-shadow var(--ease);
+  transition: transform var(--ease);
   &:active { transform: scale(0.98); }
 }
 
-// ---------- 课程切换器（痛点修复：大号 pill + 高亮） ----------
+// ---------- 课程切换器（单元内 8 课） ----------
 .lesson-switcher {
   display: flex;
   gap: 6px;
@@ -286,7 +281,7 @@ a.lesson-link {
   padding: 8px 12px;
   border-radius: var(--r-md);
   background: var(--card);
-  border: 2px solid var(--line-2);
+  border: 1px solid var(--line);
   font-size: var(--fs-base);
   font-weight: 700;
   color: var(--ink-soft);
@@ -298,8 +293,7 @@ a.lesson-link {
     background: var(--mc-soft, var(--brand-soft));
     color: var(--brand-deep);
     border-color: var(--mc, var(--brand));
-    transform: scale(1.05);
-    box-shadow: var(--shadow);
+    font-weight: 800;
   }
   &.active .lp-num { opacity: 0.85; }
 }
@@ -332,43 +326,82 @@ a.lesson-link {
 @media (min-width: 520px) {
   .module-grid { grid-template-columns: 1fr 1fr; }
   .feature-grid { grid-template-columns: 1fr 1fr; }
-  .hero-title { font-size: var(--fs-4xl); }
 }
+
+// ---------- 首页栅格 ----------
+// 只作用于首页（.home--workbench）：StarlightHome / BookHome / StoryHome 也用 .home，
+// 若把栅格挂在 .home 上会把它们的单元列表挤成两栏并留下大片空洞。
+// 桌面：左半是「这是什么」，右半是「今天翻到哪一页」—— 首屏两侧都有内容。
+.home--workbench {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  column-gap: 24px;
+}
+@media (min-width: 900px) {
+  .home--workbench { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .home--workbench > .hero { grid-column: 1; grid-row: 1; }
+  .home--workbench > .today-card {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: start;
+    margin-top: 18px;
+  }
+  .home--workbench > .section-title,
+  .home--workbench > .home-entries,
+  .home--workbench > .quick-row { grid-column: 1 / -1; }
+}
+
+// ---------- 其它课程首页共用的 hero 装饰 ----------
+// 首页本身已不再渲染这些元素（去掉了居中大 emoji 与一排胶囊），
+// 但 StarlightHome / BookHome / StoryHome / Eng3aHome / NotFound 仍在用，
+// 保留一套克制的兼容样式：小图标 + 纯文字标签，不再做胶囊和阴影。
+.hero-emoji { font-size: 32px; line-height: 1; margin-bottom: 8px; }
+.hero-tags {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+  font-size: var(--fs-sm);
+  color: var(--ink-soft);
+  font-weight: 600;
+}
+.hero-tag { white-space: nowrap; }
 
 // ============================================================
 //  今日任务聚合卡（首页）：到期复习 + 各模块推荐下一课
+//  这一张是首页的「翻页卡」：家长一眼看到今天该翻到哪一页。
 // ============================================================
 .today-card {
   background: var(--card);
-  border: 2px solid var(--line-2);
+  border: 1px solid var(--line);
   border-radius: var(--r-lg);
-  padding: 14px;
-  margin-bottom: 18px;
-  box-shadow: var(--shadow-pop);
+  padding: 16px;
+  margin-bottom: 8px;
 }
 .today-head {
-  font-size: var(--fs-md);
+  font-size: var(--fs-lg);
   font-weight: 800;
-  margin-bottom: 4px;
+  margin-bottom: 10px;
+  color: var(--ink);
 }
 .today-row {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 12px;
+  padding: 11px 13px;
   border-radius: var(--r-md);
   background: var(--bg-3);
   margin-top: 8px;
   text-decoration: none;
   color: var(--ink);
   transition: transform 0.15s;
-  &:active { transform: scale(0.98); }
+  &:active { transform: scale(0.985); }
 }
 .today-emoji { font-size: 22px; line-height: 1; }
 .today-body { flex: 1; min-width: 0; }
-.today-module { font-size: var(--fs-xs); color: var(--ink-mute); }
+.today-module { font-size: var(--fs-xs); color: var(--ink-mute); font-weight: 700; }
 .today-label {
-  font-size: var(--fs-sm);
+  font-size: var(--fs-md);
   font-weight: 700;
   white-space: nowrap;
   overflow: hidden;
@@ -377,7 +410,7 @@ a.lesson-link {
 .today-arrow { color: var(--ink-mute); font-size: 18px; }
 .today-done {
   text-align: center;
-  color: var(--ok);
+  color: var(--ok-deep);
   font-weight: 700;
   padding: 10px 0 4px;
 }

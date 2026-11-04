@@ -11,17 +11,17 @@
   padding: 26px 20px 18px;
   margin: 14px 0 10px;
   text-align: center;
-  border: 3px solid var(--mc, var(--brand));
+  border: 1px solid var(--line);
   box-shadow: var(--shadow);
   position: relative;
   overflow: hidden;
+  // 顶部 4px 满色条：满色只出现在小标记上，不再铺 60px 渐变色带
   &::before {
     content: '';
     position: absolute;
     top: 0; left: 0; right: 0;
-    height: 60px;
-    background: linear-gradient(180deg, var(--mc-soft, var(--brand-soft)), transparent);
-    opacity: 0.5;
+    height: 4px;
+    background: var(--mc, var(--brand));
   }
 }
 .fc-emoji {
@@ -313,8 +313,7 @@
   height: 100%;
   transition: width 0.4s ease;
   border-radius: var(--r-pill);
-  background: linear-gradient(90deg, var(--mc, var(--brand)), var(--sun));
-  box-shadow: 0 0 8px rgba(var(--brand-rgb), 0.4);
+  background: var(--mc, var(--brand));
 }
 .quiz-q {
   background: var(--card);
@@ -427,7 +426,7 @@
 .result-score { font-size: var(--fs-lg); color: var(--ink-soft); }
 .result-score b { color: var(--brand-deep); font-size: var(--fs-4xl); font-weight: 800; }
 .result-bar { height: 14px; background: var(--line); border-radius: var(--r-pill); overflow: hidden; margin: 16px 0; position: relative; }
-.result-bar-fill { height: 100%; transition: width 0.8s ease; border-radius: var(--r-pill); background: linear-gradient(90deg, var(--mc, var(--brand)), var(--sun)); }
+.result-bar-fill { height: 100%; transition: width 0.8s ease; border-radius: var(--r-pill); background: var(--mc, var(--brand)); }
 .result-tip { color: var(--ink-soft); font-size: var(--fs-md); margin: 8px 0 16px; }
 .result-actions { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
 
@@ -504,7 +503,7 @@
 .mp-name { font-size: var(--fs-md); font-weight: 800; }
 .mp-status { font-size: var(--fs-sm); color: var(--ink-soft); margin-top: 2px; font-weight: 600; }
 .mp-bar { height: 10px; background: var(--line); border-radius: var(--r-pill); overflow: hidden; margin-top: 8px; }
-.mp-bar-fill { height: 100%; border-radius: var(--r-pill); background: linear-gradient(90deg, var(--mc, var(--brand)), var(--sun)); transition: width 0.6s ease; }
+.mp-bar-fill { height: 100%; border-radius: var(--r-pill); background: var(--mc, var(--brand)); transition: width 0.6s ease; }
 .mp-arrow { font-size: 22px; color: var(--ink-mute); font-weight: 700; flex-shrink: 0; }
 
 // ---------- 掌握度 Mastery ----------
@@ -1059,41 +1058,24 @@
 }
 
 // ---------- 书页 ----------
-// 暖纸色 + 极淡的斜向纤维纹 + 顶部丝带：让「这是一页书」一眼可辨，而不是白卡片。
-// 纹路用**斜向**而不是横向 —— 横向纹会和每一行英文对齐或错位，读起来像被划了线。
+// 一档暖纸色 + 细边 + 顶部 5px 色条：让「这是一页书」一眼可辨。
+// 旧版用 3 层渐变（纤维纹 / 顶部光 / 纸色）+ 内发光 + 外阴影 + 渐变丝带，
+// 全部换成 flat 色阶与实心色条；母题不变，噪音去掉。
 .reading-body {
   position: relative;
   padding: 22px 24px 20px;
   border: 1px solid color-mix(in srgb, var(--mc-deep, var(--brand-deep)) 20%, transparent);
   border-radius: var(--r-lg);
-  background:
-    repeating-linear-gradient(
-      58deg,
-      color-mix(in srgb, var(--mc-deep, var(--brand-deep)) 3%, transparent) 0 1px,
-      transparent 1px 7px
-    ),
-    radial-gradient(130% 55% at 50% 0%, color-mix(in srgb, var(--card, #fff) 94%, #fff), transparent 72%),
-    linear-gradient(180deg, var(--card, #fff), color-mix(in srgb, var(--mc-soft, var(--brand-soft)) 42%, var(--card, #fff)));
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.9),
-    inset 0 0 40px color-mix(in srgb, var(--sun, #fbbf24) 7%, transparent),
-    0 8px 24px color-mix(in srgb, var(--mc-deep, var(--brand-deep)) 12%, transparent);
+  background: color-mix(in srgb, var(--mc-soft, var(--brand-soft)) 32%, var(--card));
   max-width: 34em;
   overflow: hidden;
-  // 顶部丝带：一条渐变窄条，像书签压在页顶
+  // 顶部丝带：一条实心色条，像书签压在页顶
   &::before {
     content: '';
     position: absolute;
     top: 0; left: 0; right: 0;
     height: 5px;
-    background: linear-gradient(
-      90deg,
-      var(--mc-soft, var(--brand-soft)),
-      var(--mc, var(--brand)) 22%,
-      var(--mc, var(--brand)) 78%,
-      var(--mc-soft, var(--brand-soft))
-    );
-    opacity: 0.9;
+    background: var(--mc, var(--brand));
   }
 }
 
@@ -1114,13 +1096,11 @@
 .reading-title-en {
   display: inline-block;
   padding-bottom: 8px;
-  // 手写下划线：一层粗的 + 一层细的错位，叠出「笔锋」的粗细变化
-  background-image:
-    linear-gradient(90deg, transparent 3%, var(--sun, #fbbf24) 3% 97%, transparent 97%),
-    linear-gradient(90deg, transparent 8%, color-mix(in srgb, var(--sun-deep, #f59e0b) 55%, transparent) 8% 92%, transparent 92%);
-  background-repeat: no-repeat;
-  background-size: 100% 3px, 100% 2px;
-  background-position: 0 100%, 0 88%;
+  // 手写下划线改用文字装饰线：不再叠两层渐变去画「笔锋」
+  text-decoration: underline;
+  text-decoration-color: var(--sun);
+  text-decoration-thickness: 3px;
+  text-underline-offset: 7px;
 }
 .reading-title-zh {
   font-size: var(--fs-md);
@@ -1307,7 +1287,6 @@
 .reading-say:hover {
   opacity: 1;
   background: var(--mc-soft, var(--brand-soft));
-  box-shadow: 0 2px 8px var(--mc-soft, var(--brand-soft));
 }
 .reading-say.is-playing {
   opacity: 1;

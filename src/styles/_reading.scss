@@ -9,9 +9,8 @@
   .pl-line {
     height: 16px;
     border-radius: var(--r-sm);
-    background: linear-gradient(90deg, var(--bg-2) 25%, var(--card) 50%, var(--bg-2) 75%);
-    background-size: 200% 100%;
-    animation: pl-shimmer 1.4s ease-in-out infinite;
+    background: var(--bg-2);
+    animation: pl-pulse 1.4s ease-in-out infinite;
   }
   .pl-line--title { height: 34px; width: 62%; }
   .pl-line--short { width: 44%; }
@@ -19,9 +18,8 @@
   .pl-card {
     height: 62px;
     border-radius: var(--r-md);
-    background: linear-gradient(90deg, var(--bg-2) 25%, var(--card) 50%, var(--bg-2) 75%);
-    background-size: 200% 100%;
-    animation: pl-shimmer 1.4s ease-in-out infinite;
+    background: var(--bg-2);
+    animation: pl-pulse 1.4s ease-in-out infinite;
   }
   .pl-note {
     text-align: center;
@@ -31,9 +29,10 @@
   }
 }
 
-@keyframes pl-shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+// 静态底色 + 透明度呼吸，不用扫光渐变（骨架也是"图形"，不该带 gradient）
+@keyframes pl-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
 }
 
 // reduced-motion：去掉流动高光，保留静态底色（内容仍可见）
@@ -56,12 +55,12 @@
     display: flex;
     align-items: flex-start;
     gap: 14px;
-    background: linear-gradient(135deg, var(--mc-soft, #eef2ff) 0%, #fff 100%);
-    border: 2px solid var(--mc, #6366f1);
+    // 浅色调平底 + 一根发丝边：不再用渐变 + 2px 饱和描边
+    background: var(--mc-soft, #eef2ff);
+    border: 1px solid var(--line);
     border-radius: var(--r-lg);
     padding: 18px 16px;
     margin: 12px 0;
-    box-shadow: var(--shadow-sm);
   }
   .rm-hero-emoji {
     font-size: 44px;

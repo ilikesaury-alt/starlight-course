@@ -1,76 +1,45 @@
 // ============================================================
-//  Responsive — 大屏/电脑端放大（儿童远距离阅读友好）
+//  Responsive — 大屏字号放大（儿童远距离阅读友好）
 //  ------------------------------------------------------------
-//  痛点：App 为移动端优先，.app 固定在 720px 窄列，字号按“贴近手机看”
-//  设计。小朋友在电脑大屏前坐得较远时，整页文字显得偏小。
+//  **只放大字号，不再动布局宽度**。
+//  桌面骨架（.app 1240px 居中 + 顶栏导航 / 窄屏底部图标栏）统一由
+//  _components.scss 与 _home.scss 决定。这里若再写 `.app { max-width: 820px }`
+//  会把 1440px 桌面重新压回手机窄栏 —— 2026-11-04 UI 重整时就踩过这个坑：
+//  _responsive.scss 在 index.scss 最后加载，把前面所有骨架宽度覆盖掉了，
+//  截图里内容其实只有约 770px 宽。
 //
-//  方案（仅桌面端生效，手机端零影响）：
-//   1. 在断点处整体放大 --fs-* 字号令牌（覆盖全站绝大多数阅读文字）；
-//   2. 同步放大少数硬编码的关键 UI 字号（页面标题/品牌/底部导航等）；
-//   3. 适当加宽 .app / 底部导航容器，避免大屏上内容挤成细条。
-//
-//  注意：不用 zoom（会让 position:fixed 的底部导航包含块错乱），
-//  纯 media + 令牌/类覆盖，安全可预期。
+//  令牌的唯一真源是 _tokens.scss；这里仅在 ≥1024px 做一次整体放大，
+//  让坐得较远的孩子也能看清。不用 zoom（会扰乱 position:fixed 的包含块）。
 // ============================================================
 
-// ---------- 中等大屏（笔记本 / 小桌面，≥1024px） ----------
+// ---------- 笔记本 / 小桌面（≥1024px） ----------
 @media (min-width: 1024px) {
   :root {
-    --fs-xs: 14px;
-    --fs-sm: 15px;
+    --fs-xs: 13px;
+    --fs-sm: 14px;
     --fs-base: 16px;
-    --fs-md: 18px;
+    --fs-md: 17px;
     --fs-lg: 19px;
     --fs-xl: 22px;
-    --fs-2xl: 24px;
-    --fs-3xl: 28px;
+    --fs-2xl: 25px;
+    --fs-3xl: 30px;
     --fs-4xl: 34px;
     --fs-5xl: 40px;
-    --fs-display: 56px;
+    --fs-display: 48px;
   }
 
-  // 容器加宽，给大屏更舒展的阅读区
-  .app { max-width: 820px; }
-  .bottom-nav { max-width: 820px; }
-
-  // 关键硬编码 UI 字号同步放大（与令牌保持比例）
-  .brand { font-size: 22px; }
-  .brand-sub { font-size: 15px; }
-  .bottom-nav-item { font-size: 16px; }
-  .bottom-nav-item .nav-emoji { font-size: 26px; }
-  .app-footer { font-size: 15px; }
-  .page-kicker { font-size: 14px; }
-  .page-title { font-size: 20px; }
   .page-emoji { font-size: 40px; }
-  .result-title { font-size: 26px; }
+  .result-title { font-size: var(--fs-2xl); }
 }
 
 // ---------- 大桌面（外接显示器 / 电视，≥1536px） ----------
 @media (min-width: 1536px) {
   :root {
-    --fs-xs: 15px;
-    --fs-sm: 16px;
-    --fs-base: 18px;
-    --fs-md: 20px;
-    --fs-lg: 21px;
-    --fs-xl: 24px;
-    --fs-2xl: 28px;
-    --fs-3xl: 32px;
-    --fs-4xl: 38px;
-    --fs-5xl: 46px;
-    --fs-display: 64px;
+    --fs-base: 17px;
+    --fs-md: 18px;
+    --fs-lg: 20px;
+    --fs-xl: 23px;
   }
 
-  .app { max-width: 980px; }
-  .bottom-nav { max-width: 980px; }
-
-  .brand { font-size: 24px; }
-  .brand-sub { font-size: 16px; }
-  .bottom-nav-item { font-size: 17px; }
-  .bottom-nav-item .nav-emoji { font-size: 28px; }
-  .app-footer { font-size: 16px; }
-  .page-kicker { font-size: 15px; }
-  .page-title { font-size: 22px; }
   .page-emoji { font-size: 44px; }
-  .result-title { font-size: 28px; }
 }
