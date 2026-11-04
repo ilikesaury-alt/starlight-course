@@ -64,7 +64,7 @@ export default function UnitQuiz() {
   }
 
   return (
-    <div className="page lesson-preview" style={mcStyle}>
+    <div className="page lesson-preview starlight-sheet" style={mcStyle}>
       <Breadcrumb
         items={[
           { label: '🏠', to: '/' },
@@ -75,9 +75,12 @@ export default function UnitQuiz() {
       />
       <div className="page-head" style={mcStyle}>
         <span className="page-emoji">🏁</span>
-        <div>
-          <div className="page-kicker">Module {mod.id} · 单元测验</div>
-          <h1 className="page-title">{mod.title} 综合测验</h1>
+        <div className="sl-title-row">
+          <div>
+            <div className="page-kicker">Module {mod.id} · 单元测验</div>
+            <h1 className="page-title">{mod.title} 综合测验</h1>
+            <p className="sl-sub">Module {mod.id} / 12 · {quiz.length} 题 · 全对得 5 星</p>
+          </div>
         </div>
       </div>
 
@@ -106,8 +109,9 @@ export default function UnitQuiz() {
         />
       </SafeBoundary>
 
-      <div className="page-nav">
-        <Link to={`/preview/${unitId}`} className="back-link">← 课程列表</Link>
+      <div className="sl-page-foot">
+        <span className="sl-page-num">Module {mod.id} / 12 · 单元测验</span>
+        <Link to={`/preview/${unitId}`} className="back-link">← 这一单元的 8 课</Link>
       </div>
     </div>
   )

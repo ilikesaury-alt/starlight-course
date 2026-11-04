@@ -3,6 +3,12 @@
 > 起因：「当前项目的 UI 不好看」，按 [Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill) 的方法重整。
 > 技能副本与检查产物在 `.taste-skill/`（已加进 `.gitignore`，不入库）。
 > 目标平台不变：桌面 Chrome / Edge（Windows），幼儿（6–9 岁）在家长陪同下使用。
+>
+> **续篇**：本文件记的是**全站换皮**（token 层 + 外壳 + 15 个路由 0 FAIL）。
+> Starlight 主课模块的**单独重设计**（白纸页 + 96 格课次星图）见
+> [`starlight-module-redesign.md`](<starlight-module-redesign.md>)，
+> 设计工作单（inventory / argument / idea / copy deck）见
+> [`starlight-module-design-plan.md`](<starlight-module-design-plan.md>)。
 
 ## 1. 方向单
 

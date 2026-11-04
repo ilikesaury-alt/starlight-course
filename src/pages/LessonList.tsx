@@ -2,10 +2,11 @@ import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import SafeBoundary from '../components/SafeBoundary'
 import ConfirmDialog from '../components/ConfirmDialog'
-import { getModule, STARLIGHT_THEME } from '../data/starlight'
+import { getModule, modules, STARLIGHT_THEME } from '../data/starlight'
 import { useCourseStore } from '../store/useCourseStore'
 import { moduleThemeVars } from '../utils/theme'
 import Breadcrumb from '@/components/Breadcrumb'
+import LessonStarMap from '@/components/LessonStarMap'
 
 export default function LessonList() {
   const { unitId = '' } = useParams()
@@ -14,7 +15,8 @@ export default function LessonList() {
   const markLessonDone = useCourseStore((s) => s.markLessonDone)
   const completed = useCourseStore((s) => s.completedPreviews.includes(unitId))
   const lessonCompleted = useCourseStore((s) => s.lessonCompleted)
-  const [showGuide, setShowGuide] = useState(true)
+  // 导学默认收起：首屏先让 8 课表露出来（app-screens.md §2.2 everything the brief names）
+  const [showGuide, setShowGuide] = useState(false)
   const [showUnitDone, setShowUnitDone] = useState(false)
 
   if (!mod) {
@@ -29,7 +31,7 @@ export default function LessonList() {
   const mcStyle = moduleThemeVars(STARLIGHT_THEME)
 
   return (
-    <div className="page lesson-list" style={mcStyle}>
+    <div className="page lesson-list starlight-sheet" style={mcStyle}>
       <Breadcrumb items={[{ label: '🏠', to: '/' }, { label: 'Starlight 主课', to: '/starlight' }, { label: mod.title }]} />
       <div className="unit-banner" style={mcStyle}>
         <span className="unit-emoji">{mod.emoji}</span>
@@ -37,8 +39,14 @@ export default function LessonList() {
           <div className="unit-num">Module {mod.id} · 预习</div>
           <h1 className="unit-title">{mod.title}</h1>
           <div className="unit-zh">{mod.titleZh}</div>
+          <p className="sl-sub">
+            Module {mod.id} · {mod.titleZh} · {mod.lessons.length} 课 · 每课 5 词 5 句
+          </p>
         </div>
       </div>
+
+      {/* 本单元的 8 格：目录本身就是导航，格子状态由完成记录派生 */}
+      <LessonStarMap unitSlug={unitId} />
 
       <SafeBoundary label="课程列表">
         <button
@@ -67,10 +75,8 @@ export default function LessonList() {
           </div>
         )}
 
-        <h2 className="section-title">📚 本单元 {mod.lessons.length} 课</h2>
-        <p className="lead" style={{ marginTop: '-4px' }}>
-          已完成 <b>{mod.lessons.filter((l) => (lessonCompleted[unitId] ?? []).includes(l.id)).length}</b> / {mod.lessons.length} 课
-        </p>
+        <h2 className="section-title">📚 这一单元的课程</h2>
+        {/* 进度不在这里另算一份：星图头已是唯一进度真源（app-screens.md §2.1 一事实一变量） */}
         <div className="lesson-quiz-entry" style={mcStyle}>
           <Link to={`/preview/${unitId}/quiz`} className="lesson-quiz-card">
             <span className="lesson-quiz-emoji">🏁</span>
@@ -137,9 +143,9 @@ export default function LessonList() {
         />
       </SafeBoundary>
 
-      <div className="page-nav">
-        <Link to="/starlight" className="back-link">← 主课列表</Link>
-        <Link to="/smart" className="btn">去复习 →</Link>
+      <div className="sl-page-foot">
+        <span className="sl-page-num">Module {mod.id} / {modules.length} · {mod.lessons.length} 课</span>
+        <Link to="/starlight" className="back-link">← 主课目录</Link>
       </div>
     </div>
   )

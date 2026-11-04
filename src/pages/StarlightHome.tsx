@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { modules, STARLIGHT_THEME } from '@/data/starlight'
 import { useCourseStore } from '@/store/useCourseStore'
 import { moduleThemeVars } from '@/utils/theme'
+import LessonStarMap from '@/components/LessonStarMap'
 
 // Starlight 主课采用暖橙模块主题色,统一由 moduleThemeVars 派生
 const mcStyle = moduleThemeVars(STARLIGHT_THEME)
@@ -10,7 +11,6 @@ const mcStyle = moduleThemeVars(STARLIGHT_THEME)
 export default function StarlightHome() {
   const [query, setQuery] = useState('')
   const completed = useCourseStore((s) => s.completedPreviews)
-  const lessonCompleted = useCourseStore((s) => s.lessonCompleted)
 
   const totalLessons = useMemo(() => modules.reduce((a, m) => a + m.lessons.length, 0), [])
   // 统一以「按课细分的完整单词」为单词全集口径(与复习系统 getWords / Progress 一致)
@@ -18,15 +18,7 @@ export default function StarlightHome() {
     () => modules.reduce((a, m) => a + m.lessons.flatMap((l) => l.words).length, 0),
     []
   )
-  const doneCount = useMemo(
-    () => modules.filter((m) => completed.includes(m.slug)).length,
-    [completed],
-  )
-  // 课粒度完成统计(12 单元 × 8 课 = 96 课)
-  const doneLessons = useMemo(
-    () => Object.values(lessonCompleted).reduce((a, ids) => a + ids.length, 0),
-    [lessonCompleted],
-  )
+  // 进度不在这里另算一份：96 格星图是唯一的进度真源（app-screens.md §2.1 一事实一变量）
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -42,32 +34,28 @@ export default function StarlightHome() {
   }, [query])
 
   return (
-    <div className="home" style={mcStyle}>
-      <section className="hero" style={mcStyle}>
-        <div className="hero-emoji">🌟</div>
-        <h1 className="hero-title">Starlight 主课</h1>
-        <p className="hero-sub">
-          牛津 <b>Starlight Starter</b> 预备级，配合一对一菲教课使用。<br />
-          共 <b>{modules.length}</b> 个单元、<b>{totalLessons}</b> 节课、<b>{totalWords}</b> 个单词，
-          每单元都有预习导学、单词卡、句型对话与互动测验。
-        </p>
-        <div className="hero-tags">
-          <span className="hero-tag">📖 预习</span>
-          <span className="hero-tag">🔁 复习</span>
-          <span className="hero-tag">🎯 测验</span>
-          <span className="hero-tag">⭐ 得星</span>
+    <div className="home starlight-sheet" style={mcStyle}>
+      {/* 标题行：一个名词 h1 + 一句支撑句。不再有 hero emoji / eyebrow / 胶囊阵列 */}
+      <section className="hero">
+        <div className="sl-title-row">
+          <div>
+            <h1 className="hero-title">Starlight 主课</h1>
+            <p className="sl-sub">
+              牛津 Starlight 预备级 · {modules.length} 单元 / {totalLessons} 课 / {totalWords} 词 · 配合一对一菲教课
+            </p>
+          </div>
+          <Link className="sl-action" to="/smart">今天要复习 →</Link>
         </div>
       </section>
 
-      <div className="rg-progress-pill" style={mcStyle}>
-        🏆 已完成 <b>{doneLessons}</b> / {totalLessons} 课 · {doneCount} / {modules.length} 个单元预习
-      </div>
+      {/* 96 格课次星图：这本教材的目录本身，格子状态由完成记录派生 */}
+      <LessonStarMap />
 
       <div className="rg-search-wrap">
         <input
           className="rg-search"
           type="search"
-          placeholder="🔍 搜单元名或单词，例如 hello、red、family…"
+          placeholder="搜单元名或单词，例如 hello、red、family…"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
@@ -111,7 +99,8 @@ export default function StarlightHome() {
         </p>
       </details>
 
-      <div className="page-nav">
+      <div className="sl-page-foot">
+        <span className="sl-page-num">Oxford Starlight Starter · {modules.length} 单元 / {totalLessons} 课</span>
         <Link to="/" className="back-link">← 返回首页</Link>
       </div>
     </div>

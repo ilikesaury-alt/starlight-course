@@ -97,6 +97,7 @@ export default function LessonPreview() {
   const lessons = mod?.lessons ?? []
   const lessonIdx = lessons.findIndex((l) => String(l.id) === lessonId)
   const lesson = lessonIdx >= 0 ? lessons[lessonIdx] : null
+  const nextLesson = lessonIdx >= 0 ? lessons[lessonIdx + 1] : undefined
 
   const words = useMemo(() => lesson?.words ?? [], [lesson])
   const sentences = lesson?.sentences ?? []
@@ -231,7 +232,7 @@ export default function LessonPreview() {
   const lessonDone = lessonCompleted[mod.slug]?.includes(lesson.id) ?? false
 
   return (
-    <div className="page lesson-preview" style={mcStyle}>
+    <div className="page lesson-preview starlight-sheet" style={mcStyle}>
       {/* 头部从 4 层压到 2 层（面包屑 + 标题），删掉与面包屑信息重复的
           「📖 Starlight 课前预习」mode-badge：430px 视口下首屏该看到学习内容，
           不是四层导航 chrome。面包屑本身也缩短为「‹ 模块 · Lesson N」。 */}
@@ -244,8 +245,18 @@ export default function LessonPreview() {
       />
       <div className="page-head" style={mcStyle}>
         <span className="page-emoji">{mod.emoji}</span>
-        <div>
-          <h1 className="page-title">{lesson.title}{lesson.titleZh ? ` · ${lesson.titleZh}` : ''}</h1>
+        <div className="sl-title-row">
+          <div>
+            <h1 className="page-title">{lesson.title}{lesson.titleZh ? ` · ${lesson.titleZh}` : ''}</h1>
+            <p className="sl-sub">
+              Lesson {lesson.id} / {lessons.length} · {words.length} 词 · {sentences.length} 句 · 课本第 {lesson.id} 页
+            </p>
+          </div>
+          {nextLesson && (
+            <Link className="sl-action" to={`/preview/${unitId}/${nextLesson.id}`}>
+              下一课 · {nextLesson.title} →
+            </Link>
+          )}
         </div>
       </div>
 
@@ -299,7 +310,7 @@ export default function LessonPreview() {
         </div>
 
         {tab === 'vocab' && (
-          <>
+          <div className="sl-vocab-grid">
             <VocabTab words={words} mcStyle={mcStyle} />
             <ExtensionSection
               words={extensions}
@@ -310,7 +321,7 @@ export default function LessonPreview() {
               onOpenEntry={() => setShowExtEntry(true)}
               onAutoFill={handleAutoFill}
             />
-          </>
+          </div>
         )}
         {tab === 'speak' && (
           sentences.length === 0 ? (
@@ -456,8 +467,9 @@ export default function LessonPreview() {
         onSubmit={(w) => addExtensionWord(lessonKey, w)}
         onCancel={() => setShowExtEntry(false)}
       />
-      <div className="page-nav">
-        <Link to={`/preview/${unitId}`} className="back-link">← 课程列表</Link>
+      <div className="sl-page-foot">
+        <span className="sl-page-num">Lesson {lesson.id} / {lessons.length} · {mod.title}</span>
+        <Link to={`/preview/${unitId}`} className="back-link">← 这一单元的 8 课</Link>
       </div>
 
       {/* 课级完成：只展示状态，不再提供手动标记（闯关全对会自动标记） */}
@@ -509,54 +521,57 @@ function VocabTab({ words, mcStyle }: { words: Word[]; mcStyle: React.CSSPropert
 
   return (
     <>
-      <Flashcard
-        emoji={w.emoji}
-        en={w.en}
-        zh={w.zh}
-        ipa={w.ipa}
-        showZh={showZh}
-        onToggleZh={() => setShowZh((v) => !v)}
-        mcStyle={mcStyle}
-        footer={
-          selfChecked.has(w.en) ? (
-            <p className="fc-self-done">⭐ 已记录，继续加油！</p>
-          ) : (
-            <div className="fc-self-check">
-              <button
-                type="button"
-                className="btn btn--soft"
-                onClick={() => selfAssess(w.en, false)}
-              >
-                😅 还不会
-              </button>
-              <button
-                type="button"
-                className="btn"
-                onClick={() => selfAssess(w.en, true)}
-              >
-                ✅ 我会了
-              </button>
-            </div>
-          )
-        }
-      />
+      {/* 卡片本体 + 进度 + 圆点 + 翻页是一个整体：两栏布局里占左栏整列 */}
+      <div className="sl-card-pane">
+        <Flashcard
+          emoji={w.emoji}
+          en={w.en}
+          zh={w.zh}
+          ipa={w.ipa}
+          showZh={showZh}
+          onToggleZh={() => setShowZh((v) => !v)}
+          mcStyle={mcStyle}
+          footer={
+            selfChecked.has(w.en) ? (
+              <p className="fc-self-done">⭐ 已记录，继续加油！</p>
+            ) : (
+              <div className="fc-self-check">
+                <button
+                  type="button"
+                  className="btn btn--soft"
+                  onClick={() => selfAssess(w.en, false)}
+                >
+                  😅 还不会
+                </button>
+                <button
+                  type="button"
+                  className="btn"
+                  onClick={() => selfAssess(w.en, true)}
+                >
+                  ✅ 我会了
+                </button>
+              </div>
+            )
+          }
+        />
 
-      <div className="fc-progress">{idx + 1} / {words.length}</div>
-      <div className="fc-dots">
-        {words.map((_, i) => (
-          <button
-            key={i}
-            type="button"
-            className={'fc-dot' + (i === idx ? ' on' : '')}
-            onClick={() => setIdx(i)}
-            aria-label={`第 ${i + 1} 个单词`}
-          />
-        ))}
-      </div>
+        <div className="fc-progress">{idx + 1} / {words.length}</div>
+        <div className="fc-dots">
+          {words.map((_, i) => (
+            <button
+              key={i}
+              type="button"
+              className={'fc-dot' + (i === idx ? ' on' : '')}
+              onClick={() => setIdx(i)}
+              aria-label={`第 ${i + 1} 个单词`}
+            />
+          ))}
+        </div>
 
-      <div className="fc-controls">
-        <button type="button" className="btn btn--soft" onClick={prev}>← 上一个</button>
-        <button type="button" className="btn" onClick={next}>下一个 →</button>
+        <div className="fc-controls">
+          <button type="button" className="btn btn--soft" onClick={prev}>← 上一个</button>
+          <button type="button" className="btn" onClick={next}>下一个 →</button>
+        </div>
       </div>
 
       {/* 本课词表：点词本身即发音 + 切卡看词义；单词按记忆强度着色（与课文点读同一套） */}
