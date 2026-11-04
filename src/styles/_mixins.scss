@@ -79,3 +79,188 @@
     display: none;
   }
 }
+
+// ============================================================
+//  paper-sheet —— 「白纸页」骨架（2026-11-04，tasteskill framed-sheet）
+//  ------------------------------------------------------------
+//  一套共用骨架，让 /starlight 与 /reading 是**同一种东西**而不是两个模块：
+//    ① 骨白纸 #f2f1ee = tinted frame（全站底色，不另画）
+//    ② .xxx-sheet      = 白纸页（1px 边 / 16px 圆角 / 无阴影）
+//    ③ 页内区块只靠 1px 细线与色阶分开（不再有第四层卡片）
+//
+//  规则全部写在调用方自己的作用域里（.starlight-sheet / .reading-sheet），
+//  **不改任何共享类的全局定义** —— flashcard / zone-card / page-head / card
+//  都被别的模块共用，只能在作用域内覆盖。
+// ============================================================
+@mixin paper-sheet {
+  --sh-gap: 24px;
+
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 24px;
+  margin: 8px 0 0;
+  box-shadow: none;
+  position: relative;
+
+  // ---------- 标题行：h1 24px 名词 + 一句灰支撑句 ----------
+  .page-head,
+  .unit-banner,
+  .hero,
+  .rm-hero {
+    display: block;
+    background: none;
+    border: 0;
+    border-bottom: 1px solid var(--line);
+    border-radius: 0;
+    padding: 0 0 16px;
+    margin: 0 0 var(--sh-gap);
+    text-align: left;
+    color: var(--ink);
+    max-width: none;
+    align-items: baseline;
+    gap: 12px;
+  }
+  .page-title,
+  .unit-title,
+  .hero-title,
+  .rm-hero-title {
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: 0;
+    color: var(--ink);
+    margin: 0;
+  }
+  .sl-sub {
+    margin: 6px 0 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--ink-soft);
+  }
+  .sl-title-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    min-width: 0;
+  }
+  .page-head > .sl-title-row,
+  .unit-banner > .sl-title-row { flex: 1; }
+  .sl-action {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 40px;
+    padding: 8px 16px;
+    border-radius: var(--r-md);
+    background: var(--brand-deep);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: transform 0.14s ease;
+    &:active { transform: scale(0.97); }
+  }
+
+  // 面包屑：16/600，父级灰、当前页墨色
+  .breadcrumb { padding: 0 0 14px; margin: 0; font-size: 14px; }
+
+  // ---------- 下划线 Tab：跨整张纸页 ----------
+  .tab-bar { margin: 0 0 var(--sh-gap); gap: 24px; }
+  .tab-btn { font-size: 14px; padding: 10px 2px 12px; }
+  .tab-btn.active { color: var(--brand-deep); }
+
+  // ---------- 第三层：区块只靠细线分开，不再套卡片 ----------
+  .zone-card {
+    border: 0;
+    border-top: 1px solid var(--line);
+    border-radius: 0;
+    background: none;
+    margin-bottom: var(--sh-gap);
+  }
+  .zone-card-head {
+    background: none;
+    color: var(--ink);
+    padding: 12px 0;
+    font-size: 16px;
+    font-weight: 700;
+    border-bottom: 1px solid var(--line);
+  }
+  .zone-card-side { color: var(--ink-soft); font-size: 13px; }
+  .zone-card-body { padding: 16px 0 0; gap: 16px; }
+
+  .card,
+  .tip-card {
+    border: 0;
+    border-bottom: 1px solid var(--line);
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+    margin-top: 0;
+    padding: 14px 0;
+  }
+  .card-title { font-size: 16px; font-weight: 700; color: var(--ink); }
+
+  // ---------- 提示与工具条：灰字小注 + 方钮，不再是黄色药丸 ----------
+  .sent-hint {
+    display: block;
+    margin-top: 4px;
+    padding: 0;
+    background: none;
+    border-radius: 0;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink-mute);
+  }
+  .zone-lead { font-size: 14px; font-weight: 500; color: var(--ink-soft); }
+  .play-tools { gap: 8px; margin-bottom: 12px; }
+  .play-tools .btn {
+    padding: 7px 14px;
+    min-height: 36px;
+    border-radius: var(--r-md);
+    background: var(--card);
+    border: 1px solid var(--line-2);
+    color: var(--ink-soft);
+    font-size: 13px;
+    font-weight: 600;
+    box-shadow: none;
+  }
+  .play-tools .btn.active {
+    background: var(--brand-soft);
+    border-color: var(--brand-deep);
+    color: var(--brand-deep);
+  }
+  .play-tools-hint { font-size: 12px; font-weight: 500; color: var(--ink-mute); }
+
+  // 模式标识：这是「这一轮是什么」的标签，不是一枚徽章
+  .mode-badge {
+    padding: 0;
+    border-radius: 0;
+    background: none;
+    color: var(--ink-mute);
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+
+  // ---------- 页脚：页码 + 返回 ----------
+  .sl-page-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: var(--sh-gap);
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+  }
+  .sl-page-num {
+    font-size: 13px;
+    color: var(--ink-mute);
+    font-variant-numeric: tabular-nums;
+  }
+  .page-nav { margin-top: 0; border: 0; padding: 0; }
+  .back-link { background: none; color: var(--ink-soft); padding: 8px 0; }
+}

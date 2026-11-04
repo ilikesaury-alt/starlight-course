@@ -23,3 +23,5 @@
 // Starlight 主课模块专属（framed-sheet 白纸页 + 96 格课次星图）。
 // 必须最后加载：它只在 .starlight-sheet 作用域内覆盖共享组件的外观。
 @use 'styles/starlight';
+// 阅读模块专属（同一套 paper-sheet 骨架 + 「按单元翻的故事书」母题）。
+@use 'styles/reading-module';

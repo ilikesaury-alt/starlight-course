@@ -23,9 +23,11 @@
 
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { Gem } from 'lucide-react'
 import Breadcrumb from '@/components/Breadcrumb'
 import ZoneCard from '@/components/ZoneCard'
 import ReadingZone from '@/components/ReadingZone'
+import UnitGlyph from '@/components/UnitGlyph'
 import { modules } from '@/data/starlight'
 import { getReadingPassage } from '@/data/reading'
 import { useCourseStore } from '@/store/useCourseStore'
@@ -59,26 +61,36 @@ export default function ReadingPage() {
 
   const totalLessons = modules.reduce((n, m) => n + m.lessons.length, 0)
 
-  // 每个单元的宝藏词数：本单元各课课本词**去重**后的数量。
+  // 每个单元的宝藏词：本单元各课课本词**去重**后的词表。
   // 去重的原因：同一单元 8 课会反复出现 hello/name 这类共词，
   // 重复计数会让「💎 120 词」看着像虚数。
+  // 存词而不只存数量：展开单元时把这 N 个词真实地列出来（可点发音）——
+  // 「💎 32 词」从一枚数字变成 32 个孩子真能读的词，母题才算立住。
   const unitTreasures = useMemo(
     () =>
       new Map(
-        modules.map((m) => [
-          m.id,
-          new Set(m.lessons.flatMap((l) => l.words.map((w) => w.en.toLowerCase()))).size,
-        ])
+        modules.map((m) => {
+          const seen = new Set<string>()
+          const words: { en: string; zh: string; emoji?: string }[] = []
+          for (const l of m.lessons) {
+            for (const w of l.words) {
+              const k = w.en.toLowerCase()
+              if (seen.has(k)) continue
+              seen.add(k)
+              words.push(w)
+            }
+          }
+          return [m.id, words] as const
+        })
       ),
     []
   )
 
   return (
-    <div className={'page reading-module' + (memOn ? ' sr-mem' : '')} style={mcStyle}>
+    <div className={'page reading-module reading-sheet' + (memOn ? ' sr-mem' : '')} style={mcStyle}>
       <Breadcrumb items={[{ label: '🏠', to: '/' }, { label: '阅读小故事' }]} />
 
       <section className="rm-hero">
-        <div className="rm-hero-emoji">📚</div>
         <div className="rm-hero-main">
           {/* h1 = 模块名（页面自己要说清这是哪一页，不只靠面包屑）。
               母题「只用了你学过的词」写成**大字陈述句**而不是标题：
@@ -88,7 +100,8 @@ export default function ReadingPage() {
             这些故事<b>只用了你学过的词</b>
           </p>
           <p className="rm-hero-sub">
-            每节课配一段小故事，共 <b>{totalLessons}</b> 篇。
+            每节课配一段小故事，共 <b>{totalLessons}</b> 篇 · {modules.length} 个单元 ·{' '}
+            {modules.reduce((n, m) => n + (unitTreasures.get(m.id)?.length ?? 0), 0)} 个不同的词。
             点开一课自己读一遍，读不出的词点一下就能听发音。
           </p>
           {/* 宝藏词示例：真实课表词，且**真的能点、能发音**（复用同一条 TTS 链路）。 */}
@@ -122,17 +135,42 @@ export default function ReadingPage() {
             }}
           >
             <summary className="rm-unit-head">
-              <span className="rm-unit-emoji">{m.emoji}</span>
+              <span className="rm-unit-emoji">
+                <UnitGlyph
+                  unitId={m.id}
+                  fallback={m.emoji}
+                  color={m.color}
+                  soft={m.colorSoft}
+                  size={26}
+                />
+              </span>
               <span className="rm-unit-title">Module {m.id} · {m.title}</span>
               <span className="rm-unit-zh">{m.titleZh}</span>
-              {/* 两枚徽章成组：作为一整块推到右侧，宽度不够时整组换行 */}
+              {/* 「N 篇」与「N 词」如实印数；词数展开后就是下面那张真实词表 */}
               <span className="rm-unit-badges">
                 <span className="rm-unit-count">{m.lessons.length} 篇</span>
                 <span className="rm-unit-treasure">
-                  💎 {unitTreasures.get(m.id)} 词
+                  <Gem size={14} aria-hidden="true" />
+                  {unitTreasures.get(m.id)?.length ?? 0} 词
                 </span>
               </span>
             </summary>
+
+            {/* 这一单元的宝藏词表：去重后的全部课本词，点一下就发音。
+                「💎 N 词」的实体化 —— 数字背后是孩子真能读的词。 */}
+            <div className="rm-treasure-list" aria-label={`Module ${m.id} 的课本词`}>
+              {(unitTreasures.get(m.id) ?? []).map((w) => (
+                <button
+                  type="button"
+                  className="rm-treasure-word"
+                  key={w.en}
+                  onClick={() => speakText(cleanForSpeak(w.en), { slow })}
+                  title={`${w.zh} · 点一下听发音`}
+                >
+                  {w.en}
+                </button>
+              ))}
+            </div>
 
             <div className="rm-lessons">
               {m.lessons.map((l) => {
