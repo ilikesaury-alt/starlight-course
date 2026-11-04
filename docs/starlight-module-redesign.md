@@ -55,6 +55,8 @@ page run 本身不适用于 app screen（SKILL.md L44–55），只借它的 ide
 
 ## 4. Critique（`references/critique.md` §4）
 
+> 第二轮把 ROUND 2 记下的三个遗留问题做完了，见第 3.5 节；本节保留两轮 critique 的原文。
+
 ```
 ROUND 1 — before (.taste-skill/starlight/before/sl-lesson/desktop-fold.jpg)
 Seen in one second: 一个黄横幅、五个带 emoji 的标签、一张居中的大白卡，卡下面又一张黄卡。
@@ -83,17 +85,64 @@ Top three remaining problems:
 
 两轮之间 4 个页面的 inspector 从 **2 FAIL + 3 WARN**（课内页 11 档字号、首页 hero-void）到 **0 FAIL / 0 WARN**。
 
+## 4.5 遗留问题的收尾（第二轮）
+
+ROUND 2 记下的三个遗留问题，这一轮做完了：
+
+### 4.5.1 12 个单元主题的 code-drawn 插画
+
+**为什么不用 emoji**：emoji 是系统字体里的通用符号，谁装都长一个样；这里要表达的是「牛津 Starlight 的这一单元教什么」——挥手的手、餐盘、侧视的小巴士。图形画在 **`src/components/UnitGlyph.tsx`**（12 张，24×24 网格）。
+
+**一套图形语言，不混风格**（imagery.md §8）：
+- 方角无框，flat filled shapes，只用填充色不用描边
+- **主体用满色**（要看得见），浅色只作细节层次
+- 每个图形 2–3 层细节
+- 用该单元自己的教材色（`--mc` 满色 + `--mc-soft` 浅底）
+
+12 张：挥手的手 / 侧脸小猫 / 苹果+吸管杯 / 小熊+星 / 相对箭头 / 正面小人 / 房子 / 四格餐盘 / 闹钟 / 蛋糕蜡烛 / 沙滩遮阳伞 / 侧视巴士。
+
+**接进三处**：首页 12 个单元卡、单元页横幅、课内页标题。原来那三个位置是 `mod.emoji`（👋🐾🍎🧸⚖️🕺🏠🍽️⏰🎂🏖️🚦），现在换成对应图形；**词卡的 emoji 保留**——那是教材词图（96 课 480 词，不可能都画）。
+
+> ⚠️ 图形文件放在 `src/components/` 而不是 `src/data/`：`react-refresh/only-export-components` 要求组件文件只导出组件，把 12 个图形导出函数放在 data 目录会刷 13 条 warning。收进 `UnitGlyph.tsx` 并只导出这一个组件后归零。
+
+### 4.5.2 五个 Tab 按 job 分版式
+
+之前五个 Tab 共用同一套「ZoneCard + 内容」版式，只是换内容。现在每个是**一个工作区**：
+
+| Tab | job | 版式 |
+|---|---|---|
+| 单词卡 | peer objects | 一张大卡 + 一份词表（两栏） |
+| 句型 | 填空工作区 | 句子左对齐 24px；选项 44px 高方钮（不是药丸）；工作区浅底 |
+| 外教对话 | 说话人行表 | 通栏行、36–53px 行距、说话人稳定左边条；喇叭靠行右端 |
+| 课文 | 逐句双行 | 通栏行 + 译文固定第二行灰字（13px） |
+| 闯关 | 一题一屏 | 真实比例进度条 + 题干 28px 内容字号 + 选项一行一个 48px |
+
+**「听整篇 / 慢速 / 记忆状态」工具条**从药丸改成 12px 灰字小注 + 36px 方钮；`mode-badge`（"📖 课文选词填空"）也降成灰字标签。
+
+**对话与课文两个 Tab 的关键修正**：`.dialogue-bubble.right` 的 `align-self: flex-end` 让气泡靠右、左右分栏，一屏里留下一大片空地（frame 规则：右半不能空）。在 Starlight 作用域里重置为 `align-self: stretch`，两个 Tab 都走通栏行。
+
+> e2e 断言的是 `.dialogue-bubble.left/right` **存在且可见**、数量 12、`.dialogue-zh` 数量随开关变化——**不断言左右位置**，所以改版式是安全的。
+
+### 4.5.3 星图窄屏触控目标
+
+窄屏 8 列挤成 ~40px 宽的格子，点不准。改成 **4 列、格子 44px 高**（每格约 78×44px，满足 ≥44px 的触控目标下限）。
+
 ## 5. 验证
 
 ```
 npm run test    343 passed / 28 files
-npm run check   ✓     npm run lint  ✓     npm run build  ✓
+npm run check   ✓     npm run lint  ✓（0 error / 0 warning）    npm run build  ✓
 npm run e2e     96 passed / 3 skipped / 0 failed
 inspect.mjs     sl-home / sl-list / sl-lesson / sl-quiz × 1440/768/390：全部 0 FAIL / 0 WARN
 ```
 
 **e2e 契约一条没破**：`.tab-btn` 仍 5 个且名称不变、`.ext-item` / `.ext-badge` / `.sfc-*` / `.dialogue-bubble.left/right` / `.dialogue-zh` / `.passage-zone .tt-word` / `.tt-pop` / `.word-list-mini .word-chip`（5 个）/ `.flashcard` / `.fc-progress` 的类名与数量全部不变；`.tt-word` 默认透明底不变；`SHOW_SPEAK_TAB = false` 不变。
 
-**结构改动只有三处**（都不改类名与文本）：`VocabTab` 前四项包进新增的 `.sl-card-pane`；`LessonList` 的导学 `showGuide` 默认值 `true → false`；4 个页面根节点加了 `.starlight-sheet` 类。
+**结构改动**（都不改已有类名与文本）：
+- `VocabTab` 前四项包进新增的 `.sl-card-pane`
+- `LessonList` 的导学 `showGuide` 默认值 `true → false`
+- 4 个页面根节点加了 `.starlight-sheet` 类
+- `LessonDialogueBox` 的 ZoneCard 加了 `className="dlg-zone"`（用来和外教对话 / 课文两个 Tab 区分作用域）
+- 三处模块图形位由 `mod.emoji` 换成 `<UnitGlyph />`
 
 **未改动**：路由、store、教材数据、SRS / TTS / STT 逻辑。

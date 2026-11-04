@@ -26,6 +26,7 @@ import SentenceFrameCard from '@/components/SentenceFrameCard'
 import LessonDialogueBox from '@/components/LessonDialogueBox'
 import PlayTools from '@/components/PlayTools'
 import ZoneCard from '@/components/ZoneCard'
+import UnitGlyph from '@/components/UnitGlyph'
 import { useMemoryState } from '@/utils/memoryState'
 import { EXT_LIMIT, lessonTopicZh, suggestExtensions, type ExtWord } from '@/data/extensionTopics'
 import { getModule, STARLIGHT_THEME, type Sentence, type Word } from '@/data/starlight'
@@ -244,7 +245,15 @@ export default function LessonPreview() {
         ]}
       />
       <div className="page-head" style={mcStyle}>
-        <span className="page-emoji">{mod.emoji}</span>
+        <span className="page-emoji">
+          <UnitGlyph
+            unitId={mod.id}
+            fallback={mod.emoji}
+            color={mod.color}
+            soft={mod.colorSoft}
+            size={30}
+          />
+        </span>
         <div className="sl-title-row">
           <div>
             <h1 className="page-title">{lesson.title}{lesson.titleZh ? ` · ${lesson.titleZh}` : ''}</h1>

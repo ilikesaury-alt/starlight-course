@@ -32,7 +32,12 @@ export default function LessonDialogueBox({
   const [showZh, setShowZh] = useState(false)
 
   return (
-    <ZoneCard title={`🎭 外教课堂对话 · ${dialogue.title}`} side="点词听发音" mcStyle={mcStyle}>
+    <ZoneCard
+      title={`🎭 外教课堂对话 · ${dialogue.title}`}
+      side="点词听发音"
+      mcStyle={mcStyle}
+      className="dlg-zone"
+    >
       <p className="zone-lead">
         外教上课时可能这样和你说话，先看再听。
         <span className="sent-hint">点单词听发音，点 🔊 听整句</span>

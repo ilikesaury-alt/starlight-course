@@ -7,6 +7,7 @@ import { useCourseStore } from '../store/useCourseStore'
 import { moduleThemeVars } from '../utils/theme'
 import Breadcrumb from '@/components/Breadcrumb'
 import LessonStarMap from '@/components/LessonStarMap'
+import UnitGlyph from '@/components/UnitGlyph'
 
 export default function LessonList() {
   const { unitId = '' } = useParams()
@@ -34,7 +35,15 @@ export default function LessonList() {
     <div className="page lesson-list starlight-sheet" style={mcStyle}>
       <Breadcrumb items={[{ label: '🏠', to: '/' }, { label: 'Starlight 主课', to: '/starlight' }, { label: mod.title }]} />
       <div className="unit-banner" style={mcStyle}>
-        <span className="unit-emoji">{mod.emoji}</span>
+        <span className="unit-emoji">
+          <UnitGlyph
+            unitId={mod.id}
+            fallback={mod.emoji}
+            color={mod.color}
+            soft={mod.colorSoft}
+            size={34}
+          />
+        </span>
         <div>
           <div className="unit-num">Module {mod.id} · 预习</div>
           <h1 className="unit-title">{mod.title}</h1>

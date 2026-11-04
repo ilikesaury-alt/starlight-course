@@ -4,6 +4,7 @@ import { modules, STARLIGHT_THEME } from '@/data/starlight'
 import { useCourseStore } from '@/store/useCourseStore'
 import { moduleThemeVars } from '@/utils/theme'
 import LessonStarMap from '@/components/LessonStarMap'
+import UnitGlyph from '@/components/UnitGlyph'
 
 // Starlight 主课采用暖橙模块主题色,统一由 moduleThemeVars 派生
 const mcStyle = moduleThemeVars(STARLIGHT_THEME)
@@ -72,7 +73,15 @@ export default function StarlightHome() {
               className="module-card"
               style={{ '--mc': m.color, '--mc-soft': m.colorSoft } as React.CSSProperties}
             >
-              <div className="module-emoji">{m.emoji}</div>
+              <div className="module-emoji">
+                <UnitGlyph
+                  unitId={m.id}
+                  fallback={m.emoji}
+                  color={m.color}
+                  soft={m.colorSoft}
+                  size={26}
+                />
+              </div>
               <div className="module-info">
                 <div className="module-num">
                   Module {m.id} {done && '✅'}
