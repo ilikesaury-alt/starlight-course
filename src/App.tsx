@@ -88,6 +88,8 @@ function AppRoutes() {
           <Route path="/flyguy" element={<FlyGuyHome />} />
           <Route path="/flyguy/:slug" element={<FlyGuyStory />} />
           <Route path="/starlight" element={<StarlightHome />} />
+          {/* Starlight 是一个系列：第一册（Book 1）与预备级共用同一套页面，按 level 取数据 */}
+          <Route path="/starlight1" element={<StarlightHome level="starlight1" />} />
           <Route path="/chinese" element={<ChineseHome />} />
           <Route path="/chinese/:unitId" element={<ChineseUnit />} />
           <Route path="/chinese/:unitId/:lessonId" element={<ChineseLesson />} />

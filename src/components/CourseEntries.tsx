@@ -20,6 +20,13 @@ export default function CourseEntries() {
   // 故事模块动态统计:总数(进度%)与 Fly Guy 文案用数字
   const [fgStats, setFgStats] = useState<{ stories: number; words: number } | null>(null)
   const [storyTotals, setStoryTotals] = useState<{ flyguy?: number; rocketgirl?: number }>({})
+  // Starlight 第一册的汇总同样动态取:第一册教材数据约 350KB 源码,
+  // 静态 import 会把首页首屏 chunk 顶大(与故事模块同一策略)。
+  const [sl1Summary, setSl1Summary] = useState<{
+    units: number
+    lessons: number
+    slugs: Set<string>
+  } | null>(null)
 
   useEffect(() => {
     let alive = true
@@ -32,6 +39,15 @@ export default function CourseEntries() {
       if (!alive) return
       setStoryTotals((s) => ({ ...s, rocketgirl: m.rocketGirlStories.length }))
     })
+    void import('@/data/starlightSeriesData').then((m) => {
+      if (!alive) return
+      const mods = m.modulesOfLevel('starlight1')
+      setSl1Summary({
+        units: mods.length,
+        lessons: mods.reduce((n, x) => n + x.lessons.length, 0),
+        slugs: new Set(mods.map((x) => x.slug)),
+      })
+    })
     return () => {
       alive = false
     }
@@ -43,6 +59,15 @@ export default function CourseEntries() {
   const chineseLessonTotal = chineseUnits.reduce((n, u) => n + u.lessons.length, 0)
   const eng3aLessonTotal = eng3aUnits.reduce((n, u) => n + u.lessons.length, 0)
 
+  // Starlight 是一个系列：预备级与第一册共用一份 completedPreviews（按 slug 记），
+  // 但进度百分比必须各算各的 —— 否则第一册学完会把预备级的进度条顶上去。
+  const starterSlugs = new Set(starlightModules.map((m) => m.slug))
+  const starterDone = completedPreviews.filter((s) => starterSlugs.has(s)).length
+  const starter1Done = sl1Summary
+    ? completedPreviews.filter((s) => sl1Summary.slugs.has(s)).length
+    : 0
+  const starlightLessonTotal = starlightModules.reduce((n, m) => n + m.lessons.length, 0)
+
   const badges: Partial<Record<ModuleId, { percent?: number; due: number }>> = {
     chinese: {
       percent: pct(completedChinese.length, chineseLessonTotal),
@@ -53,8 +78,12 @@ export default function CourseEntries() {
       due: getTodayDueCount('eng3a'),
     },
     starlight: {
-      percent: pct(completedPreviews.length, starlightModules.length),
+      percent: pct(starterDone, starlightModules.length),
       due: getTodayDueCount('starlight'),
+    },
+    starlight1: {
+      percent: pct(starter1Done, sl1Summary?.units),
+      due: getTodayDueCount('starlight1'),
     },
     rocketgirl: {
       percent: pct(
@@ -107,9 +136,18 @@ export default function CourseEntries() {
         <Link to="/starlight" className="sl-home-entry">
           <span className="sl-home-emoji">🌟</span>
           <div className="sl-home-body">
-            <div className="sl-home-title">Starlight 主课</div>
-            <div className="sl-home-sub">牛津 Starlight 预备级 · 12 单元 / 96 课 / 全教材单词</div>
+            <div className="sl-home-title">Starlight 主课 · 预备级</div>
+            <div className="sl-home-sub">牛津 Starlight Starter · {starlightModules.length} 单元 / {starlightLessonTotal} 课 / 全教材单词</div>
             <Badge id="starlight" />
+          </div>
+          <span className="sl-home-arrow">›</span>
+        </Link>
+        <Link to="/starlight1" className="sl-home-entry">
+          <span className="sl-home-emoji">🌟</span>
+          <div className="sl-home-body">
+            <div className="sl-home-title">Starlight 主课 · 第一册</div>
+            <div className="sl-home-sub">牛津 Starlight 1 · {sl1Summary ? `${sl1Summary.units} 单元 / ${sl1Summary.lessons} 课 / 全教材单词` : '第一册 · 9 单元'}</div>
+            <Badge id="starlight1" />
           </div>
           <span className="sl-home-arrow">›</span>
         </Link>

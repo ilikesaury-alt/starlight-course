@@ -10,15 +10,22 @@ import {
   dayStamp,
 } from '../data/srs'
 import { MODULE_LIST, type ModuleId } from '../data/modules'
-import { modules } from '../data/starlight'
-import type { Word } from '../data/starlight'
+import { modules as starlightModules, type Word } from '../data/starlight'
 import type { SentenceFrame } from '../data/sentenceFrame'
 import { frameCardKey } from '../data/sentenceFrame'
 import { migrateFromLeitner } from '../data/fsrsScheduler'
 import { EXT_LIMIT, type ExtWord } from '../data/extensionTopics'
 
-// Starlight 主课:单元 slug -> 全部课 id,用于课级进度判断
-const lessonsOf = (unitId: string) => modules.find((m) => m.slug === unitId)?.lessons ?? []
+// Starlight 预备级:单元 slug -> 全部课 id。仅用于迁移旧数据(那时只有预备级的完成记录)。
+//
+// ⚠️ store 不再自己去查教材数据:两册教材加起来近 1MB 源码,而 store 被几乎每个页面
+// 引用 —— 在 store 里 import 课程数据等于把课程数据塞进首屏 chunk(实测 +125KB gzip)。
+// 运行时需要的课表由页面传进来(见 markPreviewDone / markLessonDone 的参数)。
+const lessonsOf = (unitId: string) => starlightModules.find((m) => m.slug === unitId)?.lessons ?? []
+
+/** 拓展词属于哪一册:预备级的 lessonKey 形如 `${单元}-${课}`,第一册形如 `s1-${单元}-${课}`。 */
+const moduleOfLessonKey = (lessonKey: string): ModuleId =>
+  lessonKey.startsWith('s1-') ? 'starlight1' : 'starlight'
 
 export interface WrongWord {
   en: string
@@ -77,10 +84,11 @@ interface CourseStore {
   removeWrongWord: (en: string, module?: ModuleId) => void
   clearWrongWords: () => void
   addStars: (n: number) => void
-  markPreviewDone: (slug: string) => void
+  markPreviewDone: (slug: string, lessonIds?: number[]) => void
   /** 标记 Starlight 某课的课级完成(闯关全对自动触发 / 手动按钮触发)。
-   *  该单元全部课时完成时自动同步单元级完成标记。 */
-  markLessonDone: (unitId: string, lessonId: number) => void
+   *  该单元全部课时完成时自动同步单元级完成标记。
+   *  totalLessons:该单元总课数,由页面传入(页面已经拿到了课表),用于判断是否已学完。 */
+  markLessonDone: (unitId: string, lessonId: number, totalLessons?: number) => void
   markQuizDone: (slug: string) => void
   /** 标记故事类模块某故事已通关(与 markPreviewDone 区分语义) */
   markStoryDone: (slug: string) => void
@@ -161,10 +169,10 @@ export const useCourseStore = create<CourseStore>()(
 
       addStars: (n) => set((s) => ({ totalStars: s.totalStars + n })),
 
-      markPreviewDone: (slug) =>
+      markPreviewDone: (slug, lessonIds) =>
         set((s) => {
           // 手动标记单元完成时,同步把该单元全部课时标为课级完成,两种粒度保持一致
-          const lessons = lessonsOf(slug)
+          const lessons = lessonIds ?? lessonsOf(slug).map((l) => l.id)
           const completedPreviews = s.completedPreviews.includes(slug)
             ? s.completedPreviews
             : [...s.completedPreviews, slug]
@@ -172,9 +180,9 @@ export const useCourseStore = create<CourseStore>()(
           const prev = s.lessonCompleted[slug] ?? []
           const merged = [...prev]
           let changed = false
-          for (const l of lessons) {
-            if (!merged.includes(l.id)) {
-              merged.push(l.id)
+          for (const id of lessons) {
+            if (!merged.includes(id)) {
+              merged.push(id)
               changed = true
             }
           }
@@ -183,15 +191,14 @@ export const useCourseStore = create<CourseStore>()(
             : { completedPreviews }
         }),
 
-      markLessonDone: (unitId, lessonId) =>
+      markLessonDone: (unitId, lessonId, totalLessons) =>
         set((s) => {
           const prev = s.lessonCompleted[unitId] ?? []
           if (prev.includes(lessonId)) return s
           const next = { ...s.lessonCompleted, [unitId]: [...prev, lessonId] }
           // 全部课时完成后自动同步单元级完成标记(保持 completedPreviews 语义不变)
-          const lessons = lessonsOf(unitId)
-          const allDone =
-            lessons.length > 0 && lessons.every((l) => next[unitId].includes(l.id))
+          const total = totalLessons ?? lessonsOf(unitId).length
+          const allDone = total > 0 && next[unitId].length >= total
           const completedPreviews =
             allDone && !s.completedPreviews.includes(unitId)
               ? [...s.completedPreviews, unitId]
@@ -352,7 +359,10 @@ export const useCourseStore = create<CourseStore>()(
           const existing = s.srsCards[en]
           const srsCards = existing
             ? { ...s.srsCards }
-            : { ...s.srsCards, [en]: createNewCard(en, 'starlight', dayStamp(), 'extension') }
+            : {
+                ...s.srsCards,
+                [en]: createNewCard(en, moduleOfLessonKey(lessonKey), dayStamp(), 'extension'),
+              }
           return {
             starlightExtensions: { ...s.starlightExtensions, [lessonKey]: [...list, word] },
             srsCards,
@@ -412,7 +422,9 @@ export const useCourseStore = create<CourseStore>()(
               auto: true,
             })
             // 播种:已有卡只保留,无卡按 extension 来源建卡(与 addExtensionWord 同口径)
-            if (!srsCards[en]) touch()[en] = createNewCard(en, 'starlight', dayStamp(), 'extension')
+            if (!srsCards[en]) {
+              touch()[en] = createNewCard(en, moduleOfLessonKey(lessonKey), dayStamp(), 'extension')
+            }
           }
           added = picked.length
           const nextList = [...kept, ...picked]

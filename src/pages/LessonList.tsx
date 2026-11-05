@@ -2,7 +2,9 @@ import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import SafeBoundary from '../components/SafeBoundary'
 import ConfirmDialog from '../components/ConfirmDialog'
-import { getModule, modules, STARLIGHT_THEME } from '../data/starlight'
+import { STARLIGHT_THEME } from '../data/starlight'
+import { STARLIGHT_LEVELS } from '../data/starlightSeries'
+import { getSeriesModule, unitCountOfLevel } from '../data/starlightSeriesData'
 import { useCourseStore } from '../store/useCourseStore'
 import { moduleThemeVars } from '../utils/theme'
 import Breadcrumb from '@/components/Breadcrumb'
@@ -11,7 +13,7 @@ import UnitGlyph from '@/components/UnitGlyph'
 
 export default function LessonList() {
   const { unitId = '' } = useParams()
-  const mod = getModule(unitId)
+  const mod = getSeriesModule(unitId)
   const markPreviewDone = useCourseStore((s) => s.markPreviewDone)
   const markLessonDone = useCourseStore((s) => s.markLessonDone)
   const completed = useCourseStore((s) => s.completedPreviews.includes(unitId))
@@ -30,14 +32,16 @@ export default function LessonList() {
   }
 
   const mcStyle = moduleThemeVars(STARLIGHT_THEME)
+  const levelMeta = STARLIGHT_LEVELS[mod.level]
 
   return (
     <div className="page lesson-list starlight-sheet" style={mcStyle}>
-      <Breadcrumb items={[{ label: '🏠', to: '/' }, { label: 'Starlight 主课', to: '/starlight' }, { label: mod.title }]} />
+      <Breadcrumb items={[{ label: '🏠', to: '/' }, { label: levelMeta.pageTitle, to: levelMeta.path }, { label: mod.title }]} />
       <div className="unit-banner" style={mcStyle}>
         <span className="unit-emoji">
           <UnitGlyph
             unitId={mod.id}
+            level={mod.level}
             fallback={mod.emoji}
             color={mod.color}
             soft={mod.colorSoft}
@@ -54,7 +58,7 @@ export default function LessonList() {
         </div>
       </div>
 
-      {/* 本单元的 8 格：目录本身就是导航，格子状态由完成记录派生 */}
+      {/* 本单元的格子：目录本身就是导航，格子状态由完成记录派生 */}
       <LessonStarMap unitSlug={unitId} />
 
       <SafeBoundary label="课程列表">
@@ -144,8 +148,8 @@ export default function LessonList() {
           cancelText="再检查一下"
           onConfirm={() => {
             // 手动标记单元完成 ⇒ 同步标记全部课时完成,两种粒度保持一致
-            mod.lessons.forEach((l) => markLessonDone(unitId, l.id))
-            markPreviewDone(unitId)
+            mod.lessons.forEach((l) => markLessonDone(unitId, l.id, mod.lessons.length))
+            markPreviewDone(unitId, mod.lessons.map((l) => l.id))
             setShowUnitDone(false)
           }}
           onCancel={() => setShowUnitDone(false)}
@@ -153,8 +157,8 @@ export default function LessonList() {
       </SafeBoundary>
 
       <div className="sl-page-foot">
-        <span className="sl-page-num">Module {mod.id} / {modules.length} · {mod.lessons.length} 课</span>
-        <Link to="/starlight" className="back-link">← 主课目录</Link>
+        <span className="sl-page-num">Module {mod.id} / {unitCountOfLevel(mod.level)} · {mod.lessons.length} 课</span>
+        <Link to={levelMeta.path} className="back-link">← 主课目录</Link>
       </div>
     </div>
   )

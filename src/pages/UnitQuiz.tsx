@@ -6,21 +6,24 @@ import { Link, useParams } from 'react-router-dom'
 import SafeBoundary from '@/components/SafeBoundary'
 import Breadcrumb from '@/components/Breadcrumb'
 import QuizEngine, { type QuizItem } from '@/components/QuizEngine'
-import { getModule, STARLIGHT_THEME } from '@/data/starlight'
+import { STARLIGHT_THEME } from '@/data/starlight'
+import { STARLIGHT_LEVELS } from '@/data/starlightSeries'
+import { getSeriesModule, quizLessonIdOf, unitCountOfLevel } from '@/data/starlightSeriesData'
 import { useCourseStore } from '@/store/useCourseStore'
 import { moduleThemeVars } from '@/utils/theme'
 import { useSettleQuiz } from '@/hooks/useSettleQuiz'
 
 export default function UnitQuiz() {
   const { unitId = '' } = useParams()
-  const mod = getModule(unitId)
+  const mod = getSeriesModule(unitId)
   const mcStyle = moduleThemeVars(STARLIGHT_THEME)
+  const levelMeta = mod ? STARLIGHT_LEVELS[mod.level] : null
   const markQuizDone = useCourseStore((s) => s.markQuizDone)
   const markLessonDone = useCourseStore((s) => s.markLessonDone)
 
   // 加星/错题入本/SRS 记录统一走共享结算编排(同词去重、词表释义兜底)
   const { recordPick, restart, settle } = useSettleQuiz({
-    module: 'starlight',
+    module: mod?.level ?? 'starlight',
     from: `${mod?.title ?? ''} · 单元测验`,
     fallbackEmoji: mod?.emoji,
   })
@@ -68,7 +71,7 @@ export default function UnitQuiz() {
       <Breadcrumb
         items={[
           { label: '🏠', to: '/' },
-          { label: 'Starlight 主课', to: '/starlight' },
+          { label: levelMeta?.pageTitle ?? 'Starlight 主课', to: levelMeta?.path ?? '/starlight' },
           { label: mod.title, to: `/preview/${unitId}` },
           { label: '单元测验' },
         ]}
@@ -79,7 +82,7 @@ export default function UnitQuiz() {
           <div>
             <div className="page-kicker">Module {mod.id} · 单元测验</div>
             <h1 className="page-title">{mod.title} 综合测验</h1>
-            <p className="sl-sub">Module {mod.id} / 12 · {quiz.length} 题 · 全对得 5 星</p>
+            <p className="sl-sub">Module {mod.id} / {unitCountOfLevel(mod.level)} · {quiz.length} 题 · 全对得 5 星</p>
           </div>
         </div>
       </div>
@@ -102,16 +105,19 @@ export default function UnitQuiz() {
           onFinish={(correct, total, wrongEns) => {
             settle(correct, total, wrongEns, unitWords, () => {
               markQuizDone(mod.slug)
-              // 单元测验全对 ⇒ 本单元第 6 课(Quiz 课)记为完成
-              if (correct === total && total > 0) markLessonDone(mod.slug, 6)
+              // 单元测验全对 ⇒ 本单元的「测验课」记为完成
+              // （预备级是第 6 课 Quiz 课；第一册每单元课数不同，取最后一课）
+              if (correct === total && total > 0) {
+                markLessonDone(mod.slug, quizLessonIdOf(mod), mod.lessons.length)
+              }
             })
           }}
         />
       </SafeBoundary>
 
       <div className="sl-page-foot">
-        <span className="sl-page-num">Module {mod.id} / 12 · 单元测验</span>
-        <Link to={`/preview/${unitId}`} className="back-link">← 这一单元的 8 课</Link>
+        <span className="sl-page-num">Module {mod.id} / {unitCountOfLevel(mod.level)} · 单元测验</span>
+        <Link to={`/preview/${unitId}`} className="back-link">← 这一单元的 {mod.lessons.length} 课</Link>
       </div>
     </div>
   )

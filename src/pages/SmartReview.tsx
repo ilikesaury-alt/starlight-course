@@ -7,6 +7,7 @@ import ModuleFilterChips, { type ModuleFilter } from '../components/ModuleFilter
 import SentenceReader from '../components/SentenceReader'
 import { fillFrame } from '../data/sentenceFrame'
 import { modules, STARLIGHT_THEME } from '../data/starlight'
+import { parseSeriesLessonKey } from '../data/starlightSeries'
 import { MODULE_LIST, type ModuleId } from '../data/modules'
 import { useCourseStore } from '../store/useCourseStore'
 import { boxLabel, boxEmoji, type SrsCard } from '../data/srs'
@@ -49,8 +50,9 @@ const contentIndexReady = (async () => {
         }
       }
     }
-    // Starlight 句型也加入索引
-    for (const m of modules) {
+    // Starlight 句型也加入索引（预备级静态 + 第一册按需加载，两册的句子都要能查到释义）
+    const { modules1 } = await import('@/data/starlight1')
+    for (const m of [...modules, ...modules1]) {
       for (const l of m.lessons) {
         for (const s of l.sentences) {
           if (!idx[s.en]) {
@@ -71,9 +73,15 @@ const contentIndexReady = (async () => {
     // key 形如 `${moduleId}-${lessonId}`（与 LessonPreview 的 lessonKey 一致）。
     const extensions = useCourseStore.getState().starlightExtensions ?? {}
     for (const [lessonKey, list] of Object.entries(extensions)) {
-      const [unitId, lessonId] = lessonKey.split('-')
-      const mod = modules.find((m) => m.id === Number(unitId))
-      const from = `课堂拓展词 · ${mod?.titleZh ?? mod?.title ?? `M${unitId}`} L${lessonId}`
+      // key 形如 `${单元}-${课}`（预备级）或 `s1-${单元}-${课}`（第一册）——
+      // 单元号在两册之间重复，必须连册一起解析，否则会挂到另一册的单元标题上
+      const parsed = parseSeriesLessonKey(lessonKey)
+      const mod = parsed
+        ? parsed.level === 'starlight1'
+          ? modules1.find((x) => x.id === parsed.unitId)
+          : modules.find((x) => x.id === parsed.unitId)
+        : undefined
+      const from = `课堂拓展词 · ${mod?.titleZh ?? mod?.title ?? `M${parsed?.unitId ?? '?'}`} L${parsed?.lessonId ?? '?'}`
       for (const w of list) {
         if (!w?.en) continue
         if (!idx[w.en]) {
@@ -176,30 +184,13 @@ export default function SmartReview() {
     setDone(false)
   }
 
-  // 队列为空
-  if (!metaReady) {
-    return (
-      <div className="page smart-review" style={mcStyle}>
-        <div className="page-head" style={mcStyle}>
-          <span className="page-emoji">🎯</span>
-          <div>
-            <div className="page-kicker">智能复习</div>
-            <h1 className="page-title">今日复习</h1>
-          </div>
-        </div>
-        <SafeBoundary label="智能复习">
-          <div className="smart-empty">
-            <div className="smart-empty-emoji">⏳</div>
-            <h2 className="smart-empty-title">正在准备复习内容…</h2>
-          </div>
-        </SafeBoundary>
-        <div className="page-nav">
-          <Link to="/" className="back-link">← 返回首页</Link>
-        </div>
-      </div>
-    )
-  }
-
+  // 队列为空 —— 空状态**不等**内容索引就绪。
+  //
+  // 「今天没有要复习的词」只依赖队列，而队列是进页面时从 store 同步取到的
+  // （loadQueue）；内容索引（含 Fly Guy / Rocket Girl 的词表动态下载）是给
+  // 「有卡要翻」时查释义用的。原先把空状态也挂在 metaReady 后面，于是词表一慢，
+  // 空状态就跟着一起卡在「正在准备复习内容…」（e2e review.spec 的空状态用例
+  // 就是这么偶发红的：它 5 秒内要看到空状态，而索引兜底要 8 秒）。
   if (total === 0) {
     return (
       <div className="page smart-review" style={mcStyle}>
@@ -228,6 +219,30 @@ export default function SmartReview() {
           </div>
         </SafeBoundary>
 
+        <div className="page-nav">
+          <Link to="/" className="back-link">← 返回首页</Link>
+        </div>
+      </div>
+    )
+  }
+
+  // 有卡要翻时才等索引就绪（卡片要靠索引拿中文释义）
+  if (!metaReady) {
+    return (
+      <div className="page smart-review" style={mcStyle}>
+        <div className="page-head" style={mcStyle}>
+          <span className="page-emoji">🎯</span>
+          <div>
+            <div className="page-kicker">智能复习</div>
+            <h1 className="page-title">今日复习</h1>
+          </div>
+        </div>
+        <SafeBoundary label="智能复习">
+          <div className="smart-empty">
+            <div className="smart-empty-emoji">⏳</div>
+            <h2 className="smart-empty-title">正在准备复习内容…</h2>
+          </div>
+        </SafeBoundary>
         <div className="page-nav">
           <Link to="/" className="back-link">← 返回首页</Link>
         </div>

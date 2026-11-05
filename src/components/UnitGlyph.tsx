@@ -15,6 +15,8 @@
 //
 // ⚠️ 本文件只导出 UnitGlyph 一个组件（react-refresh 要求组件文件只导出组件）。
 
+import type { StarlightLevel } from '@/data/starlightSeries'
+
 interface GlyphProps {
   /** 满色（单元主色） */
   color: string
@@ -213,10 +215,24 @@ interface Props {
   soft: string
   size?: number
   className?: string
+  /**
+   * 所属册次。图形是按**预备级**的 12 个单元画的，而第一册的单元号同样从 1 开始，
+   * 直接查表会让第一册 Unit 1 显示预备级的「挥手」—— 换一本书却看到另一本的图形。
+   * 第一册暂未画图形，退回该单元自己的 emoji。
+   */
+  level?: StarlightLevel
 }
 
-export default function UnitGlyph({ unitId, fallback, color, soft, size = 26, className }: Props) {
-  const Glyph = UNIT_GLYPHS[unitId]
+export default function UnitGlyph({
+  unitId,
+  fallback,
+  color,
+  soft,
+  size = 26,
+  className,
+  level = 'starlight',
+}: Props) {
+  const Glyph = level === 'starlight' ? UNIT_GLYPHS[unitId] : undefined
   if (!Glyph) {
     return (
       <span className={className} aria-hidden="true">

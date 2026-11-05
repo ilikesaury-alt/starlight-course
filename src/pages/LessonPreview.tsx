@@ -28,14 +28,22 @@ import PlayTools from '@/components/PlayTools'
 import ZoneCard from '@/components/ZoneCard'
 import UnitGlyph from '@/components/UnitGlyph'
 import { useMemoryState } from '@/utils/memoryState'
-import { EXT_LIMIT, lessonTopicZh, suggestExtensions, type ExtWord } from '@/data/extensionTopics'
-import { getModule, STARLIGHT_THEME, type Sentence, type Word } from '@/data/starlight'
-import { getLessonBook } from '@/data/starlight-book'
-import { getPassage } from '@/data/starlight-passage'
-import { getLessonDialogue } from '@/data/lessonDialogue'
+import { EXT_LIMIT, type ExtWord } from '@/data/extensionTopics'
+import { STARLIGHT_THEME, type Sentence, type Word } from '@/data/starlight'
+import {
+  getSeriesModule,
+  seriesBook,
+  seriesDialogue,
+  seriesFrames,
+  seriesLessonKey,
+  seriesLessonTopicZh,
+  seriesPassage,
+  seriesSuggestExtensions,
+} from '@/data/starlightSeriesData'
+import { frameCardKey } from '@/data/sentenceFrame'
 import { passageToTurns } from '@/utils/passageDialogue'
-import { framesOfLesson, frameCardKey } from '@/data/sentenceFrame'
 import { useCourseStore } from '@/store/useCourseStore'
+import type { ModuleId } from '@/data/modules'
 import { useSettleQuiz } from '@/hooks/useSettleQuiz'
 import { speakText } from '@/utils/speak'
 import { buildLineZhIndex, lineZhOf } from '@/utils/passageZh'
@@ -63,7 +71,7 @@ const SHOW_SPEAK_TAB = false
 
 export default function LessonPreview() {
   const { unitId = '', lessonId = '' } = useParams()
-  const mod = getModule(unitId)
+  const mod = getSeriesModule(unitId)
   const seedCards = useCourseStore((s) => s.seedCards)
   const recordReview = useCourseStore((s) => s.recordReview)
   const markQuizDone = useCourseStore((s) => s.markQuizDone)
@@ -90,7 +98,7 @@ export default function LessonPreview() {
   const fillExtensionWords = useCourseStore((s) => s.fillExtensionWords)
   // 统一结算编排:加星 + 错题入本 + SRS 记录(同词去重)
   const { recordPick, restart, settle } = useSettleQuiz({
-    module: 'starlight',
+    module: mod?.level ?? 'starlight',
     from: mod ? `${mod.title} · Lesson ${lessonId}` : `Lesson ${lessonId}`,
     fallbackEmoji: mod?.emoji,
   })
@@ -103,13 +111,13 @@ export default function LessonPreview() {
   const words = useMemo(() => lesson?.words ?? [], [lesson])
   const sentences = lesson?.sentences ?? []
   // 课本原文：按「单元号-课号」取，教材 PDF 每课一份
-  const book = mod && lesson ? getLessonBook(mod.id, lesson.id) : undefined
+  const book = mod && lesson ? seriesBook(mod, lesson.id) : undefined
   // 包一层 useMemo：否则每次渲染都是新数组，下游 lineZhIndex / quizItems 的依赖会跟着抖
   const chapters = useMemo(() => book?.sections ?? [], [book])
-  // 拓展词 key 与课本原文保持同一套「单元号-课号」命名
-  const lessonKey = `${mod?.id ?? 0}-${lesson?.id ?? 0}`
+  // 拓展词 key 与课本原文保持同一套「单元号-课号」命名；两册之间由 seriesLessonKey 加前缀隔开
+  const lessonKey = mod && lesson ? seriesLessonKey(mod, lesson.id) : ''
   // 外教课堂对话：每课一段，在「课本原文」tab 顶部替代原来的操作说明
-  const dialogue = mod && lesson ? getLessonDialogue(mod.id, lesson.id) : undefined
+  const dialogue = mod && lesson ? seriesDialogue(mod, lesson.id) : undefined
   // useMemo：空数组不能每次渲染都造新的，否则下面自动填充 effect 的依赖会一直抖
   const extensions = useMemo(
     () => starlightExtensions[lessonKey] ?? [],
@@ -125,13 +133,19 @@ export default function LessonPreview() {
     if (!lesson) return
     if (round > 0) return
     if (extensions.length > 0) return
-    fillExtensionWords(lessonKey, suggestExtensions({ lessonKey, lessonWords: words, existing: [] }), 1)
-  }, [lesson, lessonKey, words, extensions, round, fillExtensionWords])
+    fillExtensionWords(lessonKey, seriesSuggestExtensions({
+      mod,
+      lessonId: lesson.id,
+      lessonWords: words,
+      existing: [],
+    }), 1)
+  }, [lesson, lessonKey, words, extensions, round, fillExtensionWords, mod])
   // ✨ 自动填充 / 🔄 换一批：换一批只替换带「自动」标记的词，手动录入的词原样保留
   const handleAutoFill = () => {
     const manual = extensions.filter((x) => !x.auto)
-    const next = suggestExtensions({
-      lessonKey,
+    const next = seriesSuggestExtensions({
+      mod,
+      lessonId: lesson.id,
       lessonWords: words,
       existing: manual,
       round: round + 1,
@@ -143,9 +157,9 @@ export default function LessonPreview() {
     setFillHint('')
     fillExtensionWords(lessonKey, next, round + 1)
   }
-  const frames = mod && lesson ? framesOfLesson(mod.slug, lesson.id) : []
+  const frames = mod && lesson ? seriesFrames(mod, lesson.id) : []
   // 课文点读（D）：试点课有提取出的 passage，其余课回落到 BookTextView
-  const passage = mod && lesson ? getPassage(mod.id, lesson.id) : undefined
+  const passage = mod && lesson ? seriesPassage(mod, lesson.id) : undefined
   // 课本原文拆解成课堂对话（外教 ↔ 孩子），替代原来的扁平句子清单
   const passageTurns = useMemo(() => passageToTurns(passage?.lines ?? []), [passage])
   // 点读区整句中文索引：课本 textZh（人工翻译） > 本单元句子表；都查不到时逐词拼粗释义
@@ -195,14 +209,14 @@ export default function LessonPreview() {
   // 进入某课时,把该课的单词和句型批量种子化进 SRS 调度池
   useEffect(() => {
     if (words.length === 0 && sentences.length === 0) return
-    seedCards([...words.map((w) => w.en), ...sentences.map((s) => s.en)], 'starlight')
+    seedCards([...words.map((w) => w.en), ...sentences.map((s) => s.en)], mod?.level ?? 'starlight')
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lesson?.id, mod?.slug])
 
   // 本课句型框架卡播种进同一个复习池（kind='sentence'，与单词卡隔离）
   useEffect(() => {
     if (frames.length === 0) return
-    seedSentenceFrames(frames, 'starlight')
+    seedSentenceFrames(frames, mod?.level ?? 'starlight')
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lesson?.id, mod?.slug])
 
@@ -248,6 +262,7 @@ export default function LessonPreview() {
         <span className="page-emoji">
           <UnitGlyph
             unitId={mod.id}
+            level={mod.level}
             fallback={mod.emoji}
             color={mod.color}
             soft={mod.colorSoft}
@@ -320,10 +335,10 @@ export default function LessonPreview() {
 
         {tab === 'vocab' && (
           <div className="sl-vocab-grid">
-            <VocabTab words={words} mcStyle={mcStyle} />
+            <VocabTab words={words} mcStyle={mcStyle} module={mod.level} />
             <ExtensionSection
               words={extensions}
-              topic={lessonTopicZh(lessonKey)}
+              topic={mod ? seriesLessonTopicZh(mod, lesson.id) : undefined}
               round={round}
               hint={fillHint}
               onRemove={(en) => removeExtensionWord(lessonKey, en)}
@@ -353,8 +368,8 @@ export default function LessonPreview() {
                 sentence={sentences[sentIdx].en}
                 zh={sentences[sentIdx].zh}
                 onPass={() => {
-                  seedCards([sentences[sentIdx].en], 'starlight')
-                  recordReview(sentences[sentIdx].en, true, 'starlight')
+                  seedCards([sentences[sentIdx].en], mod.level)
+                  recordReview(sentences[sentIdx].en, true, mod.level)
                 }}
                 autoPlay={sentAutoPlay}
               />
@@ -379,8 +394,8 @@ export default function LessonPreview() {
                     key={f.id}
                     frame={f}
                     onPass={() => {
-                      seedSentenceFrames([f], 'starlight')
-                      recordReview(frameCardKey(f), true, 'starlight')
+                      seedSentenceFrames([f], mod.level)
+                      recordReview(frameCardKey(f), true, mod.level)
                     }}
                   />
                 ))}
@@ -462,7 +477,7 @@ export default function LessonPreview() {
               settle(correct, total, wrongEns, words, () => {
                 markQuizDone(mod.slug)
                 // 闯关全对 ⇒ 自动标记本课完成
-                if (correct === total && total > 0) markLessonDone(mod.slug, lesson.id)
+                if (correct === total && total > 0) markLessonDone(mod.slug, lesson.id, mod.lessons.length)
               })
             }}
           />
@@ -478,7 +493,7 @@ export default function LessonPreview() {
       />
       <div className="sl-page-foot">
         <span className="sl-page-num">Lesson {lesson.id} / {lessons.length} · {mod.title}</span>
-        <Link to={`/preview/${unitId}`} className="back-link">← 这一单元的 8 课</Link>
+        <Link to={`/preview/${unitId}`} className="back-link">← 这一单元的 {mod.lessons.length} 课</Link>
       </div>
 
       {/* 课级完成：只展示状态，不再提供手动标记（闯关全对会自动标记） */}
@@ -491,7 +506,7 @@ export default function LessonPreview() {
   )
 }
 
-function VocabTab({ words, mcStyle }: { words: Word[]; mcStyle: React.CSSProperties }) {
+function VocabTab({ words, mcStyle, module }: { words: Word[]; mcStyle: React.CSSProperties; module: ModuleId }) {
   const [idx, setIdx] = useState(0)
   const [showZh, setShowZh] = useState(true)
   const [selfChecked, setSelfChecked] = useState<Set<string>>(new Set())
@@ -505,8 +520,8 @@ function VocabTab({ words, mcStyle }: { words: Word[]; mcStyle: React.CSSPropert
   // 自评:翻面看到中文后,点「会了/不会」把记忆反馈写回 SRS,
   // 让预习从被动翻卡升级为主动回忆(与智能复习同一调度池)
   const selfAssess = (en: string, know: boolean) => {
-    seedCards([en], 'starlight')
-    recordReview(en, know, 'starlight')
+    seedCards([en], module)
+    recordReview(en, know, module)
     setSelfChecked((s) => new Set(s).add(en))
   }
 

@@ -45,6 +45,32 @@ export default function TodayTasks() {
     }
   }, [completedStories])
 
+  // Starlight 第一册:第一册教材数据体积大,经 import() 动态获取,不拖慢首屏
+  const [sl1Task, setSl1Task] = useState<Task | null>(null)
+  useEffect(() => {
+    let alive = true
+    void import('@/data/starlightSeriesData').then((m) => {
+      if (!alive) return
+      const found = m
+        .modulesOfLevel('starlight1')
+        .flatMap((x) => x.lessons.map((l) => ({ x, l })))
+        .find(({ x, l }) => !(lessonCompleted[x.slug] ?? []).includes(l.id))
+      if (found) {
+        setSl1Task({
+          emoji: '🌟',
+          module: 'Starlight 1',
+          label: `Lesson ${found.l.id} · ${found.l.title}`,
+          to: `/preview/${found.x.slug}/${found.l.id}`,
+        })
+      } else {
+        setSl1Task(null)
+      }
+    })
+    return () => {
+      alive = false
+    }
+  }, [lessonCompleted])
+
   const tasks: Task[] = []
 
   // Starlight 主课:按单元→课顺序找第一个未完成课
@@ -59,6 +85,9 @@ export default function TodayTasks() {
       to: `/preview/${slNext.m.slug}/${slNext.l.id}`,
     })
   }
+
+  // Starlight 第一册:同上,两册各给一条（哪一册没学完就提示哪一册）
+  if (sl1Task) tasks.push(sl1Task)
 
   // 语文:第一个未学完课
   const cnNext = chineseUnits

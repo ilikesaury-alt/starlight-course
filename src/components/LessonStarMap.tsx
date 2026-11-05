@@ -1,28 +1,38 @@
-// 课次星图 —— Oxford Starlight Starter 独有的「12 单元 × 8 课 = 96 格」目录。
+// 课次星图 —— Oxford Starlight 系列独有的「单元 × 课」目录。
 //
 // 这不是进度条：每一格就是教材里真实存在的一课，格子排布就是这本课本的目录本身。
 // 状态完全由 store.lessonCompleted 派生，不引入新状态；总数与已完成数从同一份
 // modules 数据算出，保证「已完成 N / 96 课」与格子永远对得上（app-screens.md §2.1）。
 //
 // 用途：
-//   /starlight        → 96 格全图，孩子一眼看到这本教材学到哪了
-//   /preview/:unitId  → 本单元 8 格，当前课描边高亮
+//   /starlight        → 预备级的 12 单元 96 格全图，孩子一眼看到学到哪了
+//   /starlight1       → 第一册的 9 单元 96 格全图
+//   /preview/:unitId  → 本单元的格子，当前课描边高亮
 // 每个格子都是真实链接，点一下直达那一课（一击可达，§2.2）。
+//
+// 册次：两册教材的单元号都从 1 开始，图形/课文都按册分发，所以这里必须带 level。
 
 import { Link } from 'react-router-dom'
-import { modules } from '@/data/starlight'
+import { type StarlightLevel } from '@/data/starlightSeries'
+import { getSeriesModule, modulesOfLevel } from '@/data/starlightSeriesData'
 import { useCourseStore } from '@/store/useCourseStore'
 
 interface Props {
-  /** 只画某一个单元的 8 格；不传则画 12 单元 96 格全图 */
+  /** 只画某一个单元的格子；不传则画整册全图 */
   unitSlug?: string
   /** 描边高亮「当前正在看的课」 */
   currentLessonId?: number
+  /** 画哪一册（不传 unitSlug 时决定全图是哪册；传了 unitSlug 时自动按 slug 判册） */
+  level?: StarlightLevel
 }
 
-export default function LessonStarMap({ unitSlug, currentLessonId }: Props) {
+export default function LessonStarMap({ unitSlug, currentLessonId, level = 'starlight' }: Props) {
   const lessonCompleted = useCourseStore((s) => s.lessonCompleted)
-  const list = unitSlug ? modules.filter((m) => m.slug === unitSlug) : modules
+  // 传了 unitSlug 就以 slug 判册（slug 全局唯一），避免页面的默认 level 与实际单元不符
+  const resolvedLevel = unitSlug ? (getSeriesModule(unitSlug)?.level ?? level) : level
+  const list = unitSlug
+    ? modulesOfLevel(resolvedLevel).filter((m) => m.slug === unitSlug)
+    : modulesOfLevel(resolvedLevel)
 
   const isDone = (slug: string, id: number) => (lessonCompleted[slug] ?? []).includes(id)
   const total = list.reduce((n, m) => n + m.lessons.length, 0)
@@ -41,7 +51,7 @@ export default function LessonStarMap({ unitSlug, currentLessonId }: Props) {
     <section className="sl-map" aria-label="课次星图">
       <div className="sl-map-head">
         <h2 className="sl-map-title">
-          {unitSlug ? '这一单元的 8 课' : '这本教材的 96 课'}
+          {unitSlug ? `这一单元的 ${total} 课` : `这本教材的 ${total} 课`}
         </h2>
         <p className="sl-map-total">
           已完成 <b>{done}</b> / {total} 课

@@ -21,7 +21,7 @@ export interface ExtWord extends Word {
 
 const w = (en: string, zh: string, emoji: string): Word => ({ en, zh, emoji })
 
-interface Topic {
+export interface Topic {
   /** 主题名（展示用，如填充提示里的「本课主题：打招呼」） */
   zh: string
   /** 候选词，按优先级排序 */
@@ -471,14 +471,20 @@ export interface SuggestInput {
   limit?: number
 }
 
-/** 按本课主题挑拓展词：主题池 → 去课内词/已录词 → 按轮次轮换 → 截断到 limit。
- *  纯函数，不碰 store；词库没有该主题或全被过滤时返回空数组。 */
-export function suggestExtensions(input: SuggestInput): ExtWord[] {
-  const keys = LESSON_TOPICS[input.lessonKey] ?? []
+/** 按给定主题池挑拓展词：主题池 → 去课内词/已录词 → 按轮次轮换 → 截断到 limit。
+ *  纯函数，不碰 store；词库没有该主题或全被过滤时返回空数组。
+ *
+ *  通用版：主题池与主题键由调用方给（预备级用 TOPICS + LESSON_TOPICS，
+ *  第一册用 starlight1 的词库与自己的单元→主题映射）。挑选逻辑两册共用。 */
+export function suggestExtensionsWith(
+  topics: Record<string, Topic>,
+  topicKeys: string[],
+  input: SuggestInput,
+): ExtWord[] {
   const pool: ExtWord[] = []
   const seenPool = new Set<string>()
-  for (const key of keys) {
-    for (const word of TOPICS[key]?.words ?? []) {
+  for (const key of topicKeys) {
+    for (const word of topics[key]?.words ?? []) {
       const base = word.en.trim().toLowerCase()
       if (!base || seenPool.has(base)) continue
       seenPool.add(base)
@@ -501,4 +507,9 @@ export function suggestExtensions(input: SuggestInput): ExtWord[] {
   // 轮换窗口：第 N 轮从 (N-1)*limit 处开始绕回来取，保证「换一批」换得动
   const offset = ((round - 1) * limit) % fresh.length
   return [...fresh.slice(offset), ...fresh.slice(0, offset)].slice(0, Math.min(limit, fresh.length))
+}
+
+/** 预备级专用入口：主题池与主题键固定（LESSON_TOPICS 按 `${单元}-${课}` 查）。 */
+export function suggestExtensions(input: SuggestInput): ExtWord[] {
+  return suggestExtensionsWith(TOPICS, LESSON_TOPICS[input.lessonKey] ?? [], input)
 }

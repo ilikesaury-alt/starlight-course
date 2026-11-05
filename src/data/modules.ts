@@ -13,7 +13,14 @@ import { eng3aUnits, eng3aPlays, ENG3A_THEME, collectEngUnitWords, collectEngPla
 import { FG_THEME, RG_THEME } from './story-themes'
 import type { Story } from './story-types'
 
-export type ModuleId = 'starlight' | 'flyguy' | 'rocketgirl' | 'chinese' | 'eng3a' | 'alphablocks'
+export type ModuleId =
+  | 'starlight'
+  | 'starlight1'
+  | 'flyguy'
+  | 'rocketgirl'
+  | 'chinese'
+  | 'eng3a'
+  | 'alphablocks'
 
 export interface ReviewItem {
   /** 单元 slug（Starlight）或故事 slug（故事类） */
@@ -132,6 +139,39 @@ const starlightMeta: ModuleMeta = {
   load: async () => ({ items: starlightMeta.items, getWords: starlightMeta.getWords }),
 }
 
+// Starlight 第一册（Book 1）：与预备级同构但独立成池 —— 两册的单词要能分开
+// 复习、分模块统计进度，混在一个池子里就看不出孩子学到哪一册了。
+//
+// 词表体积大（9 单元 96 课 ≈ 350KB 源码），经 load() 动态 import 按需加载，
+// 不进首屏 chunk（与 Fly Guy / Rocket Girl 同策略）。注册表只保留主题与标签等轻量字段。
+const starlight1Meta: ModuleMeta = {
+  id: 'starlight1',
+  label: 'Starlight 1',
+  labelZh: '主课一册',
+  color: STARLIGHT_THEME.color,
+  colorSoft: STARLIGHT_THEME.colorSoft,
+  kind: 'unit',
+  items: [],
+  getWords: () => [],
+  load: async () => {
+    const { modules1 } = await import('./starlight1')
+    const items = modules1.map((m) => ({
+      id: m.slug,
+      title: m.title,
+      titleZh: m.titleZh,
+      emoji: m.emoji,
+    }))
+    return {
+      items,
+      getWords: (itemId) => {
+        const mod = modules1.find((m) => m.slug === itemId)
+        if (!mod) return []
+        return mod.lessons.flatMap((l) => l.words).map((w) => ({ en: w.en, zh: w.zh, emoji: w.emoji }))
+      },
+    }
+  },
+}
+
 // 语文模块（三年级上册）：生字（汉字）作为 SRS 记忆卡，key = 汉字，zh = 拼音 · 组词，
 // module='chinese'。进语文课（ChineseLesson）即播种到 SRS，统一走「智能复习」(/smart) 到期调度；
 // 古诗/课文段落则在课程页内「自测练习」完成，不进 SRS。
@@ -213,6 +253,7 @@ const rocketGirlMeta: ModuleMeta = makeStoryMeta(
 
 export const MODULES: Record<ModuleId, ModuleMeta> = {
   starlight: starlightMeta,
+  starlight1: starlight1Meta,
   flyguy: flyGuyMeta,
   rocketgirl: rocketGirlMeta,
   chinese: chineseMeta,
@@ -231,7 +272,14 @@ export const MODULES: Record<ModuleId, ModuleMeta> = {
   },
 }
 
-export const MODULE_LIST: ModuleMeta[] = [starlightMeta, flyGuyMeta, rocketGirlMeta, chineseMeta, eng3aMeta]
+export const MODULE_LIST: ModuleMeta[] = [
+  starlightMeta,
+  starlight1Meta,
+  flyGuyMeta,
+  rocketGirlMeta,
+  chineseMeta,
+  eng3aMeta,
+]
 
 export function getModuleMeta(id: string | undefined): ModuleMeta | undefined {
   if (!id) return undefined
