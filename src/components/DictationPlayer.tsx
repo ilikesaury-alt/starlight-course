@@ -315,54 +315,60 @@ export default function DictationPlayer({
         </div>
       )}
 
-      {/* ---------- B：先数音（只在还没开始写时显示，避免堆杂物） ---------- */}
-      {mode === 'spell' && status === 'idle' && !input.trim() && (
-        <div className="dt-count" aria-label={`先数一数，这个词有 ${soundCount} 个音`}>
-          <div className="dt-count-title">
-            👂 先数一数：这个词有 <b className="dt-count-num">{soundCount}</b> 个音
-          </div>
-          <div className="dt-count-boxes" aria-hidden="true">
-            {Array.from({ length: soundCount }, (_, i) => (
-              <span key={i} className={`dt-count-box${i < litCount ? ' is-lit' : ''}`} />
-            ))}
-          </div>
-          <div className="dt-count-hint">
-            一个音可能就是一个字母，也可能是几个字母合起来发一个音。
-          </div>
-        </div>
-      )}
-
       {/* ---------- 作答区 ---------- */}
       {mode === 'spell' ? (
         <div className="dt-spell">
-          {/* 字母盒：视觉答案区；真输入框透明覆盖其上，物理键盘/屏幕托盘都能输入 */}
-          <div className="dt-slots">
-            {slots.map((s, i) => (
-              <span
-                key={i}
-                className={`dt-slot is-${s.state}${s.caret ? ' is-caret' : ''}`}
-                aria-hidden="true"
-              >
-                {s.ch}
-              </span>
-            ))}
-            <input
-              ref={inputRef}
-              className="dt-input"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') submit()
-              }}
-              placeholder=""
-              aria-label="写下听到的单词"
-              autoComplete="off"
-              autoCorrect="off"
-              autoCapitalize="none"
-              spellCheck={false}
-              disabled={locked || status === 'correct' || status === 'revealed'}
-            />
+          {/* ---------- B：先数音（只在还没开始写时显示，避免堆杂物） ----------
+              与字母盒**并排**：左边是音的个数，右边是要填的格子。
+              「2 个音 → 3 个格子」这条推理链必须一眼看到 ——
+              分成上下两块、中间隔一句提示，孩子自己拼不出这个对应关系。 */}
+          <div className="dt-bridge">
+            {status === 'idle' && !input.trim() && (
+              <div className="dt-count" aria-label={`先数一数，这个词有 ${soundCount} 个音`}>
+                <div className="dt-count-title">
+                  先数一数：这个词有 <b className="dt-count-num">{soundCount}</b> 个音
+                </div>
+                <div className="dt-count-boxes" aria-hidden="true">
+                  {Array.from({ length: soundCount }, (_, i) => (
+                    <span key={i} className={`dt-count-box${i < litCount ? ' is-lit' : ''}`} />
+                  ))}
+                </div>
+              </div>
+            )}
+            {/* 字母盒：视觉答案区；真输入框透明覆盖其上，物理键盘/屏幕托盘都能输入 */}
+            <div className="dt-slots">
+              {slots.map((s, i) => (
+                <span
+                  key={i}
+                  className={`dt-slot is-${s.state}${s.caret ? ' is-caret' : ''}`}
+                  aria-hidden="true"
+                >
+                  {s.ch}
+                </span>
+              ))}
+              <input
+                ref={inputRef}
+                className="dt-input"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') submit()
+                }}
+                placeholder=""
+                aria-label="写下听到的单词"
+                autoComplete="off"
+                autoCorrect="off"
+                autoCapitalize="none"
+                spellCheck={false}
+                disabled={locked || status === 'correct' || status === 'revealed'}
+              />
+            </div>
           </div>
+
+          {/* 这句解释整个桥：为什么音的个数和格子的个数不一样 */}
+          <p className="dt-count-hint">
+            一个音可能就是一个字母，也可能是几个字母合起来发一个音。
+          </p>
 
           {/* 逐格反馈：说清楚「第几个字母」要改，而不是只给一个红脸 */}
           {status === 'wrong' && firstMistake > 0 && (

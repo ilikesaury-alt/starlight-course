@@ -136,6 +136,28 @@ export default function AlphablocksPage() {
     () => (current ? phonemeSegments(current.en) : []),
     [current],
   )
+  /**
+   * 这个词有几个**音**（不是几块积木）。
+   * 手拉手（sh / st / nd）一块顶两个音，字母小队（igh / ee）两块才一个音，
+   * 魔法E 自己不发音 —— 所以块数 ≠ 音数，孩子第一次看见这两个数不一样，
+   * 才知道「积木不是字母」。
+   * ⚠️ 必须按 PhonicsSegment.sounds 求和，不能用 answerBlocks.length（块数）。
+   */
+  const soundCount = useMemo(
+    () => answerBlocks.reduce((n, b) => n + b.sounds, 0),
+    [answerBlocks],
+  )
+  /** 逐个点亮：和听写的「先数一数」同一套节拍（每 240ms 亮一个） */
+  const [litSounds, setLitSounds] = useState(0)
+  useEffect(() => {
+    if (phase !== 'play' || !current) return
+    setLitSounds(0)
+    const timers: number[] = []
+    for (let i = 1; i <= soundCount; i++) {
+      timers.push(window.setTimeout(() => setLitSounds(i), 240 * i))
+    }
+    return () => timers.forEach((t) => clearTimeout(t))
+  }, [current, phase, soundCount])
   const decoys = useMemo(
     () => (current ? decoyBlocks(current.en, level) : []),
     // wordKey 变化才算新干扰块
@@ -367,23 +389,39 @@ export default function AlphablocksPage() {
               {solved && <div className="ab-word-zh">{current.zh}</div>}
             </div>
 
-            {/* ---- 搭好的积木槽 ---- */}
-            <div className="ab-slots" aria-label="搭好的积木">
-              {answerBlocks.map((seg, i) => {
-                const got = placed[i]
-                const isNext = i === placed.length && !solved
-                return (
-                  <span
-                    key={i}
-                    className={`ab-slot${got ? ' filled' : ''}${isNext ? ' next' : ''}${solved ? ' ok' : ''} ab-k-${got ? kindOf(got) : ''}`}
-                  >
-                    {got ?? (isNext ? '?' : '')}
-                    {got && i === placed.length - 1 && solvedAll && (
-                      <span className="ab-slot-tag">{labelOf(got)}</span>
-                    )}
-                  </span>
-                )
-              })}
+            {/* ---- 搭好的积木槽 ----
+                ⚠️ 「音数」和「块数」不是一回事：手拉手（sh / st / nd）一块顶两个音，
+                字母小队（igh / ee）两块才一个音。把两个数并置摆出来，孩子第一次
+                看见「3 块积木 = 4 个音」—— 这正是这个模块要教的那件事。
+                只报数量，不给字母（报了字母就等于给答案）。 */}
+            <div className="ab-bridge">
+              <div className="ab-sound-count" aria-label={`这个词有 ${soundCount} 个音`}>
+                <span className="ab-sound-head">
+                  <b className="ab-sound-num">{soundCount}</b> 个音
+                </span>
+                <span className="ab-sound-boxes" aria-hidden="true">
+                  {Array.from({ length: soundCount }, (_, i) => (
+                    <span key={i} className={'ab-sound-box' + (i < litSounds ? ' is-lit' : '')} />
+                  ))}
+                </span>
+              </div>
+              <div className="ab-slots" aria-label="搭好的积木">
+                {answerBlocks.map((seg, i) => {
+                  const got = placed[i]
+                  const isNext = i === placed.length && !solved
+                  return (
+                    <span
+                      key={i}
+                      className={`ab-slot${got ? ' filled' : ''}${isNext ? ' next' : ''}${solved ? ' ok' : ''} ab-k-${got ? kindOf(got) : ''}`}
+                    >
+                      {got ?? (isNext ? '?' : '')}
+                      {got && i === placed.length - 1 && solvedAll && (
+                        <span className="ab-slot-tag">{labelOf(got)}</span>
+                      )}
+                    </span>
+                  )
+                })}
+              </div>
             </div>
 
             {/* ---- 概念提示（搭完才给，别提前泄底） ---- */}

@@ -353,6 +353,64 @@
   .dt-count-num { font-size: 20px; }
 
   // 字母格与音格并排：音格在上、字母格在下，中间留一条细线
+  // ---------- 「数音 → 字母格」并置 ----------
+  // 这个模块唯一要教的事：词的音数 ≠ 字母格数（show 是 2 音 4 字母，
+  // she 是 2 音 3 字母）。分成上下两块、中间隔一句提示，孩子拼不出这个对应关系；
+  // 摆成「N 个音 → M 个格子」，一眼就在。
+  .dt-bridge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin: 16px 0;
+  }
+  .dt-bridge .dt-count {
+    flex: none;
+    margin: 0;
+    padding: 12px 16px;
+    border-width: 1px;
+    border-style: solid;
+    border-radius: var(--r-md);
+    text-align: center;
+  }
+  .dt-bridge .dt-count-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    margin-bottom: 8px;
+    white-space: nowrap;
+  }
+  .dt-bridge .dt-count-num { font-size: 20px; }
+  .dt-bridge .dt-count-boxes { margin: 0; justify-content: center; gap: 8px; }
+  .dt-bridge .dt-count-box { width: 34px; height: 34px; border-radius: 8px; }
+
+  // 两排之间的连接：箭头把「音」指向「格子」
+  .dt-bridge .dt-slots {
+    flex: none;
+    margin: 0;
+    position: relative;
+    padding-left: 28px;
+  }
+  .dt-bridge .dt-slots::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 20px;
+    color: var(--ink-mute);
+  }
+
+  // 字母格与音格并置：两排共用同一条基线，格子数一眼即得
+  .dt-count-hint {
+    margin: 8px 0 0;
+    font-size: 13px;
+    color: var(--ink-mute);
+    text-align: center;
+    line-height: 1.6;
+  }
+
   .dt-slots { gap: 6px; }
   .dt-tray {
     border: 0;
