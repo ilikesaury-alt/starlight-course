@@ -3,19 +3,20 @@
 // 仅做数据层：接入 App 首页「等级切换」时，把 modules1 与 modules（level-0）按等级分组即可。
 
 import type { Module } from '../starlight'
+import type { ReadingPassage, SentenceFrame } from './shared'
 import { lessonsByUnit1 } from './lessons'
 import { STARLIGHT_BOOK1 } from './book'
 import { READING_PASSAGES1, getReadingPassage1 } from './reading'
 import { STARLIGHT_FRAMES1, framesOfLesson1 } from './sentenceFrames'
 import { EXT_TOPICS1 } from './extensions'
-import { u2_module } from './u2'
-import { u3_module } from './u3'
-import { u4_module } from './u4'
-import { u5_module } from './u5'
-import { u6_module } from './u6'
-import { u7_module } from './u7'
-import { u8_module } from './u8'
-import { u9_module } from './u9'
+import { u2_module, u2_frames, u2_reading } from './u2'
+import { u3_module, u3_frames, u3_reading } from './u3'
+import { u4_module, u4_frames, u4_reading } from './u4'
+import { u5_module, u5_frames, u5_reading } from './u5'
+import { u6_module, u6_frames, u6_reading } from './u6'
+import { u7_module, u7_frames, u7_reading } from './u7'
+import { u8_module, u8_frames, u8_reading } from './u8'
+import { u9_module, u9_frames, u9_reading } from './u9'
 
 export {
   lessonsByUnit1,
@@ -25,6 +26,53 @@ export {
   STARLIGHT_FRAMES1,
   framesOfLesson1,
   EXT_TOPICS1,
+}
+
+/**
+ * 句型框架卡：**按单元聚合**。
+ * Unit 1 的卡在 sentenceFrames.ts，Unit 2–9 的卡分散在各自的 uN.ts 里
+ * （u2_frames / u3_frames …）—— 之前只接了 Unit 1，等于 u2–u9 那些卡白放着。
+ * 现按 unitId 归拢，缺哪一单元由调用方兜底（[] 表示这一课确实没有卡）。
+ */
+export const FRAMES_BY_UNIT1: Record<number, SentenceFrame[]> = {
+  1: STARLIGHT_FRAMES1,
+  2: u2_frames,
+  3: u3_frames,
+  4: u4_frames,
+  5: u5_frames,
+  6: u6_frames,
+  7: u7_frames,
+  8: u8_frames,
+  9: u9_frames,
+}
+
+/** 某单元的句型框架卡（按 unitSlug + lessonId 过滤） */
+export function framesOfLesson1Series(unitSlug: string, lessonId: number): SentenceFrame[] {
+  const unitId = Number(unitSlug.startsWith('u') ? unitSlug.slice(1) : 0)
+  // unitSlug 不是 'uN' 形态时，退回全表扫（数据量小，代价可忽略）
+  const pool = FRAMES_BY_UNIT1[unitId] ?? Object.values(FRAMES_BY_UNIT1).flat()
+  return pool.filter((f) => f.unitSlug === unitSlug && f.lessonId === lessonId)
+}
+
+/**
+ * 阅读短文：**按单元聚合**（键形同为 `${单元}-${课}`，与 Unit 1 的 READING_PASSAGES1 一致）。
+ * Unit 2–9 的短文在各自的 uN_reading 里，之前没接。
+ */
+export const READINGS_BY_UNIT1: Record<number, Record<string, ReadingPassage>> = {
+  1: READING_PASSAGES1,
+  2: u2_reading,
+  3: u3_reading,
+  4: u4_reading,
+  5: u5_reading,
+  6: u6_reading,
+  7: u7_reading,
+  8: u8_reading,
+  9: u9_reading,
+}
+
+/** 某课的阅读短文（第一册专用；预备级走 src/data/reading） */
+export function getReadingPassage1Series(unitId: number, lessonId: number): ReadingPassage | undefined {
+  return READINGS_BY_UNIT1[unitId]?.[`${unitId}-${lessonId}`]
 }
 
 /** Level 1「Monty the Artist」单元（试点只放 Unit 1；后续照此补 Unit 2–9） */

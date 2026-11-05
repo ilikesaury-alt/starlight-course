@@ -378,7 +378,14 @@ export default function LessonPreview() {
         )}
         {tab === 'frame' && (
           frames.length === 0 ? (
-            <div className="empty"><p>这一课还没有句型框架卡。</p></div>
+            /* 同样要说实话：预备级每课都有填空框架卡，第一册目前只有部分课有。 */
+            <div className="empty">
+              <p>
+                {mod.level === 'starlight1'
+                  ? '第一册这一课还没有填空框架卡，可以先看上面的「本课重点句型」。'
+                  : '这一课还没有句型框架卡。'}
+              </p>
+            </div>
           ) : (
             <>
               {/* 本课重点句型：原来和「外教对话」「课文」挤在同一个 Tab 里被展示三遍。
@@ -407,7 +414,15 @@ export default function LessonPreview() {
           dialogue ? (
             <LessonDialogueBox dialogue={dialogue} mcStyle={mcStyle} vocab={words} boxOf={(en) => srsCards[en]?.box} />
           ) : (
-            <div className="empty"><p>这一课还没有外教对话。</p></div>
+            /* 空态要说实话：预备级每课都有外教对话，缺了是这一课没有；
+               第一册整册还没抽对话，写「这一课还没有」会让孩子以为是自己没找对。 */
+            <div className="empty">
+              <p>
+                {mod.level === 'starlight1'
+                  ? '第一册的外教课堂对话还在整理，先用「单词卡」和「课文」读这一课。'
+                  : '这一课还没有外教对话。'}
+              </p>
+            </div>
           )
         )}
         {/* 课文区：只放教材真实课文。原来这里还叠加「重点句型」和「外教对话」两块，

@@ -26,8 +26,8 @@ import {
 import {
   modules1,
   STARLIGHT_BOOK1,
-  getReadingPassage1,
-  framesOfLesson1,
+  getReadingPassage1Series,
+  framesOfLesson1Series,
   EXT_TOPICS1,
 } from './starlight1'
 import { getLessonBook, type LessonBook } from './starlight-book'
@@ -83,17 +83,25 @@ export function seriesBook(mod: SeriesModule, lessonId: number): LessonBook | un
     : getLessonBook(mod.id, lessonId)
 }
 
-/** 句型框架卡：第一册的卡 unitSlug/lessonId 与预备级同构，按 slug 过滤即可 */
+/**
+ * 句型框架卡：第一册的卡 unitSlug/lessonId 与预备级同构，按 slug 过滤即可。
+ * ⚠️ 第一册 Unit 2–9 的卡在各自的 uN.ts 里（u2_frames…），聚合在
+ *    starlight1/index.ts 的 FRAMES_BY_UNIT1 —— 之前只接了 Unit 1，
+ *    等于 u2–u9 已经抽出来的那几十张卡白放着。
+ */
 export function seriesFrames(mod: SeriesModule, lessonId: number): SentenceFrame[] {
   return mod.level === 'starlight1'
-    ? framesOfLesson1(mod.slug, lessonId)
+    ? framesOfLesson1Series(mod.slug, lessonId)
     : framesOfLesson(mod.slug, lessonId)
 }
 
-/** 单元阅读短文（/reading 用） */
+/**
+ * 单元阅读短文（/reading 用）。
+ * ⚠️ 同上：第一册 Unit 2–9 的短文在 uN_reading 里，聚合在 READINGS_BY_UNIT1。
+ */
 export function seriesReading(mod: SeriesModule, lessonId: number): ReadingPassage | undefined {
   return mod.level === 'starlight1'
-    ? getReadingPassage1(mod.id, lessonId)
+    ? getReadingPassage1Series(mod.id, lessonId)
     : getReadingPassage(mod.id, lessonId)
 }
 

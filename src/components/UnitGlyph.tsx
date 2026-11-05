@@ -188,7 +188,117 @@ const Transport: Glyph = (p) => (
   </Canvas>
 )
 
-/** 单元 id → 图形。id 与 src/data/starlight.ts 的 Module.id 一致。 */
+// ============================================================
+//  第一册（Book 1）· 9 个单元
+//  ------------------------------------------------------------
+//  第一册的单元不是「主题」而是**角色**（蒙蒂和罗拉各做各的职业），
+//  所以画的是**职业道具**：调色盘、听诊器、小丑帽、飞机、稻草人、
+//  海盗帽、礼帽、奖牌、潜水镜 —— 画的是这一课在演谁。
+//  与预备级同一套图形语言（24×24 / flat filled / 满色主体 / 浅色细节）。
+// ============================================================
+
+// ---- 1. 蒙蒂小画家：调色盘 + 画笔 ----
+const B1Artist: Glyph = (p) => (
+  <Canvas {...p}>
+    <path d="M12 3.6a8.4 8.4 0 0 0 0 16.8c1.5 0 2-1 2-2 0-.8-.7-1.4-.7-2.2 0-1 1-1.6 2.2-1.6h1.3c2 0 3.6-1.6 3.6-3.6C20.4 7.2 16.8 3.6 12 3.6Z" />
+    <circle cx="8" cy="9.4" r="1.5" fill={p.soft} />
+    <circle cx="12" cy="7.6" r="1.5" fill={p.soft} opacity="0.75" />
+    <circle cx="16" cy="9.4" r="1.5" fill={p.soft} opacity="0.5" />
+    <path d="M18.4 15.6 21 13" stroke={p.color} strokeWidth="2" strokeLinecap="round" />
+    <path d="M16.6 17.4 19.2 14.8" stroke={p.color} strokeWidth="2.4" strokeLinecap="round" />
+  </Canvas>
+)
+
+// ---- 2. 罗拉医生：听诊器 ----
+const B1Doctor: Glyph = (p) => (
+  <Canvas {...p}>
+    <path d="M6.6 3.4v6.2a4.4 4.4 0 0 0 8.8 0V3.4" stroke={p.color} strokeWidth="2.2" strokeLinecap="round" fill="none" />
+    <path d="M11 13.8v3.2c0 2.4 1.9 4.2 4.2 4.2" stroke={p.color} strokeWidth="2.2" strokeLinecap="round" fill="none" />
+    <circle cx="15.2" cy="21" r="2.2" />
+    <circle cx="11" cy="17.8" r="1.7" fill={p.soft} opacity="0.6" />
+  </Canvas>
+)
+
+// ---- 3. 蒙蒂小丑：小丑帽 + 小丑脸 ----
+const B1Clown: Glyph = (p) => (
+  <Canvas {...p}>
+    <path d="M8 12.4a4 4 0 0 1 8 0v1.2H8v-1.2Z" />
+    <circle cx="12" cy="4.6" r="2.2" />
+    <circle cx="7.4" cy="7.2" r="2" fill={p.soft} />
+    <circle cx="16.6" cy="7.2" r="2" fill={p.soft} opacity="0.7" />
+    <path d="M8 13.6h8v1.4H8z" />
+    {/* 小丑脸：圆脸 + 两只眼睛 + 一个红鼻（小丑脸比气球更好认） */}
+    <circle cx="12" cy="17.6" r="3.4" fill={p.soft} opacity="0.85" />
+    <circle cx="10.6" cy="16.8" r="0.8" fill={p.color} />
+    <circle cx="13.4" cy="16.8" r="0.8" fill={p.color} />
+    <circle cx="12" cy="18.8" r="1" fill={p.color} />
+  </Canvas>
+)
+
+// ---- 4. 罗拉飞行员：侧视的小飞机 ----
+const B1Pilot: Glyph = (p) => (
+  <Canvas {...p}>
+    <path d="M2.4 13.4 21 8.2c1-.3 1.8.8 1.2 1.6L4.2 15.6c-1 .3-1.8-.8-1.2-1.6Z" />
+    <path d="M9.6 11.6 12.6 4.4c.3-.7 1.4-.6 1.5.2l.7 7.6" fill={p.soft} />
+    <path d="M11.6 14.2 9.4 19.6c-.3.7.5 1.4 1.2 1.1l4-1.6" fill={p.soft} opacity="0.7" />
+    <circle cx="5.4" cy="12.6" r="1.5" fill={p.soft} opacity="0.85" />
+  </Canvas>
+)
+
+// ---- 5. 蒙蒂农场主：稻草人 + 谷仓 ----
+const B1Farmer: Glyph = (p) => (
+  <Canvas {...p}>
+    <path d="M12 5.2a2.6 2.6 0 0 1 2.6 2.6c0 1-.6 1.9-1.5 2.3l3.3 1.7c.5.3.5 1 0 1.3L12 16.4 7.6 13.1c-.5-.3-.5-1 0-1.3l3.3-1.7c-.9-.4-1.5-1.3-1.5-2.3A2.6 2.6 0 0 1 12 5.2Z" />
+    <path d="M5.4 3.4h13.2M8.6 3.4 6.8 8.6M15.4 3.4l1.8 5.2" stroke={p.color} strokeWidth="1.8" strokeLinecap="round" fill="none" />
+    <path d="M12 16.4V21" stroke={p.color} strokeWidth="1.8" strokeLinecap="round" />
+  </Canvas>
+)
+
+// ---- 6. 罗拉海盗：海盗帽 + 望远镜 ----
+const B1Pirate: Glyph = (p) => (
+  <Canvas {...p}>
+    <path d="M6.6 12.4c0-4.2 2.4-7.6 5.4-7.6s5.4 3.4 5.4 7.6H6.6Z" />
+    <path d="M4.4 12.4h15.2v2.2H4.4z" />
+    <path d="M10.4 4.6c.5-1 .7-2 .5-2.9" stroke={p.color} strokeWidth="1.6" strokeLinecap="round" fill="none" />
+    <circle cx="10.4" cy="7.6" r="1.5" fill={p.soft} opacity="0.8" />
+    <path d="M9.6 18.4h6.8l-1.2 2.6h-4.4l-1.2-2.6Z" fill={p.soft} opacity="0.75" />
+  </Canvas>
+)
+
+// ---- 7. 蒙蒂魔术师：礼帽 + 魔术棒 ----
+const B1Magician: Glyph = (p) => (
+  <Canvas {...p}>
+    <path d="M7.4 12.4V8.2h9.2v4.2" />
+    <path d="M4.6 12.4h14.8v1.8H4.6z" />
+    <path d="M9.6 8.2c0-2.6 1-4.4 2.4-4.4s2.4 1.8 2.4 4.4" fill={p.soft} opacity="0.55" />
+    {/* 魔术棒：从帽檐斜伸出去，顶端一颗星 */}
+    <path d="M15.2 15.4 20 20.2" stroke={p.color} strokeWidth="2" strokeLinecap="round" />
+    <path d="m20.4 15.8 1 2.2 2.2 1-2.2 1-1 2.2-1-2.2-2.2-1 2.2-1 1-2.2Z" fill={p.soft} />
+  </Canvas>
+)
+
+// ---- 8. 罗拉运动员：奖牌 + 哨子 ----
+const B1Athlete: Glyph = (p) => (
+  <Canvas {...p}>
+    <path d="M8 3.4 12 10l4-6.6" stroke={p.color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+    <circle cx="12" cy="14.4" r="4.4" />
+    <circle cx="12" cy="14.4" r="2.2" fill={p.soft} opacity="0.7" />
+    <path d="M6.4 20.4h11.2" stroke={p.color} strokeWidth="2" strokeLinecap="round" />
+  </Canvas>
+)
+
+// ---- 9. 蒙蒂潜水员：潜水镜 + 气泡 ----
+const B1Diver: Glyph = (p) => (
+  <Canvas {...p}>
+    <path d="M4.4 10.6h15.2a2 2 0 0 1 2 2v1.6a2 2 0 0 1-2 2H4.4a2 2 0 0 1-2-2v-1.6a2 2 0 0 1 2-2Z" />
+    <circle cx="7.4" cy="13.4" r="2" fill={p.soft} opacity="0.8" />
+    <circle cx="14.6" cy="13.4" r="2" fill={p.soft} opacity="0.8" />
+    <circle cx="19.4" cy="6.4" r="1.8" fill={p.soft} opacity="0.6" />
+    <circle cx="21" cy="2.8" r="1.1" fill={p.soft} opacity="0.45" />
+  </Canvas>
+)
+
+/** 预备级单元 id → 图形。id 与 src/data/starlight.ts 的 Module.id 一致。 */
 const UNIT_GLYPHS: Record<number, Glyph> = {
   1: Hello,
   2: Animals,
@@ -204,6 +314,22 @@ const UNIT_GLYPHS: Record<number, Glyph> = {
   12: Transport,
 }
 
+/**
+ * 第一册单元 id → 图形。第一册的单元号同样从 1 开始，**必须按册分开**：
+ * 换一本书却看到另一本的图形（第一册 Unit 1 显示预备级的「挥手」）是错的。
+ */
+const UNIT_GLYPHS_BOOK1: Record<number, Glyph> = {
+  1: B1Artist,
+  2: B1Doctor,
+  3: B1Clown,
+  4: B1Pilot,
+  5: B1Farmer,
+  6: B1Pirate,
+  7: B1Magician,
+  8: B1Athlete,
+  9: B1Diver,
+}
+
 interface Props {
   /** 单元 id（src/data/starlight.ts 的 Module.id） */
   unitId: number
@@ -216,9 +342,8 @@ interface Props {
   size?: number
   className?: string
   /**
-   * 所属册次。图形是按**预备级**的 12 个单元画的，而第一册的单元号同样从 1 开始，
-   * 直接查表会让第一册 Unit 1 显示预备级的「挥手」—— 换一本书却看到另一本的图形。
-   * 第一册暂未画图形，退回该单元自己的 emoji。
+   * 所属册次。图形按**每册各自的单元**画（预备级 12 张 = 主题；第一册 9 张 = 职业道具），
+   * 而两册的单元号都从 1 开始 —— 按册查表才不会串。
    */
   level?: StarlightLevel
 }
@@ -232,7 +357,8 @@ export default function UnitGlyph({
   className,
   level = 'starlight',
 }: Props) {
-  const Glyph = level === 'starlight' ? UNIT_GLYPHS[unitId] : undefined
+  const Glyph =
+    level === 'starlight1' ? UNIT_GLYPHS_BOOK1[unitId] : UNIT_GLYPHS[unitId]
   if (!Glyph) {
     return (
       <span className={className} aria-hidden="true">
