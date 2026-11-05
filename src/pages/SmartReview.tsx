@@ -193,13 +193,10 @@ export default function SmartReview() {
   // 就是这么偶发红的：它 5 秒内要看到空状态，而索引兜底要 8 秒）。
   if (total === 0) {
     return (
-      <div className="page smart-review" style={mcStyle}>
+      <div className="page smart-review review-sheet" style={mcStyle}>
         <div className="page-head" style={mcStyle}>
-          <span className="page-emoji">🎯</span>
-          <div>
-            <div className="page-kicker">智能复习</div>
-            <h1 className="page-title">今日复习</h1>
-          </div>
+          <div className="page-kicker">智能复习</div>
+          <h1 className="page-title">今日复习</h1>
         </div>
 
         <SafeBoundary label="智能复习">
@@ -207,14 +204,18 @@ export default function SmartReview() {
           <ModuleFilterChips value={filter} onChange={changeFilter} hideAll />
 
           <div className="smart-empty">
-            <div className="smart-empty-emoji">🎉</div>
             <h2 className="smart-empty-title">今天没有需要复习的单词</h2>
+            {/* §11：空态不该只有一个零 —— 把真实的学习进度摆出来，
+                让孩子知道「今天 0 个」是正常的，而明天有 N 个在等着。 */}
+            <p className="smart-empty-stat">
+              今天 <b>0</b> 个 · 记忆保鲜期内 · 明天约 <b>{getTomorrowDueCount()}</b> 个到期
+            </p>
             <p className="smart-empty-sub">
-              已学过的单词都还在记忆保鲜期内,<br />
-              去预习新内容或做听力测验吧!
+              已学过的单词都还在记忆保鲜期内，<br />
+              去预习新内容或做听力测验吧！
             </p>
             <div className="smart-empty-actions">
-              <Link to={previewTo} className="btn btn--sun">📖 去预习</Link>
+              <Link to={previewTo} className="btn btn--sun">去预习</Link>
             </div>
           </div>
         </SafeBoundary>
@@ -229,17 +230,13 @@ export default function SmartReview() {
   // 有卡要翻时才等索引就绪（卡片要靠索引拿中文释义）
   if (!metaReady) {
     return (
-      <div className="page smart-review" style={mcStyle}>
+      <div className="page smart-review review-sheet" style={mcStyle}>
         <div className="page-head" style={mcStyle}>
-          <span className="page-emoji">🎯</span>
-          <div>
-            <div className="page-kicker">智能复习</div>
-            <h1 className="page-title">今日复习</h1>
-          </div>
+          <div className="page-kicker">智能复习</div>
+          <h1 className="page-title">今日复习</h1>
         </div>
         <SafeBoundary label="智能复习">
           <div className="smart-empty">
-            <div className="smart-empty-emoji">⏳</div>
             <h2 className="smart-empty-title">正在准备复习内容…</h2>
           </div>
         </SafeBoundary>
@@ -257,18 +254,14 @@ export default function SmartReview() {
     const mostlyRight = isPassed(session.correct, total)
     const tomorrowCount = getTomorrowDueCount()
     return (
-      <div className="page smart-review" style={mcStyle}>
+      <div className="page smart-review review-sheet" style={mcStyle}>
         <div className="page-head" style={mcStyle}>
-          <span className="page-emoji">🎯</span>
-          <div>
-            <div className="page-kicker">智能复习</div>
-            <h1 className="page-title">本次复习完成</h1>
-          </div>
+          <div className="page-kicker">智能复习</div>
+          <h1 className="page-title">本次复习完成</h1>
         </div>
 
         <SafeBoundary label="复习结果">
           <div className="smart-result">
-            <div className="result-emoji">{allRight ? '🌟' : mostlyRight ? '👍' : '💪'}</div>
             <h2 className="result-title">
               {allRight ? '全部记住啦!' : mostlyRight ? '记得很牢!' : '继续加油!'}
             </h2>
@@ -281,17 +274,14 @@ export default function SmartReview() {
 
             <div className="smart-stats-row">
               <div className="smart-stat">
-                <div className="smart-stat-emoji">✅</div>
                 <div className="smart-stat-val">{session.correct}</div>
                 <div className="smart-stat-label">答对</div>
               </div>
               <div className="smart-stat">
-                <div className="smart-stat-emoji">😅</div>
                 <div className="smart-stat-val">{session.wrong}</div>
                 <div className="smart-stat-label">忘了</div>
               </div>
               <div className="smart-stat">
-                <div className="smart-stat-emoji">⭐</div>
                 <div className="smart-stat-val">+{quizStars(session.correct, total)}</div>
                 <div className="smart-stat-label">星星</div>
               </div>
@@ -299,7 +289,7 @@ export default function SmartReview() {
 
             {session.wrongWords.length > 0 && (
               <div className="smart-wrong-list">
-                <h3 className="smart-wrong-title">📋 这些内容需要再练</h3>
+                <h3 className="smart-wrong-title">这些内容需要再练</h3>
                 {session.wrongWords.map((w) => (
                   <div key={w.en} className="smart-wrong-item">
                     <span className="sw-emoji">{w.emoji ?? '❓'}</span>
@@ -321,7 +311,7 @@ export default function SmartReview() {
               <button type="button" className="btn btn--sun" onClick={reload}>
                 🔁 再复习一轮
               </button>
-              <Link to="/wrong" className="btn btn--soft">📋 错题本</Link>
+              <Link to="/wrong" className="btn btn--soft">错题本</Link>
               <Link to="/" className="btn btn--soft">返回首页</Link>
             </div>
           </div>
@@ -382,9 +372,8 @@ export default function SmartReview() {
   const canAnswer = revealed || isFrameCard
 
   return (
-    <div className="page smart-review" style={mcStyle}>
+    <div className="page smart-review review-sheet" style={mcStyle}>
       <div className="page-head" style={mcStyle}>
-        <span className="page-emoji">🎯</span>
         <div>
           <div className="page-kicker">智能复习 · 跨模块</div>
           <h1 className="page-title">今日复习</h1>
@@ -392,7 +381,7 @@ export default function SmartReview() {
       </div>
 
       <SafeBoundary label="智能复习">
-        <div className="mode-badge mode-review">🧠 大脑健身 · 先回忆再翻面</div>
+        <div className="mode-badge mode-review">先回忆，再翻面</div>
 
         {/* 模块筛选 chips：统一隐藏「全部」，与空状态分支保持一致 */}
         <ModuleFilterChips value={filter} onChange={changeFilter} hideAll />
@@ -408,7 +397,6 @@ export default function SmartReview() {
         {frameCard && (
           <div className="smart-card" style={mcStyle}>
             <div className="smart-card-from">📍 句型框架 · 说出整句</div>
-            <div className="smart-card-emoji">🧩</div>
             <div className="sfc-pattern">
               {frameCard.blanks.length === 0
                 ? frameCard.pattern
@@ -466,7 +454,7 @@ export default function SmartReview() {
             onClick={() => answer(false)}
             disabled={!canAnswer}
           >
-            😅 忘了
+            忘了
           </button>
           <button
             type="button"
@@ -474,7 +462,7 @@ export default function SmartReview() {
             onClick={() => answer(true)}
             disabled={!canAnswer}
           >
-            ✅ 记得
+            记得
           </button>
         </div>
         {!canAnswer && (

@@ -66,19 +66,12 @@ export default function WrongBook() {
   }
 
   return (
-    <div className="page wrong-book" style={mcStyle}>
-      <div className="page-head">
-        <span className="page-emoji">📋</span>
-        <div>
-          <div className="page-kicker">错题本</div>
-          <h1 className="page-title">把错的练对</h1>
-        </div>
-      </div>
+    <div className="page wrong-book review-sheet" style={mcStyle}>
+      <div className="page-head"><div className="page-kicker">错题本</div> <h1 className="page-title">把错的练对</h1></div>
 
       <SafeBoundary label="错题本">
         {wrongWords.length === 0 ? (
           <div className="wrong-empty">
-            <div className="wrong-empty-emoji">🎉</div>
             <p>错题本是空的，太棒啦！</p>
             <p style={{ fontSize: '13px' }}>做完测验后，错题会自动出现在这里。</p>
             <Link to="/smart" className="btn">去复习</Link>
@@ -94,9 +87,9 @@ export default function WrongBook() {
               resultLinks={
                 <>
                   <button type="button" className="btn btn--soft" onClick={() => setQuizItems(null)}>
-                    📋 返回错题本
+                    返回错题本
                   </button>
-                  <Link to="/smart" className="btn btn--soft">🧠 去复习</Link>
+                  <Link to="/smart" className="btn btn--soft">去复习</Link>
                 </>
               }
               onPick={handlePick}

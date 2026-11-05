@@ -1,0 +1,135 @@
+// ============================================================
+//  字母表（/alphabet）— 白纸页 + 一张「教室墙上的字母表」
+//  ------------------------------------------------------------
+//  方向：tasteskill v2 · framed-sheet（与其它模块共用 paper-sheet 骨架）
+//  Idea：26 个字母是**同一张表**，不是 26 张卡片。桌面上应该一眼看全，
+//        所以排成紧密网格（7 列 × 4 行），而不是 3 列 9 行要滚 2 屏多。
+//
+//  ⚠️ 作用域纪律：所有规则挂在 .alphabet-sheet 下，不改共享类全局定义。
+//     e2e 只断言 h1「26 个字母」可见（tests/home.spec.ts），结构可自由改。
+// ============================================================
+@use 'mixins' as *;
+
+.alphabet-sheet {
+  @include paper-sheet;
+
+  // ---------- 页头 ----------
+  .page-emoji { display: none; }
+  .page-kicker {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ink-mute);
+    margin: 0 0 2px;
+    letter-spacing: 0.04em;
+  }
+  .page-title { margin: 0; }
+  .lead {
+    font-size: 14px;
+    color: var(--ink-soft);
+    line-height: 1.6;
+    margin: 8px 0 20px;
+    max-width: 68ch;
+  }
+
+  // ---------- 26 个字母 = 一张表 ----------
+  // 桌面 7 列（26 = 3×7 + 5）、窄屏递减；每格只留「字母 / 例词 / 音标」三行。
+  .letter-grid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 0;
+    border-top: 1px solid var(--line);
+    padding-top: 16px;
+  }
+  .letter-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 10px 4px 12px;
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    background: var(--card);
+    transition: background 0.15s ease, border-color 0.15s ease;
+    &:hover { border-color: var(--line-2); background: var(--bg-3); }
+  }
+
+  // 字母本身是播放按钮：主体该是字母，不是喇叭
+  .letter-shape {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 1px;
+    width: 100%;
+    border: 0;
+    background: none;
+    padding: 2px 0 4px;
+    cursor: pointer;
+    font-family: inherit;
+    line-height: 1;
+    transition: transform 0.12s ease;
+    &:active { transform: scale(0.94); }
+    &:focus-visible { outline: 2px solid var(--brand-deep); outline-offset: 2px; border-radius: 4px; }
+  }
+  .letter-upper { font-size: 30px; font-weight: 800; color: var(--brand-deep); }
+  .letter-lower { font-size: 20px; font-weight: 700; color: var(--ink-soft); }
+
+  // 例词：emoji + 单词，也可点发音
+  .letter-word {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    margin-top: 2px;
+    min-width: 0;
+    width: 100%;
+  }
+  .letter-emoji { font-size: 15px; line-height: 1; flex: none; }
+  .letter-word-btn {
+    font: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink);
+    background: none;
+    border: 0;
+    border-bottom: 1px solid transparent;
+    padding: 2px 0;
+    cursor: pointer;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    transition: border-color 0.15s ease, color 0.15s ease;
+    &:hover { color: var(--brand-deep); border-bottom-color: var(--brand-deep); }
+    &:active { transform: scale(0.96); }
+    &:focus-visible { outline: 2px solid var(--brand-deep); outline-offset: 1px; border-radius: 3px; }
+  }
+  .letter-ipa {
+    font-size: 13px;
+    color: var(--ink-mute);
+    margin-top: 0;
+    font-variant-numeric: tabular-nums;
+  }
+
+  // 原来那两个大喇叭已改为「字母本体 + 例词」两个明确入口；
+  // 保险起见把残留的 .letter-acts 收掉。
+  .letter-acts { display: none; }
+
+  .page-nav { margin-top: 24px; border-top: 1px solid var(--line); padding-top: 16px; }
+  .back-link { background: none; color: var(--ink-soft); }
+
+  @media (max-width: 1100px) {
+    .letter-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  }
+  @media (max-width: 860px) {
+    .letter-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  }
+  @media (max-width: 640px) {
+    padding: 16px;
+    .letter-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+    .letter-upper { font-size: 24px; }
+    .letter-lower { font-size: 16px; }
+    .letter-word-btn { font-size: 12px; }
+  }
+}

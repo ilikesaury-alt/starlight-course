@@ -1,0 +1,224 @@
+// ============================================================
+//  智能复习（/smart）与错题本（/wrong）— 白纸页 + 诚实的数据界面
+//  ------------------------------------------------------------
+//  方向：tasteskill v2 · framed-sheet（与其它模块共用 paper-sheet 骨架）
+//  这两页是**每天用的工作界面**，不是展示页：
+//    · 空态要如实——「今天没有需要复习的单词」就是 0，不用大 emoji 装饰；
+//      清单一空，画一个 72px 的派对炮反而像加载失败。
+//    · 结果页的数字是主角（答对 / 忘了 / 星星），emoji 不该比数字显眼。
+//    · 模块筛选是分段控件，不是一排药丸。
+//
+//  ⚠️ 作用域：`.review-sheet`，两页共用。e2e 契约（tests/review.spec.ts）：
+//     「今天没有需要复习的单词」「去预习」链接、「第 1 / N 张」、
+//     .smart-card-from、「翻面 / 记得 / 忘了」、「本次复习完成」「全部记住啦」
+//     「答对 N / M 题」；「把错的练对」.wrong-item、「掌握」「清空全部」「清空」
+//     「错题本是空的」—— 全部保留。
+// ============================================================
+@use 'mixins' as *;
+
+.review-sheet {
+  @include paper-sheet;
+
+  // ---------- 页头 ----------
+  .page-emoji { display: none; }
+  .page-kicker {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ink-mute);
+    margin: 0 0 2px;
+    letter-spacing: 0.04em;
+  }
+  .page-title { margin: 0; }
+  .lead {
+    font-size: 14px;
+    color: var(--ink-soft);
+    line-height: 1.6;
+    margin: 8px 0 16px;
+    max-width: 68ch;
+  }
+
+  // ---------- 模块筛选：分段控件，不是一排药丸 ----------
+  // ModuleFilterChips 渲染的是共享类 .filter-chips / .chip，只在作用域内改外观。
+  .filter-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0;
+    margin: 0 0 20px;
+    border: 1px solid var(--line-2);
+    border-radius: var(--r-md);
+    overflow: hidden;
+    width: fit-content;
+    max-width: 100%;
+  }
+  .filter-chips .chip {
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    background: var(--card);
+    border: 0;
+    border-right: 1px solid var(--line-2);
+    border-radius: 0;
+    padding: 8px 14px;
+    min-height: 38px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s ease, color 0.15s ease;
+    &:last-child { border-right: 0; }
+    &.active { background: var(--brand-soft); color: var(--brand-deep); font-weight: 700; }
+    &:hover:not(.active) { background: var(--bg-3); }
+  }
+
+  // ---------- 空态：0 如实印，不画大 emoji ----------
+  // §11：保留一块带表头的区域 + 一句跨整块的话 + 一个真实动作。
+  // ⚠️ 框要**贴着内容收窄**：1200×420 的浅灰大框里只放三行字，
+  //    检测器会把整块灰底当成「一块空矩形」（hero-void）。
+  .smart-empty,
+  .wrong-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 8px;
+    padding: 40px 32px;
+    margin: 0 auto;
+    max-width: 620px;
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    background: var(--bg-3);
+  }
+  .smart-empty-emoji,
+  .wrong-empty-emoji { display: none; }
+  .smart-empty-title,
+  .wrong-empty-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--ink);
+    margin: 0;
+  }
+  .smart-empty-sub,
+  .wrong-empty-sub {
+    font-size: 14px;
+    color: var(--ink-soft);
+    line-height: 1.7;
+    margin: 0;
+    max-width: 42ch;
+  }
+  // 空态里的真实进度（「今天 0 个 · 明天约 N 个到期」）—— 数字如实印
+  .smart-empty-stat {
+    font-size: 13px;
+    color: var(--ink-mute);
+    margin: 0 0 4px;
+    font-variant-numeric: tabular-nums;
+    b { color: var(--ink); font-weight: 700; }
+  }
+  .smart-empty-actions { display: flex; gap: 12px; margin-top: 12px; }
+
+  // ---------- 结果页：数字是主角 ----------
+  .smart-result { text-align: left; }
+  .result-emoji { display: none; }
+  .result-title { font-size: 24px; font-weight: 700; color: var(--ink); margin: 0 0 20px; }
+  .result-score { font-size: 15px; color: var(--ink-soft); margin-bottom: 8px; }
+  .result-bar { height: 8px; background: var(--bg-3); border-radius: 4px; overflow: hidden; margin-bottom: 24px; }
+  .result-bar-fill { height: 100%; background: var(--brand); border-radius: 4px; }
+
+  .smart-stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1px;
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    overflow: hidden;
+    background: var(--line);
+    margin-bottom: 24px;
+  }
+  .smart-stat {
+    background: var(--card);
+    padding: 16px;
+    display: grid;
+    gap: 4px;
+  }
+  // 统计里的 emoji 去掉，让数字站出来
+  .smart-stat-emoji { display: none; }
+  .smart-stat-val {
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+  }
+  .smart-stat-label { font-size: 13px; color: var(--ink-soft); }
+
+  .smart-wrong-list { margin-bottom: 16px; }
+  .smart-wrong-title { font-size: 16px; font-weight: 700; color: var(--ink); margin: 0 0 12px; }
+  .smart-wrong-item {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    padding: 10px 2px;
+    border-bottom: 1px solid var(--line);
+    font-size: 14px;
+  }
+  .sw-en { font-weight: 700; color: var(--ink); }
+  .sw-zh { color: var(--ink-soft); font-size: 13px; }
+  .smart-tomorrow-hint { font-size: 13px; color: var(--ink-mute); margin: 12px 0 0; }
+  .result-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 20px; }
+
+  // ---------- 复习中：卡片翻转界面（保留，只做降噪） ----------
+  .smart-card {
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    background: var(--card);
+    box-shadow: none;
+    padding: 24px;
+    margin: 16px 0;
+    text-align: center;
+  }
+  .smart-card-from { font-size: 13px; color: var(--ink-mute); text-align: left; margin-bottom: 12px; }
+  .smart-card-emoji { font-size: 34px; line-height: 1; margin-bottom: 8px; }
+  .smart-card-box { font-size: 13px; color: var(--ink-mute); font-variant-numeric: tabular-nums; margin-top: 12px; }
+  .smart-card-stat { font-size: 13px; color: var(--ink-mute); margin-top: 8px; }
+  .smart-controls { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 16px; }
+  .smart-hint { font-size: 13px; color: var(--ink-mute); text-align: center; margin-top: 12px; }
+  .quiz-meta { font-size: 13px; color: var(--ink-soft); }
+  .quiz-progress { height: 8px; background: var(--bg-3); }
+
+  // ---------- 错题本清单：无卡片行表 ----------
+  .wrong-list { display: grid; gap: 0; border-top: 1px solid var(--line); }
+  .wrong-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 2px;
+    border-bottom: 1px solid var(--line);
+  }
+  .wrong-emoji { font-size: 24px; line-height: 1; flex: none; width: 32px; text-align: center; }
+  .wrong-info { min-width: 0; flex: 1; display: grid; gap: 2px; }
+  .wrong-en { font-size: 16px; font-weight: 700; color: var(--ink); }
+  .wrong-zh { font-size: 13px; color: var(--ink-soft); }
+  .wrong-from { font-size: 12px; color: var(--ink-mute); }
+  .wrong-module-tag {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink-mute);
+    background: var(--bg-3);
+    border-radius: var(--r-sm);
+    padding: 1px 6px;
+    margin-left: 4px;
+  }
+  .wrong-actions { display: flex; gap: 8px; flex: none; }
+
+  .page-nav { margin-top: 24px; border-top: 1px solid var(--line); padding-top: 16px; }
+  .back-link { background: none; color: var(--ink-soft); }
+
+  @media (max-width: 640px) {
+    padding: 16px;
+    .smart-stats-row { grid-template-columns: 1fr; }
+    .smart-stat { padding: 12px 16px; display: flex; align-items: baseline; gap: 8px; }
+    .smart-stat-val { font-size: 24px; }
+    .wrong-item { flex-wrap: wrap; }
+    .wrong-actions { width: 100%; }
+  }
+}

@@ -29,3 +29,7 @@
 @use 'styles/dictation-module';
 // 字母积木模块专属（同一套 paper-sheet 骨架 + 动画五级关卡轴）。
 @use 'styles/alphablocks-module';
+// 字母表专属（同一套 paper-sheet 骨架 + 一张 26 格字母表）。
+@use 'styles/alphabet-module';
+// 智能复习 + 错题本专属（同一套 paper-sheet 骨架 + 诚实的数据界面）。
+@use 'styles/review-module';
