@@ -46,6 +46,11 @@ src/data/starlight0/
 src/data/starlight0_extracted.json
 *.pdf
 
+# Starlight 1 教材提取中间产物(本地用,不提交；生成的 src/data/starlight1/*.ts 已纳入版本控制)
+src/data/starlight1/extracted.json
+src/data/starlight1/raw/
+scripts/extract_starlight1.py
+
 # 本地构建缓存
 .vite/
 

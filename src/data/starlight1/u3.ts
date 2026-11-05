@@ -1,0 +1,867 @@
+// Starlight 1 · Level 1 · Unit 3「Monty the Clown」课程数据
+// 数据来源：src/data/starlight1/raw/unit3.json（教材 PDF 文本）。
+// 结构对齐 Unit 1 试点（lessons.ts / book.ts / sentenceFrames.ts / reading.ts / extensions.ts / index.ts）。
+// 本单元 11 课：家庭成员词汇 → 阅读救猫故事 → 单复数 / 外貌描写语法 → /er/ 自然拼读 →
+// 双胞胎科学(CLIL) → 综合练习 → Secret Agent 10 故事。
+
+import type { Lesson, LessonBook, SentenceFrame, ReadingPassage, Module, ExtTopic } from './shared'
+import { w } from './shared'
+
+// ===================== Lessons（11 课） =====================
+export const u3_lessons: Record<number, Lesson[]> = {
+  3: [
+    // ---- Lesson 1: Vocabulary（家庭成员 + 马戏团） ----
+    {
+      id: 1,
+      title: 'Family at the Circus',
+      titleZh: '马戏团里的家人',
+      words: [
+        { en: 'mom', zh: '妈妈', emoji: '👩', ipa: '/mɒm/' },
+        { en: 'dad', zh: '爸爸', emoji: '👨', ipa: '/dæd/' },
+        { en: 'grandma', zh: '奶奶／外婆', emoji: '👵', ipa: '/ˈɡrænmɑː/' },
+        { en: 'grandpa', zh: '爷爷／外公', emoji: '👴', ipa: '/ˈɡrænpɑː/' },
+        { en: 'circus', zh: '马戏团', emoji: '🎪', ipa: '/ˈsɜːkəs/' },
+      ],
+      sentences: [
+        { en: 'Come to the circus!', zh: '来马戏团吧！', hint: '马戏团歌曲里的句子' },
+        { en: 'Who is this?', zh: '这是谁？', hint: '指着家人问' },
+        { en: 'This is my dad.', zh: '这是我的爸爸。', hint: '介绍家人' },
+        { en: 'This is my grandma.', zh: '这是我的奶奶。', hint: '介绍家人' },
+        { en: 'How many people are there at the circus?', zh: '马戏团里有多少人？', hint: '询问数量' },
+      ],
+    },
+    // ---- Lesson 2: Vocabulary and Practice ----
+    {
+      id: 2,
+      title: 'More Family',
+      titleZh: '更多家庭成员',
+      words: [
+        { en: 'aunt', zh: '阿姨／姑妈', emoji: '👩', ipa: '/ɑːnt/' },
+        { en: 'uncle', zh: '叔叔／舅舅', emoji: '👨', ipa: '/ˈʌŋkl/' },
+        { en: 'brother', zh: '兄弟', emoji: '👦', ipa: '/ˈbrʌðə/' },
+        { en: 'sister', zh: '姐妹', emoji: '👧', ipa: '/ˈsɪstə/' },
+        { en: 'cousins', zh: '表／堂兄弟姐妹', emoji: '👫', ipa: '/ˈkʌznz/' },
+      ],
+      sentences: [
+        { en: 'This is my uncle.', zh: '这是我的叔叔。', hint: '介绍长辈' },
+        { en: 'This is my aunt.', zh: '这是我的阿姨。', hint: '介绍长辈' },
+        { en: 'This is my brother.', zh: '这是我的兄弟。', hint: '介绍同辈' },
+        { en: 'This is my sister.', zh: '这是我的姐妹。', hint: '介绍同辈' },
+        { en: 'These are my cousins.', zh: '这些是我的表兄弟姐妹。', hint: 'cousins 是复数' },
+      ],
+    },
+    // ---- Lesson 3: Reading（Ruby 救猫） ----
+    {
+      id: 3,
+      title: 'Bam Bam in the Tree',
+      titleZh: '树上的 Bam Bam',
+      words: [
+        { en: 'cat', zh: '猫', emoji: '🐱', ipa: '/kæt/' },
+        { en: 'tree', zh: '树', emoji: '🌳', ipa: '/triː/' },
+        { en: 'jump', zh: '跳', emoji: '🦘', ipa: '/dʒʌmp/' },
+        { en: 'high', zh: '高的', emoji: '🔝', ipa: '/haɪ/' },
+        { en: 'big', zh: '大的', emoji: '🐘', ipa: '/bɪɡ/' },
+      ],
+      sentences: [
+        { en: 'This is Bam Bam. He is a cat.', zh: '这是 Bam Bam，他是一只猫。', hint: '故事里的猫' },
+        { en: 'Bam Bam is in the tree.', zh: 'Bam Bam 在树上。', hint: '猫上树了' },
+        { en: 'Grandpa jumps.', zh: '爷爷跳。', hint: '救猫的动作' },
+        { en: 'Dad jumps onto Grandpa.', zh: '爸爸跳到爷爷身上。', hint: '叠罗汉' },
+        { en: 'Bam Bam is very high up.', zh: 'Bam Bam 在高高的树上。', hint: '猫还在高处' },
+      ],
+    },
+    // ---- Lesson 4: Reading and Practice ----
+    {
+      id: 4,
+      title: 'We Get Bam Bam!',
+      titleZh: '我们救下 Bam Bam 啦',
+      words: [
+        { en: 'grandma', zh: '奶奶／外婆', emoji: '👵', ipa: '/ˈɡrænmɑː/' },
+        { en: 'idea', zh: '主意', emoji: '💡', ipa: '/aɪˈdɪə/' },
+        { en: 'happy', zh: '开心的', emoji: '😊', ipa: '/ˈhæpi/' },
+        { en: 'thank you', zh: '谢谢', emoji: '🙏', ipa: '/ˈθæŋk juː/' },
+        { en: 'cat', zh: '猫', emoji: '🐱', ipa: '/kæt/' },
+      ],
+      sentences: [
+        { en: 'Grandma jumps onto the cousins.', zh: '奶奶跳到表兄弟姐妹身上。', hint: '救猫的动作' },
+        { en: 'Jump, Ruby, jump!', zh: '跳，Ruby，跳！', hint: '大家一起帮忙' },
+        { en: 'The family get Bam Bam.', zh: '一家人救下了 Bam Bam。', hint: '故事的结局' },
+        { en: 'Now Bam Bam is happy.', zh: '现在 Bam Bam 开心了。', hint: '猫得救了' },
+        { en: 'Thank you, everyone!', zh: '谢谢大家！', hint: '表达感谢' },
+      ],
+    },
+    // ---- Lesson 5: Language Focus（This is / These are） ----
+    {
+      id: 5,
+      title: 'This Is / These Are',
+      titleZh: '单数还是复数',
+      words: [
+        { en: 'cousin', zh: '表／堂兄弟姐妹', emoji: '👦', ipa: '/ˈkʌzn/' },
+        { en: 'cousins', zh: '表／堂兄弟姐妹（复数）', emoji: '👫', ipa: '/ˈkʌznz/' },
+        { en: 'grandma', zh: '奶奶／外婆', emoji: '👵', ipa: '/ˈɡrænmɑː/' },
+        { en: 'grandpa', zh: '爷爷／外公', emoji: '👴', ipa: '/ˈɡrænpɑː/' },
+        { en: 'dad', zh: '爸爸', emoji: '👨', ipa: '/dæd/' },
+      ],
+      sentences: [
+        { en: 'This is my cousin.', zh: '这是我的表兄弟姐妹（一个）。', hint: '单数用 this is' },
+        { en: 'These are my cousins.', zh: '这些是我的表兄弟姐妹。', hint: '复数用 these are' },
+        { en: 'This is my grandma.', zh: '这是我的奶奶。', hint: '介绍一位长辈' },
+        { en: 'This is my grandpa.', zh: '这是我的爷爷。', hint: '介绍一位长辈' },
+        { en: 'This is my dad.', zh: '这是我的爸爸。', hint: '介绍家人' },
+      ],
+    },
+    // ---- Lesson 6: Language Focus and Practice（He has / She has） ----
+    {
+      id: 6,
+      title: 'He Has / She Has',
+      titleZh: '描述外貌',
+      words: [
+        { en: 'long hair', zh: '长发', emoji: '💇', ipa: '/lɒŋ heə/' },
+        { en: 'short hair', zh: '短发', emoji: '✂️', ipa: '/ʃɔːt heə/' },
+        { en: 'big eyes', zh: '大眼睛', emoji: '👀', ipa: '/bɪɡ aɪz/' },
+        { en: 'small eyes', zh: '小眼睛', emoji: '👁️', ipa: '/smɔːl aɪz/' },
+        { en: 'blond hair', zh: '金发', emoji: '💛', ipa: '/blɒnd heə/' },
+      ],
+      sentences: [
+        { en: 'She has blond hair.', zh: '她有一头金发。', hint: '描述女生外貌' },
+        { en: 'He has small eyes.', zh: '他有一双小眼睛。', hint: '描述男生外貌' },
+        { en: 'He has gray hair.', zh: '他有灰白头发。', hint: '描述头发颜色' },
+        { en: 'She has long hair.', zh: '她有一头长发。', hint: '描述头发长短' },
+        { en: 'She has big eyes.', zh: '她有一双大眼睛。', hint: '描述眼睛大小' },
+      ],
+    },
+    // ---- Lesson 7: Phonics（/er/ 音） ----
+    {
+      id: 7,
+      title: 'Phonics: /er/',
+      titleZh: '自然拼读：/er/ 音',
+      words: [
+        { en: 'brother', zh: '兄弟', emoji: '👦', ipa: '/ˈbrʌðə/' },
+        { en: 'sister', zh: '姐妹', emoji: '👧', ipa: '/ˈsɪstə/' },
+        { en: 'teacher', zh: '老师', emoji: '👩‍🏫', ipa: '/ˈtiːtʃə/' },
+        { en: 'eraser', zh: '橡皮', emoji: '🧽', ipa: '/ɪˈreɪzə/' },
+        { en: 'spider', zh: '蜘蛛', emoji: '🕷️', ipa: '/ˈspaɪdə/' },
+        { en: 'flower', zh: '花', emoji: '🌸', ipa: '/ˈflaʊə/' },
+      ],
+      sentences: [
+        { en: 'Er says er, er, er.', zh: 'er 发 er 的音。', hint: '/er/ 发音口诀' },
+        { en: 'This is my brother.', zh: '这是我的兄弟。', hint: '含 /er/ 的词' },
+        { en: 'This is my sister.', zh: '这是我的姐妹。', hint: '含 /er/ 的词' },
+        { en: 'This is my teacher.', zh: '这是我的老师。', hint: '含 /er/ 的词' },
+        { en: 'This is a spider.', zh: '这是一只蜘蛛。', hint: '含 /er/ 的词' },
+      ],
+    },
+    // ---- Lesson 8: CLIL（科学：一样／相似／一模一样） ----
+    {
+      id: 8,
+      title: 'CLIL: Twins',
+      titleZh: '科学：双胞胎',
+      words: [
+        { en: 'different', zh: '不一样的', emoji: '🔀', ipa: '/ˈdɪfrənt/' },
+        { en: 'similar', zh: '很像的', emoji: '🔁', ipa: '/ˈsɪmələ/' },
+        { en: 'identical', zh: '一模一样的', emoji: '👯', ipa: '/aɪˈdentɪkl/' },
+        { en: 'twins', zh: '双胞胎', emoji: '👯', ipa: '/twɪnz/' },
+        { en: 'sister', zh: '姐妹', emoji: '👧', ipa: '/ˈsɪstə/' },
+      ],
+      sentences: [
+        { en: 'They are different.', zh: '他们不一样。', hint: '描述差异' },
+        { en: 'They are similar.', zh: '他们很像。', hint: '描述相似' },
+        { en: 'They are identical.', zh: '他们一模一样。', hint: '双胞胎用语' },
+        { en: 'They are twins.', zh: '他们是双胞胎。', hint: '介绍双胞胎' },
+        { en: 'I look like my mom.', zh: '我长得像妈妈。', hint: '像谁' },
+      ],
+    },
+    // ---- Lesson 9: Practice（综合练习） ----
+    {
+      id: 9,
+      title: 'Practice',
+      titleZh: '综合练习',
+      words: [
+        { en: 'clown', zh: '小丑', emoji: '🤡', ipa: '/klaʊn/' },
+        { en: 'flower', zh: '花', emoji: '🌸', ipa: '/ˈflaʊə/' },
+        { en: 'balloon', zh: '气球', emoji: '🎈', ipa: '/bəˈluːn/' },
+        { en: 'spider', zh: '蜘蛛', emoji: '🕷️', ipa: '/ˈspaɪdə/' },
+        { en: 'teacher', zh: '老师', emoji: '👩‍🏫', ipa: '/ˈtiːtʃə/' },
+      ],
+      sentences: [
+        { en: 'This is my brother, my sister and me.', zh: '这是我的兄弟、姐妹和我。', hint: '介绍一家人' },
+        { en: 'This is my teacher and her family.', zh: '这是我的老师和她的家人。', hint: '介绍老师一家' },
+        { en: 'The clown has a flower.', zh: '小丑有一朵花。', hint: '练习歌曲里的句子' },
+        { en: 'He has a balloon and a spider.', zh: '他有一个气球和一只蜘蛛。', hint: '继续练 has' },
+        { en: 'They are twins.', zh: '他们是双胞胎。', hint: '复习 CLIL 词汇' },
+      ],
+    },
+    // ---- Lesson 10: Story Reading（Secret Agent 10） ----
+    {
+      id: 10,
+      title: 'Secret Agent 10',
+      titleZh: '10 号特工（故事）',
+      words: [
+        { en: 'blond hair', zh: '金发', emoji: '💛', ipa: '/blɒnd heə/' },
+        { en: 'brown eyes', zh: '棕色眼睛', emoji: '🤎', ipa: '/braʊn aɪz/' },
+        { en: 'blue eyes', zh: '蓝色眼睛', emoji: '🔵', ipa: '/bluː aɪz/' },
+        { en: 'black hair', zh: '黑头发', emoji: '⚫', ipa: '/blæk heə/' },
+        { en: 'white hat', zh: '白帽子', emoji: '🎩', ipa: '/waɪt hæt/' },
+        { en: 'big feet', zh: '大脚', emoji: '👣', ipa: '/bɪɡ fiːt/' },
+      ],
+      sentences: [
+        { en: 'What does he look like?', zh: '他长什么样？', hint: '问外貌' },
+        { en: 'He has brown hair and blue eyes.', zh: '他有棕色头发和蓝色眼睛。', hint: '描述男生' },
+        { en: 'She has blond hair and green eyes.', zh: '她有金发和绿色眼睛。', hint: '描述女生' },
+        { en: 'He has black hair and a white hat.', zh: '他有黑头发和一顶白帽子。', hint: '描述穿着' },
+        { en: 'Where are Monty and Lola?', zh: 'Monty 和 Lola 在哪里？', hint: '故事开头' },
+      ],
+    },
+    // ---- Lesson 11: Story Reading and Practice ----
+    {
+      id: 11,
+      title: 'Who Is Agent 10?',
+      titleZh: '10 号特工是谁？',
+      words: [
+        { en: 'brown hair', zh: '棕色头发', emoji: '🤎', ipa: '/braʊn heə/' },
+        { en: 'green eyes', zh: '绿色眼睛', emoji: '🟢', ipa: '/ɡriːn aɪz/' },
+        { en: 'black hair', zh: '黑头发', emoji: '⚫', ipa: '/blæk heə/' },
+        { en: 'blond hair', zh: '金发', emoji: '💛', ipa: '/blɒnd heə/' },
+        { en: 'big feet', zh: '大脚', emoji: '👣', ipa: '/bɪɡ fiːt/' },
+      ],
+      sentences: [
+        { en: 'He has brown hair and blue eyes.', zh: '他有棕色头发和蓝色眼睛。', hint: '描述男生' },
+        { en: 'She has black hair and blue eyes.', zh: '她有黑头发和蓝色眼睛。', hint: '描述女生' },
+        { en: 'Mr. Sonic is Secret Agent 10.', zh: 'Sonic 老师是 10 号特工。', hint: '故事结尾揭晓' },
+        { en: 'This message is from Mr. Sonic.', zh: '这条消息来自 Sonic 老师。', hint: '谁留下的' },
+        { en: 'He has big feet.', zh: '他有一双大脚。', hint: '特工的特征' },
+      ],
+    },
+  ],
+}
+
+// ===================== Book（课本原文，按活动分组） =====================
+export const u3_book: Record<string, LessonBook> = {
+  '3-1': {
+    title: 'Family at the Circus',
+    sections: [
+      { chapter: 'Warm up: a song.', chapterZh: '热身：唱首歌。', pages: [
+        { text: "Let's enjoy a song!", textZh: '我们来唱首歌吧！' },
+        { text: 'Mommy shark, doo doo doo, doo doo doo, doo doo doo.', textZh: '鲨鱼妈妈～（跟着哼唱）' },
+      ] },
+      { chapter: 'Focus on: family words.', chapterZh: '重点词汇：家庭成员。', pages: [
+        { text: 'mom', textZh: '妈妈' },
+        { text: 'dad', textZh: '爸爸' },
+        { text: 'grandma', textZh: '奶奶／外婆' },
+        { text: 'grandpa', textZh: '爷爷／外公' },
+      ] },
+      { chapter: 'Look and say.', chapterZh: '看一看，说一说。', pages: [
+        { text: 'How many people are there at the circus?', textZh: '马戏团里有多少人？' },
+        { text: 'Who are they?', textZh: '他们是谁？' },
+        { text: 'This is my ...', textZh: '这是我的……' },
+      ] },
+      { chapter: 'Do a role-play.', chapterZh: '来玩角色扮演。', pages: [
+        { text: 'Who is this?', textZh: '这是谁？' },
+        { text: 'This is my dad.', textZh: '这是我的爸爸。' },
+        { text: 'This is my grandma.', textZh: '这是我的奶奶。' },
+        { text: 'This is my grandpa.', textZh: '这是我的爷爷。' },
+        { text: 'This is my mom.', textZh: '这是我的妈妈。' },
+      ] },
+      { chapter: 'Listen and sing along.', chapterZh: '听一听，一起唱。', pages: [
+        { text: 'Come, come, come to the circus, you and you and you!', textZh: '来，来，来马戏团，你、你、还有你！' },
+        { text: 'Mom and Dad, Brother, Sister, come to the circus, too!', textZh: '爸爸妈妈、哥哥姐姐，也来马戏团吧！' },
+        { text: 'Aunt and Uncle and my cousins, come to the circus, too!', textZh: '叔叔阿姨和我的表亲，也来马戏团吧！' },
+        { text: 'Grandpa, Grandma, yes, you too, come to the circus, too!', textZh: '爷爷奶奶，对，还有你们，也来马戏团吧！' },
+      ] },
+    ],
+  },
+  '3-2': {
+    title: 'More Family',
+    sections: [
+      { chapter: 'Review.', chapterZh: '复习。', pages: [
+        { text: 'grandma', textZh: '奶奶' },
+        { text: 'grandpa', textZh: '爷爷' },
+        { text: 'dad', textZh: '爸爸' },
+        { text: 'mom', textZh: '妈妈' },
+      ] },
+      { chapter: 'Focus on: more family words.', chapterZh: '重点词汇：更多家庭成员。', pages: [
+        { text: 'aunt', textZh: '阿姨／姑妈' },
+        { text: 'uncle', textZh: '叔叔／舅舅' },
+        { text: 'brother', textZh: '兄弟' },
+        { text: 'sister', textZh: '姐妹' },
+        { text: 'cousins', textZh: '表／堂兄弟姐妹' },
+      ] },
+      { chapter: 'Learn the key sentence.', chapterZh: '重点句型。', pages: [
+        { text: 'This is my uncle.', textZh: '这是我的叔叔。' },
+        { text: 'This is my aunt.', textZh: '这是我的阿姨。' },
+        { text: 'This is my brother.', textZh: '这是我的兄弟。' },
+        { text: 'This is my sister.', textZh: '这是我的姐妹。' },
+        { text: 'This is my cousin.', textZh: '这是我的表兄弟姐妹。' },
+      ] },
+      { chapter: 'Do a role-play.', chapterZh: '来玩角色扮演。', pages: [
+        { text: 'Who is this?', textZh: '这是谁？' },
+        { text: 'This is my aunt.', textZh: '这是我的阿姨。' },
+        { text: 'This is my sister.', textZh: '这是我的姐妹。' },
+        { text: 'This is my uncle.', textZh: '这是我的叔叔。' },
+        { text: 'This is my brother.', textZh: '这是我的兄弟。' },
+        { text: 'This is my cousin.', textZh: '这是我的表兄弟姐妹。' },
+      ] },
+      { chapter: 'Listen and sing along.', chapterZh: '听一听，一起唱。', pages: [
+        { text: 'Come, come, come to the circus, you and you and you!', textZh: '来，来，来马戏团，你、你、还有你！' },
+        { text: 'Aunt and Uncle and my cousins, come to the circus, too!', textZh: '叔叔阿姨和我的表亲，也来马戏团吧！' },
+        { text: 'Grandpa, Grandma, yes, you too, come to the circus, too!', textZh: '爷爷奶奶，对，还有你们，也来马戏团吧！' },
+      ] },
+    ],
+  },
+  '3-3': {
+    title: 'Bam Bam in the Tree',
+    sections: [
+      { chapter: 'Review.', chapterZh: '复习。', pages: [
+        { text: 'grandpa', textZh: '爷爷' },
+        { text: 'brother', textZh: '兄弟' },
+        { text: 'grandma', textZh: '奶奶' },
+        { text: 'sister', textZh: '姐妹' },
+      ] },
+      { chapter: 'Lead in.', chapterZh: '导入。', pages: [
+        { text: 'What do you see?', textZh: '你看到了什么？' },
+        { text: 'Jump! Jump! Jump!', textZh: '跳！跳！跳！' },
+      ] },
+      { chapter: 'Guided reading.', chapterZh: '引导阅读。', pages: [
+        { text: 'This is Ruby. This is Bam Bam.', textZh: '这是 Ruby。这是 Bam Bam。' },
+        { text: 'Bam Bam is in the tree. The tree is very big.', textZh: 'Bam Bam 在树上。树很大。' },
+        { text: 'This is my cat, Bam Bam.', textZh: '这是我的猫，Bam Bam。' },
+        { text: 'This is Grandpa. Grandpa jumps.', textZh: '这是爷爷。爷爷跳。' },
+        { text: 'This is Dad. Dad jumps.', textZh: '这是爸爸。爸爸跳。' },
+        { text: 'These are Ruby’s cousins. The cousins jump.', textZh: '这些是 Ruby 的表亲。表亲们跳。' },
+      ] },
+      { chapter: 'Activity 1: fill in the blank.', chapterZh: '活动一：填空。', pages: [
+        { text: 'This is my grandpa.', textZh: '这是我的爷爷。' },
+        { text: 'This is my dad. He jumps onto Grandpa.', textZh: '这是我的爸爸。他跳到爷爷身上。' },
+        { text: 'These are my cousins. They jump onto Dad.', textZh: '这些是我的表亲。他们跳到爸爸身上。' },
+      ] },
+      { chapter: 'Show Time.', chapterZh: '展示时间。', pages: [
+        { text: 'Hello, everyone! I’m ...', textZh: '大家好！我是……' },
+        { text: 'This is my ... (These are my ...)', textZh: '这是我的……（这些是我的……）' },
+      ] },
+    ],
+  },
+  '3-4': {
+    title: 'We Get Bam Bam!',
+    sections: [
+      { chapter: 'Lead in.', chapterZh: '导入。', pages: [
+        { text: 'How many people do you see?', textZh: '你看到几个人？' },
+      ] },
+      { chapter: 'Guided reading.', chapterZh: '引导阅读。', pages: [
+        { text: 'This is Grandma. Grandma jumps. She jumps onto Ruby’s cousins.', textZh: '这是奶奶。奶奶跳。她跳到 Ruby 的表亲身上。' },
+        { text: 'Grandma, the cousins, Dad and Grandpa have an idea.', textZh: '奶奶、表亲、爸爸和爷爷有了主意。' },
+        { text: 'Jump, Ruby!', textZh: '跳，Ruby！' },
+        { text: 'Jump, Jump, Jump! Hello, Bam Bam!', textZh: '跳、跳、跳！你好，Bam Bam！' },
+        { text: 'Here’s Bam Bam the cat. Now Bam Bam is happy.', textZh: 'Bam Bam 猫回来了。现在 Bam Bam 开心了。' },
+        { text: 'Thank you, everyone!', textZh: '谢谢大家！' },
+      ] },
+      { chapter: 'Activity 1: read and match.', chapterZh: '活动一：读一读，连一连。', pages: [
+        { text: 'This is my dad.', textZh: '这是我的爸爸。' },
+        { text: 'This is my grandma.', textZh: '这是我的奶奶。' },
+        { text: 'This is my grandpa.', textZh: '这是我的爷爷。' },
+        { text: 'These are my cousins.', textZh: '这些是我的表亲。' },
+      ] },
+      { chapter: 'Activity 2: true or false.', chapterZh: '活动二：判断对错。', pages: [
+        { text: 'Grandma jumps onto Ruby’s cousins.', textZh: '奶奶跳到 Ruby 的表亲身上。' },
+        { text: 'Ruby jumps onto grandma.', textZh: 'Ruby 跳到奶奶身上。' },
+        { text: 'The family can get the cat.', textZh: '一家人救下了猫。' },
+        { text: 'The cat is happy.', textZh: '猫很开心。' },
+      ] },
+      { chapter: 'Show Time.', chapterZh: '展示时间。', pages: [
+        { text: 'Hello, everyone! I’m ...', textZh: '大家好！我是……' },
+        { text: 'Look! This is my family.', textZh: '看！这是我的家人。' },
+        { text: 'This is my ... I love my family.', textZh: '这是我的……我爱我的家人。' },
+      ] },
+    ],
+  },
+  '3-5': {
+    title: 'This Is / These Are',
+    sections: [
+      { chapter: 'Warm up.', chapterZh: '热身。', pages: [
+        { text: 'Say the family members as fast as you can.', textZh: '尽快说出家庭成员。' },
+        { text: 'dad, grandma, cousins, grandpa', textZh: '爸爸、奶奶、表亲、爷爷' },
+      ] },
+      { chapter: 'Grammar: singular and plural.', chapterZh: '语法：单数与复数。', pages: [
+        { text: 'This is my cousin.', textZh: '这是我的表兄弟姐妹（一个）。' },
+        { text: 'These are my cousins.', textZh: '这些是我的表兄弟姐妹。' },
+        { text: 'What are the differences?', textZh: '它们有什么不同？' },
+      ] },
+      { chapter: 'Grammar practice.', chapterZh: '语法练习。', pages: [
+        { text: 'These are my cousins.', textZh: '这些是我的表亲。' },
+        { text: 'This is my cousin.', textZh: '这是我的表亲。' },
+        { text: 'These are my cats.', textZh: '这些是我的猫。' },
+        { text: 'This is my cat.', textZh: '这是我的猫。' },
+      ] },
+      { chapter: 'Activity 1: match.', chapterZh: '活动一：连线。', pages: [
+        { text: 'This is my grandma.', textZh: '这是我的奶奶。' },
+        { text: 'This is my grandpa.', textZh: '这是我的爷爷。' },
+        { text: 'These are my cousins.', textZh: '这些是我的表亲。' },
+        { text: 'This is my dad.', textZh: '这是我的爸爸。' },
+      ] },
+      { chapter: 'Activity 2: choose fast.', chapterZh: '活动二：快速选择。', pages: [
+        { text: 'This is my grandma. / These are my grandma.', textZh: '这是我的奶奶。／这些是我的奶奶。' },
+        { text: 'This is my dad. / These are my dad.', textZh: '这是我的爸爸。／这些是我的爸爸。' },
+        { text: 'This is my sisters. / These are my sisters.', textZh: '这是我的姐妹。／这些是我的姐妹。' },
+        { text: 'This is my mom. / These are my mom.', textZh: '这是我的妈妈。／这些是我的妈妈。' },
+      ] },
+    ],
+  },
+  '3-6': {
+    title: 'He Has / She Has',
+    sections: [
+      { chapter: 'Warm up.', chapterZh: '热身。', pages: [
+        { text: 'What do you have?', textZh: '你有什么？' },
+        { text: 'Look, she has big eyes and long hair.', textZh: '看，她有一双大眼睛和一头长发。' },
+        { text: 'Look, he has small eyes.', textZh: '看，他有一双小眼睛。' },
+      ] },
+      { chapter: 'Focus on: descriptive words.', chapterZh: '重点词汇：外貌描写。', pages: [
+        { text: 'long hair', textZh: '长发' },
+        { text: 'short hair', textZh: '短发' },
+        { text: 'big eyes', textZh: '大眼睛' },
+        { text: 'small eyes', textZh: '小眼睛' },
+        { text: 'gray hair', textZh: '灰白头发' },
+        { text: 'blond hair', textZh: '金发' },
+      ] },
+      { chapter: 'Activity 2: complete the table.', chapterZh: '活动二：填表。', pages: [
+        { text: 'Grandpa has ...', textZh: '爷爷有……' },
+        { text: 'Grandma has ...', textZh: '奶奶有……' },
+        { text: 'blue eyes, green eyes, gray hair, blond hair, big eyes, small eyes, short hair, long hair', textZh: '蓝眼睛、绿眼睛、灰发、金发、大眼睛、小眼睛、短发、长发' },
+      ] },
+      { chapter: 'Grammar: he / she has.', chapterZh: '语法：他／她有。', pages: [
+        { text: 'She has blond hair.', textZh: '她有一头金发。' },
+        { text: 'He has small eyes.', textZh: '他有一双小眼睛。' },
+        { text: 'She has big eyes. / He has big eyes.', textZh: '她有一双大眼睛。／他有一双大眼睛。' },
+      ] },
+      { chapter: 'Activity 3 & Show Time.', chapterZh: '活动三与展示时间。', pages: [
+        { text: '1. She has long hair. 2. He has big eyes.', textZh: '1. 她有一头长发。2. 他有一双大眼睛。' },
+        { text: 'My teacher is ... She / He has ...', textZh: '我的老师是……她／他有……' },
+      ] },
+    ],
+  },
+  '3-7': {
+    title: 'Phonics: /er/',
+    sections: [
+      { chapter: 'Warm up.', chapterZh: '热身。', pages: [
+        { text: 'What does grandpa / grandma look like?', textZh: '爷爷／奶奶长什么样？' },
+        { text: 'Grandpa has ... Grandma has ...', textZh: '爷爷有……奶奶有……' },
+      ] },
+      { chapter: 'Chant Time.', chapterZh: 'chant 时间。', pages: [
+        { text: 'Er says er, er, er, er.', textZh: 'er 发 er 的音。' },
+        { text: 'This is my brother, this is my sister, er, er, er.', textZh: '这是我的兄弟，这是我的姐妹，er，er，er。' },
+      ] },
+      { chapter: 'Learn and read the words.', chapterZh: '学习并拼读单词。', pages: [
+        { text: 'brother', textZh: '兄弟' },
+        { text: 'sister', textZh: '姐妹' },
+        { text: 'teacher', textZh: '老师' },
+        { text: 'eraser', textZh: '橡皮' },
+        { text: 'spider', textZh: '蜘蛛' },
+        { text: 'flower', textZh: '花' },
+      ] },
+      { chapter: 'Activity 1: circle the /er/ sound.', chapterZh: '活动一：圈出 /er/ 音。', pages: [
+        { text: 'teacher, sister, artist, eraser, spider, flower, brother', textZh: '老师、姐妹、艺术家、橡皮、蜘蛛、花、兄弟' },
+      ] },
+      { chapter: 'Summary.', chapterZh: '小结。', pages: [
+        { text: 'flower, sister, teacher, eraser, spider, brother', textZh: '花、姐妹、老师、橡皮、蜘蛛、兄弟' },
+      ] },
+    ],
+  },
+  '3-8': {
+    title: 'CLIL: Twins',
+    sections: [
+      { chapter: 'Lead in.', chapterZh: '导入。', pages: [
+        { text: 'How many babies do you see? What color are their eyes?', textZh: '你看到几个宝宝？他们的眼睛是什么颜色？' },
+      ] },
+      { chapter: 'Focus on: same or different.', chapterZh: '重点：一样还是不一样。', pages: [
+        { text: 'They are different.', textZh: '他们不一样。' },
+        { text: 'They are similar.', textZh: '他们很像。' },
+        { text: 'They are identical.', textZh: '他们一模一样。' },
+        { text: 'They are twins.', textZh: '他们是双胞胎。' },
+      ] },
+      { chapter: 'Read the passage.', chapterZh: '读短文。', pages: [
+        { text: 'I’m Alice. This is my family.', textZh: '我是 Alice。这是我的家人。' },
+        { text: 'My mom has brown eyes. My dad has blue eyes. They’re different.', textZh: '我妈妈有棕色眼睛。我爸爸有蓝色眼睛。他们不一样。' },
+        { text: 'I have brown hair and brown eyes. I look like my mom. We’re similar!', textZh: '我有棕色头发和棕色眼睛。我像妈妈。我们很像！' },
+        { text: 'I have two sisters. Lily has blond hair. Anna has blond hair, too! They’re identical! They’re twins!', textZh: '我有两个姐妹。Lily 有金发。Anna 也有金发！她们一模一样！她们是双胞胎！' },
+      ] },
+      { chapter: 'Label the picture.', chapterZh: '给图片贴标签。', pages: [
+        { text: 'Alice, twins, mom, dad', textZh: 'Alice、双胞胎、妈妈、爸爸' },
+      ] },
+      { chapter: 'Activity 1: say fast.', chapterZh: '活动一：快速说。', pages: [
+        { text: 'different / similar / identical', textZh: '不一样／很像／一模一样' },
+      ] },
+    ],
+  },
+  '3-9': {
+    title: 'Practice',
+    sections: [
+      { chapter: 'Listen and read.', chapterZh: '听一听，读一读。', pages: [
+        { text: 'This is my brother, my sister and me.', textZh: '这是我的兄弟、姐妹和我。' },
+        { text: 'This is my teacher and her family.', textZh: '这是我的老师和她的家人。' },
+        { text: 'The clown has a flower. It’s yellow and blue.', textZh: '小丑有一朵花。它是黄色和蓝色的。' },
+        { text: 'He has a balloon and a spider, too!', textZh: '他还有一个气球和一只蜘蛛！' },
+      ] },
+      { chapter: 'Choose and say.', chapterZh: '选一选，说一说。', pages: [
+        { text: 'This is my dad. These are my uncles.', textZh: '这是我的爸爸。这些是我的叔叔们。' },
+        { text: 'This is my mom. These are my aunts.', textZh: '这是我的妈妈。这些是我的阿姨们。' },
+        { text: 'This is my sister. These are my aunts.', textZh: '这是我的姐妹。这些是我的阿姨们。' },
+        { text: 'This is my brother. These are my cousins.', textZh: '这是我的兄弟。这些是我的表亲。' },
+      ] },
+      { chapter: 'Say the sentences.', chapterZh: '说出这些句子。', pages: [
+        { text: 'These are my cousins.', textZh: '这些是我的表亲。' },
+        { text: 'She has big eyes. She has black eyes.', textZh: '她有一双大眼睛。她有一双黑眼睛。' },
+        { text: 'He has blond hair. He has short hair.', textZh: '他有一头金发。他有一头短发。' },
+        { text: 'They are twins. They are identical.', textZh: '他们是双胞胎。他们一模一样。' },
+        { text: 'This is my friend and me. We are different.', textZh: '这是我的朋友和我。我们不一样。' },
+      ] },
+      { chapter: 'Show time.', chapterZh: '展示时间。', pages: [
+        { text: 'Describe your mom. My mother is ... She has ...', textZh: '描述你的妈妈。我的妈妈是……她有……' },
+      ] },
+    ],
+  },
+  '3-10': {
+    title: 'Secret Agent 10',
+    sections: [
+      { chapter: 'Task: describe him.', chapterZh: '任务：描述他。', pages: [
+        { text: 'Who’s this?', textZh: '这是谁？' },
+        { text: 'What does he look like?', textZh: '他长什么样？' },
+        { text: 'He has ...', textZh: '他有……' },
+      ] },
+      { chapter: 'Guided reading.', chapterZh: '引导阅读。', pages: [
+        { text: 'Where are Monty and Lola?', textZh: 'Monty 和 Lola 在哪里？' },
+        { text: 'Who is Secret Agent 8? Who is Secret Agent 9?', textZh: '8 号特工是谁？9 号特工是谁？' },
+        { text: 'What does Secret Agent 10 look like?', textZh: '10 号特工长什么样？' },
+        { text: 'What do Monty and Lola see?', textZh: 'Monty 和 Lola 看见了什么？' },
+      ] },
+      { chapter: 'Activity 1: circle the words.', chapterZh: '活动一：圈出描写词。', pages: [
+        { text: 'blond hair, brown eyes, blue eyes, a black hat, big feet, a white hat, black hair', textZh: '金发、棕眼睛、蓝眼睛、黑帽子、大脚、白帽子、黑头发' },
+      ] },
+      { chapter: 'Activity 2: fill in the blanks.', chapterZh: '活动二：填空。', pages: [
+        { text: 'Monty and Lola are in the classroom at school.', textZh: 'Monty 和 Lola 在学校教室里。' },
+        { text: 'I’m Secret Agent 8. You’re Secret Agent 9.', textZh: '我是 8 号特工。你是 9 号特工。' },
+        { text: 'He has brown hair and blue eyes.', textZh: '他有棕色头发和蓝色眼睛。' },
+      ] },
+      { chapter: 'Activity 3 & Show Time.', chapterZh: '活动三与展示时间。', pages: [
+        { text: 'Monty and Lola are in the classroom at school.', textZh: 'Monty 和 Lola 在学校教室里。' },
+        { text: 'Monty and Lola see a white cat.', textZh: 'Monty 和 Lola 看见一只白猫。' },
+        { text: 'Now Monty and Lola are in a city.', textZh: '现在 Monty 和 Lola 来到一座城市。' },
+        { text: 'Lola opens the book. Monty and Lola read.', textZh: 'Lola 打开书。Monty 和 Lola 读起来。' },
+        { text: 'Hello, everyone! I’m ... This is Grandpa. He has ... This is Grandma. She has ...', textZh: '大家好！我是……这是爷爷。他有……这是奶奶。她有……' },
+      ] },
+    ],
+  },
+  '3-11': {
+    title: 'Who Is Agent 10?',
+    sections: [
+      { chapter: 'Task.', chapterZh: '任务。', pages: [
+        { text: 'Who is Secret Agent 10?', textZh: '10 号特工是谁？' },
+        { text: 'What does Secret Agent 10 look like?', textZh: '10 号特工长什么样？' },
+      ] },
+      { chapter: 'Guided reading.', chapterZh: '引导阅读。', pages: [
+        { text: 'Who do Monty and Lola see?', textZh: 'Monty 和 Lola 看见了谁？' },
+        { text: 'Who left the message?', textZh: '是谁留下的消息？' },
+        { text: 'Who is Secret Agent 10?', textZh: '谁是 10 号特工？' },
+      ] },
+      { chapter: 'Activity 1: read and match.', chapterZh: '活动一：读一读，连一连。', pages: [
+        { text: 'He has brown hair and blue eyes.', textZh: '他有棕色头发和蓝色眼睛。' },
+        { text: 'She has blond hair and green eyes.', textZh: '她有金发和绿眼睛。' },
+        { text: 'He has black hair and a white hat.', textZh: '他有黑头发和一顶白帽子。' },
+      ] },
+      { chapter: 'Activity 2: true or false.', chapterZh: '活动二：判断对错。', pages: [
+        { text: 'They see small feet.', textZh: '他们看到一双小脚。' },
+        { text: 'She has black hair and blue eyes.', textZh: '她有黑头发和蓝眼睛。' },
+        { text: 'Mr. Sonic is Secret Agent 10.', textZh: 'Sonic 老师是 10 号特工。' },
+        { text: 'This message is from Mr. Sonic.', textZh: '这条消息来自 Sonic 老师。' },
+      ] },
+      { chapter: 'Show Time.', chapterZh: '展示时间。', pages: [
+        { text: 'Draw and give a description of Secret Agent 11.', textZh: '画一画并描述 11 号特工。' },
+        { text: 'Hello, everyone! I’m ... Look! This is Secret Agent 11. He / She has ...', textZh: '大家好！我是……看！这是 11 号特工。他／她有……' },
+      ] },
+    ],
+  },
+}
+
+// ===================== Sentence Frames（句型框架卡） =====================
+// 从 Language Focus 课（L5 单复数、L6 外貌描写）抽取；unitSlug = 'monty-the-clown'。
+export const u3_frames: SentenceFrame[] = [
+  // ---- Lesson 5: This is / These are ----
+  {
+    id: 'l1-monty-the-clown-5-this-cousin',
+    pattern: 'This is my ___.',
+    blanks: [
+      {
+        options: ['cousin', 'grandma', 'dad', 'brother'],
+        answer: 0,
+        zhOptions: ['这是我的表兄弟姐妹。', '这是我的奶奶。', '这是我的爸爸。', '这是我的兄弟。'],
+      },
+    ],
+    zh: '这是我的表兄弟姐妹。',
+    hint: '单数：介绍一个家人（this is）',
+    unitSlug: 'monty-the-clown',
+    lessonId: 5,
+  },
+  {
+    id: 'l1-monty-the-clown-5-these-cousins',
+    pattern: 'These are my ___.',
+    blanks: [
+      {
+        options: ['cousins', 'grandma', 'dad', 'sister'],
+        answer: 0,
+        zhOptions: ['这些是我的表兄弟姐妹。', '这是我的奶奶。', '这是我的爸爸。', '这是我的姐妹。'],
+      },
+    ],
+    zh: '这些是我的表兄弟姐妹。',
+    hint: '复数：介绍多个家人（these are）',
+    unitSlug: 'monty-the-clown',
+    lessonId: 5,
+  },
+  {
+    id: 'l1-monty-the-clown-5-this-grandma',
+    pattern: 'This is my ___.',
+    blanks: [
+      {
+        options: ['grandma', 'grandpa', 'aunt', 'uncle'],
+        answer: 0,
+        zhOptions: ['这是我的奶奶。', '这是我的爷爷。', '这是我的阿姨。', '这是我的叔叔。'],
+      },
+    ],
+    zh: '这是我的奶奶。',
+    hint: '介绍一位长辈',
+    unitSlug: 'monty-the-clown',
+    lessonId: 5,
+  },
+  {
+    id: 'l1-monty-the-clown-5-this-grandpa',
+    pattern: 'This is my ___.',
+    blanks: [
+      {
+        options: ['grandpa', 'grandma', 'dad', 'uncle'],
+        answer: 0,
+        zhOptions: ['这是我的爷爷。', '这是我的奶奶。', '这是我的爸爸。', '这是我的叔叔。'],
+      },
+    ],
+    zh: '这是我的爷爷。',
+    hint: '介绍一位长辈',
+    unitSlug: 'monty-the-clown',
+    lessonId: 5,
+  },
+  {
+    id: 'l1-monty-the-clown-5-this-brother',
+    pattern: 'This is my ___.',
+    blanks: [
+      {
+        options: ['brother', 'sister', 'cousin', 'dad'],
+        answer: 0,
+        zhOptions: ['这是我的兄弟。', '这是我的姐妹。', '这是我的表兄弟姐妹。', '这是我的爸爸。'],
+      },
+    ],
+    zh: '这是我的兄弟。',
+    hint: '介绍同辈家人',
+    unitSlug: 'monty-the-clown',
+    lessonId: 5,
+  },
+  // ---- Lesson 6: He has / She has ----
+  {
+    id: 'l1-monty-the-clown-6-he-big-eyes',
+    pattern: 'He has ___.',
+    blanks: [
+      {
+        options: ['big eyes', 'small eyes', 'long hair', 'gray hair'],
+        answer: 0,
+        zhOptions: ['他有一双大眼睛。', '他有一双小眼睛。', '他有一头长发。', '他有一头灰白头发。'],
+      },
+    ],
+    zh: '他有一双大眼睛。',
+    hint: '描述男生外貌（he has）',
+    unitSlug: 'monty-the-clown',
+    lessonId: 6,
+  },
+  {
+    id: 'l1-monty-the-clown-6-she-long-hair',
+    pattern: 'She has ___.',
+    blanks: [
+      {
+        options: ['long hair', 'short hair', 'big eyes', 'blond hair'],
+        answer: 0,
+        zhOptions: ['她有一头长发。', '她有一头短发。', '她有一双大眼睛。', '她有一头金发。'],
+      },
+    ],
+    zh: '她有一头长发。',
+    hint: '描述女生外貌（she has）',
+    unitSlug: 'monty-the-clown',
+    lessonId: 6,
+  },
+  {
+    id: 'l1-monty-the-clown-6-he-gray-hair',
+    pattern: 'He has ___.',
+    blanks: [
+      {
+        options: ['gray hair', 'blond hair', 'big eyes', 'small eyes'],
+        answer: 0,
+        zhOptions: ['他有一头灰白头发。', '他有一头金发。', '他有一双大眼睛。', '他有一双小眼睛。'],
+      },
+    ],
+    zh: '他有一头灰白头发。',
+    hint: '描述头发颜色（he has）',
+    unitSlug: 'monty-the-clown',
+    lessonId: 6,
+  },
+  {
+    id: 'l1-monty-the-clown-6-she-blond-hair',
+    pattern: 'She has ___.',
+    blanks: [
+      {
+        options: ['blond hair', 'black hair', 'small eyes', 'long hair'],
+        answer: 0,
+        zhOptions: ['她有一头金发。', '她有一头黑发。', '她有一双小眼睛。', '她有一头长发。'],
+      },
+    ],
+    zh: '她有一头金发。',
+    hint: '描述头发颜色（she has）',
+    unitSlug: 'monty-the-clown',
+    lessonId: 6,
+  },
+]
+
+// ===================== Reading Passages（连贯小故事） =====================
+export const u3_reading: Record<string, ReadingPassage> = {
+  '3-3': {
+    title: 'Bam Bam in the Tree',
+    titleZh: '树上的 Bam Bam',
+    paragraphs: [
+      [
+        { en: 'This is Ruby. This is Bam Bam.', zh: '这是 Ruby。这是 Bam Bam。' },
+        { en: 'Bam Bam is Ruby’s cat.', zh: 'Bam Bam 是 Ruby 的猫。' },
+        { en: 'Bam Bam is in the big tree.', zh: 'Bam Bam 在那棵大树上。' },
+      ],
+      [
+        { en: 'Grandpa jumps, but Bam Bam is very high up.', zh: '爷爷跳，可是 Bam Bam 在很高处。' },
+        { en: 'Dad jumps onto Grandpa.', zh: '爸爸跳到爷爷身上。' },
+        { en: 'The cousins jump onto Dad.', zh: '表兄弟姐妹们跳到爸爸身上。' },
+      ],
+      [
+        { en: 'Oh no! Bam Bam is still very high up.', zh: '哦不！Bam Bam 还是很高。' },
+        { en: 'Ruby is sad. Who can get Bam Bam?', zh: 'Ruby 很难过。谁能救下 Bam Bam？' },
+      ],
+    ],
+  },
+  '3-4': {
+    title: 'We Get Bam Bam!',
+    titleZh: '我们救下 Bam Bam 啦！',
+    paragraphs: [
+      [
+        { en: 'Grandma jumps onto Ruby’s cousins.', zh: '奶奶跳到 Ruby 的表兄弟姐妹身上。' },
+        { en: 'Dad, Grandpa and the cousins have an idea.', zh: '爸爸、爷爷和表兄弟姐妹们有了主意。' },
+        { en: 'Jump, Ruby, jump!', zh: '跳，Ruby，跳！' },
+      ],
+      [
+        { en: 'Ruby jumps, too.', zh: 'Ruby 也跳了。' },
+        { en: 'Now Ruby gets Bam Bam!', zh: '现在 Ruby 救下了 Bam Bam！' },
+        { en: 'Hello, Bam Bam!', zh: '你好，Bam Bam！' },
+      ],
+      [
+        { en: 'Here is Bam Bam the cat.', zh: 'Bam Bam 这只猫回来了。' },
+        { en: 'Now Bam Bam is happy.', zh: '现在 Bam Bam 开心了。' },
+        { en: 'Thank you, everyone!', zh: '谢谢大家！' },
+      ],
+    ],
+  },
+  '3-10': {
+    title: 'Secret Agent 10',
+    titleZh: '10 号特工',
+    paragraphs: [
+      [
+        { en: 'Monty and Lola are in the classroom at school.', zh: 'Monty 和 Lola 在学校教室里。' },
+        { en: 'They see a white cat.', zh: '他们看见一只白色的猫。' },
+        { en: 'Now Monty and Lola are in a city.', zh: '现在 Monty 和 Lola 来到一座城市。' },
+      ],
+      [
+        { en: 'Lola opens the book. Monty and Lola read.', zh: 'Lola 打开书。Monty 和 Lola 读起来。' },
+        { en: 'Who is Secret Agent 10?', zh: '谁是 10 号特工？' },
+        { en: 'He has brown hair and blue eyes.', zh: '他有棕色头发和蓝色眼睛。' },
+      ],
+      [
+        { en: 'She has blond hair and green eyes.', zh: '她有金色头发和绿色眼睛。' },
+        { en: 'He has black hair and a white hat.', zh: '他有黑头发和一顶白帽子。' },
+        { en: 'Is Mr. Sonic Secret Agent 10?', zh: 'Sonic 老师是 10 号特工吗？' },
+      ],
+    ],
+  },
+  '3-11': {
+    title: 'Who Is Agent 10?',
+    titleZh: '10 号特工是谁？',
+    paragraphs: [
+      [
+        { en: 'Monty and Lola see a message.', zh: 'Monty 和 Lola 看到一条消息。' },
+        { en: 'Who left the message?', zh: '是谁留下的消息？' },
+        { en: 'He has brown hair and blue eyes.', zh: '他有棕色头发和蓝色眼睛。' },
+      ],
+      [
+        { en: 'She has black hair and blue eyes.', zh: '她有黑头发和蓝色眼睛。' },
+        { en: 'They see small feet and a white hat.', zh: '他们看到一双小脚和一顶白帽子。' },
+        { en: 'Mr. Sonic is Secret Agent 10!', zh: 'Sonic 老师就是 10 号特工！' },
+      ],
+      [
+        { en: 'This message is from Mr. Sonic.', zh: '这条消息来自 Sonic 老师。' },
+        { en: 'Now Monty and Lola know the answer.', zh: '现在 Monty 和 Lola 知道了答案。' },
+      ],
+    ],
+  },
+}
+
+// ===================== Extension Topics（拓展词主题库） =====================
+export const u3_ext: Record<string, ExtTopic> = {
+  circus: {
+    zh: '马戏团与表演',
+    words: [
+      w('clown', '小丑', '🤡'), w('circus', '马戏团', '🎪'), w('balloon', '气球', '🎈'),
+      w('flower', '花', '🌸'), w('spider', '蜘蛛', '🕷️'), w('hat', '帽子', '🎩'),
+      w('teacher', '老师', '👩‍🏫'), w('performance', '表演', '🎭'),
+    ],
+  },
+  emotions: {
+    zh: '情绪',
+    words: [
+      w('happy', '开心的', '😊'), w('sad', '难过的', '😢'), w('excited', '兴奋的', '🤩'),
+      w('scared', '害怕的', '😨'), w('tired', '累的', '😴'), w('angry', '生气的', '😠'),
+      w('surprised', '惊讶的', '😲'),
+    ],
+  },
+  toys: {
+    zh: '玩具',
+    words: [
+      w('toy', '玩具', '🧸'), w('ball', '球', '⚽'), w('doll', '洋娃娃', '🪆'),
+      w('car', '小汽车', '🚗'), w('balloon', '气球', '🎈'), w('blocks', '积木', '🧱'),
+      w('kite', '风筝', '🪁'), w('teddy bear', '泰迪熊', '🧸'),
+    ],
+  },
+}
+
+// ===================== Module（单元总入口） =====================
+export const u3_module: Module = {
+  id: 3,
+  slug: 'monty-the-clown',
+  title: 'Monty the Clown',
+  titleZh: '蒙蒂小丑',
+  emoji: '🤡',
+  color: '#F5B017',
+  colorSoft: '#FFF3C4',
+  preview: {
+    goals: [
+      '认识家庭成员（爸爸妈妈、爷爷奶奶、叔叔阿姨、兄弟姐妹、表亲）',
+      '用 This is my... / These are my... 介绍家人（单数与复数）',
+      '用 He has... / She has... 描述外貌（头发、眼睛）',
+      '读懂 Ruby 救猫与「10 号特工」小故事，学说自然拼读 /er/ 音',
+      '了解「不一样／很像／一模一样」与双胞胎的科学概念',
+    ],
+    keyWords: 'mom, dad, grandma, grandpa, aunt, uncle, brother, sister, cousins, long hair, short hair, big eyes, small eyes, blond hair, different, similar, identical, twins, clown, circus, balloon',
+    keySentences: "This is my dad. These are my cousins. He has big eyes. She has long hair. They are twins. Come to the circus!",
+    tip: '预习时拿出家人合照，用英语边指边说 This is my...；读故事时模仿角色语气；练 /er/ 音可以读 brother、sister、teacher 这些词。',
+  },
+  lessons: u3_lessons[3],
+  quiz: [
+    { q: '爷爷用英语怎么说？👴', options: ['grandpa', 'grandma', 'dad'], answer: 0, explain: '爷爷是 grandpa，grandma 是奶奶。' },
+    { q: '想说「这些是我的表兄弟姐妹」，应该用？👫', options: ['This is my cousin.', 'These are my cousins.', 'He is my cousin.'], answer: 1, explain: '复数用 These are my cousins。' },
+    { q: '描述男生「他有一双大眼睛」，怎么说？👀', options: ['She has big eyes.', 'He has big eyes.', 'He has small eyes.'], answer: 1, explain: '男生用 He has...，大眼睛是 big eyes。' },
+    { q: 'Lily 和 Anna 长得一模一样，她们是？👯', options: ['different', 'similar', 'identical / twins'], answer: 2, explain: '一模一样的双胞胎用 identical，她们是 twins（双胞胎）。' },
+    { q: '小丑用英语怎么说？🤡', options: ['clown', 'circus', 'teacher'], answer: 0, explain: '小丑是 clown，circus 是马戏团。' },
+  ],
+}
