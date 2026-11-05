@@ -150,7 +150,10 @@
   cursor: pointer;
   input { width: 20px; height: 20px; accent-color: var(--mc, var(--brand)); }
 }
-.dt-count { color: var(--mc, var(--brand-deep)); margin-left: 2px; }
+// 行内计数（家长设置里「只练错题本里的词（3）」）。
+// ⚠️ 以前它也叫 .dt-count，被练习页那个「数音面板」的样式覆盖成了一枚
+//    虚线蓝框药丸 —— 同名不同物，必须分开。
+.dt-inline-count { color: var(--mc, var(--brand-deep)); margin-left: 2px; font-weight: 700; }
 
 .dt-chips {
   display: flex;
@@ -615,7 +618,7 @@
   border-radius: 50%;
   background: var(--mc, var(--brand));
   color: #fff;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 800;
   flex-shrink: 0;
 }
@@ -642,7 +645,7 @@
   border-radius: var(--r-pill);
   background: var(--mc-soft, var(--brand-soft));
   color: var(--brand-deep);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 800;
   white-space: nowrap;
   line-height: 1.6;
@@ -1025,8 +1028,8 @@
   margin: var(--sp-3) 0 0;
   padding: var(--sp-3) var(--sp-4);
   border-radius: var(--r-md);
-  background: var(--sky2-soft, #e0f2fe);
-  border: 2px dashed var(--sky2, #38bdf8);
+  background: var(--mc-soft, #dbeafe);
+  border: 2px dashed var(--mc, #2563eb);
   text-align: center;
 }
 .dt-count-title {
@@ -1051,14 +1054,14 @@
   width: 34px;
   height: 34px;
   border-radius: 10px;
-  border: 2px solid var(--sky2, #38bdf8);
+  border: 2px solid var(--mc, #2563eb);
   background: transparent;
   opacity: 0.45;
   transition: opacity 0.25s var(--ease), transform 0.25s var(--ease), background 0.25s var(--ease);
 
   &.is-lit {
     opacity: 1;
-    background: var(--sky2, #38bdf8);
+    background: var(--mc, #2563eb);
     transform: scale(1.12);
   }
 }

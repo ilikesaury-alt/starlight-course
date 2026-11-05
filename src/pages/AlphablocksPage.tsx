@@ -19,12 +19,14 @@
 // ============================================================
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { Volume2, Eye } from 'lucide-react'
 import SafeBoundary from '@/components/SafeBoundary'
 import SpeakButton from '@/components/SpeakButton'
 import { useCourseStore } from '@/store/useCourseStore'
 import { quizStars } from '@/utils/stars'
 import { shuffle } from '@/utils/dictation'
 import { phonemeSegments } from '@/data/phonics'
+import { moduleThemeVars } from '@/utils/theme'
 import {
   BLOCK_DOUBLE_WORDS,
   BLOCK_LEVELS,
@@ -51,6 +53,12 @@ function decoyBlocks(answer: string, level: BlockLevel): string[] {
   }
   return shuffle([...pool]).slice(0, 4)
 }
+
+// 模块主题：与首页入口卡（_theme.scss 的 home-entry('ab-home', 砖橙)）同一个色。
+// ⚠️ 原来这一页没调 moduleThemeVars()，--brand* 落回全站默认蓝，
+//    于是「从首页砖橙入口点进来 → 页面变成蓝的」，主题在门口断了一次。
+//    同时主按钮不能跟着关卡色漂（黄级会变成橄榄褐，像 disabled），所以主题固定。
+const AB_THEME = { color: '#ea580c', colorSoft: '#ffedd5' } as const
 
 export default function AlphablocksPage() {
   const addWrongWord = useCourseStore((s) => s.addWrongWord)
@@ -233,7 +241,16 @@ export default function AlphablocksPage() {
   const solvedAll = placed.join('') === (current?.en.toLowerCase().replace(/[^a-z]/g, '') ?? '')
 
   return (
-    <div className="page alphablocks-page" style={{ '--ab-color': meta.color, '--ab-soft': meta.colorSoft } as React.CSSProperties}>
+    <div
+      className="page alphablocks-page alphablocks-sheet"
+      style={
+        {
+          ...moduleThemeVars(AB_THEME),
+          '--ab-color': meta.color,
+          '--ab-soft': meta.colorSoft,
+        } as React.CSSProperties
+      }
+    >
       <div className="page-head">
         <span className="page-emoji">🧱</span>
         <div>
@@ -252,7 +269,7 @@ export default function AlphablocksPage() {
             </p>
 
             <section className="ab-setup-block">
-              <div className="ab-setup-title">🎬 动画看到哪一级了？</div>
+              <div className="ab-setup-title">动画看到哪一级了？</div>
               <div className="ab-levels">
                 {BLOCK_LEVELS.map((l) => (
                   <button
@@ -283,14 +300,14 @@ export default function AlphablocksPage() {
             </section>
 
             <section className="ab-setup-block">
-              <div className="ab-setup-title">🧩 选玩法</div>
+              <div className="ab-setup-title">选玩法</div>
               <div className="ab-modes">
                 {(
                   [
-                    ['build', '🔊', '听音搭积木', '听发音，把积木一块块搭出这个词', '推荐'],
-                    ['split', '👀', '看词拆积木', '看整词，把积木拆成正确的几块', ''],
-                  ] as [Mode, string, string, string, string][]
-                ).map(([val, emoji, title, desc, tag]) => (
+                    ['build', '🔊', Volume2, '听音搭积木', '听发音，把积木一块块搭出这个词', '推荐'],
+                    ['split', '👀', Eye, '看词拆积木', '看整词，把积木拆成正确的几块', ''],
+                  ] as [Mode, string, typeof Volume2, string, string, string][]
+                ).map(([val, emoji, Icon, title, desc, tag]) => (
                   <button
                     key={val}
                     type="button"
@@ -299,7 +316,8 @@ export default function AlphablocksPage() {
                     aria-pressed={mode === val}
                     aria-label={`${emoji} ${title}`}
                   >
-                    <span className="ab-mode-emoji" aria-hidden="true">{emoji}</span>
+                    {/* 视觉用线性图标；aria-label 里的 emoji 保留（e2e 按它定位按钮） */}
+                    <span className="ab-mode-emoji" aria-hidden="true"><Icon /></span>
                     <span className="ab-mode-text">
                       <span className="ab-mode-title">
                         {title}
@@ -315,12 +333,12 @@ export default function AlphablocksPage() {
 
             <div className="ab-start-row">
               <button type="button" className="btn btn--lg ab-start-btn" onClick={start}>
-                🚀 开始练习（{WORDS_PER_ROUND} 个词）
+                开始练习（{WORDS_PER_ROUND} 个词）
               </button>
             </div>
 
             <div className="ab-foot-links">
-              <Link to="/dictation" className="back-link">✍️ 去听写练习</Link>
+              <Link to="/dictation" className="back-link">去听写练习</Link>
             </div>
           </>
         )}
@@ -332,11 +350,16 @@ export default function AlphablocksPage() {
               <span className="ab-progress-text">
                 第 {cursor + 1} / {round.length} 个
               </span>
-              <button type="button" className="ab-exit" onClick={backToSetup}>✕ 退出</button>
+              <button type="button" className="ab-exit" onClick={backToSetup}>退出</button>
             </div>
 
             <div className="ab-word-card">
-              <div className="ab-word-emoji" aria-hidden="true">{current.emoji}</div>
+              {/* ⚠️ 词图**只在「看词拆积木」时给**：
+                  「听音搭积木」是听音拼写，给了图（'hat' → 👒）等于把答案先说一遍，
+                  孩子根本不用听。split 模式下图是提示，和右边整词是同一件事。 */}
+              {mode === 'split' && (
+                <div className="ab-word-emoji" aria-hidden="true">{current.emoji}</div>
+              )}
               <SpeakButton text={current.en} label={current.en} autoPlay />
               {mode === 'split' && (
                 <div className="ab-word-full">{current.en}</div>
@@ -419,7 +442,6 @@ export default function AlphablocksPage() {
         {/* ---------------- 报告 ---------------- */}
         {phase === 'report' && (
           <div className="ab-report">
-            <div className="ab-report-emoji">{correctCount === round.length ? '🏆' : '🌟'}</div>
             <h2 className="ab-report-title">这一轮搭完啦！</h2>
             <div className="ab-report-stats">
               <div className="ab-stat">
@@ -438,7 +460,7 @@ export default function AlphablocksPage() {
             </div>
             {missed.length > 0 ? (
               <section className="ab-missed">
-                <div className="ab-setup-title">📌 这些积木再多搭几次（{missed.length}）</div>
+                <div className="ab-setup-title">这些积木再多搭几次（{missed.length}）</div>
                 <div className="ab-missed-list">
                   {missed.map((w) => (
                     <span className="ab-missed-chip" key={w.en}>
@@ -449,11 +471,11 @@ export default function AlphablocksPage() {
                 <p className="ab-setup-hint">已放进错题本，去「智能复习」还能遇到它们。</p>
               </section>
             ) : (
-              <p className="ab-perfect">全部搭对，太厉害了！🎉</p>
+              <p className="ab-perfect">全部搭对，太厉害了！</p>
             )}
             <div className="ab-report-actions">
-              <button type="button" className="btn btn--lg ab-start-btn" onClick={start}>🔁 再来一轮</button>
-              <button type="button" className="btn btn--soft" onClick={backToSetup}>🎚️ 换个级别</button>
+              <button type="button" className="btn btn--lg ab-start-btn" onClick={start}>再来一轮</button>
+              <button type="button" className="btn btn--soft" onClick={backToSetup}>换个级别</button>
             </div>
           </div>
         )}

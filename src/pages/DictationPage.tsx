@@ -16,6 +16,7 @@
 // ============================================================
 import { useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { Search, Blocks, PenLine } from 'lucide-react'
 import SafeBoundary from '@/components/SafeBoundary'
 import DictationPlayer from '@/components/DictationPlayer'
 import { MODULES } from '@/data/modules'
@@ -159,20 +160,19 @@ export default function DictationPage() {
   const previewCount = phase === 'setup' ? computePool().length : round.length
 
   return (
-    <div className="page dictation-page" style={mcStyle}>
+    <div className="page dictation-page dictation-sheet" style={mcStyle}>
       <div className="page-head">
-        <span className="page-emoji">✍️</span>
-        <div>
-          <div className="page-kicker">听写练习</div>
-          <h1 className="page-title">听一听，写出来</h1>
-        </div>
+        {/* h1 = 模块名（原来 h1 是口号「听一听，写出来」，模块名被降级成 12px
+            的 kicker，主次反了）。口号降为陈述句 —— e2e 断言它仍然可见。 */}
+        <h1 className="page-title">听写练习</h1>
+        <p className="dt-statement">听一听，写出来</p>
       </div>
 
       <SafeBoundary label="听写练习">
         {/* ---------------- 设置阶段 ---------------- */}
         {phase === 'setup' && (
           <>
-            <p className="lead">
+            <p className="sl-sub">
               三年级上册英语单词，听音写词。写错也别怕，我们会<b>把声音拆成字母</b>教给你。
             </p>
 
@@ -181,7 +181,7 @@ export default function DictationPage() {
                 4 组选择才能开始练，6~9 岁根本做不了这种决定。现在只留一件事——
                 「我现在练到哪一步」，其余全部收进下面的「家长设置」。 */}
             <section className="dt-setup-block">
-              <div className="dt-setup-title">🎯 现在练哪一步</div>
+              <div className="dt-setup-title">现在练哪一步</div>
               <div className="dt-ladder">
                 <button
                   type="button"
@@ -191,7 +191,10 @@ export default function DictationPage() {
                   aria-pressed={mode === 'choice'}
                 >
                   <span className="dt-step-no" aria-hidden="true">①</span>
-                  <span className="dt-step-emoji" aria-hidden="true">🔍</span>
+                  {/* 视觉用线性图标；aria-label 里的 emoji 保留（e2e 按它定位按钮） */}
+                  <span className="dt-step-emoji" aria-hidden="true">
+                    <Search />
+                  </span>
                   <span className="dt-step-text">
                     <span className="dt-step-title">
                       先认 · 三选一
@@ -206,7 +209,9 @@ export default function DictationPage() {
                     正是音-写不同步阶段最缺的那座桥。 */}
                 <Link to="/alphablocks" className="dt-step dt-step--link">
                   <span className="dt-step-no" aria-hidden="true">②</span>
-                  <span className="dt-step-emoji" aria-hidden="true">🧱</span>
+                  <span className="dt-step-emoji" aria-hidden="true">
+                    <Blocks />
+                  </span>
                   <span className="dt-step-text">
                     <span className="dt-step-title">再拼 · 搭积木</span>
                     <span className="dt-step-desc">把词拆成一块块声音搭出来</span>
@@ -222,7 +227,9 @@ export default function DictationPage() {
                   aria-pressed={mode === 'spell'}
                 >
                   <span className="dt-step-no" aria-hidden="true">③</span>
-                  <span className="dt-step-emoji" aria-hidden="true">✍️</span>
+                  <span className="dt-step-emoji" aria-hidden="true">
+                    <PenLine />
+                  </span>
                   <span className="dt-step-text">
                     <span className="dt-step-title">后写 · 听音写词</span>
                     <span className="dt-step-desc">一个字母一个字母写出来</span>
@@ -236,7 +243,7 @@ export default function DictationPage() {
                 孩子不需要看到这些；家长偶尔要调。用 <details> 默认收起：
                 既省掉一面决策墙，又不用新做弹窗。 */}
             <details className="dt-parent-box">
-              <summary className="dt-parent-summary">👨‍👩‍👧 家长设置（范围 / 长短）</summary>
+              <summary className="dt-parent-summary">家长设置（范围 / 长短）</summary>
               <div className="dt-parent-body">
                 <label className="dt-check-row">
                   <input
@@ -246,7 +253,7 @@ export default function DictationPage() {
                   />
                   <span>
                     只练错题本里的词
-                    {wrongWords.length > 0 && <b className="dt-count">（{wrongWords.length}）</b>}
+                    {wrongWords.length > 0 && <b className="dt-inline-count">（{wrongWords.length}）</b>}
                   </span>
                 </label>
 
@@ -273,7 +280,7 @@ export default function DictationPage() {
                   </div>
                 )}
 
-                <div className="dt-setup-title dt-setup-title--sub">📏 词的长短</div>
+                <div className="dt-setup-title dt-setup-title--sub">词的长短</div>
                 <div className="dt-seg">
                   {(
                     [
@@ -306,7 +313,7 @@ export default function DictationPage() {
                 onClick={start}
                 disabled={previewCount === 0}
               >
-                🚀 开始听写（{Math.min(previewCount, WORDS_PER_ROUND)} 个）
+                开始听写（{Math.min(previewCount, WORDS_PER_ROUND)} 个）
               </button>
               {previewCount === 0 && (
                 <p className="dt-empty-tip">
@@ -318,8 +325,8 @@ export default function DictationPage() {
             </div>
 
             <div className="dt-foot-links">
-              <Link to="/eng3a" className="back-link">📘 去学三年级英语</Link>
-              <Link to="/wrong" className="back-link">📋 看错题本</Link>
+              <Link to="/eng3a" className="back-link">去学三年级英语</Link>
+              <Link to="/wrong" className="back-link">看错题本</Link>
             </div>
           </>
         )}
@@ -427,7 +434,7 @@ export default function DictationPage() {
               <button type="button" className="btn btn--soft" onClick={backToSetup}>
                 🎚️ 换个范围
               </button>
-              <Link to="/wrong" className="btn btn--soft">📋 错题本</Link>
+              <Link to="/wrong" className="btn btn--soft">错题本</Link>
               <Link to="/smart" className="btn btn--soft">🧠 智能复习</Link>
             </div>
           </div>

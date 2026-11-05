@@ -112,8 +112,17 @@ export default function DictationPlayer({
 
      ⚠️ 刻意只数「音」的数量、不显示任何字母或概念标签：
         一旦显示字母就等于直接给答案，只剩抄写。数量本身就是那座桥
-        （ boat 3 个音 / 4 个字母，孩子看到「3 个音填 4 格」就懂了字母小队）。 */
-  const soundCount = boxes.length
+        （ boat 3 个音 / 4 个字母，孩子看到「3 个音填 4 格」就懂了字母小队）。
+
+     ⚠️ 音数必须按 PhonicsSegment.sounds **求和**，不能拿 boxes.length（片段数）：
+        片段数 ≠ 音数 —— magic-e / 不发音字母占一格但不发一个音，
+        手拉手（st / nd）一格占两个音。实测 232 词里 70 词（30%）会报错
+        （write 被说成 5 个音，实为 3；stand 被说成 3 个音，实为 5），
+        而这正是这个面板唯一要教的那件事。 */
+  const soundCount = useMemo(
+    () => boxes.reduce((n, b) => n + b.sounds, 0),
+    [boxes],
+  )
   useEffect(() => {
     if (mode !== 'spell') return
     setLitCount(0)
@@ -436,12 +445,28 @@ export default function DictationPlayer({
           <span className="dt-fb-icon" aria-hidden="true">🤔</span>
           <div className="dt-fb-body">
             <div className="dt-fb-title">差一点点，再试一次！</div>
-            <div className="dt-fb-text">
-              看看下面哪个格子是红的，把它改过来。也可以点 🔊 再听一遍。
-            </div>
-            <button type="button" className="dt-retry" onClick={retry}>
-              ✏️ 清空重写
-            </button>
+            {/* ⚠️ 三选一没有输入框、没有格子可清 —— 这里必须换一套文案，
+                否则「看看哪个格子是红的」「清空重写」在 choice 下是误导
+                （点「清空重写」只是把状态复位，没有任何东西被清）。 */}
+            {mode === 'spell' ? (
+              <>
+                <div className="dt-fb-text">
+                  看看下面哪个格子是红的，把它改过来。也可以点 🔊 再听一遍。
+                </div>
+                <button type="button" className="dt-retry" onClick={retry}>
+                  ✏️ 清空重写
+                </button>
+              </>
+            ) : (
+              <>
+                <div className="dt-fb-text">
+                  再听一遍，然后重新选一个。也可以点 🔊 再听一遍。
+                </div>
+                <button type="button" className="dt-retry" onClick={retry}>
+                  🔁 重新选
+                </button>
+              </>
+            )}
           </div>
         </div>
       )}
