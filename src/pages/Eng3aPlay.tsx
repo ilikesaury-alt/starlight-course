@@ -14,7 +14,7 @@ export default function Eng3aPlay() {
   const completed = useCourseStore((s) => s.completedEng3a)
 
   return (
-    <div className="page en3-play-index" style={moduleThemeVars(ENG3A_THEME)}>
+    <div className="page en3-play-index eng3a-sheet" style={moduleThemeVars(ENG3A_THEME)}>
       <div className="page-head" style={moduleThemeVars(ENG3A_THEME)}>
         <span className="page-emoji">🎭</span>
         <div>

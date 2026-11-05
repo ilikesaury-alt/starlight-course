@@ -33,7 +33,7 @@ export default function Eng3aHome() {
   }
 
   return (
-    <div className="home en3-home" style={moduleThemeVars(ENG3A_THEME)}>
+    <div className="home en3-home eng3a-sheet" style={moduleThemeVars(ENG3A_THEME)}>
       <section className="hero" style={moduleThemeVars(ENG3A_THEME)}>
         <div className="hero-emoji">📘</div>
         <h1 className="hero-title">三年级上册英语</h1>

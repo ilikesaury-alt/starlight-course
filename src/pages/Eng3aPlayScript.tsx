@@ -83,7 +83,7 @@ export default function Eng3aPlayScript() {
     name ? `${name}（${play.charactersZh[name] ?? ''}）`.replace('（）', '') : '旁白'
 
   return (
-    <div className="page en3-play-script" style={mcStyle}>
+    <div className="page en3-play-script eng3a-sheet" style={mcStyle}>
       <div className="page-head" style={mcStyle}>
         <span className="page-emoji">{play.emoji}</span>
         <div>

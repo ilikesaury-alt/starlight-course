@@ -45,7 +45,7 @@ export default function Eng3aUnit() {
     .map((lesson) => ({ stage: stageOf(lesson), lesson }))
 
   return (
-    <div className="page en3-unit" style={mcStyle}>
+    <div className="page en3-unit eng3a-sheet" style={mcStyle}>
       <div className="page-head" style={mcStyle}>
         <span className="page-emoji">{unit.emoji}</span>
         <div>

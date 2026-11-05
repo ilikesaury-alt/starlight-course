@@ -1,0 +1,421 @@
+// ============================================================
+//  三年级上册英语（/eng3a）— 白纸页 + 五关学习路径
+//  ------------------------------------------------------------
+//  方向：tasteskill v2 · framed-sheet（与其它模块共用 paper-sheet 骨架）
+//  Idea：外研版 2024 新课标教材的「每单元五关」是这个模块独有的结构 ——
+//        认单词 → 说句子 → 唱起来 → 长知识 → 闯关测，是一条路径，不是五张卡。
+//
+//  ⚠️ 作用域：`.eng3a-sheet`，5 个页面共用。e2e 红线（tests/eng3a.spec.ts）：
+//     .hero-title 文本「三年级上册英语」、.en3-board ×3、.en3-path-step ×5、
+//     .module-card ×7、.en3-play-mini ×4、.cn-lesson-card ×5、.en3-pathbar-dot ×5、
+//     .en3-flip-card ×14、.en3-more-chip ×12、.en3-match-item ×8、
+//     .en3-explore-card ×5、.en3-play-card ×3、.en3-role-chip ×6、
+//     .en3-script-line ×16、.en3-notfound-path 文本「/units」—— 全部保留。
+//
+//  ⚠️ 本模块主题色是**亮琥珀 #f59e0b**（eng3a.ts:248）。直接拿 --mc 当文字色
+//     压在 --mc-soft（浅黄）或骨白底上只有 1.9:1（WCAG AA 要 4.5:1）——
+//     这是 before 唯一两个 FAIL。作用域内一律用派生深琥珀 --brand-deep 做文字。
+// ============================================================
+@use 'mixins' as *;
+
+// 作用域：4 个页面直接挂 .eng3a-sheet；关卡页走共享组件 SelfStudyLesson，
+// 它的根是 .page.cn-lesson[data-module="eng3a"] —— 用属性选择器接住，
+// 不动共享组件（语文模块也用它，加类会串模块）。
+.eng3a-sheet,
+.cn-lesson[data-module='eng3a'] {
+  @include paper-sheet;
+
+  // ---------- 页头 ----------
+  // 首页 h1 是 .hero-title（契约钉死文本），其它页是 .page-title。
+  .hero-emoji,
+  .page-emoji { display: none; }
+  .page-kicker {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ink-mute);
+    margin: 0 0 2px;
+    letter-spacing: 0.04em;
+  }
+  .hero-title,
+  .page-title {
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.25;
+    color: var(--ink);
+    margin: 0;
+  }
+  .hero-sub {
+    font-size: 14px;
+    color: var(--ink-soft);
+    line-height: 1.6;
+    margin: 8px 0 0;
+    max-width: 68ch;
+    b { color: var(--ink); font-variant-numeric: tabular-nums; }
+  }
+  // 五关标签：不是一排药丸，是这一页的索引（一行文字流）
+  .hero-tags { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 10px; }
+  .hero-tag {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    background: none;
+    border: 0;
+    border-radius: 0;
+    padding: 0;
+  }
+
+  // ---------- 进度：如实印 0，不是一枚大药丸 ----------
+  .rg-progress-pill {
+    background: none;
+    border: 0;
+    border-bottom: 1px solid var(--line);
+    border-radius: 0;
+    color: var(--ink-soft);
+    font-size: 14px;
+    padding: 0 0 14px;
+    margin: 0 0 24px;
+    text-align: left;
+    b { color: var(--ink); font-size: 18px; font-variant-numeric: tabular-nums; }
+  }
+
+  .section-title { font-size: 16px; font-weight: 700; color: var(--ink); margin: 0 0 12px; }
+
+  // ---------- 三板块导航：细线行，不是三张饱和描边卡 ----------
+  // before 的 heavy-borders 就来自这三张卡的 2px 彩色左边条。
+  .en3-boards {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin: 0 0 24px;
+  }
+  .en3-board {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px;
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    background: var(--card);
+    text-align: left;
+    text-decoration: none;
+    color: var(--ink);
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+    &:hover { border-color: var(--line-2); background: var(--bg-3); }
+  }
+  .en3-board-emoji { font-size: 22px; line-height: 1; flex: none; }
+  .en3-board-body { min-width: 0; }
+  // ⚠️ 原来用 --mc（亮琥珀）当标题色 → 1.9:1；改深墨色
+  .en3-board-title { font-size: 16px; font-weight: 700; color: var(--ink); }
+  .en3-board-sub { font-size: 13px; color: var(--ink-soft); line-height: 1.5; margin-top: 4px; }
+
+  // ---------- 五关路径：一条轨道，不是五张通栏卡 ----------
+  // 五关是**顺序的学习步骤**（peer objects 但更是流程），
+  // 编号做成轨道节点、节点间连线，难度/顺序一眼可见。
+  .en3-path {
+    display: grid;
+    gap: 0;
+    margin: 0 0 24px;
+    position: relative;
+  }
+  .en3-path-step {
+    display: grid;
+    grid-template-columns: 30px 22px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 4px;
+    border: 0;
+    border-bottom: 1px solid var(--line);
+    border-radius: 0;
+    background: none;
+    color: var(--ink);
+    font-family: inherit;
+    text-align: left;
+    transition: background 0.15s ease;
+    &:hover { background: var(--bg-3); }
+  }
+  .en3-path-num {
+    flex: none;
+    width: 30px;
+    height: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--bg-3);
+    color: var(--ink-soft);
+    font-size: 13px;
+    font-weight: 800;
+    position: relative;
+    &::after {
+      content: '';
+      position: absolute;
+      left: 50%; top: 100%;
+      width: 1px; height: 28px;
+      background: var(--line);
+      transform: translateX(-50%);
+    }
+  }
+  .en3-path-step:last-child .en3-path-num::after { display: none; }
+  .en3-path-emoji { font-size: 20px; line-height: 1; flex: none; }
+  .en3-path-body { min-width: 0; flex: 1; }
+  // ⚠️ --mc / --brand-deep 原来都是亮琥珀当文字 → 改深墨
+  .en3-path-title { font-size: 16px; font-weight: 700; color: var(--ink); }
+  .en3-path-desc { font-size: 13px; color: var(--ink-soft); line-height: 1.5; margin-top: 2px; }
+  // 互动方式放到行右端：左半是关卡说明、右半是这一关怎么练，
+  // 不让 1200px 宽的行只装着左边 400px 的内容（frame 规则：右半不能空）。
+  .en3-path-interact {
+    grid-column: 4;
+    justify-self: end;
+    font-size: 13px;
+    color: var(--ink-mute);
+    white-space: nowrap;
+  }
+
+  // ---------- 单元卡（.module-card ×7，契约钉死数量）----------
+  .module-card {
+    border: 0;
+    border-bottom: 1px solid var(--line);
+    border-radius: 0;
+    background: none;
+    padding: 14px 2px;
+    box-shadow: none;
+    &::before { width: 3px; }
+  }
+  .module-emoji { font-size: 24px; }
+  .module-num { font-size: 12px; color: var(--ink-mute); }
+  .module-title { font-size: 16px; color: var(--ink); }
+  .module-lessons-badge { color: var(--ink-mute); font-variant-numeric: tabular-nums; }
+
+  // ---------- 小戏入口（.en3-play-mini ×4）----------
+  .en3-play-mini {
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    background: var(--card);
+  }
+
+  // ============================================================
+  //  单元页 / 关卡页
+  // ============================================================
+
+  // 教材插画：这是真实的课本内容，保留并让它有书页感
+  .en3-unit-hero-img,
+  .en3-cover {
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    overflow: hidden;
+    max-width: 100%;
+  }
+
+  // 进度条（🛤️ 5 关 / 🎓 已学完 0 …）—— 原来 amber 字压浅黄底 1.9:1
+  .en3-progress,
+  .en3-unit-progress {
+    background: none;
+    border: 0;
+    border-bottom: 1px solid var(--line);
+    border-radius: 0;
+    padding: 12px 0;
+    margin: 0 0 16px;
+    font-size: 14px;
+    color: var(--ink-soft);
+    font-variant-numeric: tabular-nums;
+    b { color: var(--ink); }
+  }
+
+  // 五关路径条（.en3-pathbar-dot ×5）
+  .en3-pathbar { border: 0; border-top: 1px solid var(--line); border-radius: 0; background: none; padding: 16px 0; }
+  .en3-pathbar-dot { border-width: 1px; }
+  .en3-pathbar-dot.done { background: var(--ok-soft); border-color: var(--ok); }
+
+  .cn-lesson-list { display: grid; gap: 0; }
+  .cn-lesson-badge {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink-mute);
+    background: var(--bg-3);
+    border-radius: var(--r-sm);
+    padding: 2px 8px;
+  }
+
+  // ---------- 关卡页 ----------
+  .en3-stage-banner {
+    background: none;
+    border: 0;
+    border-bottom: 1px solid var(--line);
+    border-radius: 0;
+    padding: 14px 0;
+    margin: 0 0 20px;
+  }
+  .en3-stage-banner-title { font-size: 20px; font-weight: 700; color: var(--ink); }
+  .en3-stage-banner-desc { font-size: 14px; color: var(--ink-soft); }
+  .en3-stage-name { color: var(--ink); }
+  .en3-stage-desc { font-size: 13px; color: var(--ink-soft); }
+
+  // ⚠️ 两个 contrast FAIL 的源头：_chinese.scss 的共享类拿 --mc（亮琥珀）当文字色。
+  //    eng3a 模块的 --mc = #f59e0b，压在 --mc-soft(#fef3c7) 或骨白底上只有 1.9:1。
+  //    全部改深墨/深琥珀；徽章底色保留浅色但字色要够深。
+  .cn-section-title,
+  .en3-gallery-title,
+  .en3-section-lead,
+  .en3-tip-eq,
+  .en3-play-arrow,
+  .en3-board-title,
+  .cn-unit-stat,
+  .cn-unit-stat > span,
+  .cn-tag,
+  .cn-done,
+  .en3-section-label,
+  .en3-group-title,
+  .en3-flip-label,
+  .en3-more-label {
+    color: var(--ink);
+  }
+  .cn-section-title { font-size: 16px; font-weight: 700; }
+  .cn-unit-stat {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    justify-content: flex-start;
+    background: none;
+    border: 0;
+    border-bottom: 1px solid var(--line);
+    border-radius: 0;
+    padding: 10px 0;
+    margin: 0 0 16px;
+    font-size: 14px;
+    font-variant-numeric: tabular-nums;
+  }
+  .cn-tag {
+    font-size: 12px;
+    font-weight: 600;
+    background: var(--bg-3);
+    border-radius: var(--r-sm);
+    padding: 2px 8px;
+  }
+  // .cn-lesson-card 的 2px 边 + 6px 满色左条 → 细线行
+  .cn-lesson-card {
+    border: 0;
+    border-bottom: 1px solid var(--line);
+    border-radius: 0;
+    background: none;
+    padding: 16px 2px;
+    box-shadow: none;
+    &:hover { background: var(--bg-3); }
+  }
+  .cn-lesson-num {
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    background: var(--bg-3);
+    color: var(--ink-soft);
+    font-size: 12px;
+  }
+  .cn-lesson-title { font-size: 16px; font-weight: 700; color: var(--ink); }
+  .cn-lesson-desc { font-size: 13px; color: var(--ink-soft); }
+
+  // ⚠️ 14 个 heavy-borders 的源头：翻卡正反面的 4px 满色顶条
+  //    （.en3-flip-face，不是 .en3-flip-card::before）
+  .en3-flip-card {
+    border: 0;
+    border-radius: var(--r-md);
+    background: none;
+    box-shadow: none;
+    // 翻卡背面长例句原来被 152px 固定高 + line-clamp:3 裁掉（真内容丢失）
+    height: auto;
+    min-height: 168px;
+  }
+  .en3-flip-face {
+    border: 1px solid var(--line);
+    border-top: 0;
+    border-radius: var(--r-md);
+    background: var(--card);
+    box-shadow: none;
+    overflow: visible;
+  }
+  // 顶条只给**正面**一条 2px 主题细线（不是 4px 满色）
+  .en3-flip-front { border-bottom: 2px solid var(--brand-soft); }
+  .en3-flip-card.open .en3-flip-front { border-bottom-color: var(--brand-deep); }
+  .en3-flip-eg { -webkit-line-clamp: unset; line-clamp: unset; }
+  .en3-flip-egzh { font-size: 12px; }
+  .en3-flip-card .en3-flip-en { font-size: 18px; font-weight: 700; color: var(--ink); }
+  .en3-flip-card .en3-flip-zh { font-size: 13px; color: var(--ink-soft); }
+  .en3-flip-emoji { font-size: 28px; line-height: 1; }
+  .en3-flip-all { }
+  .en3-more-chip {
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    background: var(--card);
+    font-size: 13px;
+  }
+
+  // 句子连线（.en3-match-item ×8）
+  .en3-match-item {
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    background: var(--card);
+    font-size: 14px;
+    &.picked { border-color: var(--brand-deep); background: var(--brand-soft); color: var(--ink); }
+  }
+
+  // 知识小卡（.en3-explore-card ×5）
+  .en3-explore-card {
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    background: var(--card);
+  }
+
+  // 对话框 / 歌谣
+  .en3-dialog-en { font-size: 16px; color: var(--ink); }
+  .en3-dialog-zh { font-size: 13px; color: var(--ink-soft); }
+  .en3-chant-line { font-size: 20px; color: var(--ink); }
+
+  // ---------- 小剧场 ----------
+  .en3-play-list { display: grid; gap: 0; }
+  .en3-play-card {
+    border: 0;
+    border-bottom: 1px solid var(--line);
+    border-radius: 0;
+    background: none;
+    padding: 16px 2px;
+  }
+  .en3-role-chip {
+    border: 1px solid var(--line-2);
+    border-radius: var(--r-md);
+    background: var(--card);
+    font-size: 13px;
+  }
+  .en3-script-line {
+    border: 0;
+    border-bottom: 1px solid var(--line);
+    border-radius: 0;
+    background: none;
+    padding: 12px 2px;
+  }
+
+  // ---------- 字号地板：原来有 11px 的序号/译文/标签，低于全站 12px 下限 ----------
+  .en3-stage-idx,
+  .en3-pathbar-label,
+  .en3-flip-egzh,
+  .en3-script-speaker,
+  .en3-more-chip > span,
+  .en3-play-meta,
+  .en3-play-char,
+  .en3-char,
+  .en3-dialog-speaker,
+  .en3-role-chip,
+  .cn-tag { font-size: 13px; }
+  .en3-path-desc,
+  .en3-more-lead,
+  .en3-tips-list,
+  .en3-explore-bullets { font-size: 13px; color: var(--ink-soft); }
+  .page-nav { margin-top: 24px; border-top: 1px solid var(--line); padding-top: 16px; }
+  .back-link { background: none; color: var(--ink-soft); }
+
+  @media (max-width: 900px) {
+    .en3-boards { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 640px) {
+    padding: 16px;
+  }
+}
