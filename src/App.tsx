@@ -33,6 +33,8 @@ const Eng3aPlayScript = lazy(() => import('@/pages/Eng3aPlayScript'))
 const DictationPage = lazy(() => import('@/pages/DictationPage'))
 const AlphablocksPage = lazy(() => import('@/pages/AlphablocksPage'))
 const ReadingPage = lazy(() => import('@/pages/ReadingPage'))
+// Starlight 是一个系列：阅读模块也分两册，共用 ReadingBook 组件
+const ReadingPage1 = lazy(() => import('@/pages/ReadingPage1'))
 const NotFound = lazy(() => import('@/pages/NotFound'))
 
 // 分包加载中的兜底:轻量居中提示(儿童向文案)
@@ -102,6 +104,7 @@ function AppRoutes() {
           <Route path="/dictation" element={<DictationPage />} />
           <Route path="/alphablocks" element={<AlphablocksPage />} />
           <Route path="/reading" element={<ReadingPage />} />
+          <Route path="/reading1" element={<ReadingPage1 />} />
           {/* 兜底:HashRouter 下任何写错/失效的 hash 路径都走这里,避免白屏 */}
           <Route path="*" element={<NotFound />} />
         </Routes>

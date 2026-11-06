@@ -61,6 +61,8 @@
 @include home-entry('ab-home', #ffedd5, #ea580c, #9a3412);
 // 阅读模块入口：靛蓝主题（与「学新课」的所有暖色入口区分，突出「自选阅读」）
 @include home-entry('rd-home', #e0e7ff, #6366f1, #312e81);
+// 阅读·第一册：同色系紫罗兰，与预备级的靛蓝一眼看出是同一模块的另一册
+@include home-entry('rd1-home', #ede9fe, #7c3aed, #4c1d95);
 // 入口卡片进度/到期徽章（全部主题共用，挂在 -body 内）
 .home-entry-badge {
   display: inline-flex;

@@ -1,6 +1,7 @@
 import { test, expect, type Page } from '@playwright/test'
 import { READING_PASSAGES } from '../src/data/reading'
 import { modules } from '../src/data/starlight'
+import { modules1 } from '../src/data/starlight1'
 
 /**
  * 📚 阅读模块（/#/reading）E2E。
@@ -408,6 +409,86 @@ test.describe('阅读模块 · 「学过的词宝藏」视觉母题', () => {
       expect(shell.note).toContain('正在翻开')
       expect(shell.hasSkeleton).toBe(true)
     }
+  })
+})
+
+test.describe('阅读模块 · 系列（预备级 / 第一册）', () => {
+  test('/reading 首屏有系列切换条，当前册是预备级', async ({ page }) => {
+    await page.goto(READING)
+    const tabs = page.locator('.sl-series-tab')
+    await expect(tabs).toHaveCount(2, { timeout: 15000 })
+    await expect(tabs.nth(0)).toHaveClass(/is-on/)
+    await expect(tabs.nth(0)).toHaveAttribute('href', /reading$/)
+    await expect(tabs.nth(1)).toHaveAttribute('href', /reading1$/)
+  })
+
+  test('点切换条「第一册」进入 /reading1，两册共用同一套页面骨架', async ({ page }) => {
+    await page.goto(READING)
+    await expect(page.locator('.sl-series-tab')).toHaveCount(2, { timeout: 15000 })
+    await page.locator('.sl-series-tab').nth(1).click()
+    await expect(page).toHaveURL(/#\/reading1$/)
+    await expect(page.getByRole('heading', { name: '阅读小故事' })).toBeVisible({ timeout: 15000 })
+    // 母题、单元目录、宝藏词示例都在（同一个组件，不是另写的简化页）
+    await expect(page.locator('.rm-hero-statement')).toContainText('学过的词')
+    await expect(page.locator('.rm-unit')).toHaveCount(9, { timeout: 15000 })
+    await expect(page.locator('.rm-hero-word')).toHaveCount(5)
+  })
+
+  test('/reading1 只列真正有短文的课，且每个课卡片都不是死链', async ({ page }) => {
+    await page.goto('/#/reading1')
+    await expect(page.locator('.rm-unit')).toHaveCount(9, { timeout: 15000 })
+
+    const cards = page.locator('[data-testid^="rm-lesson-"]')
+    const n = await cards.count()
+    expect(n).toBeGreaterThan(0)
+    expect(n).toBeLessThan(96) // 第一册短文还没铺满，不能摆 96 张卡
+
+    // 先展开全部 9 个单元（<details> 收起时子树不可点）
+    for (let u = 1; u <= 9; u++) {
+      const unit = page.locator(`.rm-unit[data-unit="${u}"]`)
+      await unit.locator('summary').click()
+      await expect(unit).toHaveAttribute('open', '')
+    }
+    // 抽样 4 张（首/中/尾 + 不同单元）点开验证阅读器；全量死链由单测按数据兜底，
+    // e2e 逐张点 27 次会让套件平白多跑一分钟。
+    for (const i of [0, Math.floor(n / 3), Math.floor(2 * n / 3), n - 1]) {
+      await cards.nth(i).click()
+      await expect(page.locator('.reading-zone')).toHaveCount(1)
+      await expect(page.locator('.rm-empty')).toHaveCount(0)
+      await cards.nth(i).click()
+      await expect(page.locator('.reading-zone')).toHaveCount(0)
+    }
+  })
+
+  test('第一册首屏宝藏词示例是该册 Unit 1 的真实课表词', async ({ page }) => {
+    await page.goto('/#/reading1')
+    const words = page.locator('.rm-hero-word')
+    await expect(words).toHaveCount(5, { timeout: 15000 })
+    const unit1 = new Set(
+      modules1[0].lessons.flatMap((l) => l.words.map((w) => w.en.toLowerCase())),
+    )
+    for (const t of await words.allTextContents()) {
+      expect(unit1.has(t.trim().toLowerCase())).toBe(true)
+    }
+  })
+
+  test('/reading1 的切换条能切回预备级，预备级恢复 12 单元 96 课', async ({ page }) => {
+    await page.goto('/#/reading1')
+    await expect(page.locator('.sl-series-tab')).toHaveCount(2, { timeout: 15000 })
+    await expect(page.locator('.sl-series-tab').nth(1)).toHaveClass(/is-on/)
+    await page.locator('.sl-series-tab').nth(0).click()
+    await expect(page).toHaveURL(/#\/reading$/)
+    await expect(page.locator('.rm-unit')).toHaveCount(12, { timeout: 15000 })
+    await expect(page.locator('[data-testid^="rm-lesson-"]')).toHaveCount(96)
+  })
+
+  test('首页有「第一册」阅读入口，点了进入 /reading1', async ({ page }) => {
+    await page.goto(HOME)
+    const entry = page.locator('.rd1-home-entry')
+    await expect(entry).toBeVisible({ timeout: 15000 })
+    await expect(entry).toContainText('阅读小故事')
+    await entry.click()
+    await expect(page).toHaveURL(/#\/reading1$/)
   })
 })
 

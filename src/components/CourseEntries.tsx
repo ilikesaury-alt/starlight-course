@@ -189,9 +189,20 @@ export default function CourseEntries() {
           <span className="rd-home-emoji">📚</span>
           <div className="rd-home-body">
             <div className="rd-home-title">阅读小故事</div>
-            <div className="rd-home-sub">Starlight 96 篇 · 用每课学过的词写的小故事</div>
+            <div className="rd-home-sub">预备级 · {starlightLessonTotal} 篇 · 用每课学过的词写的小故事</div>
           </div>
           <span className="rd-home-arrow">›</span>
+        </Link>
+        {/* 系列第二册：单独一张卡，孩子/家长不用先点进去才知道还有第一册。
+            刻意用 rd1-home-entry 而非 rd-home-entry：reading.spec 的入口用例
+            用 .rd-home-entry 唯一定位，同名会让 strict mode 炸掉。 */}
+        <Link to="/reading1" className="rd1-home-entry">
+          <span className="rd1-home-emoji">📖</span>
+          <div className="rd1-home-body">
+            <div className="rd1-home-title">阅读小故事 · 第一册</div>
+            <div className="rd1-home-sub">牛津 Starlight 1 · 阅读课小故事，一课一课补上</div>
+          </div>
+          <span className="rd1-home-arrow">›</span>
         </Link>
       </div>
 

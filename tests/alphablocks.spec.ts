@@ -153,7 +153,14 @@ test.describe('A6 错块反馈 + 错题本', () => {
       for (const b of [...document.querySelectorAll('.ab-block')] as HTMLButtonElement[]) {
         const before = filled()
         b.click()
-        await wait(200)
+        // 等 React 重渲染真正落地，再判定这一块对不对。
+        // 原来固定 wait(200)：全套件并行、机器忙时 200ms 不够，正确块还没填进
+        // 槽位就被当成「没反应 → 错块」，.ab-wrong 也还没出现，于是返回 null
+        // 让 expect(...).toContain 偶发红。改成有界轮询，等到有明确信号为止。
+        for (let i = 0; i < 40; i++) {
+          if (filled() !== before || document.querySelector('.ab-wrong')) break
+          await wait(25)
+        }
         if (filled() === before) return document.querySelector('.ab-wrong')?.textContent ?? null
         await wait(100)
         break

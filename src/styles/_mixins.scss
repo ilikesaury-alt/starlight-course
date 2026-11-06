@@ -11,6 +11,37 @@
 //  · 删掉 `grad-soft` 与 `blob`：渐变底与装饰光斑一律不用。
 // ============================================================
 
+// 系列切换条（预备级 / 第一册）—— 主课目录页与阅读模块共用。
+// 抽成 mixin 而不是全局规则：两个页面各自有自己的 .*-sheet 作用域纪律，
+// 在各自作用域里 @include，谁也不越界，也不会出现「一个页面改了、另一个没跟上」。
+@mixin series-tabs {
+  .sl-series {
+    display: flex;
+    gap: 28px;
+    margin: 0 0 var(--sl-gap, 24px);
+    border-bottom: 1px solid var(--line);
+  }
+  .sl-series-tab {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 10px 2px 12px;
+    text-decoration: none;
+    color: var(--ink-soft);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: color 0.14s ease, border-color 0.14s ease;
+    &:hover { color: var(--ink); }
+  }
+  .sl-series-tab.is-on {
+    color: var(--ink);
+    border-bottom-color: var(--brand-deep);
+  }
+  .sl-series-title { font-size: 15px; font-weight: 700; line-height: 1.3; }
+  .sl-series-sub { font-size: 12px; color: var(--ink-soft); }
+  .sl-series-tab.is-on .sl-series-sub { color: var(--brand-deep); }
+}
+
 // 通用卡片表面：白底、圆角、细边（**无阴影**）
 @mixin card($radius: var(--r-lg), $pad: var(--sp-4)) {
   background: var(--card);

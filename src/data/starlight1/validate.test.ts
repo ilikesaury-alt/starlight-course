@@ -4,7 +4,7 @@ import { STARLIGHT_BOOK1 } from './book'
 import { STARLIGHT_FRAMES1 } from './sentenceFrames'
 import { READING_PASSAGES1 } from './reading'
 import { EXT_TOPICS1 } from './extensions'
-import { modules1 } from './index'
+import { modules1, READINGS_BY_UNIT1 } from './index'
 import type { ExtTopic } from './shared'
 import { u2_ext } from './u2'
 import { u3_ext } from './u3'
@@ -90,6 +90,30 @@ describe('Level 1 数据完整性', () => {
     for (const k of Object.keys(READING_PASSAGES1)) {
       expect(k).toMatch(/^\d+-\d+$/)
     }
+  })
+
+  // 每篇短文的键必须落在一个**真实存在**的「单元-课」上，且归在正确的单元桶里。
+  // 回归：Unit 1 的桶曾直接摊平了 u2–u9 的短文，混进 '2-3' 这类别单元的键，
+  // 任何遍历桶的逻辑都会读到别的单元去。
+  it('按单元聚合的短文桶：键都指向本单元真实存在的一课', () => {
+    for (const [unitId, bucket] of Object.entries(READINGS_BY_UNIT1)) {
+      const u = Number(unitId)
+      const mod = modules1.find((m) => m.id === u)
+      expect(mod, `桶 ${unitId} 没有对应单元`).toBeDefined()
+      for (const key of Object.keys(bucket)) {
+        expect(key, `桶 ${unitId} 混进了别单元的键 ${key}`).toMatch(new RegExp(`^${u}-\\d+$`))
+        const lessonId = Number(key.split('-')[1])
+        expect(
+          mod!.lessons.some((l) => l.id === lessonId),
+          `${key} 指向不存在的课`,
+        ).toBe(true)
+      }
+    }
+  })
+
+  it('第一册短文总数与按单元聚合表一致（没有重复计/漏计）', () => {
+    const perUnit = Object.values(READINGS_BY_UNIT1).reduce((n, r) => n + Object.keys(r).length, 0)
+    expect(perUnit).toBe(Object.keys(READING_PASSAGES1).length)
   })
 
   it('modules1 含 9 个单元，id 1~9', () => {

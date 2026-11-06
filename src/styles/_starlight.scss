@@ -54,33 +54,8 @@
   .bc-current { color: var(--ink); }
 
   // ---------- 系列切换条：预备级 / 第一册 ----------
-  // Starlight 是一个系列，两册共用同一套页面。切换条让「换了一本书」这件事
-  // 看得见，而不是像跳到了一个不相干的页面。
-  .sl-series {
-    display: flex;
-    gap: 28px;
-    margin: 0 0 var(--sl-gap);
-    border-bottom: 1px solid var(--line);
-  }
-  .sl-series-tab {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    padding: 10px 2px 12px;
-    text-decoration: none;
-    color: var(--ink-soft);
-    border-bottom: 2px solid transparent;
-    margin-bottom: -1px;
-    transition: color 0.14s ease, border-color 0.14s ease;
-    &:hover { color: var(--ink); }
-  }
-  .sl-series-tab.is-on {
-    color: var(--ink);
-    border-bottom-color: var(--brand-deep);
-  }
-  .sl-series-title { font-size: 15px; font-weight: 700; line-height: 1.3; }
-  .sl-series-sub { font-size: 12px; color: var(--ink-soft); }
-  .sl-series-tab.is-on .sl-series-sub { color: var(--brand-deep); }
+  // Starlight 是一个系列，两册共用同一套页面。样式抽到 mixins，阅读页也 @include。
+  @include series-tabs;
 
   .tip-card { background: var(--bg-3); padding: 14px 16px; border-radius: var(--r-md); border: 0; }
 

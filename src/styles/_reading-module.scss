@@ -15,6 +15,9 @@
 .reading-sheet {
   @include paper-sheet;
 
+  // 系列切换条（预备级 / 第一册）：与主课目录页共用 mixins，作用域仍挂在 .reading-sheet 下
+  @include series-tabs;
+
   // ---------- Hero：母题是主张，不是卡片里的装饰 ----------
   // 旧版：44px 的 📚 当头像 + 19px 的小标题 + 淡紫圆角卡。
   // 现在：标题行直落在纸页上，母题用满宽大字讲。
