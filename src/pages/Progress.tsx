@@ -6,10 +6,16 @@ import { totalEngLessons } from '../data/eng3a'
 import { flyGuyStories, flyGuyStoryCount } from '../data/flyguy'
 import { rocketGirlStories, rocketGirlStoryCount } from '../data/rocketgirl'
 import { moduleThemeOf } from '../data/modules'
+import {
+  STARLIGHT_LEVEL_ORDER,
+  STARLIGHT_LEVELS,
+  countLessonsByLevel,
+  countQuizzesByLevel,
+} from '../data/starlightSeries'
 import { moduleThemeVars } from '../utils/theme'
 import ConfirmDialog from '../components/ConfirmDialog'
 
-// 学习进度：覆盖全部 5 个课程模块，每模块一栏带进度条，
+// 学习进度：每模块一栏带进度条（Starlight 两册各一栏 + 语文 / 英语3A / 两个绘本），
 // 点任意模块可直接跳转到对应课程首页，减少「看进度 → 回首页 → 找模块」的往返。
 export default function Progress() {
   const totalStars = useCourseStore((s) => s.totalStars)
@@ -30,18 +36,32 @@ export default function Progress() {
   const flyguyDone = flyGuyStories.filter((s) => completedStories.includes(s.slug)).length
   const rocketgirlDone = rocketGirlStories.filter((s) => completedStories.includes(s.slug)).length
 
-  // Starlight 主课:课级进度(12 单元 × 8 课 = 96 课)
-  const slDone = Object.values(lessonCompleted).reduce((a, ids) => a + ids.length, 0)
-  const slTotal = 96
+  // Starlight 是一个系列：两册的完成记录都存在同一份 lessonCompleted /
+  // completedQuizzes 里（键是单元 slug，全局唯一）。按册拆开统计，分母取自
+  // 册次元信息 —— 早期把两册一起 reduce 却写死 slTotal=96，孩子只要学了第一册
+  // 任意一课，预备级就会显示「已学 97/96 课」、进度条溢出。
+  const lessonsByLevel = countLessonsByLevel(lessonCompleted)
+  const quizzesByLevel = countQuizzesByLevel(completedQuizzes)
+
+  const starlightRows = STARLIGHT_LEVEL_ORDER.map((level) => {
+    const meta = STARLIGHT_LEVELS[level]
+    const done = lessonsByLevel[level]
+    const quizzes = quizzesByLevel[level]
+    return {
+      id: level,
+      to: meta.path,
+      emoji: level === 'starlight' ? '🌟' : '📗',
+      name: `Starlight 主课 · ${meta.labelZh}`,
+      status: quizzes > 0
+        ? `已学 ${done}/${meta.lessonCount} 课 · 已闯关 ${quizzes} 关`
+        : `已学 ${done}/${meta.lessonCount} 课`,
+      total: meta.lessonCount,
+      done,
+    }
+  })
 
   const rows = [
-    {
-      id: 'starlight', to: '/starlight', emoji: '🌟', name: 'Starlight 主课',
-      status: completedQuizzes.length > 0
-        ? `已学 ${slDone}/${slTotal} 课 · 已闯关 ${completedQuizzes.length} 关`
-        : `已学 ${slDone}/${slTotal} 课`,
-      total: slTotal, done: slDone,
-    },
+    ...starlightRows,
     { id: 'chinese', to: '/chinese', emoji: '📚', name: '三年级上册语文', status: `已学完 ${completedChinese.length}/${totalChineseLessons} 课 · 已背 ${chineseRecited} 课`, total: totalChineseLessons, done: completedChinese.length },
     { id: 'eng3a', to: '/eng3a', emoji: '📘', name: '三年级上册英语', status: `已学完 ${completedEng3a.length}/${totalEngLessons} 课 · 已读 ${eng3aRead} 课`, total: totalEngLessons, done: completedEng3a.length },
     { id: 'flyguy', to: '/flyguy', emoji: '🐝', name: 'Fly Guy 绘本闯关', status: `已通关 ${flyguyDone}/${flyGuyStoryCount} 关`, total: flyGuyStoryCount, done: flyguyDone },
@@ -86,7 +106,9 @@ export default function Progress() {
       <h2 className="section-title">📚 各模块进度</h2>
       <div className="module-progress-list">
         {rows.map((r) => {
-          const pct = r.total > 0 ? Math.round((r.done / r.total) * 100) : 0
+          // 夹紧到 100%：即便 localStorage 里有旧版本写坏的完成记录，
+          // 进度条也不能溢出容器（数字仍如实显示，不掩盖数据问题）。
+          const pct = r.total > 0 ? Math.min(100, Math.max(0, Math.round((r.done / r.total) * 100))) : 0
           return (
             <Link
               key={r.id}

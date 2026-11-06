@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test'
+import { phonemeSegments } from '../src/data/phonics'
 
 /**
  * 字母积木练习（/alphablocks）端到端测试。
@@ -144,29 +145,29 @@ test.describe('A6 错块反馈 + 错题本', () => {
     await page.getByRole('button', { name: /开始练习/ }).click()
     await expect(page.locator('.ab-player')).toBeVisible()
 
-    const word = await page.locator('.ab-word-full').textContent()
+    const word = (await page.locator('.ab-word-full').textContent())!.trim()
+    // 下一个该搭的正确段（placed 还是空的，就是第一段）。
+    // 积木堆是**真洗牌**且含 4 个干扰块，不能假设「第一块是错的」——
+    // 早先用例点第一块就断言错块提示，抽到正确块时填槽、break、返回 null，
+    // 让 expect(...).toContain 偶发红（单独跑往往又绿）。
+    const needed = phonemeSegments(word)[0]?.text ?? ''
 
-    // 1) 先点一个错块：应只出现提示，**不能**已经把词入错题本
-    const wrongMsg = await page.evaluate(async () => {
+    // 1) 先点一个**确定是错的**块：应只出现提示，**不能**已经把词入错题本
+    const wrongMsg = await page.evaluate(async (neededText) => {
       const wait = (ms: number) => new Promise((r) => setTimeout(r, ms))
-      const filled = () => document.querySelectorAll('.ab-slot.filled').length
-      for (const b of [...document.querySelectorAll('.ab-block')] as HTMLButtonElement[]) {
-        const before = filled()
-        b.click()
-        // 等 React 重渲染真正落地，再判定这一块对不对。
-        // 原来固定 wait(200)：全套件并行、机器忙时 200ms 不够，正确块还没填进
-        // 槽位就被当成「没反应 → 错块」，.ab-wrong 也还没出现，于是返回 null
-        // 让 expect(...).toContain 偶发红。改成有界轮询，等到有明确信号为止。
-        for (let i = 0; i < 40; i++) {
-          if (filled() !== before || document.querySelector('.ab-wrong')) break
-          await wait(25)
-        }
-        if (filled() === before) return document.querySelector('.ab-wrong')?.textContent ?? null
-        await wait(100)
-        break
+      const blocks = [...document.querySelectorAll('.ab-block')] as HTMLButtonElement[]
+      // 干扰块的文本与所有正确段都不同（组件 decoyBlocks 保证），挑文本 ≠ 待搭段的
+      const wrong = blocks.find((b) => !b.disabled && (b.textContent ?? '').trim() !== neededText)
+      if (!wrong) return null
+      wrong.click()
+      // 等 React 重渲染把 .ab-wrong 挂上再读文本（flash 只显示 700ms）
+      for (let i = 0; i < 40; i++) {
+        const el = document.querySelector('.ab-wrong')
+        if (el) return el.textContent ?? null
+        await wait(25)
       }
       return null
-    })
+    }, needed)
     expect(wrongMsg).toContain('这块不对')
 
     // 此时尚未拼完 → 不该已入错题本（避免“界面还在练、后台已判死”）

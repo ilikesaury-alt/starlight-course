@@ -87,7 +87,10 @@ test.describe('T4/T5 听音写词与两试一揭', () => {
     // 这里验证的是「答对分支」本身，不靠随机抽样猜词，避免用例偶发超时。
     await page.getByRole('button', { name: /我拼不出来/ }).click()
     const answer = (await page.locator('.dt-box-text').allTextContents()).join('').trim()
-    expect(answer.length).toBeGreaterThan(1)
+    // 断言的是「音素格子确实拼出了答案」，不是「答案必须多字母」。
+    // 词池（eng3a 201 词）里有 I / a 两个单字母词，随机抽到它们时长度就是 1，
+    // 原写法 > 1 会让这条用例偶发假红（单独跑往往又绿）。
+    expect(answer.length).toBeGreaterThanOrEqual(1)
 
     await page.locator('input.dt-input').fill(answer)
     await page.getByRole('button', { name: '✅ 检查' }).click()
