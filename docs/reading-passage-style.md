@@ -3,6 +3,14 @@
 > 真源：`src/data/reading/unit1.ts … unit12.ts`；词表真源：`src/data/reading/baseVocab.ts`；
 > 不变量真源：`src/data/readingPassage.test.ts`。
 > 本文件是**文体**规格（写得好不好看），硬约束仍以单测为准，两者都必须满足。
+>
+> ⚠️ 上面的路径是**预备级（level-0）**的。第一册（Starlight 1）是另一套数据：
+> 短文在 `src/data/starlight1/reading.ts`（Unit 1）与 `uN.ts` 的 `uN_reading`，
+> 词表允许域真源是 `src/data/starlight1/readingVocab1.ts`，
+> 不变量真源是 `readingPassage1.test.ts`，自检脚本是
+> `node scripts/check-reading1.mjs <单元> --brief`（写作简报）/ `--stats`（校验）。
+> **文体要求（第 3 节）两册通用**；第 4 节的硬约束路径只适用于预备级，第一册按
+> `validateReadingPassage1()` 的八条口径（篇幅/零超纲/本课词/中文/标点/重复句/标题）。
 
 ## 0. 一句话说清
 

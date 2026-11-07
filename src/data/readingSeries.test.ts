@@ -35,26 +35,29 @@ describe('阅读系列 · 两册数据源分离', () => {
     }
   })
 
-  it('第一册：9 单元，只列出真正有短文的课（没有死链）', () => {
+  it('第一册：9 单元 96 课全有短文且都不是死链', () => {
     expect(book1.mods).toHaveLength(9)
     let total = 0
     for (const m of book1.mods) {
       const lessons = readingLessonsOf(book1, m)
       expect(lessons.length, `第一册 M${m.id} 一篇都没有`).toBeGreaterThan(0)
+      // 补齐后阅读页课课都有卡片，不能再滤掉任何一课
+      expect(lessons.length, `第一册 M${m.id} 漏了课`).toBe(m.lessons.length)
       for (const l of lessons) {
         expect(getReadingPassage1(m.id, l.id), `第一册 ${m.id}-${l.id} 是死链`).toBeDefined()
       }
       total += lessons.length
     }
     expect(total).toBe(readingStoryCount(book1))
-    // 短文数必然少于总课数（96）—— 这组数据本来就没有全铺满
-    expect(total).toBeLessThan(book1.mods.reduce((n, m) => n + m.lessons.length, 0))
+    expect(total).toBe(96)
+    expect(total).toBe(book1.mods.reduce((n, m) => n + m.lessons.length, 0))
   })
 
   it('同一「单元-课」号在两册指向不同内容，门面不会串书', () => {
-    // 1-1：预备级有短文，第一册没有（第一册 Unit 1 只写了 1-4 / 1-5）
+    // 1-1：两册现在都有短文（第一册 96 篇已补齐），但必须是两篇不同的故事
     expect(getReadingPassage(1, 1)).toBeDefined()
-    expect(getReadingPassage1(1, 1)).toBeUndefined()
+    expect(getReadingPassage1(1, 1)).toBeDefined()
+    expect(getReadingPassage(1, 1)!.title).not.toBe(getReadingPassage1(1, 1)!.title)
     // 1-4：两册都有，但必须是两篇不同的故事
     const a = getReadingPassage(1, 4)
     const b = getReadingPassage1(1, 4)

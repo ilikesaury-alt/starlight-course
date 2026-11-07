@@ -2,8 +2,8 @@
 // /reading1（第一册）页面级回归测试。
 //
 // 与 ReadingPage.test.tsx（预备级）成对：同一个 ReadingBook 组件，换一册数据源。
-// 这里钉死「换册不串书」—— 第一册只列真正有短文的课，首屏示例词来自第一册，
-// 切换条指到阅读模块自己的两个路由，而不是主课目录页。
+// 这里钉死「换册不串书」—— 第一册 96 课篇篇有短文、课卡片数 = 96，
+// 首屏示例词来自第一册，切换条指到阅读模块自己的两个路由，而不是主课目录页。
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
@@ -30,7 +30,7 @@ const renderPage = () =>
   )
 
 describe('/reading1 · 系列与目录', () => {
-  it('渲染 9 个单元；课卡片数 = 有短文的课数，且每张卡都不是死链', () => {
+  it('渲染 9 个单元；96 课全铺出来，且每张卡都不是死链', () => {
     renderPage()
     const units = document.querySelectorAll('.rm-unit')
     expect(units).toHaveLength(9)
@@ -40,16 +40,15 @@ describe('/reading1 · 系列与目录', () => {
       (n, m) => n + m.lessons.filter((l) => !!getReadingPassage1(m.id, l.id)).length,
       0,
     )
-    expect(cards.length).toBe(expected)
-    expect(expected).toBeGreaterThan(0)
+    // 96 篇短文已补齐：每课一张卡，一篇都不能少
+    expect(cards.length).toBe(96)
+    expect(expected).toBe(96)
     // 每张课卡片都能从 testid 反查到一篇真实短文
     for (const card of cards) {
       const key = card.getAttribute('data-testid')!.replace('rm-lesson-', '')
       const [u, l] = key.split('-').map(Number)
       expect(getReadingPassage1(u, l), `${key} 是死链`).toBeDefined()
     }
-    // 死链过滤真的生效：不能把 96 课全铺出来
-    expect(cards.length).toBeLessThan(96)
   })
 
   it('系列切换条有预备级 / 第一册两项，指向阅读模块自己的路由、当前册高亮', () => {

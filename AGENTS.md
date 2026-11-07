@@ -117,6 +117,7 @@ npm run electron:build  # 打包 Windows NSIS 安装包（产物在 release/）
   - `--brief` 模式打印该单元的**精确允许词表 + 逐课词表 + 本课句型**：`node scripts/check-reading.mjs N --brief`。写之前先看它，别凭感觉猜词
   - ⚠️ 常见超纲词（多个 Agent 栽过）：`by` `land` `lands` `orange` `first` `let` `end` `race` `full` `quiz` `winner` `grow` `sunny` `soon` `meow` `softly` `beautiful` `wonderful` `street` `seaside`
   - ⚠️ **多词词条可以如实写出来**（旧注释说「写不出来」是误判）：单测的「本课词 100%」是 `w.split(' ').every(part => fullText.includes(part))` —— 按空格拆开做**子串**匹配，不是拿整串比 token 集合；且 `sea/world/umbrella/tennis/merry/round/bumper/ferris/wheel` 早就在 `BASE_WORDS` 里。**不要为绕开多词词条而牺牲内容质量**
+  - **第一册（Starlight 1）是另一套数据，别用上面的脚本/词表**：短文在 `src/data/starlight1/reading.ts`（Unit 1）与 `uN.ts` 的 `uN_reading`，9 单元 / 96 课全有短文。零超纲允许域真源 = `src/data/starlight1/readingVocab1.ts`（预备级 `BASE_WORDS` ∪ `BOOK1_EXTRA_WORDS` 教材角色名/口语词 ∪ 本单元课词表 ∪ 本单元课本原文 token）——第一册教材故事必须能写 Monty/Lola/Mr. Gnome 这些人物。校验器 `readingPassage1.test.ts`、自检脚本 `node scripts/check-reading1.mjs N --brief / --stats`、唯一口径实现 `validateReadingPassage1()`（生成与单测共用）。文体要求与预备级通用，见 `docs/reading-passage-style.md` 第 3 节
   - 阅读区视觉：`.reading-body` 是「书页」（暖纸色 + 斜向纤维纹 + 顶部丝带），`.reading-title` 居中带手写下划线；**两种排版模式**由 `.reading-zone.is-zh` 切换 —— 默认「流式散文」（句子 inline-block 连成一段），显示中文后切「逐句双语」（一句一行、译文紧跟其下）。改样式**不得破坏** e2e 契约（`tests/starlight-zones.spec.ts`）：类名一个都不能改、`.reading-sent` == `.reading-zh` == `.reading-say` 数量、译文必须在英文**下方**且与英文**左对齐**（偏差 < 6px）、`.tt-word` 默认透明底
 
 - Phonics: `src/data/phonics.ts` 的音素切分口径**对齐《字母积木》(Alphablocks / BBC CBeebies) 的教学分级** —— 孩子正在看的动画是这套片，app 必须跟动画对得上号，否则提示反而干扰：

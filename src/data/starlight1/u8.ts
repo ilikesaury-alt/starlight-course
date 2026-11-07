@@ -785,6 +785,53 @@ export const u8_frames: SentenceFrame[] = [
 // ============================================================================
 
 export const u8_reading: Record<string, ReadingPassage> = {
+  '8-1': {
+    title: 'A Game in the Park',
+    titleZh: '公园里的小游戏',
+    paragraphs: [
+      [ // 开场：罗拉和朋友们玩「你会吗」
+        { en: 'Today Lola is an athlete in the park.', zh: '今天，Lola 在公园里当运动员啦。' },
+        { en: 'Her friends come to play a new game.', zh: '朋友们跑来玩一个新游戏。' },
+        { en: '"Can you walk with me?" she asks.', zh: '“你能和我一起走吗？”她问。' },
+        { en: '"Yes, I can! Look at my feet!" says Ben.', zh: '“能呀！快看我的脚！”Ben 说。' },
+      ],
+      [ // 小问题：小鸭子觉得自己什么都不会
+        { en: 'A little duck is sad near the water.', zh: '水边有只小鸭子，闷闷不乐的。' },
+        { en: `"I can't climb or swing," says the duck.`, zh: '“我不会爬，也不会荡秋千。”它说。' },
+        { en: `"I can't fly up in the sky," it says.`, zh: '“我飞不到高高的天上呀。”它说。' },
+        { en: 'Lola sits down and smiles at the duck.', zh: 'Lola 坐下来，笑眯眯地看着小鸭子。' },
+      ],
+      [ // 收尾：每个人都有会的事
+        { en: '"Can you swim? The water is warm!" she says.', zh: '“你会游泳吗？水暖暖的哦！”她说。' },
+        { en: 'The duck swims and swims. It is happy now.', zh: '小鸭子游呀游呀，现在可开心啦。' },
+        { en: '"We can all play!" says Lola.', zh: '“我们都能一起玩！”Lola 说。' },
+      ],
+    ],
+  },
+  '8-2': {
+    title: 'Keep Fit!',
+    titleZh: '一起动起来',
+    paragraphs: [
+      [ // 罗拉来了，大家猜她会什么
+        { en: '"Look! Lola is coming!" says Ann.', zh: '“快看！Lola 来啦！”Ann 喊道。' },
+        { en: '"What can she do?" the children ask.', zh: '“她会做什么呢？”孩子们问。' },
+        { en: '"I can run! Can you run?" she says.', zh: '“我会跑！你们会跑吗？”她说。' },
+        { en: `"Yes! Let's run to the tree!" says Tom.`, zh: '“会！我们跑到树那边去吧！”Tom 说。' },
+      ],
+      [ // 一起跳，可是小 Sam 停下了
+        { en: 'Now they hop to the right and left.', zh: '现在他们单脚跳到右边，又跳到左边。' },
+        { en: '"Walk one, two, three! Jump with me!"', zh: '“走一、二、三！跟我一起跳！”' },
+        { en: 'The boys jump. The girls skip and sing.', zh: '男孩们跳，女孩们跳绳、唱歌。' },
+        { en: 'But little Sam sits down and looks sad.', zh: '可是小 Sam 坐下来，看起来闷闷的。' },
+      ],
+      [ // 陪着他慢慢滑
+        { en: `"I can't skate," he says.`, zh: '“我不会滑冰。”他说。' },
+        { en: '"Skate with me! I can help you," says Lola.', zh: '“跟我一起滑！我可以帮你。”Lola 说。' },
+        { en: 'They skate slow, then fast. Sam can skate!', zh: '他们先慢慢滑，再快快滑。Sam 会滑啦！' },
+        { en: '"Keep fit! Keep fit!" everyone sings.', zh: '“动起来！动起来！”大家一起唱。' },
+      ],
+    ],
+  },
   '8-3': {
     title: 'The Gingerbread Man',
     titleZh: '姜饼人',
@@ -792,7 +839,7 @@ export const u8_reading: Record<string, ReadingPassage> = {
       [
         { en: 'One day, an old man and an old woman make gingerbread.', zh: '一天，一位老爷爷和一位老奶奶做了姜饼。' },
         { en: 'Now the Gingerbread Man is ready. He can run!', zh: '现在姜饼人做好了，他会跑！' },
-        { en: 'He can jump off the table. You can’t catch me!', zh: '他能跳下桌子。你抓不到我！' },
+        { en: "He can jump off the table. You can't catch me!", zh: '他能跳下桌子。你抓不到我！' },
       ],
       [
         { en: 'I can run! Yes, I can! I am the Gingerbread Man.', zh: '我会跑！是的，我会！我是姜饼人。' },
@@ -809,17 +856,166 @@ export const u8_reading: Record<string, ReadingPassage> = {
     title: 'The Gingerbread Man and the Bird',
     titleZh: '姜饼人和小鸟',
     paragraphs: [
-      [
-        { en: 'Then the Gingerbread Man climbs the tree.', zh: '然后姜饼人爬上了树。' },
-        { en: 'A bird is in the tree, too. I can fly! says the bird.', zh: '一只小鸟也在树上。小鸟说：我会飞！' },
+      [ // 爬上树，遇见小鸟
+        { en: 'The Gingerbread Man runs to a big tree.', zh: '姜饼人跑到一棵大树前。' },
+        { en: '"I can climb! Yes, I can!" he says.', zh: '“我会爬！是的，我会！”他说。' },
+        { en: 'A bird is in the tree, too.', zh: '树上还停着一只小鸟。' },
       ],
-      [
-        { en: 'Oh no! I can’t fly! says the Gingerbread Man.', zh: '哦不！我不会飞！姜饼人说。' },
-        { en: 'Jump on my back! says the bird.', zh: '跳到我的背上来！小鸟说。' },
+      [ // 小鸟要帮忙，可它饿啦
+        { en: `"Oh no! I can't fly!" he says.`, zh: '“哦不！我不会飞！”他说。' },
+        { en: '"I can fly! Jump on my back!" says the bird.', zh: '“我会飞！跳到我的背上来！”小鸟说。' },
+        { en: 'But the bird is hungry. It wants to eat him.', zh: '可是小鸟饿啦，它想把他吃掉。' },
+        { en: '"Help! I can jump! Yes, I can!"', zh: '“救命！我会跳！是的，我会！”' },
       ],
-      [
-        { en: 'But the bird wants to eat the Gingerbread Man.', zh: '但是小鸟想吃掉姜饼人。' },
-        { en: 'Help! The Gingerbread Man jumps. I can jump!', zh: '救命！姜饼人跳了起来。我会跳！' },
+      [ // 跳下来，一起回家
+        { en: 'He jumps off the tree and runs home.', zh: '他从树上跳下来，往家跑。' },
+        { en: 'The old man and the old woman are there.', zh: '老爷爷和老奶奶就在那儿。' },
+        { en: `"You can catch me now! Let's go home!"`, zh: '“现在你们抓得到我啦！回家吧！”' },
+        { en: 'They all walk home in the warm sun.', zh: '大家一起，在暖暖的阳光里走回家。' },
+      ],
+    ],
+  },
+  '8-5': {
+    title: 'Yes or No',
+    titleZh: '会与不会',
+    paragraphs: [
+      [ // 一个「会 / 不会」的小游戏
+        { en: 'It is a warm day in the park.', zh: '公园里，是暖洋洋的一天。' },
+        { en: 'Lola and Mia play a yes and no game.', zh: 'Lola 和 Mia 玩起一个「会、不会」的小游戏。' },
+        { en: '"Can you walk?" asks Lola.', zh: '“你会走路吗？”Lola 问。' },
+        { en: '"Yes, I can! I can hop, too!" says Mia.', zh: '“会呀！我还会单脚跳呢！”Mia 说。' },
+      ],
+      [ // 会的和不会的，说来都好笑
+        { en: `"I can swing. I can't skip," she says.`, zh: '“我会荡秋千，可不会跳绳。”她说。' },
+        { en: `"My mom can't skate. Can you skate?"`, zh: '“我妈妈不会滑冰。你会滑冰吗？”' },
+        { en: `"No, I can't," says Lola with a smile.`, zh: '“不会呢。”Lola 笑着说。' },
+        { en: 'The two friends laugh under the tree.', zh: '两个好朋友在树下笑作一团。' },
+      ],
+      [ // 水里的鸭子也来答一句
+        { en: 'A duck is in the water near them.', zh: '它们身边的水里，有只小鸭子。' },
+        { en: '"The duck can swim! Can you swim?"', zh: '“小鸭子会游泳！你会游泳吗？”' },
+        { en: `"Yes, I can! Let's swim together!" says Mia.`, zh: '“会呀！我们一起游吧！”Mia 说。' },
+        { en: 'Yes or no, the friends are happy.', zh: '会也好，不会也好，好朋友一样开心。' },
+      ],
+    ],
+  },
+  '8-6': {
+    title: 'Photos from the Vacation',
+    titleZh: '假期寄来的照片',
+    paragraphs: [
+      [ // 姜饼人的度假照片
+        { en: 'The friends look at photos today.', zh: '今天，朋友们一起看照片。' },
+        { en: 'The photos are from the Gingerbread Man.', zh: '这些照片来自姜饼人。' },
+        { en: '"Look! He is on vacation!" says Lola.', zh: '“快看！他在度假呢！”Lola 说。' },
+      ],
+      [ // 照片里的事，我们也想试
+        { en: '"Can you drive a car?" asks Tom.', zh: '“你会开车吗？”Tom 问。' },
+        { en: '"No, but I can ride a bike!" he says.', zh: '“不会，可我会骑自行车呀！”他说。' },
+        { en: `"Let's kick a ball!" says Sam.`, zh: '“我们踢球吧！”Sam 说。' },
+        { en: `"Let's hit a ball, too!" says Ann.`, zh: '“我们也来击球吧！”Ann 说。' },
+        { en: 'They run to the park with a ball.', zh: '他们带着球跑到公园。' },
+      ],
+      [ // 球上树了，游戏照样玩
+        { en: 'But the ball is up in a tree.', zh: '可是球在树上呢。' },
+        { en: '"Oh no! Can we play a game now?"', zh: '“哎呀！那我们现在玩什么游戏好呢？”' },
+        { en: 'Lola climbs up and gets the ball.', zh: 'Lola 爬上去，把球拿了下来。' },
+        { en: `"Yes! Let's play a game!" everyone says.`, zh: '“能啦！一起玩游戏吧！”大家喊。' },
+      ],
+    ],
+  },
+  '8-7': {
+    title: 'Charlie and the Car',
+    titleZh: '奶牛查理和汽车',
+    paragraphs: [
+      [ // 没有手臂，弹不了吉他
+        { en: 'Charlie the cow has a big guitar.', zh: '奶牛 Charlie 有一把大吉他。' },
+        { en: `"I can't play the guitar," he says.`, zh: '“我弹不了吉他呀。”他说。' },
+        { en: "He doesn't have arms, but he can drive a car.", zh: '他没有手臂，可他会开车。' },
+        { en: '"A car is my guitar!" he says.', zh: '“汽车就是我的吉他！”他说。' },
+      ],
+      [ // 开着车，到处跑
+        { en: 'He drives in the garden. He drives in the park.', zh: '他在花园里开，在公园里开。' },
+        { en: 'He drives at the farm, too.', zh: '他还开到农场去呢。' },
+        { en: 'The children wave and sing to him.', zh: '孩子们向他挥手、唱歌。' },
+        { en: 'Then the sun goes down. It is dark.', zh: '后来太阳落山了，天黑啦。' },
+      ],
+      [ // 天黑了，车灯派上用场
+        { en: `"I can't see the road!" says a little girl.`, zh: '“我看不见路啦！”一个小女孩说。' },
+        { en: 'Charlie can drive in the dark.', zh: 'Charlie 会在黑夜里开车呀。' },
+        { en: 'The car lights show the way home.', zh: '车灯照亮了回家的路。' },
+        { en: '"Hurray! My car can sing, too!" he says.', zh: '“好耶！我的车也会唱歌呢！”他说。' },
+      ],
+    ],
+  },
+  '8-8': {
+    title: 'P.E. Class',
+    titleZh: '体育课上的距离',
+    paragraphs: [
+      [ // 体育课，大家都想试
+        { en: "It's P.E. class. The sun is up.", zh: '体育课到啦，太阳高高挂着。' },
+        { en: '"I want to throw a ball!" says Dan.', zh: '“我想扔球！”Dan 说。' },
+        { en: `"Let's kick a ball, too!" says Sam.`, zh: '“我们也踢球吧！”Sam 说。' },
+        { en: 'The children run out to the grass.', zh: '孩子们跑到草地上。' },
+      ],
+      [ // 用米和厘米量一量
+        { en: 'We measure distances in meters and centimeters.', zh: '我们用米和厘米来量距离。' },
+        { en: 'Dan can kick a ball six meters.', zh: 'Dan 能把球踢出六米。' },
+        { en: 'Ben can throw a ball seven meters.', zh: 'Ben 能把球扔出七米。' },
+        { en: 'Sam can swim ten meters in the water.', zh: 'Sam 在水里能游十米。' },
+      ],
+      [ // 小 Ann 的一跳，也值得量
+        { en: 'Little Ann looks at her short jump.', zh: '小 Ann 看着自己那一小跳。' },
+        { en: '"My distance is not far," she says.', zh: '“我的距离不远呢。”她说。' },
+        { en: '"You can hop eighty centimeters!" says the teacher.', zh: '“你能单脚跳八十厘米呢！”老师说。' },
+        { en: 'Ann smiles. Every distance is a good one.', zh: 'Ann 笑了。每一段距离都很棒呀。' },
+      ],
+    ],
+  },
+  '8-9': {
+    title: "Let's Play!",
+    titleZh: '一起玩吧',
+    paragraphs: [
+      [ // Charlie 又开着车来了
+        { en: "Charlie the cow can't play the guitar.", zh: '奶牛 Charlie 不会弹吉他。' },
+        { en: 'But he can drive a car in the dark.', zh: '可他能在黑夜里开车。' },
+        { en: 'Today he drives to the park with friends.', zh: '今天他载着朋友们开到公园。' },
+        { en: `"Let's walk! Let's climb!" says Lola.`, zh: '“我们走吧！我们爬吧！”Lola 说。' },
+      ],
+      [ // 会说会，也会说不会
+        { en: 'They walk up the little hill.', zh: '他们走上小小的山坡。' },
+        { en: `"I can swing. I can't fly," says Mia.`, zh: '“我会荡秋千，可不会飞。”Mia 说。' },
+        { en: `"I can walk, but I can't swing," says Sam.`, zh: '“我会走路，可不会荡秋千。”Sam 说。' },
+        { en: 'The friends stop and look at the sky.', zh: '朋友们停下来，抬头看天。' },
+      ],
+      [ // 不会飞，也能玩得开心
+        { en: 'Charlie drives to the farm and back.', zh: 'Charlie 又开车去农场转了一圈回来。' },
+        { en: `"Let's skip! Let's hop! Let's skate!"`, zh: '“跳绳吧！单脚跳吧！滑冰吧！”' },
+        { en: 'They skip and sing all the way home.', zh: '他们一路跳绳、唱歌回家。' },
+        { en: `"I can't fly, but we can play!" says Mia.`, zh: '“我不会飞，可我们能一起玩呀！”Mia 说。' },
+      ],
+    ],
+  },
+  '8-10': {
+    title: 'A Game on a Card',
+    titleZh: '卡片上的游戏',
+    paragraphs: [
+      [ // 卡片游戏开场
+        { en: 'Nick and Alice play a game at home.', zh: 'Nick 和 Alice 在家里玩游戏。' },
+        { en: 'It is a game on a big card.', zh: '游戏画在一张大大的卡片上。' },
+        { en: '"Read the card and jump!" says Nick.', zh: '“读一读卡片，然后跳！”Nick 说。' },
+        { en: '"I want a doll," says Alice.', zh: '“我想要一个玩偶。”Alice 说。' },
+      ],
+      [ // 说说卡片上的东西
+        { en: 'The doll has a head and two legs.', zh: '玩偶有一个头、两条腿。' },
+        { en: `"It doesn't have arms or hands," she says.`, zh: '“它没有手臂，也没有手。”她说。' },
+        { en: 'Alice can swing. Nick can jump.', zh: 'Alice 会荡秋千，Nick 会跳。' },
+        { en: 'They read the card and run to the tree.', zh: '他们读完卡片，跑到树下。' },
+      ],
+      [ // 树上还有一架小飞机
+        { en: 'But a little plane is up in the tree.', zh: '可树上还有一架小飞机呢。' },
+        { en: '"It can fly! I want a plane, too!"', zh: '“它会飞！我也想要飞机！”' },
+        { en: 'Nick climbs up and gets it down.', zh: 'Nick 爬上去，把它拿了下来。' },
+        { en: `"Let's play a game again!" they say.`, zh: '“我们再玩一次吧！”两人说。' },
       ],
     ],
   },
@@ -827,13 +1023,23 @@ export const u8_reading: Record<string, ReadingPassage> = {
     title: 'Sports in the USA',
     titleZh: '美国的运动',
     paragraphs: [
-      [
-        { en: 'In the USA, boys and girls play lots of sports.', zh: '在美国，男孩女孩们做很多运动。' },
-        { en: 'My favorite sport is basketball. I can shoot a hoop!', zh: '我最喜欢的运动是篮球。我能投进篮筐！' },
+      [ // 在美国，人人都有喜欢的运动
+        { en: 'Today we are in the United States of America.', zh: '今天，我们在美利坚合众国，也就是美国。' },
+        { en: 'In the USA, boys and girls play lots of sports.', zh: '在美国，男孩女孩们玩好多运动。' },
+        { en: `"What's your favorite sport?" asks Lola.`, zh: '“你最喜欢什么运动呀？”Lola 问。' },
       ],
-      [
-        { en: 'Tom likes baseball. He has a uniform.', zh: 'Tom 喜欢棒球，他有一套队服。' },
-        { en: 'Ann likes hockey. She can hit a puck!', zh: 'Ann 喜欢曲棍球，她能击冰球！' },
+      [ // 篮球、棒球、曲棍球
+        { en: '"My favorite sport is basketball," says Tom.', zh: '“我最喜欢篮球。”Tom 说。' },
+        { en: 'He can shoot a hoop. The ball goes in!', zh: '他会投篮，球进筐啦！' },
+        { en: 'Ann has a baseball and a white uniform.', zh: 'Ann 有一个棒球，还有一身白队服。' },
+        { en: '"My favorite sport is hockey. I can skate!"', zh: '“我最喜欢曲棍球。我会滑冰！”' },
+        { en: 'She can hit a puck on the ice.', zh: '她能在冰上击冰球。' },
+      ],
+      [ // 小 Ben 也投进了一个
+        { en: 'But little Ben is sad and quiet.', zh: '可小 Ben 闷闷的，不说话。' },
+        { en: `"I can't shoot a hoop," he says.`, zh: '“我投不进篮筐。”他说。' },
+        { en: '"Stand near me. Try again!" says Tom.', zh: '“站到我旁边，再试一次！”Tom 说。' },
+        { en: 'The ball goes in! Everyone is happy now.', zh: '球进啦！这下大家都开心了。' },
       ],
     ],
   },

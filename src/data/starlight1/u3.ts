@@ -869,23 +869,75 @@ export const u3_frames: SentenceFrame[] = [
 
 // ===================== Reading Passages（连贯小故事） =====================
 export const u3_reading: Record<string, ReadingPassage> = {
-  '3-3': {
-    title: 'Bam Bam in the Tree',
-    titleZh: '树上的 Bam Bam',
+  '3-1': {
+    title: 'Family at the Circus',
+    titleZh: '马戏团里的家人',
     paragraphs: [
       [
-        { en: 'This is Ruby. This is Bam Bam.', zh: '这是 Ruby。这是 Bam Bam。' },
-        { en: 'Bam Bam is Ruby’s cat.', zh: 'Bam Bam 是 Ruby 的猫。' },
-        { en: 'Bam Bam is in the big tree.', zh: 'Bam Bam 在那棵大树上。' },
+        { en: `Today my big family goes to the circus.`, zh: '今天，我们全家去马戏团。' },
+        { en: `Mom has a red balloon for me.`, zh: '妈妈给我拿来一只红气球。' },
+        { en: `Dad has a big yellow bag, too.`, zh: '爸爸拎着一个黄色的大包。' },
+        { en: `"Come to the circus!" says Grandma.`, zh: '“来马戏团吧！”奶奶喊道。' },
       ],
       [
-        { en: 'Grandpa jumps, but Bam Bam is very high up.', zh: '爷爷跳，可是 Bam Bam 在很高处。' },
-        { en: 'Dad jumps onto Grandpa.', zh: '爸爸跳到爷爷身上。' },
-        { en: 'The cousins jump onto Dad.', zh: '表兄弟姐妹们跳到爸爸身上。' },
+        { en: `We look at the people.`, zh: '我们数一数在场的人。' },
+        { en: `"How many people are there at the circus?" I ask.`, zh: '“马戏团里有多少人呀？”我问。' },
+        { en: `Mom, Dad and Grandma are here.`, zh: '妈妈、爸爸和奶奶都在这儿。' },
+        { en: `But where is Grandpa?`, zh: '可是爷爷去哪儿了？' },
+        { en: `"Who is this?" I say.`, zh: '“这是谁呀？”我说。' },
       ],
       [
-        { en: 'Oh no! Bam Bam is still very high up.', zh: '哦不！Bam Bam 还是很高。' },
-        { en: 'Ruby is sad. Who can get Bam Bam?', zh: 'Ruby 很难过。谁能救下 Bam Bam？' },
+        { en: `A tall clown waves at us.`, zh: '一个高个子小丑朝我们挥手。' },
+        { en: `"It's Grandpa!" we all laugh.`, zh: '“是爷爷！”我们都笑了。' },
+        { en: `Now the circus feels like home.`, zh: '这会儿，马戏团也有了家的味道。' },
+      ],
+    ],
+  },
+  '3-2': {
+    title: 'More Family at the Circus',
+    titleZh: '马戏团里来了更多家人',
+    paragraphs: [
+      [
+        { en: `We wait at the circus with Mom and Dad.`, zh: '我们和爸爸妈妈在马戏团里等。' },
+        { en: `Aunt waves from a red bus.`, zh: '阿姨从一辆红色巴士上朝我们挥手。' },
+        { en: `Uncle carries a big cake.`, zh: '叔叔抱着一个大蛋糕。' },
+        { en: `"This is my aunt!" I tell Ruby.`, zh: '“这是我的阿姨！”我告诉 Ruby。' },
+        { en: `"This is my uncle!" she says.`, zh: '“这是我的叔叔！”她说。' },
+      ],
+      [
+        { en: `My brother and sister run to them.`, zh: '哥哥姐姐朝他们跑过去。' },
+        { en: `But I cannot see my cousins.`, zh: '可我还没看见表兄妹们。' },
+        { en: `"Where are my cousins?" I ask.`, zh: '“我的表兄妹们在哪儿呀？”我问。' },
+        { en: `Suddenly a big box opens.`, zh: '忽然，一只大箱子打开了。' },
+        { en: `My cousins jump out with balloons.`, zh: '表兄妹们抱着气球跳了出来。' },
+      ],
+      [
+        { en: `"These are my cousins!" I laugh.`, zh: '“这些就是我的表兄妹！”我笑起来。' },
+        { en: `Now all my family goes in together.`, zh: '现在，全家人一起走进去啦。' },
+      ],
+    ],
+  },
+  '3-3': {
+    title: 'Bam Bam in the Big Tree',
+    titleZh: '大树上的 Bam Bam',
+    paragraphs: [
+      [
+        { en: `Ruby has a little cat, Bam Bam.`, zh: 'Ruby 有一只小猫，叫 Bam Bam。' },
+        { en: `The cat runs up a big tree.`, zh: '小猫爬上了一棵大树。' },
+        { en: `Now Bam Bam is very high.`, zh: '这下 Bam Bam 在好高好高的地方。' },
+        { en: `"Come down, little cat!" says Ruby.`, zh: '“下来吧，小猫咪！”Ruby 喊。' },
+      ],
+      [
+        { en: `Grandpa and Dad jump.`, zh: '爷爷和爸爸一起跳。' },
+        { en: `The cousins jump onto Dad.`, zh: '表兄妹们跳到爸爸身上。' },
+        { en: `Bam Bam looks down at us.`, zh: 'Bam Bam 低头看看我们。' },
+        { en: `"Jump, Bam Bam, jump!" they say.`, zh: '“跳呀，Bam Bam，跳呀！”他们说。' },
+      ],
+      [
+        { en: `The cat jumps into the hands of Dad.`, zh: '小猫跳进爸爸的手里。' },
+        { en: `Ruby holds Bam Bam and smiles.`, zh: 'Ruby 抱着 Bam Bam，笑了。' },
+        { en: `"The tree is big, but we are a team," I say.`, zh: '“树好大，可我们是一队呀。”我说。' },
+        { en: `Bam Bam is home again.`, zh: 'Bam Bam 又回家啦。' },
       ],
     ],
   },
@@ -894,19 +946,142 @@ export const u3_reading: Record<string, ReadingPassage> = {
     titleZh: '我们救下 Bam Bam 啦！',
     paragraphs: [
       [
-        { en: 'Grandma jumps onto Ruby’s cousins.', zh: '奶奶跳到 Ruby 的表兄弟姐妹身上。' },
-        { en: 'Dad, Grandpa and the cousins have an idea.', zh: '爸爸、爷爷和表兄弟姐妹们有了主意。' },
-        { en: 'Jump, Ruby, jump!', zh: '跳，Ruby，跳！' },
+        { en: `Bam Bam is a small cat.`, zh: 'Bam Bam 是只小猫咪。' },
+        { en: `The cat sits on a tall chair.`, zh: '小猫蹲在一把高椅子上。' },
+        { en: `Ruby cannot get the cat.`, zh: 'Ruby 够不着小猫。' },
+        { en: `"I have an idea," says Grandma.`, zh: '“我有个主意。”奶奶说。' },
       ],
       [
-        { en: 'Ruby jumps, too.', zh: 'Ruby 也跳了。' },
-        { en: 'Now Ruby gets Bam Bam!', zh: '现在 Ruby 救下了 Bam Bam！' },
-        { en: 'Hello, Bam Bam!', zh: '你好，Bam Bam！' },
+        { en: `Grandma puts a red ball near the chair.`, zh: '奶奶把一颗红球放到椅子旁。' },
+        { en: `The cat looks at the ball.`, zh: '小猫盯着球看。' },
+        { en: `"Jump, Bam Bam, jump!" we say.`, zh: '“跳呀，Bam Bam，跳呀！”我们喊。' },
+        { en: `The cat jumps into the hands of Ruby.`, zh: '小猫跳进 Ruby 的手里。' },
       ],
       [
-        { en: 'Here is Bam Bam the cat.', zh: 'Bam Bam 这只猫回来了。' },
-        { en: 'Now Bam Bam is happy.', zh: '现在 Bam Bam 开心了。' },
-        { en: 'Thank you, everyone!', zh: '谢谢大家！' },
+        { en: `Now Bam Bam is happy.`, zh: '这下 Bam Bam 开心了。' },
+        { en: `Ruby holds the little cat.`, zh: 'Ruby 抱着小猫。' },
+        { en: `"Thank you, Grandma! Thank you, everyone!" we all say.`, zh: '“谢谢奶奶！谢谢大家！”我们一齐说。' },
+        { en: `Grandma smiles at her happy idea.`, zh: '奶奶望着这个让人开心的主意，笑了。' },
+      ],
+    ],
+  },
+  '3-5': {
+    title: 'The Family Picture',
+    titleZh: '一张全家福',
+    paragraphs: [
+      [
+        { en: `Ruby draws a big family picture.`, zh: 'Ruby 画了一张大大的全家福。' },
+        { en: `One cousin wears a red hat.`, zh: '一个表亲戴着红帽子。' },
+        { en: `"This is my cousin," she tells Grandpa.`, zh: '“这是我的表亲。”她告诉爷爷。' },
+        { en: `Grandpa smiles at the picture.`, zh: '爷爷对着画笑了。' },
+      ],
+      [
+        { en: `But three cousins are behind the door.`, zh: '可还有三个表亲躲在门后。' },
+        { en: `Grandma opens the door.`, zh: '奶奶把门打开。' },
+        { en: `"These are my cousins!" Ruby says.`, zh: '“这些是我的表兄妹们！”Ruby 说。' },
+        { en: `Dad brings three more chairs.`, zh: '爸爸又搬来三把椅子。' },
+      ],
+      [
+        { en: `Now the cousins sit in the picture.`, zh: '现在，表兄妹们都坐进画里啦。' },
+        { en: `"This is one. These are four cousins," says Dad.`, zh: '“这是一个，这些是四个表亲。”爸爸说。' },
+        { en: `Grandma, Grandpa and Dad all laugh.`, zh: '奶奶、爷爷和爸爸都笑了。' },
+        { en: `The big picture has every smile.`, zh: '这张大大的画里，装着每一张笑脸。' },
+      ],
+    ],
+  },
+  '3-6': {
+    title: 'The Secret Picture',
+    titleZh: '画像里的秘密朋友',
+    paragraphs: [
+      [
+        { en: `Our teacher has a new game.`, zh: '老师带我们玩了一个新游戏。' },
+        { en: `We draw a friend from a secret message.`, zh: '我们要照着秘密纸条画一位朋友。' },
+        { en: `My message says, "She has long hair."`, zh: '我的纸条上写着：“她有长头发。”' },
+        { en: `I draw big eyes, too.`, zh: '我还画了一双大眼睛。' },
+      ],
+      [
+        { en: `"He has short hair and small eyes," says Ben.`, zh: '“他有短头发和小眼睛。”Ben 说。' },
+        { en: `"She has blond hair," says Lily.`, zh: '“她有金发。”Lily 说。' },
+        { en: `My picture has two faces now.`, zh: '这下，我的画里有了两张脸。' },
+        { en: `But the secret friend is not here.`, zh: '可那位秘密朋友不在这儿。' },
+        { en: `Who can it be?`, zh: '会是谁呢？' },
+      ],
+      [
+        { en: `Our teacher comes to my desk.`, zh: '老师走到我的桌边。' },
+        { en: `She has long hair, big eyes and blond hair, too.`, zh: '她有长头发、大眼睛，还有一头金发呢。' },
+        { en: `"The secret friend is my teacher!" I say, and we smile.`, zh: '“秘密朋友就是老师呀！”我说完，我们都笑了。' },
+      ],
+    ],
+  },
+  '3-7': {
+    title: 'Er, Er, Er!',
+    titleZh: 'er、er、er！',
+    paragraphs: [
+      [
+        { en: `My brother and sister are at school.`, zh: '我的哥哥和姐姐在学校里。' },
+        { en: `Our teacher brings a red flower.`, zh: '老师带来一朵红花。' },
+        { en: `A little spider sits on the flower.`, zh: '一只小蜘蛛停在花上。' },
+        { en: `"Er says er, er, er!" we sing.`, zh: '“er 读 er、er、er！”我们唱起来。' },
+      ],
+      [
+        { en: `I draw the flower and the spider.`, zh: '我把花和蜘蛛都画下来。' },
+        { en: `But my eraser is not here.`, zh: '可我的橡皮不在这儿了。' },
+        { en: `"Where is my eraser?" I ask.`, zh: '“我的橡皮在哪儿呀？”我问。' },
+        { en: `My sister looks under the desk.`, zh: '姐姐往桌子底下瞧。' },
+        { en: `My brother looks near the window.`, zh: '哥哥在窗边找。' },
+      ],
+      [
+        { en: `Our teacher points at the red flower.`, zh: '老师指了指那朵红花。' },
+        { en: `"Here's the eraser!" she says.`, zh: '“橡皮在这儿呢！”她说。' },
+        { en: `We laugh. Er, er, er, what a day!`, zh: '我们都笑了。er、er、er，这一天真有意思！' },
+      ],
+    ],
+  },
+  '3-8': {
+    title: 'My Twin Sisters',
+    titleZh: '我的双胞胎姐姐',
+    paragraphs: [
+      [
+        { en: `I make a family picture at school.`, zh: '我在学校画了一张全家福。' },
+        { en: `My mom has brown eyes.`, zh: '妈妈有一双棕色眼睛。' },
+        { en: `I have brown eyes, too.`, zh: '我也有一双棕色眼睛。' },
+        { en: `"We're similar!" I say.`, zh: '“我们好像呀！”我说。' },
+      ],
+      [
+        { en: `My sister Lily has a red flower.`, zh: '我的姐姐 Lily 拿着一朵红花。' },
+        { en: `My sister Anna has a blue balloon.`, zh: '我的姐姐 Anna 拿着一只蓝气球。' },
+        { en: `They have blond hair and blue eyes.`, zh: '她们都有金发和蓝眼睛。' },
+        { en: `"They're identical!" says Dad.`, zh: '“她们一模一样！”爸爸说。' },
+        { en: `"They are twins," he says.`, zh: '“她们是双胞胎。”他说。' },
+      ],
+      [
+        { en: `But the twins are different, too.`, zh: '不过这对双胞胎也有不一样的地方。' },
+        { en: `I draw the flower and the balloon.`, zh: '我把花和气球都画上去。' },
+        { en: `"Now I can see my family," I say.`, zh: '“这下我看清我的一家人啦。”我说。' },
+      ],
+    ],
+  },
+  '3-9': {
+    title: 'The Clown at School',
+    titleZh: '学校里的小丑',
+    paragraphs: [
+      [
+        { en: `Our teacher brings a clown to school.`, zh: '老师把一位小丑带到学校。' },
+        { en: `The clown has a yellow flower.`, zh: '小丑拿着一朵黄花。' },
+        { en: `He has a blue balloon, too.`, zh: '他还拿着一只蓝气球。' },
+        { en: `A little spider sits on the balloon.`, zh: '一只小蜘蛛停在气球上。' },
+      ],
+      [
+        { en: `Suddenly the spider is not there.`, zh: '忽然，小蜘蛛不见了。' },
+        { en: `"Where is the spider?" I ask.`, zh: '“小蜘蛛去哪儿了？”我问。' },
+        { en: `My brother looks in a red hat.`, zh: '哥哥往红帽子里瞧。' },
+        { en: `My sister looks under the chair.`, zh: '姐姐在椅子下面找。' },
+        { en: `The clown smiles at us.`, zh: '小丑朝我们笑。' },
+      ],
+      [
+        { en: `Our teacher points at the yellow flower.`, zh: '老师指了指那朵黄花。' },
+        { en: `"Here's the spider!" she says.`, zh: '“小蜘蛛在这儿呢！”她说。' },
+        { en: `We all laugh with the clown.`, zh: '我们和小丑一起笑起来。' },
       ],
     ],
   },
@@ -915,19 +1090,22 @@ export const u3_reading: Record<string, ReadingPassage> = {
     titleZh: '10 号特工',
     paragraphs: [
       [
-        { en: 'Monty and Lola are in the classroom at school.', zh: 'Monty 和 Lola 在学校教室里。' },
-        { en: 'They see a white cat.', zh: '他们看见一只白色的猫。' },
-        { en: 'Now Monty and Lola are in a city.', zh: '现在 Monty 和 Lola 来到一座城市。' },
+        { en: `Monty and Lola are in the classroom at school.`, zh: 'Monty 和 Lola 在学校教室里。' },
+        { en: `They see a secret message.`, zh: '他们看到一封秘密留言。' },
+        { en: `"Who is Secret Agent 10?" asks Lola.`, zh: '“谁是 10 号特工呀？”Lola 问。' },
+        { en: `"What does he look like?" says Monty.`, zh: '“他长什么样呢？”Monty 说。' },
       ],
       [
-        { en: 'Lola opens the book. Monty and Lola read.', zh: 'Lola 打开书。Monty 和 Lola 读起来。' },
-        { en: 'Who is Secret Agent 10?', zh: '谁是 10 号特工？' },
-        { en: 'He has brown hair and blue eyes.', zh: '他有棕色头发和蓝色眼睛。' },
+        { en: `A girl has blond hair and brown eyes.`, zh: '一个女孩有金发和棕色眼睛。' },
+        { en: `A boy has black hair and blue eyes.`, zh: '一个男孩有黑头发和蓝色眼睛。' },
+        { en: `Lola opens the book and reads.`, zh: 'Lola 打开书读起来。' },
+        { en: `"Look for a white hat," she says.`, zh: '“找一顶白帽子。”她说。' },
+        { en: `"And big feet!" says Monty.`, zh: '“还有一双大脚！”Monty 说。' },
       ],
       [
-        { en: 'She has blond hair and green eyes.', zh: '她有金色头发和绿色眼睛。' },
-        { en: 'He has black hair and a white hat.', zh: '他有黑头发和一顶白帽子。' },
-        { en: 'Is Mr. Sonic Secret Agent 10?', zh: 'Sonic 老师是 10 号特工吗？' },
+        { en: `In a city, a man has a white hat and big feet.`, zh: '在城里，一个男人戴着白帽子，还有一双大脚。' },
+        { en: `"It's Mr. Sonic, Secret Agent 10!" they say.`, zh: '“是 Sonic 老师，10 号特工！”他们说。' },
+        { en: `The secret is here with them.`, zh: '秘密就留在他们这儿啦。' },
       ],
     ],
   },
@@ -936,18 +1114,22 @@ export const u3_reading: Record<string, ReadingPassage> = {
     titleZh: '10 号特工是谁？',
     paragraphs: [
       [
-        { en: 'Monty and Lola see a message.', zh: 'Monty 和 Lola 看到一条消息。' },
-        { en: 'Who left the message?', zh: '是谁留下的消息？' },
-        { en: 'He has brown hair and blue eyes.', zh: '他有棕色头发和蓝色眼睛。' },
+        { en: `Monty and Lola see a message at school.`, zh: 'Monty 和 Lola 在学校看到一条留言。' },
+        { en: `"Who left the message?" asks Lola.`, zh: '“是谁留下的留言呀？”Lola 问。' },
+        { en: `"Who is Secret Agent 10?" says Monty.`, zh: '“谁是 10 号特工呢？”Monty 说。' },
+        { en: `They open the book and read.`, zh: '他们打开书读起来。' },
       ],
       [
-        { en: 'She has black hair and blue eyes.', zh: '她有黑头发和蓝色眼睛。' },
-        { en: 'They see small feet and a white hat.', zh: '他们看到一双小脚和一顶白帽子。' },
-        { en: 'Mr. Sonic is Secret Agent 10!', zh: 'Sonic 老师就是 10 号特工！' },
+        { en: `They see a man with brown hair and blue eyes.`, zh: '他们看见一个男人，有棕色头发和蓝眼睛。' },
+        { en: `A girl has blond hair and green eyes.`, zh: '一个女孩有金发和绿色眼睛。' },
+        { en: `A woman has black hair and small feet.`, zh: '一位女士有黑头发和一双小脚。' },
+        { en: `"Look! This message is from Mr. Sonic," says Lola.`, zh: '“看！这条留言来自 Sonic 老师。”Lola 说。' },
       ],
       [
-        { en: 'This message is from Mr. Sonic.', zh: '这条消息来自 Sonic 老师。' },
-        { en: 'Now Monty and Lola know the answer.', zh: '现在 Monty 和 Lola 知道了答案。' },
+        { en: `Mr. Sonic comes near.`, zh: 'Sonic 老师走近了。' },
+        { en: `He has big feet.`, zh: '他有一双大脚。' },
+        { en: `Mr. Sonic is Secret Agent 10!`, zh: 'Sonic 老师就是 10 号特工！' },
+        { en: `Now Monty and Lola know the answer.`, zh: '现在 Monty 和 Lola 知道答案啦。' },
       ],
     ],
   },

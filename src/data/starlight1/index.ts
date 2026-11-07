@@ -6,7 +6,7 @@ import type { Module } from '../starlight'
 import type { ReadingPassage, SentenceFrame } from './shared'
 import { lessonsByUnit1 } from './lessons'
 import { STARLIGHT_BOOK1 } from './book'
-import { READING_PASSAGES1, getReadingPassage1 } from './reading'
+import { READING_PASSAGES1, getReadingPassage1, UNIT1_READINGS } from './reading'
 import { STARLIGHT_FRAMES1, UNIT1_FRAMES, framesOfLesson1 } from './sentenceFrames'
 import { EXT_TOPICS1 } from './extensions'
 import { u2_module, u2_frames, u2_reading } from './u2'
@@ -58,16 +58,15 @@ export function framesOfLesson1Series(unitSlug: string, lessonId: number): Sente
 }
 
 /**
- * 阅读短文：**按单元聚合**（键形同为 `${单元}-${课}`，与 Unit 1 的 READING_PASSAGES1 一致）。
- * Unit 2–9 的短文在各自的 uN_reading 里，之前没接。
+ * 阅读短文：**按单元聚合**（键形 `${单元}-${课}`）。
+ * Unit 1 的桶用 reading.ts 导出的 UNIT1_READINGS（该单元 10 篇专有短文），
+ * Unit 2–9 用各自 uN.ts 的 uN_reading。
  *
- * ⚠️ Unit 1 的桶只放 `1-*` 两篇：READING_PASSAGES1 是**摊平的总表**（另拼了 u2–u9
- * 的短文供 getReadingPassage1 用），整张塞进来会让 Unit 1 名下混进别的单元键，
- * 任何「遍历本桶」的逻辑都会读串。按前缀过滤成真正的 Unit 1 桶。
+ * ⚠️ 不要把摊平总表 READING_PASSAGES1 整个塞进 Unit 1 桶：那是给
+ * getReadingPassage1 用的全册总表，整张塞进来会让 Unit 1 名下混进别的单元键，
+ * 任何「遍历本桶」的逻辑都会读串。早先按前缀过滤也可行，但既然 Unit 1 已有
+ * 专有常量，直接复用更不容易漂移。
  */
-const UNIT1_READINGS: Record<string, ReadingPassage> = Object.fromEntries(
-  Object.entries(READING_PASSAGES1).filter(([key]) => key.startsWith('1-')),
-)
 
 export const READINGS_BY_UNIT1: Record<number, Record<string, ReadingPassage>> = {
   1: UNIT1_READINGS,

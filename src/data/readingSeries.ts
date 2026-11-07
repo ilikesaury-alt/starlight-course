@@ -8,8 +8,8 @@
 //   若在这里 import 任何一册的数据，两册会一起被塞进两个 chunk。
 //
 // 一条铁律：两册单元号都从 1 开始，跨册一律按 level 分发，绝不按裸单元号取。
-// 预备级 96 课篇篇有短文；第一册目前只写了 27 篇（阅读课/故事课才有），
-// 所以 readingLessonsOf 滤掉没有短文的课 —— 不然 69 张卡片点开全是空态。
+// 两册现在都是 96 课篇篇有短文。readingLessonsOf 仍保留「滤掉没有短文的课」：
+// 万一以后某册新增一课却还没配短文，页面不会出现点开是空态的死链卡片。
 
 import type { Lesson, Module } from './starlight'
 import type { ReadingPassage } from './reading/index'

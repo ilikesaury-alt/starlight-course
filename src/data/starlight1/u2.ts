@@ -748,38 +748,243 @@ export function framesOfLesson2(unitSlug: string, lessonId: number): SentenceFra
 // 4. 阅读短文（连贯小故事，keyed '2-<lesson>'；至少 3、4，另加 11）
 // ============================================================================
 export const u2_reading: Record<string, ReadingPassage> = {
+  '2-1': {
+    title: 'Look at My Face!',
+    titleZh: '看看我的脸！',
+    paragraphs: [
+      [
+        { en: "\"Doctor! Doctor! I'm ill today!\" says Ben.", zh: '“医生！医生！我今天生病啦！”小本说。' },
+        { en: 'Lola comes to the little boy.', zh: '罗拉来到小男孩身边。' },
+        { en: 'Ben is sad and very quiet.', zh: '小本蔫蔫的，一句话也不想说。' },
+        { en: "\"Look at my eyes!\" says Lola.", zh: '“看我的眼睛！”罗拉说。' },
+      ],
+      [
+        { en: "\"Look at my ears and my nose!\" she says.", zh: '“再看我的耳朵和鼻子！”她说。' },
+        { en: 'Ben looks and smiles a little.', zh: '小本看着看着，忍不住笑了一下。' },
+        { en: "\"Now look at my mouth and my teeth!\"", zh: '“现在看我的嘴和牙齿！”' },
+        { en: "\"What are these?\" asks Lola.", zh: '“这些是什么呀？”罗拉问。' },
+        { en: "\"Teeth! Big white teeth!\" says Ben.", zh: '“牙齿！白白的大牙！”小本说。' },
+      ],
+      [
+        { en: 'He points to his eyes, ears and nose.', zh: '他指指自己的眼睛、耳朵和鼻子。' },
+        { en: "\"I am not ill now,\" he says.", zh: '“我现在不生病啦。”他说。' },
+        { en: "Lola laughs. \"Look at my happy boy!\"", zh: '罗拉笑起来：“瞧这个开心的小家伙！”' },
+      ],
+    ],
+  },
+  '2-2': {
+    title: 'What Are These?',
+    titleZh: '这些是什么呀？',
+    paragraphs: [
+      [
+        { en: 'Mia draws a big picture today.', zh: '米娅今天画了一张大大的画。' },
+        { en: 'She draws a face, but it is sad.', zh: '她画了一张脸，可脸是难过的。' },
+        { en: "\"What's this?\" asks her friend Ben.", zh: '“这是什么呀？”她的朋友小本问。' },
+        { en: "\"It's my face,\" says Mia.", zh: '“这是我的脸。”米娅说。' },
+      ],
+      [
+        { en: "\"But look at my hair!\" says Ben.", zh: '“可要看看我的头发呀！”小本说。' },
+        { en: 'Mia draws long hair on the face.', zh: '米娅给脸添上长长的头发。' },
+        { en: "\"What are these?\" she asks.", zh: '“这些是什么呀？”她问。' },
+        { en: "\"They are my cheeks,\" says Ben.", zh: '“是我的脸颊呀。”小本说。' },
+        { en: 'She draws two red cheeks, too.', zh: '她又画上两团红红的脸颊。' },
+      ],
+      [
+        { en: "\"Look at my feet and my toes!\" he says.", zh: '“看我的脚和脚趾！”他说。' },
+        { en: 'Mia draws feet with ten little toes.', zh: '米娅画了脚，还有十根小脚趾。' },
+        { en: 'Now the face has a big smile!', zh: '现在这张脸笑得大大的啦！' },
+      ],
+    ],
+  },
   '2-3': {
     title: 'Poor Mr. Bear!',
     titleZh: '可怜的熊先生！',
     paragraphs: [
       [
-        { en: 'Mr. Bear is ill. He is in the hospital.', zh: '熊先生生病了，他在医院里。' },
-        { en: 'Lola is the doctor. She helps Mr. Bear.', zh: '罗拉是医生，她帮助熊先生。' },
-        { en: 'How are you today? she says. This is for you!', zh: '“你今天好吗？”她说，“这是给你的！”' },
+        { en: 'Poor Mr. Bear is ill today.', zh: '可怜的熊先生今天生病了。' },
+        { en: 'He is in the hospital, in a small bed.', zh: '他住在医院里，睡在一张小床上。' },
+        { en: 'A big bandage is on his face.', zh: '一大块绷带盖在他的脸上。' },
+        { en: "\"I can't see my mouth,\" he says.", zh: '“我看不见我的嘴啦。”他说。' },
       ],
       [
-        { en: 'One week later, here is the doctor.', zh: '一周后，医生来了。' },
-        { en: 'The doctor takes off a bandage.', zh: '医生取下一块绷带。' },
-        { en: 'Look! I have a mouth. Hurray!', zh: '看！我有一张嘴。好耶！' },
+        { en: 'Lola the doctor comes in.', zh: '罗拉医生进来了。' },
+        { en: "\"How are you today?\" she asks.", zh: '“你今天好吗？”她问。' },
+        { en: "\"This is for you!\" says Lola.", zh: '“这是给你的！”罗拉说。' },
+        { en: 'She gives him a red apple.', zh: '她递给他一个红苹果。' },
+        { en: 'Mr. Bear smiles under the bandage.', zh: '熊先生在绷带底下笑了。' },
+      ],
+      [
+        { en: 'The doctor takes off the bandage.', zh: '医生把绷带轻轻取下来。' },
+        { en: "\"Look! I have a mouth. Hurray!\"", zh: '“看！我有一张嘴啦。好耶！”' },
+        { en: "\"Hello, my face!\" says Mr. Bear.", zh: '“你好呀，我的脸！”熊先生说。' },
       ],
     ],
   },
   '2-4': {
-    title: "Mr. Wolf!",
-    titleZh: '狼先生！',
+    title: 'Mr. Wolf!',
+    titleZh: '原来是狼先生！',
     paragraphs: [
       [
-        { en: 'Then the doctor takes off another bandage.', zh: '然后医生又取下一块绷带。' },
-        { en: 'Look! I have a nose and eyes. Hurray!', zh: '看！我有一个鼻子和两只眼睛。好耶！' },
+        { en: 'Lola is in the hospital again today.', zh: '罗拉今天又来到医院。' },
+        { en: 'Two bandages sit on two beds.', zh: '两张床上各有一块绷带。' },
+        { en: "\"This is for you!\" says the doctor.", zh: '“这是给你的！”医生说。' },
+        { en: 'Then she takes off another bandage.', zh: '然后她又取下另一块绷带。' },
       ],
       [
-        { en: 'Then the doctor takes off another bandage.', zh: '医生再取下一块绷带。' },
-        { en: 'Look! I have ears. Oh!', zh: '看！我有耳朵。哦！' },
-        { en: "That isn't Mr. Bear. It's Mr. Wolf!", zh: '那不是熊先生，是狼先生！' },
+        { en: "\"Look! I have a nose and eyes!\"", zh: '“看！我有鼻子和眼睛啦！”' },
+        { en: "\"I have ears too. Hurray!\"", zh: '“我还有耳朵呢。好耶！”' },
+        { en: 'Lola looks at the big ear.', zh: '罗拉盯着那只大耳朵看。' },
+        { en: "\"Oh! That isn't Mr. Bear,\" she says.", zh: '“哦！这不是熊先生。”她说。' },
+        { en: "\"It's Mr. Wolf! It isn't Mr. Bear!\"", zh: '“是狼先生！不是熊先生！”' },
       ],
       [
-        { en: 'Where is Mr. Bear? Mr. Bear is in the other bed.', zh: '熊先生在哪里？熊先生在另一张床上。' },
-        { en: "I am here! There is Mr. Bear. Oh no!", zh: '我在这儿！熊先生在那儿。哦不！' },
+        { en: 'Mr. Wolf points to the other bed.', zh: '狼先生指指另一张床。' },
+        { en: "\"I'm here!\" says Mr. Bear.", zh: '“我在这儿呀！”熊先生说。' },
+        { en: "\"Look! I have a mouth too!\" he says.", zh: '“看！我也有嘴呢！”他说。' },
+      ],
+    ],
+  },
+  '2-5': {
+    title: 'Who Am I?',
+    titleZh: '猜猜我是谁？',
+    paragraphs: [
+      [
+        { en: 'Ben has a big hat on his face.', zh: '小本把一顶大帽子扣在脸上。' },
+        { en: "\"Who am I?\" he asks his friends.", zh: '“我是谁呀？”他问朋友们。' },
+        { en: 'The children look and laugh.', zh: '孩子们看着看着都笑了。' },
+        { en: "\"I have a face,\" says Ben.", zh: '“我有一张脸。”小本说。' },
+      ],
+      [
+        { en: "\"I have a nose and a mouth!\"", zh: '“我有一个鼻子和一张嘴！”' },
+        { en: "\"I have eyes, too,\" he says.", zh: '“我还有眼睛呢。”他说。' },
+        { en: "\"But what is this?\" asks Mia.", zh: '“可这是什么呀？”米娅问。' },
+        { en: 'She points to his yellow hair.', zh: '她指着他黄黄的头发。' },
+        { en: "\"I have hair!\" says Ben.", zh: '“我有头发！”小本说。' },
+      ],
+      [
+        { en: 'Mia takes off the big hat.', zh: '米娅摘下那顶大帽子。' },
+        { en: "\"It's Ben! We know you now!\"", zh: '“是小本！我们认出你啦！”' },
+        { en: "\"Hello, Ben!\" say the children.", zh: '“小本，你好呀！”孩子们说。' },
+      ],
+    ],
+  },
+  '2-6': {
+    title: 'This Is His Soap',
+    titleZh: '这是他的肥皂',
+    paragraphs: [
+      [
+        { en: 'Ben and Mia play in the park.', zh: '小本和米娅在公园里玩。' },
+        { en: 'Now they are not very clean.', zh: '这下他们可不太干净了。' },
+        { en: "\"Wash! Wash! Wash!\" says Mom.", zh: '“洗！洗！洗！”妈妈说。' },
+        { en: 'She puts things on the table.', zh: '她把东西一样样摆在桌上。' },
+      ],
+      [
+        { en: "\"Is this my soap?\" asks Ben.", zh: '“这是我的肥皂吗？”小本问。' },
+        { en: "\"This is his soap,\" says Mom.", zh: '“这是他的肥皂。”妈妈说。' },
+        { en: "\"This is his towel and his comb.\"", zh: '“这是他的毛巾和他的梳子。”' },
+        { en: "\"This is his toothbrush, too,\" she says.", zh: '“这也是他的牙刷。”她说。' },
+        { en: "\"And this is her shampoo.\"", zh: '“这瓶洗发水是她的。”' },
+      ],
+      [
+        { en: "\"Her towel is blue,\" says Mia.", zh: '“她的毛巾是蓝色的。”米娅说。' },
+        { en: 'They wash and wash with the soap.', zh: '他们用肥皂洗呀洗呀。' },
+        { en: "\"Good night, my clean little bears!\" says Mom.", zh: '“晚安啦，我干净的小熊们！”妈妈说。' },
+      ],
+    ],
+  },
+  '2-7': {
+    title: 'Th, Th, Th!',
+    titleZh: '嘴巴里的小声音',
+    paragraphs: [
+      [
+        { en: 'It is a new morning in the bathroom.', zh: '浴室里，新的一天开始了。' },
+        { en: 'Ben opens his mouth and looks.', zh: '小本张开嘴瞧了瞧。' },
+        { en: "\"Open your mouth,\" says Lola.", zh: '“把嘴张开。”罗拉说。' },
+        { en: "\"Th says th, th, th!\" she says.", zh: '“th 念 th、th、th！”她说。' },
+      ],
+      [
+        { en: "Ben says, \"Th, th, th!\"", zh: '小本也念：“th、th、th！”' },
+        { en: 'He laughs and laughs at the funny noise.', zh: '这声音怪怪的，他笑个不停。' },
+        { en: "\"Brush your teeth now,\" says Lola.", zh: '“现在刷牙啦。”罗拉说。' },
+        { en: 'He counts three teeth here.', zh: '他在这边数出三颗牙。' },
+        { en: 'He counts thirteen teeth there.', zh: '他在那边数出十三颗牙。' },
+      ],
+      [
+        { en: "\"Thirteen! Look at my teeth!\" he says.", zh: '“十三颗！看我的牙！”他说。' },
+        { en: 'Now his teeth are clean and white again.', zh: '现在他的牙又白又干净啦。' },
+        { en: "\"Th, th, thank you, teeth!\" says Ben.", zh: '“th、th，谢谢你，小牙齿！”小本说。' },
+      ],
+    ],
+  },
+  '2-8': {
+    title: 'Twenty Baby Teeth',
+    titleZh: '二十颗小乳牙',
+    paragraphs: [
+      [
+        { en: 'Lola the doctor looks in his mouth.', zh: '罗拉医生往他嘴里瞧了瞧。' },
+        { en: "\"How many teeth?\" asks Ben.", zh: '“有多少颗牙呀？”小本问。' },
+        { en: "\"You have twenty baby teeth,\" she says.", zh: '“你有二十颗乳牙呢。”她说。' },
+        { en: "\"When you are three, you get teeth.\"", zh: '“你三岁的时候就长牙啦。”' },
+      ],
+      [
+        { en: "\"Baby teeth are small,\" says Lola.", zh: '“乳牙小小的。”罗拉说。' },
+        { en: "\"Then you get adult teeth,\" she says.", zh: '“以后还会长恒牙。”她说。' },
+        { en: 'Ben thinks about his small teeth.', zh: '小本想着自己小小的牙。' },
+        { en: "\"I want big adult teeth!\" he says.", zh: '“我想要大大的恒牙！”他说。' },
+      ],
+      [
+        { en: "\"Take care of your teeth,\" says Lola.", zh: '“要好好照顾你的牙。”罗拉说。' },
+        { en: "\"Brush your teeth three times a day!\"", zh: '“每天刷三次牙哦！”' },
+        { en: 'Ben opens his mouth and smiles.', zh: '小本张开嘴，笑了。' },
+        { en: "\"Thank you, twenty teeth!\" he says.", zh: '“谢谢你，二十颗小牙！”他说。' },
+      ],
+    ],
+  },
+  '2-9': {
+    title: 'Five Lost Things',
+    titleZh: '丢了的五样东西',
+    paragraphs: [
+      [
+        { en: 'Ben looks at his room. Oh no!', zh: '小本看了看自己的房间。哦不！' },
+        { en: 'His five things are all lost.', zh: '他的五样东西全都不见了。' },
+        { en: "\"Where is my comb?\" he asks.", zh: '“我的梳子在哪儿呀？”他问。' },
+        { en: 'The comb is under the bed.', zh: '梳子在床底下呢。' },
+      ],
+      [
+        { en: 'He finds a towel on the chair.', zh: '他在椅子上找到一条毛巾。' },
+        { en: "\"This is my towel,\" he says.", zh: '“这是我的毛巾。”他说。' },
+        { en: 'His brush is in a red shoe.', zh: '他的刷子藏在一只红鞋里。' },
+        { en: 'He finds the soap and the toothbrush.', zh: '他又找到肥皂和牙刷。' },
+        { en: "\"This is his toothbrush,\" says Mom.", zh: '“这是他的牙刷。”妈妈说。' },
+      ],
+      [
+        { en: "\"This is his soap, too,\" she says.", zh: '“这也是他的肥皂。”她说。' },
+        { en: 'Now Ben has all five things.', zh: '现在小本五样东西都齐了。' },
+        { en: "\"Good night, my clean boy!\" says Mom.", zh: '“晚安啦，我的干净小子！”妈妈说。' },
+      ],
+    ],
+  },
+  '2-10': {
+    title: 'The Blue Nose',
+    titleZh: '蓝蓝的鼻子',
+    paragraphs: [
+      [
+        { en: 'It is a game at school today.', zh: '今天学校里有个小游戏。' },
+        { en: "\"Let's draw a big face!\" says Mia.", zh: '“我们来画一张大脸吧！”米娅说。' },
+        { en: 'Ben has a new blue pencil.', zh: '小本有一支新的蓝铅笔。' },
+        { en: "\"It's my pencil,\" he says.", zh: '“这是我的铅笔。”他说。' },
+      ],
+      [
+        { en: 'Mia draws a big blue nose.', zh: '米娅画了一个大大的蓝鼻子。' },
+        { en: "\"Look at the blue nose!\" says Ben.", zh: '“快看这个蓝鼻子！”小本说。' },
+        { en: 'She draws white teeth, too.', zh: '她还画了白白的牙齿。' },
+        { en: "\"I have teeth like that!\" says Ben.", zh: '“我的牙就长这样！”小本说。' },
+        { en: 'A towel is on the picture now.', zh: '这会儿画上盖着一条毛巾。' },
+      ],
+      [
+        { en: "\"This is her towel,\" says Mia.", zh: '“这是她的毛巾。”米娅说。' },
+        { en: "\"No, it is his towel!\" says Ben.", zh: '“不对，是他的毛巾！”小本说。' },
+        { en: 'They take off the towel. The blue nose smiles!', zh: '他们掀开毛巾，蓝鼻子正冲着他们笑呢！' },
       ],
     ],
   },
@@ -789,17 +994,21 @@ export const u2_reading: Record<string, ReadingPassage> = {
     paragraphs: [
       [
         { en: "Hello! I'm Miho. I'm from Japan.", zh: '你好！我是美穗，我来自日本。' },
-        { en: "I'm in grade 1. I'm six.", zh: '我上一年级，六岁。' },
+        { en: "I'm six. I'm in grade one.", zh: '我六岁，上一年级啦。' },
         { en: 'This is my teacher, Mr. Sato.', zh: '这是我的老师，佐藤先生。' },
+        { en: "\"Good morning, Miho!\" he says.", zh: '“美穗，早上好！”他说。' },
       ],
       [
-        { en: 'I have lunch at school.', zh: '我在学校吃午饭。' },
-        { en: 'I eat my lunch in my classroom.', zh: '我在教室里吃午饭。' },
-        { en: 'Today I have rice, fish and milk.', zh: '今天我吃米饭、鱼和牛奶。' },
+        { en: 'I have lunch at school today.', zh: '今天我在学校吃午饭。' },
+        { en: 'I eat my lunch in my classroom.', zh: '我在教室里吃自己的午饭。' },
+        { en: 'Today I have rice, fish and milk.', zh: '今天有米饭、鱼和牛奶。' },
+        { en: 'But my chopsticks are not here.', zh: '可是我的筷子不见了。' },
       ],
       [
-        { en: 'I use chopsticks!', zh: '我用筷子！' },
-        { en: 'After lunch, I brush my teeth at school.', zh: '午饭后，我在学校刷牙。' },
+        { en: "\"I can't eat my rice!\" I say.", zh: '“我吃不到米饭啦！”我着急地说。' },
+        { en: 'Mr. Sato brings new chopsticks for me.', zh: '佐藤先生给我拿来新筷子。' },
+        { en: 'I use chopsticks and eat my rice.', zh: '我用筷子，把米饭吃光光。' },
+        { en: 'Tomorrow, lunch at school again!', zh: '明天，又要在学校吃午饭喽！' },
       ],
     ],
   },

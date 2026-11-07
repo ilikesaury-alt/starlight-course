@@ -538,6 +538,50 @@ export const u7_frames: SentenceFrame[] = [
 ]
 
 export const u7_reading: Record<string, ReadingPassage> = {
+  '7-1': {
+    title: 'What Can Fly?',
+    titleZh: '什么能飞？',
+    paragraphs: [
+      [
+        { en: 'Monty has a ball, a doll and a basketball today.', zh: '蒙蒂今天有一个球、一个洋娃娃和一个篮球。' },
+        { en: '"Look at my plane and my kite!" he says.', zh: '他说：「看我的飞机和风筝！」' },
+        { en: '"Where can you see a plane?" asks Lola.', zh: '罗拉问：「你在哪里能看见飞机？」' },
+      ],
+      [
+        { en: '"The plane can fly at the airport," says Monty.', zh: '蒙蒂说：「飞机能在机场飞。」' },
+        { en: '"The kite can fly in the sky, too!"', zh: '「风筝也能在天上飞！」' },
+        { en: '"What else can fly?" asks Lola.', zh: '罗拉问：「还有什么能飞呢？」' },
+        { en: 'A little bird goes up, up, up.', zh: '一只小鸟飞呀，飞呀，飞高了。' },
+      ],
+      [
+        { en: '"My ball can not fly, but it can jump!"', zh: '「我的球不会飞，可它会跳！」' },
+        { en: '"Let\'s look at the big sky," says Lola.', zh: '罗拉说：「我们看看大大的天空吧。」' },
+        { en: '"Hurray! We can fly like a kite!" they laugh.', zh: '「太好啦！我们能像风筝一样飞！」他们笑起来。' },
+      ],
+    ],
+  },
+  '7-2': {
+    title: 'The Robot Show',
+    titleZh: '机器人表演',
+    paragraphs: [
+      [
+        { en: '"This is a robot," says Monty.', zh: '「这是一个机器人。」蒙蒂说。' },
+        { en: '"Dance like a robot!" he says to Lola.', zh: '他对罗拉说：「像机器人一样跳舞！」' },
+        { en: 'Lola has a puppet and a guitar, too.', zh: '罗拉还有一个木偶和一把吉他。' },
+      ],
+      [
+        { en: '"Listen, say and do," says the teacher.', zh: '老师说：「听一听，说一说，做一做。」' },
+        { en: 'Monty plays the piano for the robot.', zh: '蒙蒂为机器人弹钢琴。' },
+        { en: '"T-Rex is a dinosaur, not a robot!" says Lola.', zh: '罗拉说：「霸王龙是恐龙，不是机器人！」' },
+        { en: '"Triceratops is a dinosaur, too."', zh: '「三角龙也是恐龙。」' },
+      ],
+      [
+        { en: '"Can a dinosaur dance like a robot?" asks Monty.', zh: '蒙蒂问：「恐龙能像机器人一样跳舞吗？」' },
+        { en: '"Yes! Watch my puppet go!" says Lola.', zh: '「能！看我的木偶跳起来！」罗拉说。' },
+        { en: '"Hurray for the robot show!" they laugh.', zh: '「机器人表演太棒啦！」他们笑起来。' },
+      ],
+    ],
+  },
   '7-3': {
     title: 'Magic Mo the Magician',
     titleZh: '魔术师魔法莫',
@@ -545,38 +589,151 @@ export const u7_reading: Record<string, ReadingPassage> = {
       [
         { en: 'This is Magic Mo. She is a magician.', zh: '这是魔法莫。她是一位魔术师。' },
         { en: 'She has a magic hat and a magic wand.', zh: '她有一顶魔法帽和一根魔法棒。' },
-        { en: 'Abracadabra! She makes magic.', zh: '变！她施展魔法。' },
+        { en: '"Abracadabra!" she says. "I make magic!"', zh: '她说：「变！我会变魔法！」' },
       ],
       [
-        { en: 'Here is Paul. What do you want, Paul?', zh: '这是保罗。保罗，你想要什么？' },
-        { en: 'I want a ball, please.', zh: '我想要一个球，谢谢。' },
-        { en: 'I have a ball in my hat!', zh: '我的帽子里有一个球！' },
+        { en: 'Here is Paul. "What do you want, Paul?"', zh: '这是保罗。「保罗，你想要什么？」' },
+        { en: '"I want a ball, please," says Paul.', zh: '保罗说：「我想要一个球，谢谢。」' },
+        { en: '"I have a ball in my hat!" says Magic Mo.', zh: '魔法莫说：「我的帽子里有一个球！」' },
+        { en: '"Oh! Thank you very much!" says Paul.', zh: '保罗说：「哦！非常感谢你！」' },
       ],
       [
-        { en: 'Oh! Thank you very much!', zh: '哦！非常感谢你！' },
-        { en: 'Here are the twins, Sol and Jane.', zh: '这是双胞胎索尔和简。' },
-        { en: 'Sol wants a doll and Jane wants a plane.', zh: '索尔想要一个洋娃娃，简想要一架飞机。' },
+        { en: '"I want a green frog, please," says Jane.', zh: '简说：「我想要一只绿色的青蛙，谢谢。」' },
+        { en: 'Magic Mo waves her wand at the hat.', zh: '魔法莫对着帽子挥了挥魔法棒。' },
+        { en: '"Look! A frog is in my hat now!"', zh: '「看！现在我帽子里有一只青蛙！」' },
+        { en: '"Hurray for magic!" the children laugh.', zh: '「魔法真棒！」孩子们笑起来。' },
       ],
     ],
   },
   '7-4': {
-    title: "Lou and the Broken Dinosaur",
-    titleZh: '卢和坏掉的恐龙',
+    title: 'The Broken Dinosaur',
+    titleZh: '坏掉的恐龙',
     paragraphs: [
       [
-        { en: 'Here is Lou. What do you want, Lou?', zh: '这是卢。卢，你想要什么？' },
-        { en: 'My dinosaur is broken.', zh: '我的恐龙坏了。' },
-        { en: 'I want glue, please.', zh: '我想要胶水，谢谢。' },
+        { en: 'Here is Lou. "What do you want, Lou?"', zh: '这是卢。「卢，你想要什么？」' },
+        { en: '"My plane is broken," says Lou.', zh: '卢说：「我的飞机坏了。」' },
+        { en: '"My dinosaur is broken, too."', zh: '「我的恐龙也坏了。」' },
       ],
       [
-        { en: 'Lou opens his bag. Aha!', zh: '卢打开他的书包。啊哈！' },
-        { en: 'Put your dinosaur in my hat!', zh: '把你的恐龙放进我的帽子里！' },
-        { en: 'Magic Mo makes magic.', zh: '魔法莫施展魔法。' },
+        { en: '"I want glue, please," he says.', zh: '他说：「我想要胶水，谢谢。」' },
+        { en: '"Put your dinosaur in my hat!" says Magic Mo.', zh: '魔法莫说：「把你的恐龙放进我的帽子里！」' },
+        { en: '"Abracadabra! I can fix it now!"', zh: '「变！现在我就能把它修好！」' },
+        { en: 'Lou takes the dinosaur out of the hat.', zh: '卢把恐龙从帽子里拿了出来。' },
       ],
       [
-        { en: "Look at Lou's dinosaur now!", zh: '看卢的恐龙现在！' },
-        { en: "That's magic!", zh: '真是魔法！' },
-        { en: 'Hurray! Thank you, Magic Mo!', zh: '好哇！谢谢你，魔法莫！' },
+        { en: '"Look! My dinosaur is not broken!"', zh: '「看！我的恐龙不坏了！」' },
+        { en: '"That\'s magic! Thank you very much, Magic Mo!"', zh: '「真是魔法！太谢谢你了，魔法莫！」' },
+        { en: '"Hurray! My plane can fly again!" says Lou.', zh: '「太好啦！我的飞机又能飞啦！」卢说。' },
+      ],
+    ],
+  },
+  '7-5': {
+    title: 'What Do You Want?',
+    titleZh: '你想要什么？',
+    paragraphs: [
+      [
+        { en: '"I want a ball," says Monty.', zh: '「我想要一个球。」蒙蒂说。' },
+        { en: '"I want a doll," says Lola.', zh: '「我想要一个洋娃娃。」罗拉说。' },
+        { en: '"I want a plane, please," says Paul.', zh: '「我想要一架飞机，谢谢。」保罗说。' },
+      ],
+      [
+        { en: 'Magic Mo opens her big magic hat.', zh: '魔法莫打开她那顶大大的魔法帽。' },
+        { en: '"I want a robot and a big dinosaur, too!"', zh: '「我还想要一个机器人和一只大恐龙！」' },
+        { en: '"Abracadabra!" she says with her wand.', zh: '她挥着魔法棒说：「变！」' },
+        { en: 'A ball, a doll and a plane come out.', zh: '一个球、一个洋娃娃和一架飞机出来了。' },
+      ],
+      [
+        { en: '"I want a red ball now," says Monty.', zh: '蒙蒂说：「现在我想要一个红色的球。」' },
+        { en: '"A ball is in the hat, too!" laughs Lola.', zh: '罗拉笑着说：「球也在帽子里呢！」' },
+        { en: '"Hurray for the magic hat!" they say.', zh: '他们说：「魔法帽太棒啦！」' },
+      ],
+    ],
+  },
+  '7-6': {
+    title: 'Does It Have a Tail?',
+    titleZh: '它有尾巴吗？',
+    paragraphs: [
+      [
+        { en: 'Monty draws a big green dinosaur today.', zh: '蒙蒂今天画了一只绿色的大恐龙。' },
+        { en: '"It has a head," he says to Lola.', zh: '他对罗拉说：「它有一个头。」' },
+        { en: '"It has two arms and a long body, too."', zh: '「它还有两条胳膊和长长的身体。」' },
+      ],
+      [
+        { en: '"Does it have legs?" asks Lola.', zh: '罗拉问：「它有腿吗？」' },
+        { en: '"Yes, it has two big legs," says Monty.', zh: '蒙蒂说：「有，它有两条大腿。」' },
+        { en: '"Does it have a tail?" she asks.', zh: '她又问：「它有尾巴吗？」' },
+        { en: '"It doesn\'t have a tail. Look!"', zh: '「它没有尾巴。你看！」' },
+      ],
+      [
+        { en: '"A dinosaur needs a tail!" says Lola.', zh: '罗拉说：「恐龙得有尾巴呀！」' },
+        { en: 'Monty draws a long tail on the body.', zh: '蒙蒂给身体添上一条长尾巴。' },
+        { en: '"Hurray! Now it looks like a dinosaur!"', zh: '「太好啦！现在它看上去像恐龙啦！」' },
+      ],
+    ],
+  },
+  '7-7': {
+    title: 'The D Sound',
+    titleZh: 'd 的发音',
+    paragraphs: [
+      [
+        { en: '"Look at this letter," says the teacher.', zh: '「看看这个字母。」老师说。' },
+        { en: '"Can you say it?" she asks.', zh: '她问：「你会读它吗？」' },
+        { en: 'Lola has a doll in her hand.', zh: '罗拉手里拿着一个洋娃娃。' },
+      ],
+      [
+        { en: '"Doll, hand, head and red!" says Lola.', zh: '罗拉说：「洋娃娃、手、头、红色！」' },
+        { en: '"And dinosaur, too!" says Monty.', zh: '蒙蒂说：「还有恐龙！」' },
+        { en: '"This is my head and this is my hand," he says.', zh: '他说：「这是我的头，这是我的手。」' },
+        { en: '"My dinosaur is red and big!"', zh: '「我的恐龙又红又大！」' },
+      ],
+      [
+        { en: '"Can you read the little name?" asks the teacher.', zh: '老师问：「你会读这个小小的名字吗？」' },
+        { en: 'Lola draws a big red dinosaur in a picture.', zh: '罗拉在画里画了一只红色大恐龙。' },
+        { en: '"Hurray! We can read it now!" they laugh.', zh: '「太好啦！现在我们会读啦！」他们笑起来。' },
+      ],
+    ],
+  },
+  '7-8': {
+    title: 'A Line of Symmetry',
+    titleZh: '一条对称轴',
+    paragraphs: [
+      [
+        { en: '"Yes, it\'s a robot!" says Lola.', zh: '「对，这是一个机器人！」罗拉说。' },
+        { en: '"Are part one and part two the same?" asks the teacher.', zh: '老师问：「第一部分和第二部分一样吗？」' },
+        { en: '"They are the same. It is symmetrical!"', zh: '「它们一样。它是对称的！」' },
+      ],
+      [
+        { en: '"It has a line of symmetry," says Monty.', zh: '蒙蒂说：「它有一条对称轴。」' },
+        { en: 'He draws a line on the robot and a plane.', zh: '他在机器人和飞机上各画了一条线。' },
+        { en: '"Look at my ball. It is symmetrical, too!"', zh: '「看我的球，它也是对称的！」' },
+        { en: '"But my kite is not symmetrical," says Lola.', zh: '罗拉说：「可我的风筝不对称。」' },
+      ],
+      [
+        { en: '"Try again with a new line," says the teacher.', zh: '老师说：「换一条线再试试。」' },
+        { en: 'Lola draws a line and claps her hands.', zh: '罗拉画了一条线，拍起手来。' },
+        { en: '"Hurray! Now my kite has a line, too!"', zh: '「太好啦！现在我的风筝也有一条线啦！」' },
+      ],
+    ],
+  },
+  '7-9': {
+    title: 'My Green Dinosaur',
+    titleZh: '我的绿色恐龙',
+    paragraphs: [
+      [
+        { en: '"I\'m a dinosaur!" says Monty.', zh: '「我是一只恐龙！」蒙蒂说。' },
+        { en: '"This is my head and my body is green."', zh: '「这是我的头，我的身体是绿色的。」' },
+        { en: '"My legs are red," he says to Lola.', zh: '他对罗拉说：「我的腿是红色的。」' },
+      ],
+      [
+        { en: '"It has two big eyes and two arms," says Lola.', zh: '罗拉说：「它有两只大眼睛和两条胳膊。」' },
+        { en: '"Does it have a tail?" she asks.', zh: '她问：「它有尾巴吗？」' },
+        { en: '"It doesn\'t have a tail," says Monty.', zh: '蒙蒂说：「它没有尾巴。」' },
+        { en: '"It is not symmetrical, but I like it!"', zh: '「它不对称，可我喜欢它！」' },
+      ],
+      [
+        { en: '"I want the doll now," says Lola.', zh: '罗拉说：「现在我想要那个洋娃娃。」' },
+        { en: '"It has long hair and no tail, too!"', zh: '「它也有长头发，也没有尾巴！」' },
+        { en: '"Hurray for my green dinosaur!" they laugh.', zh: '「我的绿色恐龙太棒啦！」他们笑起来。' },
       ],
     ],
   },

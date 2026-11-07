@@ -86,3 +86,15 @@ e2e 契约未破：`.ab-level` 恰好 5 个、`.ab-block` 可 disabled 且 textC
 
 三样都是**内容工程**（从教材素材抽取 + 按质量标准撰写），不是 UI 改造。
 本轮已把它们在界面上的表现处理成「诚实的空态」，不会让用户以为应用坏了。
+
+### 4.1 后续补齐进度（本表是审计当时的快照，数字保留）
+
+| 缺口 | 状态 | 落地 |
+|---|---|---|
+| 句型框架卡 77 课 | ✅ 已补齐（19/96 → 96/96，130 张） | `src/data/starlight1/sentenceFrame1.test.ts` 按预备级同口径校验；顺带修了 `FRAMES_BY_UNIT1` 桶污染与 `framesOfLesson1Series` 返回重复卡 |
+| 阅读小故事 69 课 | ✅ 已补齐（27/96 → 96/96） | 第一册专属词表允许域 `src/data/starlight1/readingVocab1.ts`（预备级基线 ∪ 教材角色名 ∪ 本单元课本原文 token），校验器 `readingPassage1.test.ts`、自检脚本 `scripts/check-reading1.mjs --brief/--stats` |
+| 外教课堂对话 96 课 | 待补 | 仍需给 `seriesDialogue` 接线并改 `LessonPreview` 空态 |
+
+> 阅读短文的「零超纲」口径与预备级略有不同：第一册教材角色名（Monty/Lola/Mr. Gnome/Pippa…）
+> 和课本原文里出现过的词也算「孩子学过的」，否则连教材故事都写不出来。
+> 生成与校验共用 `validateReadingPassage1()` 一份实现，不会漂移。

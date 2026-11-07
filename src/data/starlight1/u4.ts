@@ -707,6 +707,52 @@ export const u4_frames: SentenceFrame[] = [
 // 4) 阅读短文：用学过的词把故事讲完（L3 / L4 主故事，L11 印度文化）
 // ============================================================================
 export const u4_reading: Record<string, ReadingPassage> = {
+  '4-1': {
+    title: 'Pack Your Clothes',
+    titleZh: '收拾行李啦',
+    paragraphs: [
+      [
+        { en: 'Lola will go on a vacation today.', zh: '罗拉今天要去度假啦。' },
+        { en: 'Her family is at home with a big bag.', zh: '一家人都在家，面前摆着一个大包。' },
+        { en: '"Pack your clothes, Lola!" says Mom.', zh: '“把衣服装进包里吧，罗拉！”妈妈说。' },
+        { en: 'Lola puts a hat and a T-shirt in the bag.', zh: '罗拉把一顶帽子和一件T恤放进包里。' },
+      ],
+      [
+        { en: 'She packs a shirt, a jacket and a sweater.', zh: '她又装进一件衬衫、一件夹克和一件毛衣。' },
+        { en: '"What color is the hat?" asks Lola.', zh: '“帽子是什么颜色的呀？”罗拉问。' },
+        { en: '"It is red, and it is on your head!" says Mom.', zh: '“是红色的呀，而且就在你头上呢！”妈妈说。' },
+        { en: 'The hat is not in the bag at all.', zh: '原来帽子根本没在包里。' },
+      ],
+      [
+        { en: 'Lola laughs and puts the red hat in the bag.', zh: '罗拉笑了起来，把红帽子也放进了包里。' },
+        { en: 'Now the bag is ready, and the family smiles.', zh: '这下包收拾好了，一家人都笑了。' },
+        { en: '"Let\'s fly away today!" says Lola.', zh: '“我们今天就飞走吧！”罗拉说。' },
+      ],
+    ],
+  },
+  '4-2': {
+    title: 'Where Are My Shoes?',
+    titleZh: '我的鞋在哪儿？',
+    paragraphs: [
+      [
+        { en: 'It is evening, and the family will fly tonight.', zh: '傍晚到啦，一家人今晚就要飞走喽。' },
+        { en: 'Lola opens a new bag for her clothes.', zh: '罗拉打开一个新包，准备装衣服。' },
+        { en: '"Pack your skirt and your dress," says Mom.', zh: '“把短裙和连衣裙装进去吧。”妈妈说。' },
+        { en: 'Lola puts the skirt and the dress in the bag.', zh: '罗拉把短裙和连衣裙放进了包里。' },
+      ],
+      [
+        { en: 'She has socks and pants, but no shoes.', zh: '袜子、裤子都有了，可鞋子不见了。' },
+        { en: '"Where are my shoes?" asks Lola.', zh: '“我的鞋在哪儿呀？”罗拉问。' },
+        { en: '"Look under the bed!" says her little sister.', zh: '“往床底下看看！”她的小妹妹说。' },
+        { en: 'One shoe is under the bed, and one is on the chair.', zh: '一只鞋在床底下，另一只在椅子上。' },
+      ],
+      [
+        { en: 'Lola laughs and puts the shoes with the socks.', zh: '罗拉笑了，把鞋和袜子放在了一起。' },
+        { en: 'Now the pants, the socks and the shoes are in the bag.', zh: '现在裤子、袜子和鞋子都进包啦。' },
+        { en: '"Let\'s fly tonight!" says Lola.', zh: '“我们今晚就飞吧！”罗拉说。' },
+      ],
+    ],
+  },
   '4-3': {
     title: 'On Vacation',
     titleZh: '去度假',
@@ -733,35 +779,183 @@ export const u4_reading: Record<string, ReadingPassage> = {
     titleZh: '搞错的行李箱',
     paragraphs: [
       [
-        { en: 'Hello, Mickey! Pippa is in the Arctic. It is very cold.', zh: '你好，米奇！皮帕在北极，天气很冷。' },
-        { en: "She is wearing shoes, a T-shirt and a hat! Brr!", zh: '她穿着鞋子、一件T恤和一顶帽子！好冷！' },
+        { en: 'Mickey is in the jungle, and it is very hot.', zh: '米奇在丛林里，那儿热极了。' },
+        { en: 'He opens the suitcase and looks at the clothes.', zh: '他打开行李箱，看着里面的衣服。' },
+        { en: '"A sweater and socks! Phew!" says Mickey.', zh: '“毛衣和袜子！好热呀！”米奇说。' },
+        { en: '"These are not my clothes!" he says.', zh: '“这些才不是我的衣服呢！”他说。' },
       ],
       [
-        { en: 'Hello, Pippa! Mickey is in the jungle. It is very hot.', zh: '你好，皮帕！米奇在丛林里，天气很热。' },
-        { en: "He is wearing a sweater and socks! Phew!", zh: '他穿着一件毛衣和袜子！真热！' },
+        { en: 'Pippa is in the Arctic, and it is very cold.', zh: '皮帕在北极，那儿冷极了。' },
+        { en: '"I have shoes, a T-shirt and a hat! Brr!" she says.', zh: '“我只有鞋子、T恤和帽子！好冷呀！”她说。' },
+        { en: '"My sweater is not here!" says Pippa.', zh: '“我的毛衣不在这儿呀！”皮帕说。' },
+        { en: 'The two friends are not happy at all.', zh: '两个好朋友一点也不开心。' },
       ],
       [
-        { en: "Mickey sends Pippa's suitcase. Pippa sends Mickey's suitcase.", zh: '米奇寄回了皮帕的行李箱，皮帕寄回了米奇的行李箱。' },
-        { en: 'Hurray! Now they have the right clothes.', zh: '好耶！现在他们有对的衣服了。' },
+        { en: 'Mickey sends the suitcase to Pippa.', zh: '米奇把行李箱寄给皮帕。' },
+        { en: 'Pippa sends the suitcase to Mickey.', zh: '皮帕把行李箱寄给米奇。' },
+        { en: '"Hurray! Now we have the right clothes!" they say.', zh: '“好耶！现在我们拿到对的衣服啦！”他们说。' },
+      ],
+    ],
+  },
+  '4-5': {
+    title: 'The Clothes Show',
+    titleZh: '穿衣小表演',
+    paragraphs: [
+      [
+        { en: 'It is morning, and the family is at home.', zh: '早上啦，一家人都在家。' },
+        { en: '"Hello, everyone! Look at my new dress," says Lola.', zh: '“大家好！快看我的新裙子。”罗拉说。' },
+        { en: 'Her sister has a red skirt and a jacket.', zh: '姐姐穿着一条红短裙和一件夹克。' },
+      ],
+      [
+        { en: '"I am wearing socks, but where are my pants?" asks Ben.', zh: '“我穿着袜子呢，可我的裤子在哪儿？”本问。' },
+        { en: 'Ben looks in the bag and in the box.', zh: '本在包里找，又在盒子里找。' },
+        { en: '"I cannot find my pants!" he says.', zh: '“我找不到我的裤子啦！”他说。' },
+        { en: 'Lola looks under the bed and laughs.', zh: '罗拉往床底下一看，笑了起来。' },
+      ],
+      [
+        { en: '"Here are your pants, Ben!" she says.', zh: '“你的裤子在这儿呢，本！”她说。' },
+        { en: 'Ben puts on the pants and the socks.', zh: '本穿上裤子和袜子。' },
+        { en: '"Now I\'m wearing pants and socks!" says Ben.', zh: '“现在我穿着裤子和袜子啦！”本说。' },
+        { en: 'The family smiles, and the little show starts.', zh: '一家人都笑了，小小的表演开始喽。' },
+      ],
+    ],
+  },
+  '4-6': {
+    title: 'What\'s the Weather Like?',
+    titleZh: '今天天气怎么样？',
+    paragraphs: [
+      [
+        { en: 'Lola and Pippa are on vacation in the Arctic.', zh: '罗拉和皮帕在北极度假。' },
+        { en: '"What\'s the weather like?" asks Lola.', zh: '“今天天气怎么样呀？”罗拉问。' },
+        { en: '"It is cold and it is snowing," says Pippa.', zh: '“天很冷，还下着雪呢。”皮帕说。' },
+        { en: 'The sky is white, and the wind is loud.', zh: '天空白茫茫的，风呼呼地吹。' },
+        { en: '"It is windy, too!" says Lola.', zh: '“风还挺大的呢！”罗拉说。' },
+      ],
+      [
+        { en: 'Then they fly to the jungle to see Mickey.', zh: '接着她们飞到丛林里去看米奇。' },
+        { en: '"What\'s the weather like here?" asks Lola.', zh: '“这儿的天气怎么样呀？”罗拉问。' },
+        { en: '"It is hot and it is sunny!" says Mickey.', zh: '“又热又晴呢！”米奇说。' },
+        { en: 'Suddenly it is raining, and the three friends run.', zh: '忽然下起雨来，三个好朋友赶紧跑起来。' },
+      ],
+      [
+        { en: '"We are wet, but this is fun!" says Mickey.', zh: '“我们都湿啦，可真好玩！”米奇说。' },
+        { en: '"What\'s the weather like? It is a happy day!" says Lola.', zh: '“天气怎么样？是快快乐乐的一天呀！”罗拉说。' },
+      ],
+    ],
+  },
+  '4-7': {
+    title: 'Jump in the Jungle',
+    titleZh: '丛林里跳一跳',
+    paragraphs: [
+      [
+        { en: 'It is a sunny day in the jungle.', zh: '丛林里是个阳光灿烂的好天气。' },
+        { en: 'Mickey is here with Mum and Uncle.', zh: '米奇和妈妈、叔叔一起在这儿。' },
+        { en: '"U says u, u, u!" sings Mickey.', zh: '“U 念 u、u、u！”米奇唱着。' },
+        { en: 'He can jump and swing in the trees.', zh: '他能在树间跳来跳去、荡来荡去。' },
+      ],
+      [
+        { en: 'Suddenly Mickey stops and looks at his shoes.', zh: '忽然米奇停住了，低头看自己的鞋。' },
+        { en: '"Oh no! This is not fun," he says.', zh: '“哎呀！这可不好玩了。”他说。' },
+        { en: 'Uncle has a little brush in his bag.', zh: '叔叔的包里有一把小刷子。' },
+        { en: '"Use this brush, Mickey," says Uncle.', zh: '“用这把刷子吧，米奇。”叔叔说。' },
+      ],
+      [
+        { en: 'Mickey takes the brush and cleans his shoes.', zh: '米奇接过刷子，把鞋刷得干干净净。' },
+        { en: '"Now I can jump again!" he says.', zh: '“现在我又能跳啦！”他说。' },
+        { en: 'The three friends jump in the sun.', zh: '三个好朋友在太阳底下跳呀跳。' },
+      ],
+    ],
+  },
+  '4-8': {
+    title: 'A Monkey in the Arctic',
+    titleZh: '北极里的小猴子',
+    paragraphs: [
+      [
+        { en: 'Lola has a little plane and three friends.', zh: '罗拉有一架小飞机和三个好朋友。' },
+        { en: 'Today they will visit three places.', zh: '今天他们要去三个地方看看。' },
+        { en: '"Climate is the normal weather in a place," says Lola.', zh: '“气候就是一个地方平常的天气呀。”罗拉说。' },
+      ],
+      [
+        { en: 'In the desert, a lizard sits in the sun.', zh: '沙漠里，一只蜥蜴趴在太阳底下。' },
+        { en: 'The jungle is rainy, and a monkey swings in the trees.', zh: '丛林里下着雨，一只猴子在树间荡来荡去。' },
+        { en: 'In the cold Arctic, a polar bear smiles.', zh: '寒冷的北极里，一只北极熊笑眯眯的。' },
+        { en: 'Suddenly Lola sees a monkey in the Arctic.', zh: '忽然，罗拉在北极看见了一只小猴子。' },
+      ],
+      [
+        { en: '"Brr! I am cold here," says the monkey.', zh: '“好冷呀！我在这儿冻坏了。”小猴子说。' },
+        { en: 'Lola takes the monkey back to the jungle.', zh: '罗拉把小猴子送回了丛林。' },
+        { en: 'The lizard, the monkey and the polar bear are home.', zh: '蜥蜴、猴子和北极熊都回到了自己的家。' },
+        { en: '"Different climates, different friends!" says Lola.', zh: '“不一样的气候，不一样的好朋友呀！”罗拉说。' },
+      ],
+    ],
+  },
+  '4-9': {
+    title: 'A Sweater for New York',
+    titleZh: '寄往纽约的毛衣',
+    paragraphs: [
+      [
+        { en: 'It is morning, and Lola is at home.', zh: '早上啦，罗拉在家。' },
+        { en: '"What\'s the weather like?" asks Mom.', zh: '“今天天气怎么样呀？”妈妈问。' },
+        { en: '"It is windy today," says Lola.', zh: '“今天有风呢。”罗拉说。' },
+        { en: 'She looks out of the window at the trees.', zh: '她望着窗外的树。' },
+      ],
+      [
+        { en: 'In New York it is snowing and cold.', zh: '纽约正下着雪，冷得很。' },
+        { en: 'In Sydney it is sunny and hot.', zh: '悉尼阳光灿烂，热乎乎的。' },
+        { en: 'In Tokyo it is raining, and the sky is gray.', zh: '东京下着雨，天空灰蒙蒙的。' },
+        { en: '"My friend has no sweater in New York!" says Lola.', zh: '“我在纽约的朋友没有毛衣穿呀！”罗拉说。' },
+      ],
+      [
+        { en: 'Lola puts a warm sweater in a bag.', zh: '罗拉把一件暖和的毛衣放进包里。' },
+        { en: '"This sweater will go to New York," she says.', zh: '“这件毛衣要寄到纽约去。”她说。' },
+        { en: 'Now the sunny day feels warm, too.', zh: '连这个晴天，也变得暖洋洋的了。' },
+      ],
+    ],
+  },
+  '4-10': {
+    title: 'Grandma and the Sweater',
+    titleZh: '奶奶和那件毛衣',
+    paragraphs: [
+      [
+        { en: 'It is snowing, and the family is at home.', zh: '外面下着雪，一家人都在家。' },
+        { en: 'My sister and my brother sit near the window.', zh: '姐姐和哥哥坐在窗边。' },
+        { en: '"Look at the snow!" says my sister.', zh: '“快看雪呀！”姐姐说。' },
+        { en: 'Grandma is here with a little game.', zh: '奶奶带着一个小游戏来了。' },
+      ],
+      [
+        { en: '"I am cold! I want my sweater," says my brother.', zh: '“我好冷！我要我的毛衣。”哥哥说。' },
+        { en: 'He looks in the bag, but it is not there.', zh: '他翻了翻包，可毛衣不在里面。' },
+        { en: '"Where is my red sweater?" he asks.', zh: '“我的红毛衣在哪儿呀？”他问。' },
+        { en: 'Grandma has it in her hands and smiles.', zh: '奶奶笑眯眯地把它拿在手里。' },
+      ],
+      [
+        { en: '"Here is your sweater," says Grandma.', zh: '“你的毛衣在这儿呢。”奶奶说。' },
+        { en: 'My brother puts it on and feels warm.', zh: '哥哥穿上毛衣，一下子暖和了。' },
+        { en: 'Now the four of us are warm at home.', zh: '这下我们四个，在家里都暖暖的。' },
       ],
     ],
   },
   '4-11': {
-    title: 'Pia from India',
-    titleZh: '来自印度的皮亚',
+    title: 'A Light for Diwali',
+    titleZh: '排灯节的一盏灯',
     paragraphs: [
       [
-        { en: "Hello! I am Pia. I am from India.", zh: '你好！我是皮亚，我来自印度。' },
-        { en: 'This is my family. Today is a special day.', zh: '这是我的家人，今天是个特别的日子。' },
+        { en: '"Hello! I am Pia. I am from India," says Pia.', zh: '“你好！我是皮亚，我来自印度。”皮亚说。' },
+        { en: 'Today is a special day for my family.', zh: '今天对我们家来说是个特别的日子。' },
+        { en: '"It is Diwali, an Indian festival!" says Mom.', zh: '“今天是排灯节，印度的节日呀！”妈妈说。' },
       ],
       [
-        { en: 'It is Diwali. Diwali is an Indian festival.', zh: '今天是排灯节，排灯节是印度的节日。' },
-        { en: "We wear special clothes. I am wearing a new dress.", zh: '我们穿特别的衣服，我穿着一条新裙子。' },
+        { en: 'We wear special clothes on this day.', zh: '这一天我们要穿上特别的衣服。' },
+        { en: 'My aunt has a red sari and a big smile.', zh: '阿姨穿着红红的沙丽，笑得可开心了。' },
+        { en: '"This is my sherwani," says my uncle.', zh: '“这就是我的 sherwani 长外套。”叔叔说。' },
+        { en: 'I am wearing a new dress, but I am sad.', zh: '我穿着新裙子，可心里有点不高兴。' },
+        { en: '"Where is the little light for Diwali?" I ask.', zh: '“排灯节的小灯在哪儿呀？”我问。' },
       ],
       [
-        { en: 'My aunt has a red sari.', zh: '我的阿姨有一条红色的沙丽。' },
-        { en: 'My uncles and my cousin have long jackets called sherwanis.', zh: '我的叔叔们和我的表弟有长长的外套，叫 sherwani。' },
-        { en: 'Happy Diwali!', zh: '排灯节快乐！' },
+        { en: 'My grandma has it in her hands.', zh: '原来小灯在奶奶手里呢。' },
+        { en: '"Here is the light, Pia!" she says.', zh: '“灯在这儿呢，皮亚！”她说。' },
+        { en: 'Now the house is warm, and we all sing.', zh: '屋子里一下子暖了，我们一起唱起歌来。' },
+        { en: '"Happy Diwali, everyone!" says Pia.', zh: '“大家排灯节快乐呀！”皮亚说。' },
       ],
     ],
   },

@@ -434,14 +434,13 @@ test.describe('阅读模块 · 系列（预备级 / 第一册）', () => {
     await expect(page.locator('.rm-hero-word')).toHaveCount(5)
   })
 
-  test('/reading1 只列真正有短文的课，且每个课卡片都不是死链', async ({ page }) => {
+  test('/reading1 列满 96 课，且每个课卡片都不是死链', async ({ page }) => {
     await page.goto('/#/reading1')
     await expect(page.locator('.rm-unit')).toHaveCount(9, { timeout: 15000 })
 
     const cards = page.locator('[data-testid^="rm-lesson-"]')
-    const n = await cards.count()
-    expect(n).toBeGreaterThan(0)
-    expect(n).toBeLessThan(96) // 第一册短文还没铺满，不能摆 96 张卡
+    // 第一册 96 篇短文已补齐，阅读页应课课都有卡片（readingLessonsOf 不再滤掉任何课）。
+    await expect(cards).toHaveCount(96, { timeout: 15000 })
 
     // 先展开全部 9 个单元（<details> 收起时子树不可点）
     for (let u = 1; u <= 9; u++) {
@@ -449,9 +448,9 @@ test.describe('阅读模块 · 系列（预备级 / 第一册）', () => {
       await unit.locator('summary').click()
       await expect(unit).toHaveAttribute('open', '')
     }
-    // 抽样 4 张（首/中/尾 + 不同单元）点开验证阅读器；全量死链由单测按数据兜底，
-    // e2e 逐张点 27 次会让套件平白多跑一分钟。
-    for (const i of [0, Math.floor(n / 3), Math.floor(2 * n / 3), n - 1]) {
+    // 抽样 4 张（首/中/尾 + 不同单元）点开验证阅读器；全量死链由
+    // readingPassage1.test.ts 按数据兜底，e2e 逐张点 96 次会平白多跑几分钟。
+    for (const i of [0, 32, 64, 95]) {
       await cards.nth(i).click()
       await expect(page.locator('.reading-zone')).toHaveCount(1)
       await expect(page.locator('.rm-empty')).toHaveCount(0)

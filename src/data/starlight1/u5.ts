@@ -600,6 +600,54 @@ export const u5_frames: SentenceFrame[] = [
 // ============================================================
 
 export const u5_reading: Record<string, ReadingPassage> = {
+  '5-1': {
+    title: 'Where Are the Animals?',
+    titleZh: '动物们都去哪儿了？',
+    paragraphs: [
+      [
+        { en: 'I\'m Monty, a farmer.', zh: '我是蒙蒂，一个农场主。' },
+        { en: 'Oh no! Where are the animals on my farm?', zh: '哎呀！我农场里的动物都去哪儿了？' },
+        { en: '"Can you help me find them, Lola?" I ask.', zh: '“你能帮我找找它们吗，萝拉？”我问。' },
+        { en: '"Yes! Let\'s look together," says Lola.', zh: '“好呀！我们一起找吧。”萝拉说。' },
+      ],
+      [
+        { en: 'We walk to the big tree.', zh: '我们走到那棵大树下。' },
+        { en: '"Tweet, tweet! Here\'s a bird!" she says.', zh: '“啾啾！这儿有一只鸟！”她说。' },
+        { en: 'A frog hops up from the grass.', zh: '一只青蛙从草里跳了出来。' },
+        { en: 'A duck is in the water, too.', zh: '一只鸭子也在水里呢。' },
+        { en: 'A chicken runs behind the house.', zh: '一只鸡跑到房子后面去了。' },
+      ],
+      [
+        { en: '"But where is my horse?" I ask.', zh: '“可是我的马在哪儿呢？”我问。' },
+        { en: 'Lola looks, and the horse is back at home.', zh: '萝拉一看，原来马已经回家了。' },
+        { en: '"They\'re all on the farm again!" I say.', zh: '“它们又都回到农场啦！”我说。' },
+      ],
+    ],
+  },
+  '5-2': {
+    title: 'Five Animals Now',
+    titleZh: '五只动物齐啦',
+    paragraphs: [
+      [
+        { en: 'Wow, I have five animals now.', zh: '哇，我现在有五只动物啦。' },
+        { en: '"What are they? Let\'s see!" says Lola.', zh: '“它们都是什么呀？我们来看看！”萝拉说。' },
+        { en: 'But the five animals run away.', zh: '可是这五只动物一下子跑开了。' },
+        { en: '"Oh dear! Where are they?" I ask.', zh: '“哎呀！它们去哪儿了？”我问。' },
+      ],
+      [
+        { en: 'A bull is behind the big tree.', zh: '公牛躲在大树后面。' },
+        { en: 'A cow is near the water.', zh: '奶牛在水边呢。' },
+        { en: 'Here\'s a sheep and here\'s a goat.', zh: '这儿有一只绵羊，还有一只山羊。' },
+        { en: 'They all come back to me.', zh: '它们都回到我身边啦。' },
+      ],
+      [
+        { en: 'But where is the rabbit?', zh: '可是兔子在哪儿呢？' },
+        { en: '"Look in my hat!" says Lola.', zh: '“往我的帽子里瞧瞧！”萝拉说。' },
+        { en: 'The little rabbit is in the hat.', zh: '小兔子正待在帽子里。' },
+        { en: '"Now I have five animals again," I say with a smile.', zh: '“这下我的五只动物又齐啦。”我笑着说。' },
+      ],
+    ],
+  },
   '5-3': {
     title: 'The Ugly Bird',
     titleZh: '丑小鸟',
@@ -628,19 +676,141 @@ export const u5_reading: Record<string, ReadingPassage> = {
     titleZh: '天鹅妈妈',
     paragraphs: [
       [
-        { en: 'Then the ugly bird sees a frog.', zh: '然后丑小鸟看见一只青蛙。' },
-        { en: "It isn't a frog! It isn't green!", zh: '它不是青蛙！它不是绿色的！' },
-        { en: "It's gray and ugly!", zh: '它是灰色又丑的！' },
+        { en: 'The ugly bird walks on the farm and sees a frog.', zh: '丑小鸟在农场上走着，看见一只青蛙。' },
+        { en: '"Are you my mom?" the little bird asks.', zh: '“你是我的妈妈吗？”小鸟小声问。' },
+        { en: '"No! I\'m not your mom," says the frog.', zh: '“不！我不是你的妈妈。”青蛙说。' },
       ],
       [
-        { en: 'Suddenly, the animals see a big, white bird.', zh: '突然，动物们看见一只大大的白色鸟。' },
-        { en: "It's a swan! Look at that bird! It's beautiful!", zh: '是一只天鹅！看那只鸟！它真美！' },
+        { en: 'Suddenly, the animals see a big, white bird.', zh: '突然，动物们看见一只又大又白的鸟。' },
+        { en: '"Look at that bird! It\'s beautiful!" they say.', zh: '“快看那只鸟！它真美呀！”它们说。' },
+        { en: '"It\'s a swan!" says the frog.', zh: '“是一只天鹅！”青蛙说。' },
       ],
       [
-        { en: 'Then the ugly bird sees the swan.', zh: '然后丑小鸟看见了天鹅。' },
-        { en: 'Are you my mom? Yes! I’m your mom!', zh: '你是我的妈妈吗？是的！我是你的妈妈！' },
-        { en: 'Wow! My baby! My mom!', zh: '哇！我的宝宝！我的妈妈！' },
-        { en: "It isn't an ugly bird! It's a swan!", zh: '它不再是丑小鸟了！它是一只天鹅！' },
+        { en: 'The swan comes near the ugly bird.', zh: '天鹅走到丑小鸟身边。' },
+        { en: '"Are you my mom?" asks the ugly bird.', zh: '“你是我的妈妈吗？”丑小鸟又问。' },
+        { en: '"Yes! I\'m your mom! My baby!" says the swan.', zh: '“是的！我是你的妈妈！我的宝宝！”天鹅说。' },
+        { en: '"Wow! It isn\'t a gray, ugly bird. It\'s a swan!"', zh: '“哇！原来我不是灰灰的丑小鸟，我是一只天鹅呀！”' },
+        { en: 'They go home together, swan and baby.', zh: '天鹅和宝宝一起回家啦。' },
+      ],
+    ],
+  },
+  '5-5': {
+    title: 'What Is in the Box?',
+    titleZh: '箱子里是什么？',
+    paragraphs: [
+      [
+        { en: 'The two children play on the farm.', zh: '两个孩子在农场上玩。' },
+        { en: '"What\'s this animal?" asks Lola.', zh: '“这是什么动物呀？”萝拉问。' },
+        { en: 'A noise comes from a big box.', zh: '一只大箱子里传来一阵动静。' },
+        { en: '"Is it a cow? Is it a chicken?" I ask.', zh: '“是奶牛吗？是鸡吗？”我问。' },
+      ],
+      [
+        { en: '"It isn\'t a duck. It\'s a frog!" I say.', zh: '“不是鸭子，是青蛙！”我说。' },
+        { en: 'A green frog hops out of the box.', zh: '一只绿青蛙从箱子里跳了出来。' },
+        { en: '"No! Look again!" says Lola.', zh: '“不对！再看看！”萝拉说。' },
+        { en: '"It isn\'t a bull. It\'s a goat!"', zh: '“不是公牛，是山羊！”' },
+        { en: 'A goat is near the water, too.', zh: '一只山羊也在水边呢。' },
+      ],
+      [
+        { en: 'But a little rabbit is in the box, too.', zh: '可箱子里还藏着一只小兔子。' },
+        { en: '"It isn\'t a frog. It\'s a rabbit!" I say.', zh: '“不是青蛙，是兔子呀！”我说。' },
+        { en: '"What\'s this animal? It\'s my little friend!"', zh: '“这是什么动物？是我的小朋友呀！”' },
+      ],
+    ],
+  },
+  '5-6': {
+    title: 'Where Is My Chick?',
+    titleZh: '我的小鸡在哪儿？',
+    paragraphs: [
+      [
+        { en: 'Oh dear! Where\'s my chick?', zh: '哎呀！我的小鸡在哪儿呢？' },
+        { en: 'The little chick is not in the yard.', zh: '小家伙没在院子里。' },
+        { en: '"Quick, quick! Let\'s look!" says Lola.', zh: '“快快快！我们去找找！”萝拉说。' },
+        { en: 'I look near the big tree.', zh: '我到大树附近找了找。' },
+      ],
+      [
+        { en: 'Here\'s a calf and here\'s a kid.', zh: '这儿有一头小牛，还有一只小山羊。' },
+        { en: 'Here\'s a lamb and here\'s a foal.', zh: '这儿有一只小羊，还有一匹小马。' },
+        { en: 'They are all warm and soft.', zh: '它们都暖乎乎、软绵绵的。' },
+        { en: '"But where is my chick?" I ask.', zh: '“可我的小鸡在哪儿呢？”我问。' },
+      ],
+      [
+        { en: 'A small sound comes from my hat.', zh: '我的帽子里传来一点小动静。' },
+        { en: '"Chick, chick, chick!" I say.', zh: '“叽叽叽！”我轻轻叫。' },
+        { en: 'It\'s here! Here\'s my chick!', zh: '在这儿呢！我的小鸡在这儿！' },
+        { en: 'Now all the baby animals are home.', zh: '这下动物宝宝们都回家啦。' },
+      ],
+    ],
+  },
+  '5-7': {
+    title: 'The ch Sound',
+    titleZh: 'ch 的音',
+    paragraphs: [
+      [
+        { en: 'Today we play a sound game at school.', zh: '今天我们在学校玩一个听音游戏。' },
+        { en: '"What sound does ch make?" asks the teacher.', zh: '“ch 发什么音呀？”老师问。' },
+        { en: 'The teacher sits on a chair.', zh: '老师坐在一把椅子上。' },
+        { en: 'She has pink cheeks and long, black hair.', zh: '她有粉粉的脸颊和长长的黑发。' },
+      ],
+      [
+        { en: '"Here\'s a chick and a chicken, too!" I say.', zh: '“这儿有一只小鸡，还有一只母鸡呢！”我说。' },
+        { en: 'The little chick hops on my book.', zh: '小鸡跳到了我的书上。' },
+        { en: '"Ch, ch! Chick, chicken, chair!" we sing.', zh: '“ch、ch！小鸡、母鸡、椅子！”我们唱起来。' },
+        { en: 'The chicken looks at us and laughs.', zh: '母鸡望着我们，笑啦。' },
+      ],
+      [
+        { en: '"Here are chocolates for me and you!"', zh: '“这儿有巧克力，给你也给我！”' },
+        { en: 'The teacher gives us chocolates.', zh: '老师把巧克力分给我们。' },
+        { en: '"Thank you! This sound is fun!" we say.', zh: '“谢谢！这个音真好玩！”我们说。' },
+        { en: 'Now we hear ch all day long.', zh: '这下我们一整天都听见 ch 啦。' },
+      ],
+    ],
+  },
+  '5-8': {
+    title: 'Peter and the Wolf',
+    titleZh: '彼得与狼',
+    paragraphs: [
+      [
+        { en: 'Peter and the Wolf is a famous story.', zh: '《彼得与狼》是一个很有名的故事。' },
+        { en: 'It is a story with words and music.', zh: '它有文字，也有音乐。' },
+        { en: '"What\'s your favorite musical instrument?" asks the teacher.', zh: '“你最喜欢的乐器是什么呀？”老师问。' },
+        { en: 'We listen to the music at school.', zh: '我们在学校里听起了音乐。' },
+      ],
+      [
+        { en: '"Each animal is a different instrument," says the teacher.', zh: '“每种动物都是一件不同的乐器。”老师说。' },
+        { en: '"Is the cat a clarinet?" asks Peter.', zh: '“猫是单簧管吗？”彼得问。' },
+        { en: '"Yes! The flute is the bird," she says.', zh: '“对！长笛是小鸟。”她说。' },
+        { en: '"An oboe is the duck," I say.', zh: '“双簧管是鸭子。”我说。' },
+        { en: '"And a French horn is the wolf!"', zh: '“法国号就是大灰狼啦！”' },
+      ],
+      [
+        { en: 'The wolf music is loud.', zh: '狼的音乐听起来好响。' },
+        { en: '"Can you imagine the animals?" asks the teacher.', zh: '“你们能想象出那些动物吗？”老师问。' },
+        { en: 'We close our eyes and see them all.', zh: '我们闭上眼睛，把它们全都看见啦。' },
+      ],
+    ],
+  },
+  '5-9': {
+    title: 'The Baby Animals Are Here',
+    titleZh: '动物宝宝都在这儿',
+    paragraphs: [
+      [
+        { en: 'Anna and Mia are on a farm today.', zh: '安娜和米娅今天在农场上。' },
+        { en: '"Let\'s find the baby animals!" says Anna.', zh: '“我们去找找动物宝宝吧！”安娜说。' },
+        { en: 'But the little ones are not in the yard.', zh: '可小家伙们都不在院子里。' },
+        { en: '"Oh dear! Where\'s the chick?" asks Mia.', zh: '“哎呀！小鸡在哪儿呢？”米娅问。' },
+      ],
+      [
+        { en: '"It isn\'t a duck. It\'s a bird!" says Anna.', zh: '“它不是鸭子，是小鸟呀！”安娜说。' },
+        { en: '"It isn\'t a chicken. It\'s a chick!" says Mia.', zh: '“它不是母鸡，是小鸡！”米娅说。' },
+        { en: 'The chick is here, under the big tree.', zh: '小鸡就在这儿，大树底下呢。' },
+        { en: '"Where\'s the foal? It\'s here!"', zh: '“小马在哪儿？在这儿呢！”' },
+        { en: 'The foal is near the water.', zh: '小马在水边。' },
+      ],
+      [
+        { en: '"Where\'s the calf? It\'s here!"', zh: '“小牛在哪儿？在这儿呢！”' },
+        { en: 'A calf and a lamb come to the girls.', zh: '一头小牛和一只小羊朝女孩们走来。' },
+        { en: '"They\'re all here, every little one!" says Anna.', zh: '“它们全在这儿啦，一个小家伙都没少！”安娜说。' },
       ],
     ],
   },
