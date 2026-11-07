@@ -320,6 +320,23 @@ test.describe('🎭 外教课堂对话', () => {
     // 没有任何 per-turn 慢速按钮（全局慢速开关在 PlayTools 里，是另一回事）
     await expect(page.locator('.dialogue-foot').getByRole('button', { name: /慢速/ })).toHaveCount(0)
   })
+
+  test('第一册也有外教对话（seriesDialogue 按 level 分发，不再恒为 undefined）', async ({ page }) => {
+    // 第一册 Unit 1 Lesson 1：美术课数教室物品，14 轮对话
+    await page.goto('/#/preview/monty-the-artist/1')
+    await expect(page.locator('.tab-bar').getByRole('button', { name: /外教对话/ })).toBeVisible({ timeout: 15_000 })
+    await page.locator('.tab-bar').getByRole('button', { name: /外教对话/ }).click()
+
+    const bubbles = page.locator('.dialogue-bubble')
+    await expect(bubbles.first()).toBeVisible({ timeout: 15_000 })
+    // 预备级 1-1 是 12 轮，第一册 1-1 是 14 轮 —— 不是同一段内容
+    await expect(bubbles).toHaveCount(14)
+    await expect(page.locator('.dialogue-bubble.left').first()).toBeVisible()
+    await expect(page.locator('.dialogue-bubble.right').first()).toBeVisible()
+    // 空态不该再出现（老文案「第一册的外教课堂对话还在整理」）
+    await expect(page.locator('.dlg-zone')).toContainText('Count With Mr. Sonic')
+    await expect(page.getByText('还在整理')).toHaveCount(0)
+  })
 })
 
 test.describe('课文点读', () => {

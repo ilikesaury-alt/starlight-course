@@ -33,6 +33,7 @@ import {
 import { getLessonBook, type LessonBook } from './starlight-book'
 import { getPassage } from './starlight-passage'
 import { getLessonDialogue } from './lessonDialogue'
+import { getLessonDialogue1 } from './starlight1/dialogue1'
 import { framesOfLesson, type SentenceFrame } from './sentenceFrame'
 import { getReadingPassage, type ReadingPassage } from './reading/index'
 import {
@@ -105,12 +106,15 @@ export function seriesReading(mod: SeriesModule, lessonId: number): ReadingPassa
     : getReadingPassage(mod.id, lessonId)
 }
 
-/** 外教↔孩子的课文对话轮次（只有预备级抽过 dialogue，第一册暂无） */
+/** 外教↔孩子的课文对话轮次（两册各有 96 课对话，按 level 分发）。
+ *  ⚠️ 两册单元号都从 1 开始，必须走各自的 getter，直接按 mod.id 查会串书。 */
 export function seriesDialogue(
   mod: SeriesModule,
   lessonId: number,
 ): ReturnType<typeof getLessonDialogue> {
-  return mod.level === 'starlight1' ? undefined : getLessonDialogue(mod.id, lessonId)
+  return mod.level === 'starlight1'
+    ? getLessonDialogue1(mod.id, lessonId)
+    : getLessonDialogue(mod.id, lessonId)
 }
 
 /** 课文点读轮次（只有预备级有 passage，第一册回落到课本原文） */

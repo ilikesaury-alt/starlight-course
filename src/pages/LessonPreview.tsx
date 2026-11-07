@@ -415,12 +415,12 @@ export default function LessonPreview() {
           dialogue ? (
             <LessonDialogueBox dialogue={dialogue} mcStyle={mcStyle} vocab={words} boxOf={(en) => srsCards[en]?.box} />
           ) : (
-            /* 空态要说实话：预备级每课都有外教对话，缺了是这一课没有；
-               第一册整册还没抽对话，写「这一课还没有」会让孩子以为是自己没找对。 */
+            /* 兜底：两册 96 课现在每课都有外教对话，正常不该走到这里。
+               留着是万一缺对话时仍给孩子一句能懂的话，而不是空白。 */
             <div className="empty">
               <p>
                 {mod.level === 'starlight1'
-                  ? '第一册的外教课堂对话还在整理，先用「单词卡」和「课文」读这一课。'
+                  ? '这一课的外教课堂对话还在补上，先用「单词卡」和「课文」读这一课。'
                   : '这一课还没有外教对话。'}
               </p>
             </div>

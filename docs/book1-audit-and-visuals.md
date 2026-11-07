@@ -54,13 +54,17 @@
 `UnitGlyph` 现在**按册分开查表**（`UNIT_GLYPHS` / `UNIT_GLYPHS_BOOK1`）——
 两册单元号都从 1 开始，不分开就会「换一本书看到另一本的图形」。
 
-### 2.3 空态说实话
+### 2.3 空态说实话（审计当时的状态，现已全部补齐）
 
-第一册整册没有外教对话、且多数课没有填空框架卡。原来那句「这一课还没有外教对话。」
-会让孩子以为是自己没找对。改为按册区分：
+审计当时第一册整册没有外教对话、且多数课没有填空框架卡。原来那句「这一课还没有外教对话。」
+会让孩子以为是自己没找对，所以改成按册区分：
 
-- 第一册：「第一册的外教课堂对话还在整理，先用「单词卡」和「课文」读这一课。」
+- 第一册（当时）：「第一册的外教课堂对话还在整理，先用「单词卡」和「课文」读这一课。」
 - 预备级：「这一课还没有外教对话。」（不变）
+
+> 后续句型卡与阅读短文、外教对话都已补到 96/96（见 §4.1），
+> 这些分册文案现在只是**数据万一缺卡时的兜底**，正常不会出现在孩子面前；
+> 第一册措辞也改成「这一课的…还在补上」，不再说整册没有。
 
 ## 3. 验证
 
@@ -93,7 +97,7 @@ e2e 契约未破：`.ab-level` 恰好 5 个、`.ab-block` 可 disabled 且 textC
 |---|---|---|
 | 句型框架卡 77 课 | ✅ 已补齐（19/96 → 96/96，130 张） | `src/data/starlight1/sentenceFrame1.test.ts` 按预备级同口径校验；顺带修了 `FRAMES_BY_UNIT1` 桶污染与 `framesOfLesson1Series` 返回重复卡 |
 | 阅读小故事 69 课 | ✅ 已补齐（27/96 → 96/96） | 第一册专属词表允许域 `src/data/starlight1/readingVocab1.ts`（预备级基线 ∪ 教材角色名 ∪ 本单元课本原文 token），校验器 `readingPassage1.test.ts`、自检脚本 `scripts/check-reading1.mjs --brief/--stats` |
-| 外教课堂对话 96 课 | 待补 | 仍需给 `seriesDialogue` 接线并改 `LessonPreview` 空态 |
+| 外教课堂对话 96 课 | ✅ 已补齐（0/96 → 96/96，1154 轮） | `src/data/starlight1/dialogue/uN.ts`（9 单元）+ `dialogue1.ts` 独立表与 getter；`seriesDialogue` 按 level 分发；校验器 `dialogue1.test.ts`、自检脚本 `scripts/check-dialogue1.mjs --brief/--stats`；`LessonPreview` 空态改为兜底 |
 
 > 阅读短文的「零超纲」口径与预备级略有不同：第一册教材角色名（Monty/Lola/Mr. Gnome/Pippa…）
 > 和课本原文里出现过的词也算「孩子学过的」，否则连教材故事都写不出来。
