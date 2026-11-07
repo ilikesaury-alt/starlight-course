@@ -626,9 +626,70 @@ export const u6_book: Record<string, LessonBook> = {
   },
 }
 
-// ============================ 3. 句型框架卡（L5 + L6） ============================
+// ============================ 3. 句型框架卡（13 课全覆盖） ============================
 export const u6_frames: SentenceFrame[] = [
-  // --- Lesson 5: Language Focus（水果喜好 / 颜色 + 水果） ---
+  // --- Lesson 1 ~ 4：句型均逐字取自本课 sentences[] ---
+  {
+    id: 'l1-lola-the-pirate-1-favorite',
+    pattern: '___ are my favorite fruit.',
+    blanks: [
+      {
+        options: ['Grapes', 'Apples', 'Mangoes'],
+        answer: 0,
+        zhOptions: ['葡萄是我最喜欢的水果。', '苹果是我最喜欢的水果。', '芒果是我最喜欢的水果。'],
+      },
+    ],
+    zh: '葡萄是我最喜欢的水果。',
+    hint: '说说自己最喜欢的水果（句首大写）',
+    unitSlug: 'lola-the-pirate',
+    lessonId: 1,
+  },
+  {
+    id: 'l1-lola-the-pirate-2-dont-like',
+    pattern: "I don't like ___.",
+    blanks: [
+      {
+        options: ['bananas', 'limes', 'lemons'],
+        answer: 0,
+        zhOptions: ['我不喜欢香蕉。', '我不喜欢青柠。', '我不喜欢柠檬。'],
+      },
+    ],
+    zh: '我不喜欢香蕉。',
+    hint: '说说你不喜欢的水果',
+    unitSlug: 'lola-the-pirate',
+    lessonId: 2,
+  },
+  {
+    id: 'l1-lola-the-pirate-3-pick',
+    pattern: "Let's pick the ___!",
+    blanks: [
+      {
+        options: ['mangoes', 'pineapples', 'bananas'],
+        answer: 0,
+        zhOptions: ['我们摘芒果吧！', '我们摘菠萝吧！', '我们摘香蕉吧！'],
+      },
+    ],
+    zh: '我们摘芒果吧！',
+    hint: '邀请小伙伴一起摘水果',
+    unitSlug: 'lola-the-pirate',
+    lessonId: 3,
+  },
+  {
+    id: 'l1-lola-the-pirate-4-hungry',
+    pattern: "I'm ___.",
+    blanks: [
+      {
+        options: ['hungry', 'a pirate', 'Lola'],
+        answer: 0,
+        zhOptions: ['我饿了。', '我是海盗。', '我是罗拉。'],
+      },
+    ],
+    zh: '我饿了。',
+    hint: '想吃东西的时候怎么说',
+    unitSlug: 'lola-the-pirate',
+    lessonId: 4,
+  },
+  // --- Lesson 5: Language Focus（水果喜好 / 颜色问答） ---
   {
     id: 'l1-lola-the-pirate-5-like',
     pattern: 'I like ___.',
@@ -676,21 +737,16 @@ export const u6_frames: SentenceFrame[] = [
   },
   {
     id: 'l1-lola-the-pirate-5-a-color',
-    pattern: "It's a ___ ___.",
+    pattern: 'What ___ is it?',
     blanks: [
       {
-        options: ['red', 'yellow', 'purple'],
+        options: ['color', 'fruit', 'name'],
         answer: 0,
-        zhOptions: ['红色的', '黄色的', '紫色的'],
-      },
-      {
-        options: ['apple', 'banana', 'grape'],
-        answer: 0,
-        zhOptions: ['苹果', '香蕉', '葡萄'],
+        zhOptions: ['它是什么颜色？', '它是什么水果？', '它叫什么名字？'],
       },
     ],
-    zh: '它是一个红色的苹果。',
-    hint: 'a / an + 颜色 + 水果（两个空）',
+    zh: '它是什么颜色？',
+    hint: '复习颜色问答 What color is it?',
     unitSlug: 'lola-the-pirate',
     lessonId: 5,
   },
@@ -715,15 +771,121 @@ export const u6_frames: SentenceFrame[] = [
     pattern: 'No, ___.',
     blanks: [
       {
-        options: ['I don’t', 'I do'],
+        options: ["I don't", 'I do', "I don't like yogurt"],
         answer: 0,
-        zhOptions: ['不，我不喜欢。', '不，我喜欢。'],
+        zhOptions: ['不，我不喜欢。', '不，我喜欢。', '不，我不喜欢酸奶。'],
       },
     ],
     zh: '不，我不喜欢。',
     hint: 'Do you like...? 的否定回答',
     unitSlug: 'lola-the-pirate',
     lessonId: 6,
+  },
+  // --- Lesson 7 ~ 13：句型均逐字取自本课 sentences[] ---
+  {
+    id: 'l1-lola-the-pirate-7-orange-frog',
+    pattern: "It's an ___ frog.",
+    blanks: [
+      {
+        options: ['orange', 'green', 'purple'],
+        answer: 0,
+        zhOptions: ['它是一只橙色的青蛙。', '它是一只绿色的青蛙。', '它是一只紫色的青蛙。'],
+      },
+    ],
+    zh: '它是一只橙色的青蛙。',
+    hint: '找找含字母 o 的单词 orange',
+    unitSlug: 'lola-the-pirate',
+    lessonId: 7,
+  },
+  {
+    id: 'l1-lola-the-pirate-8-seed',
+    pattern: 'This is a ___.',
+    blanks: [
+      {
+        options: ['seed', 'plant', 'blossom'],
+        answer: 0,
+        zhOptions: ['这是一颗种子。', '这是一株植物。', '这是一朵花。'],
+      },
+    ],
+    zh: '这是一颗种子。',
+    hint: '植物生长从种子开始',
+    unitSlug: 'lola-the-pirate',
+    lessonId: 8,
+  },
+  {
+    id: 'l1-lola-the-pirate-9-fruit-salad',
+    pattern: "Let's make ___ together.",
+    blanks: [
+      {
+        options: ['fruit salad', 'smoothies', 'lemonade'],
+        answer: 0,
+        zhOptions: ['我们一起做水果沙拉吧。', '我们一起做冰沙吧。', '我们一起做柠檬水吧。'],
+      },
+    ],
+    zh: '我们一起做水果沙拉吧。',
+    hint: '邀请小伙伴一起做点心',
+    unitSlug: 'lola-the-pirate',
+    lessonId: 9,
+  },
+  {
+    id: 'l1-lola-the-pirate-10-wheres-lamb',
+    pattern: "Where's my ___?",
+    blanks: [
+      {
+        options: ['lamb', 'cow', 'bull'],
+        answer: 0,
+        zhOptions: ['我的小羊在哪里？', '我的奶牛在哪里？', '我的公牛在哪里？'],
+      },
+    ],
+    zh: '我的小羊在哪里？',
+    hint: '找不到农场小动物时怎么问',
+    unitSlug: 'lola-the-pirate',
+    lessonId: 10,
+  },
+  {
+    id: 'l1-lola-the-pirate-11-from-madagascar',
+    pattern: "I'm from ___.",
+    blanks: [
+      {
+        options: ['Madagascar', 'Egypt', 'Africa'],
+        answer: 0,
+        zhOptions: ['我来自马达加斯加。', '我来自埃及。', '我来自非洲。'],
+      },
+    ],
+    zh: '我来自马达加斯加。',
+    hint: '介绍自己来自哪里',
+    unitSlug: 'lola-the-pirate',
+    lessonId: 11,
+  },
+  {
+    id: 'l1-lola-the-pirate-12-go-to-egypt',
+    pattern: 'I want to go to ___.',
+    blanks: [
+      {
+        options: ['Egypt', 'Madagascar', 'the desert'],
+        answer: 0,
+        zhOptions: ['我想去埃及。', '我想去马达加斯加。', '我想去沙漠。'],
+      },
+    ],
+    zh: '我想去埃及。',
+    hint: '说出自己想去的地方',
+    unitSlug: 'lola-the-pirate',
+    lessonId: 12,
+  },
+  {
+    id: 'l1-lola-the-pirate-13-farmer',
+    pattern: "Here's a ___.",
+    blanks: [
+      {
+        options: ['farmer', 'goat', 'duck'],
+        answer: 0,
+        zhOptions: ['这是一位农夫。', '这是一只山羊。', '这是一只鸭子。'],
+      },
+    ],
+    zh: '这是一位农夫。',
+    hint: '介绍故事里出现的人物',
+    unitSlug: 'lola-the-pirate',
+    lessonId: 13,
   },
 ]
 

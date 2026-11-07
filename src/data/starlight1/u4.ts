@@ -481,6 +481,70 @@ export const u4_book: Record<string, LessonBook> = {
 // 3) 句型框架卡：来自 Language Focus 课（L5 穿着 / L6 天气）
 // ============================================================================
 export const u4_frames: SentenceFrame[] = [
+  // L1 · 'Pack your hat.'
+  {
+    id: 'l1-lola-the-pilot-1-pack-your',
+    pattern: 'Pack your ___.',
+    blanks: [
+      {
+        options: ['hat', 'jacket', 'shirt', 'sweater', 'T-shirt'],
+        answer: 0,
+        zhOptions: ['把你的帽子装进包里。', '把你的夹克装进包里。', '把你的衬衫装进包里。', '把你的毛衣装进包里。', '把你的T恤装进包里。'],
+      },
+    ],
+    zh: '把你的帽子装进包里。',
+    hint: '整理行李时说 Pack your ___',
+    unitSlug: 'lola-the-pilot',
+    lessonId: 1,
+  },
+  // L2 · 'Pack your shoes.'
+  {
+    id: 'l1-lola-the-pilot-2-pack-your',
+    pattern: 'Pack your ___.',
+    blanks: [
+      {
+        options: ['shoes', 'socks', 'pants', 'skirt', 'dress'],
+        answer: 0,
+        zhOptions: ['把你的鞋装进包里。', '把你的袜子装进包里。', '把你的裤子装进包里。', '把你的短裙装进包里。', '把你的连衣裙装进包里。'],
+      },
+    ],
+    zh: '把你的鞋装进包里。',
+    hint: '这一课新学的五件衣物都能放进 Pack your ___',
+    unitSlug: 'lola-the-pilot',
+    lessonId: 2,
+  },
+  // L3 · 'I have my sweater and my socks.'
+  {
+    id: 'l1-lola-the-pilot-3-have-my',
+    pattern: 'I have my ___ and my socks.',
+    blanks: [
+      {
+        options: ['sweater', 'jacket', 'T-shirt', 'hat', 'shoes'],
+        answer: 0,
+        zhOptions: ['我有我的毛衣和我的袜子。', '我有我的夹克和我的袜子。', '我有我的T恤和我的袜子。', '我有我的帽子和我的袜子。', '我有我的鞋和我的袜子。'],
+      },
+    ],
+    zh: '我有我的毛衣和我的袜子。',
+    hint: '故事里皮帕数自己的衣服',
+    unitSlug: 'lola-the-pilot',
+    lessonId: 3,
+  },
+  // L4 · "Mickey sends Pippa's suitcase."
+  {
+    id: 'l1-lola-the-pilot-4-sends-suitcase',
+    pattern: "Mickey sends Pippa's ___.",
+    blanks: [
+      {
+        options: ['suitcase', 'jacket', 'sweater', 'hat', 'socks'],
+        answer: 0,
+        zhOptions: ['米奇寄回了皮帕的行李箱。', '米奇寄回了皮帕的夹克。', '米奇寄回了皮帕的毛衣。', '米奇寄回了皮帕的帽子。', '米奇寄回了皮帕的袜子。'],
+      },
+    ],
+    zh: '米奇寄回了皮帕的行李箱。',
+    hint: '故事结尾，是谁把行李箱寄回来了？',
+    unitSlug: 'lola-the-pilot',
+    lessonId: 4,
+  },
   {
     id: 'l1-lola-the-pilot-5-wearing-a',
     pattern: "I'm wearing a ___.",
@@ -501,28 +565,29 @@ export const u4_frames: SentenceFrame[] = [
     pattern: "I'm wearing ___.",
     blanks: [
       {
-        options: ['shoes', 'socks', 'pants'],
+        options: ['pants', 'socks', 'shoes'],
         answer: 0,
-        zhOptions: ['我穿着鞋子。', '我穿着袜子。', '我穿着裤子。'],
+        zhOptions: ['我穿着裤子。', '我穿着袜子。', '我穿着鞋子。'],
       },
     ],
-    zh: '我穿着鞋子。',
+    zh: '我穿着裤子。',
     hint: 'pants / socks / shoes 没有 a，直接用复数',
     unitSlug: 'lola-the-pilot',
     lessonId: 5,
   },
+  // id 保留历史命名（SRS 卡键 = frame:<id>），内容改挂 L5 真实句 "I'm wearing shoes, a T-shirt and a hat!"
   {
     id: 'l1-lola-the-pilot-5-have-my',
-    pattern: "I have my ___.",
+    pattern: "I'm wearing shoes, a T-shirt and ___!",
     blanks: [
       {
-        options: ['sweater', 'socks', 'jacket'],
+        options: ['a hat', 'a jacket', 'a sweater', 'socks'],
         answer: 0,
-        zhOptions: ['我有我的毛衣。', '我有我的袜子。', '我有我的夹克。'],
+        zhOptions: ['我穿着鞋子、T恤和一顶帽子！', '我穿着鞋子、T恤和一件夹克！', '我穿着鞋子、T恤和一件毛衣！', '我穿着鞋子、T恤和袜子！'],
       },
     ],
-    zh: '我有我的毛衣。',
-    hint: '故事里皮帕说 "I have my sweater and my socks."',
+    zh: '我穿着鞋子、T恤和一顶帽子！',
+    hint: '故事里皮帕在北极穿了什么？',
     unitSlug: 'lola-the-pilot',
     lessonId: 5,
   },
@@ -543,12 +608,98 @@ export const u4_frames: SentenceFrame[] = [
   },
   {
     id: 'l1-lola-the-pilot-6-weather-like',
-    pattern: "What's the weather like?",
-    blanks: [],
+    pattern: "What's the ___ like?",
+    blanks: [
+      {
+        options: ['weather', 'climate', 'jungle', 'Arctic'],
+        answer: 0,
+        zhOptions: ['天气怎么样？', '气候怎么样？', '丛林是什么样的？', '北极是什么样的？'],
+      },
+    ],
     zh: '天气怎么样？',
     hint: '问天气怎么说',
     unitSlug: 'lola-the-pilot',
     lessonId: 6,
+  },
+  // L7 · 'In the jungle, I jump and swing.'
+  {
+    id: 'l1-lola-the-pilot-7-jungle-jump',
+    pattern: 'In the ___, I jump and swing.',
+    blanks: [
+      {
+        options: ['jungle', 'Arctic', 'desert', 'airport'],
+        answer: 0,
+        zhOptions: ['在丛林里，我跳啊荡啊。', '在北极，我跳啊荡啊。', '在沙漠里，我跳啊荡啊。', '在机场，我跳啊荡啊。'],
+      },
+    ],
+    zh: '在丛林里，我跳啊荡啊。',
+    hint: '短音 u 的 chant：jungle / jump',
+    unitSlug: 'lola-the-pilot',
+    lessonId: 7,
+  },
+  // L8 · 'The jungle is hot and rainy. Monkeys live in the jungle.'
+  {
+    id: 'l1-lola-the-pilot-8-climate-place',
+    pattern: 'The ___ is hot and rainy. Monkeys live in the jungle.',
+    blanks: [
+      {
+        options: ['jungle', 'desert', 'Arctic', 'airport'],
+        answer: 0,
+        zhOptions: ['丛林又热又多雨，猴子住在丛林里。', '沙漠又热又多雨，猴子住在丛林里。', '北极又热又多雨，猴子住在丛林里。', '机场又热又多雨，猴子住在丛林里。'],
+      },
+    ],
+    zh: '丛林又热又多雨，猴子住在丛林里。',
+    hint: '想想哪种地方又热又多雨',
+    unitSlug: 'lola-the-pilot',
+    lessonId: 8,
+  },
+  // L9 · "It's windy in Tokyo today."
+  {
+    id: 'l1-lola-the-pilot-9-weather-city',
+    pattern: "It's ___ in Tokyo today.",
+    blanks: [
+      {
+        options: ['windy', 'sunny', 'snowing', 'raining'],
+        answer: 0,
+        zhOptions: ['今天东京有风。', '今天东京晴朗。', '今天东京下雪。', '今天东京下雨。'],
+      },
+    ],
+    zh: '今天东京有风。',
+    hint: '看天气预报，说说某个城市今天的天气',
+    unitSlug: 'lola-the-pilot',
+    lessonId: 9,
+  },
+  // L10 · 'This is my sister.'
+  {
+    id: 'l1-lola-the-pilot-10-this-is-my',
+    pattern: 'This is my ___.',
+    blanks: [
+      {
+        options: ['sister', 'grandma', 'brother', 'sweater'],
+        answer: 0,
+        zhOptions: ['这是我的姐姐。', '这是我的奶奶。', '这是我的兄弟。', '这是我的毛衣。'],
+      },
+    ],
+    zh: '这是我的姐姐。',
+    hint: '游戏里介绍自己的家人',
+    unitSlug: 'lola-the-pilot',
+    lessonId: 10,
+  },
+  // L11 · 'My aunt has a red sari.'
+  {
+    id: 'l1-lola-the-pilot-11-red-sari',
+    pattern: 'My aunt has a red ___.',
+    blanks: [
+      {
+        options: ['sari', 'sherwani', 'dress', 'jacket'],
+        answer: 0,
+        zhOptions: ['我的阿姨有一条红色的沙丽。', '我的阿姨有一件红色的男式长外套。', '我的阿姨有一条红色的连衣裙。', '我的阿姨有一件红色的夹克。'],
+      },
+    ],
+    zh: '我的阿姨有一条红色的沙丽。',
+    hint: '印度排灯节里，阿姨穿什么？',
+    unitSlug: 'lola-the-pilot',
+    lessonId: 11,
   },
 ]
 

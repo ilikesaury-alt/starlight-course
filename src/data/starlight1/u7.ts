@@ -356,6 +356,66 @@ export const u7_book: Record<string, LessonBook> = {
 
 export const u7_frames: SentenceFrame[] = [
   {
+    id: 'l1-monty-the-magician-1-can-fly',
+    pattern: 'The ___ can fly.',
+    blanks: [
+      {
+        options: ['plane', 'kite', 'ball', 'doll'],
+        answer: 0,
+        zhOptions: ['飞机能飞。', '风筝能飞。', '球能飞。', '洋娃娃能飞。'],
+      },
+    ],
+    zh: '飞机能飞。',
+    hint: '说说哪样东西会飞',
+    unitSlug: 'monty-the-magician',
+    lessonId: 1,
+  },
+  {
+    id: 'l1-monty-the-magician-2-this',
+    pattern: 'This is a ___.',
+    blanks: [
+      {
+        options: ['robot', 'puppet', 'guitar', 'piano', 'dinosaur'],
+        answer: 0,
+        zhOptions: ['这是一个机器人。', '这是一个木偶。', '这是一把吉他。', '这是一架钢琴。', '这是一只恐龙。'],
+      },
+    ],
+    zh: '这是一个机器人。',
+    hint: '介绍一个新玩具或乐器',
+    unitSlug: 'monty-the-magician',
+    lessonId: 2,
+  },
+  {
+    id: 'l1-monty-the-magician-3-want-please',
+    pattern: 'I want a ___, please.',
+    blanks: [
+      {
+        options: ['ball', 'doll', 'plane', 'robot'],
+        answer: 0,
+        zhOptions: ['我想要一个球，谢谢。', '我想要一个洋娃娃，谢谢。', '我想要一架飞机，谢谢。', '我想要一个机器人，谢谢。'],
+      },
+    ],
+    zh: '我想要一个球，谢谢。',
+    hint: '礼貌地说出想要的玩具（故事里 Paul 这样说）',
+    unitSlug: 'monty-the-magician',
+    lessonId: 3,
+  },
+  {
+    id: 'l1-monty-the-magician-4-broken',
+    pattern: 'My ___ is broken.',
+    blanks: [
+      {
+        options: ['plane', 'dinosaur', 'ball', 'kite'],
+        answer: 0,
+        zhOptions: ['我的飞机坏了。', '我的恐龙坏了。', '我的球坏了。', '我的风筝坏了。'],
+      },
+    ],
+    zh: '我的飞机坏了。',
+    hint: '说说哪个玩具坏了',
+    unitSlug: 'monty-the-magician',
+    lessonId: 4,
+  },
+  {
     id: 'l1-monty-the-magician-5-want',
     pattern: 'I want a ___.',
     blanks: [
@@ -372,16 +432,16 @@ export const u7_frames: SentenceFrame[] = [
   },
   {
     id: 'l1-monty-the-magician-5-please',
-    pattern: 'I want a ___, please.',
+    pattern: 'I want a ___ dinosaur.',
     blanks: [
       {
-        options: ['ball', 'doll', 'plane', 'robot'],
+        options: ['big', 'red', 'broken'],
         answer: 0,
-        zhOptions: ['我想要一个球，谢谢。', '我想要一个洋娃娃，谢谢。', '我想要一架飞机，谢谢。', '我想要一个机器人，谢谢。'],
+        zhOptions: ['我想要一只大恐龙。', '我想要一只红色的恐龙。', '我想要一只坏掉的恐龙。'],
       },
     ],
-    zh: '我想要一个球，谢谢。',
-    hint: '礼貌地表达愿望（故事里 Paul 这样说）',
+    zh: '我想要一只大恐龙。',
+    hint: '加个形容词，说说想要什么样的恐龙',
     unitSlug: 'monty-the-magician',
     lessonId: 5,
   },
@@ -429,6 +489,51 @@ export const u7_frames: SentenceFrame[] = [
     hint: '否定句：没有某部位',
     unitSlug: 'monty-the-magician',
     lessonId: 6,
+  },
+  {
+    id: 'l1-monty-the-magician-7-my-head',
+    pattern: 'This is my ___.',
+    blanks: [
+      {
+        options: ['head', 'hand', 'doll', 'dinosaur'],
+        answer: 0,
+        zhOptions: ['这是我的头。', '这是我的手。', '这是我的洋娃娃。', '这是我的恐龙。'],
+      },
+    ],
+    zh: '这是我的头。',
+    hint: 'chant 里介绍自己的身体部位',
+    unitSlug: 'monty-the-magician',
+    lessonId: 7,
+  },
+  {
+    id: 'l1-monty-the-magician-8-symmetrical',
+    pattern: 'It is ___.',
+    blanks: [
+      {
+        options: ['symmetrical', 'broken', 'red', 'big'],
+        answer: 0,
+        zhOptions: ['它是对称的。', '它坏了。', '它是红色的。', '它很大。'],
+      },
+    ],
+    zh: '它是对称的。',
+    hint: '判断图形是不是对称的',
+    unitSlug: 'monty-the-magician',
+    lessonId: 8,
+  },
+  {
+    id: 'l1-monty-the-magician-9-want-the',
+    pattern: 'I want the ___.',
+    blanks: [
+      {
+        options: ['doll', 'ball', 'plane', 'robot'],
+        answer: 0,
+        zhOptions: ['我想要那个洋娃娃。', '我想要那个球。', '我想要那架飞机。', '我想要那个机器人。'],
+      },
+    ],
+    zh: '我想要那个洋娃娃。',
+    hint: '复习 I want 句型，说出想要的玩具',
+    unitSlug: 'monty-the-magician',
+    lessonId: 9,
   },
 ]
 

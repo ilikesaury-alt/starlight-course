@@ -19,6 +19,15 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: process.env.CI ? [['github'], ['list']] : 'list',
 
+  // Vite 的 lazy chunk 是**按需编译**的：某个路由第一次被访问时要现场编译，
+  // 本机实测冷启动 7~20s。默认 expect 超时 5s 会让「骨架屏还没退场」被判失败，
+  // 表现为各 spec 的第一个用例随机假红（同一个 spec 的第二条往往 3s 就过）。
+  // 统一放宽到 15s，只对「断言」生效，不改变用例逻辑与显式写死的 timeout。
+  expect: { timeout: 15_000 },
+  // 同理，交互密集的用例（听写走完一轮、积木 A7）在并行 + CPU 争抢下会超过
+  // 默认 30s test 级超时；本机实测单独跑要 20s 上下。给到 60s，仍远小于 CI 的重试预算。
+  timeout: 60_000,
+
   use: {
     baseURL: 'http://localhost:5173',
     trace: 'on-first-retry',

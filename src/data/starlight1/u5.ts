@@ -414,17 +414,77 @@ export const u5_book: Record<string, LessonBook> = {
 
 export const u5_frames: SentenceFrame[] = [
   {
-    id: 'l1-monty-the-farmer-5-is-it',
-    pattern: 'Is it a ___?',
+    id: 'l1-monty-the-farmer-1-heres',
+    pattern: "Here's a ___.",
     blanks: [
       {
-        options: ['cow', 'chicken', 'rabbit', 'duck'],
+        options: ['horse', 'bird', 'frog', 'duck', 'chicken'],
         answer: 0,
-        zhOptions: ['它是一头牛吗？', '它是一只鸡吗？', '它是一只兔子吗？', '它是一只鸭子吗？'],
+        zhOptions: ['这是一匹马。', '这是一只鸟。', '这是一只青蛙。', '这是一只鸭子。', '这是一只鸡。'],
       },
     ],
-    zh: '它是一头牛吗？',
-    hint: '用 Is it a...? 猜动物',
+    zh: '这是一匹马。',
+    hint: "Here's = Here is（这是）",
+    unitSlug: 'monty-the-farmer',
+    lessonId: 1,
+  },
+  {
+    id: 'l1-monty-the-farmer-2-heres',
+    pattern: "Here's a ___.",
+    blanks: [
+      {
+        options: ['sheep', 'goat', 'cow', 'bull', 'rabbit'],
+        answer: 0,
+        zhOptions: ['这是一只绵羊。', '这是一只山羊。', '这是一头奶牛。', '这是一头公牛。', '这是一只兔子。'],
+      },
+    ],
+    zh: '这是一只绵羊。',
+    hint: '用本课新学的农场动物说「这是……」',
+    unitSlug: 'monty-the-farmer',
+    lessonId: 2,
+  },
+  {
+    id: 'l1-monty-the-farmer-3-are-you',
+    pattern: 'Are you my ___?',
+    blanks: [
+      {
+        options: ['mom', 'bird', 'frog', 'chicken'],
+        answer: 0,
+        zhOptions: ['你是我的妈妈吗？', '你是我的鸟吗？', '你是我的青蛙吗？', '你是我的鸡吗？'],
+      },
+    ],
+    zh: '你是我的妈妈吗？',
+    hint: '丑小鸟找妈妈时问的话',
+    unitSlug: 'monty-the-farmer',
+    lessonId: 3,
+  },
+  {
+    id: 'l1-monty-the-farmer-4-then',
+    pattern: 'Then the ugly bird sees a ___.',
+    blanks: [
+      {
+        options: ['frog', 'swan', 'chicken', 'horse'],
+        answer: 0,
+        zhOptions: ['然后丑小鸟看见一只青蛙。', '然后丑小鸟看见一只天鹅。', '然后丑小鸟看见一只鸡。', '然后丑小鸟看见一匹马。'],
+      },
+    ],
+    zh: '然后丑小鸟看见一只青蛙。',
+    hint: '讲故事：接着丑小鸟看见了谁',
+    unitSlug: 'monty-the-farmer',
+    lessonId: 4,
+  },
+  {
+    id: 'l1-monty-the-farmer-5-is-it',
+    pattern: 'Is it a ___? Is it a chicken?',
+    blanks: [
+      {
+        options: ['cow', 'rabbit', 'duck', 'goat'],
+        answer: 0,
+        zhOptions: ['它是一头牛吗？是一只鸡吗？', '它是一只兔子吗？是一只鸡吗？', '它是一只鸭子吗？是一只鸡吗？', '它是一只山羊吗？是一只鸡吗？'],
+      },
+    ],
+    zh: '它是一头牛吗？是一只鸡吗？',
+    hint: '用 Is it a...? 连着猜两种动物（整句照课本读）',
     unitSlug: 'monty-the-farmer',
     lessonId: 5,
   },
@@ -460,33 +520,78 @@ export const u5_frames: SentenceFrame[] = [
   },
   {
     id: 'l1-monty-the-farmer-6-wheres',
-    pattern: "Where's the ___?",
+    pattern: "Where's the ___? It's here.",
     blanks: [
       {
         options: ['chick', 'foal', 'calf', 'lamb', 'kid'],
         answer: 0,
-        zhOptions: ['小鸡在哪里？', '小马在哪里？', '小牛在哪里？', '小羊在哪里？', '小山羊在哪里？'],
+        zhOptions: ['小鸡在哪里？在这里。', '小马在哪里？在这里。', '小牛在哪里？在这里。', '小羊在哪里？在这里。', '小山羊在哪里？在这里。'],
       },
     ],
-    zh: '小鸡在哪里？',
-    hint: 'Where\'s = Where is，问动物宝宝在哪',
+    zh: '小鸡在哪里？在这里。',
+    hint: "Where's = Where is，问答动物宝宝在哪（整句照课本读）",
     unitSlug: 'monty-the-farmer',
     lessonId: 6,
   },
   {
     id: 'l1-monty-the-farmer-6-its',
-    pattern: "It's ___.",
+    pattern: "It's here! Here's my ___!",
     blanks: [
       {
-        options: ['here', 'there'],
+        options: ['chick', 'lamb', 'calf', 'foal', 'kid'],
         answer: 0,
-        zhOptions: ['在这里。', '在那里。'],
+        zhOptions: ['在这里！这是我的小鸡！', '在这里！这是我的小羊！', '在这里！这是我的小牛！', '在这里！这是我的小马！', '在这里！这是我的小山羊！'],
       },
     ],
-    zh: '在这里。',
-    hint: '回答位置',
+    zh: '在这里！这是我的小鸡！',
+    hint: '找到动物宝宝啦（整句照课本读）',
     unitSlug: 'monty-the-farmer',
     lessonId: 6,
+  },
+  {
+    id: 'l1-monty-the-farmer-7-wheres',
+    pattern: "Where's the ___?",
+    blanks: [
+      {
+        options: ['chicken', 'chick', 'chair', 'teacher'],
+        answer: 0,
+        zhOptions: ['鸡在哪里？', '小鸡在哪里？', '椅子在哪里？', '老师在哪里？'],
+      },
+    ],
+    zh: '鸡在哪里？',
+    hint: '听音辨词：找找 ch 词在哪',
+    unitSlug: 'monty-the-farmer',
+    lessonId: 7,
+  },
+  {
+    id: 'l1-monty-the-farmer-8-each',
+    pattern: 'Each animal is a different ___.',
+    blanks: [
+      {
+        options: ['instrument', 'clarinet', 'flute', 'oboe'],
+        answer: 0,
+        zhOptions: ['每个动物对应一种不同的乐器。', '每个动物对应一种不同的单簧管。', '每个动物对应一种不同的长笛。', '每个动物对应一种不同的双簧管。'],
+      },
+    ],
+    zh: '每个动物对应一种不同的乐器。',
+    hint: '《彼得与狼》里，每种动物对应一种乐器',
+    unitSlug: 'monty-the-farmer',
+    lessonId: 8,
+  },
+  {
+    id: 'l1-monty-the-farmer-9-isnt-its',
+    pattern: "It isn't a chicken. It's a ___.",
+    blanks: [
+      {
+        options: ['chick', 'foal', 'calf', 'lamb'],
+        answer: 0,
+        zhOptions: ['它不是母鸡，是小鸡。', '它不是母鸡，是小马。', '它不是母鸡，是小牛。', '它不是母鸡，是小羊。'],
+      },
+    ],
+    zh: '它不是母鸡，是小鸡。',
+    hint: '区分成鸡 chicken 和鸡宝宝 chick',
+    unitSlug: 'monty-the-farmer',
+    lessonId: 9,
   },
 ]
 

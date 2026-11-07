@@ -7,7 +7,7 @@ import type { ReadingPassage, SentenceFrame } from './shared'
 import { lessonsByUnit1 } from './lessons'
 import { STARLIGHT_BOOK1 } from './book'
 import { READING_PASSAGES1, getReadingPassage1 } from './reading'
-import { STARLIGHT_FRAMES1, framesOfLesson1 } from './sentenceFrames'
+import { STARLIGHT_FRAMES1, UNIT1_FRAMES, framesOfLesson1 } from './sentenceFrames'
 import { EXT_TOPICS1 } from './extensions'
 import { u2_module, u2_frames, u2_reading } from './u2'
 import { u3_module, u3_frames, u3_reading } from './u3'
@@ -35,7 +35,7 @@ export {
  * 现按 unitId 归拢，缺哪一单元由调用方兜底（[] 表示这一课确实没有卡）。
  */
 export const FRAMES_BY_UNIT1: Record<number, SentenceFrame[]> = {
-  1: STARLIGHT_FRAMES1,
+  1: UNIT1_FRAMES,
   2: u2_frames,
   3: u3_frames,
   4: u4_frames,
@@ -46,12 +46,15 @@ export const FRAMES_BY_UNIT1: Record<number, SentenceFrame[]> = {
   9: u9_frames,
 }
 
-/** 某单元的句型框架卡（按 unitSlug + lessonId 过滤） */
+/** 某课的句型框架卡（按 unitSlug + lessonId 精确过滤）。
+ *
+ *  ⚠️ 只扫**摊平总表**这一份，不要扫 FRAMES_BY_UNIT1 的各桶：
+ *    早先尝试从 unitSlug 推 unitId（'u2' 之类），但第一册 slug 是
+ *    'lola-the-doctor' 这类角色名，解析永远失败 → 退回全桶 flat()，
+ *    总表 + 各桶各一份，每张卡返回两次，UI 渲染重复卡、SRS 重复播种。
+ *    slug 全局唯一，直接按 slug 过滤就是最准也最省的做法。 */
 export function framesOfLesson1Series(unitSlug: string, lessonId: number): SentenceFrame[] {
-  const unitId = Number(unitSlug.startsWith('u') ? unitSlug.slice(1) : 0)
-  // unitSlug 不是 'uN' 形态时，退回全表扫（数据量小，代价可忽略）
-  const pool = FRAMES_BY_UNIT1[unitId] ?? Object.values(FRAMES_BY_UNIT1).flat()
-  return pool.filter((f) => f.unitSlug === unitSlug && f.lessonId === lessonId)
+  return STARLIGHT_FRAMES1.filter((f) => f.unitSlug === unitSlug && f.lessonId === lessonId)
 }
 
 /**

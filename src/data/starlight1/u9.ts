@@ -489,12 +489,12 @@ export const u9_frames: SentenceFrame[] = [
   },
   {
     id: 'l1-monty-the-diver-5-answer',
-    pattern: 'Is it a turtle? ___.',
+    pattern: '___ it is.',
     blanks: [
       {
-        options: ['Yes, it is.', "No, it isn't."],
+        options: ['Yes,', 'No,', 'Well,'],
         answer: 0,
-        zhOptions: ['是的，它是。', '不，它不是。'],
+        zhOptions: ['是的，它是。', '不，它是。', '嗯，它是。'],
       },
     ],
     zh: '是的，它是。',
@@ -507,9 +507,9 @@ export const u9_frames: SentenceFrame[] = [
     pattern: 'What are ___?',
     blanks: [
       {
-        options: ['they', 'these animals'],
+        options: ['they', 'these animals', 'the turtles'],
         answer: 0,
-        zhOptions: ['它们是什么？', '那些动物是什么？'],
+        zhOptions: ['它们是什么？', '这些动物是什么？', '那些海龟是什么？'],
       },
     ],
     zh: '它们是什么？',
@@ -534,18 +534,155 @@ export const u9_frames: SentenceFrame[] = [
   },
   {
     id: 'l1-monty-the-diver-6-sea',
-    pattern: "They're ___ in the sea.",
+    pattern: 'How many animals are in the ___?',
     blanks: [
       {
-        options: ['dolphins', 'seagulls', 'seals'],
+        options: ['picture', 'sea', 'sky'],
         answer: 0,
-        zhOptions: ['它们是海里的海豚。', '它们是海里的海鸥。', '它们是海里的海豹。'],
+        zhOptions: ['图里有多少只动物？', '海里有多少只动物？', '天上有多少只动物？'],
       },
     ],
-    zh: '它们是海里的海豚。',
-    hint: '位置 + 动物',
+    zh: '图里有多少只动物？',
+    hint: '用 How many 问数量',
     unitSlug: 'monty-the-diver',
     lessonId: 6,
+  },
+
+  // ---- 补齐缺卡课：句型逐字取自本课 sentences，___ 处即被挖掉的那一段 ----
+  {
+    id: 'l1-monty-the-diver-1-see',
+    pattern: 'I can see the ___.',
+    blanks: [
+      {
+        options: ['sea', 'sun', 'beach'],
+        answer: 0,
+        zhOptions: ['我看见大海。', '我看见太阳。', '我看见海滩。'],
+      },
+    ],
+    zh: '我看见大海。',
+    hint: '说在海滩看见的东西',
+    unitSlug: 'monty-the-diver',
+    lessonId: 1,
+  },
+  {
+    id: 'l1-monty-the-diver-2-can',
+    pattern: 'What can you ___?',
+    blanks: [
+      {
+        options: ['see', 'do', 'find'],
+        answer: 0,
+        zhOptions: ['你看到了什么？', '你能做什么？', '你能找到什么？'],
+      },
+    ],
+    zh: '你看到了什么？',
+    hint: '问对方看见了什么',
+    unitSlug: 'monty-the-diver',
+    lessonId: 2,
+  },
+  {
+    id: 'l1-monty-the-diver-3-find',
+    pattern: "I can't find my ___.",
+    blanks: [
+      {
+        options: ['friend', 'crab', 'shell'],
+        answer: 0,
+        zhOptions: ['我找不到我的朋友。', '我找不到我的螃蟹。', '我找不到我的贝壳。'],
+      },
+    ],
+    zh: '我找不到我的朋友。',
+    hint: '说找不到谁',
+    unitSlug: 'monty-the-diver',
+    lessonId: 3,
+  },
+  {
+    id: 'l1-monty-the-diver-4-noise',
+    pattern: "What's that ___?",
+    blanks: [
+      {
+        options: ['noise', 'turtle', 'chest'],
+        answer: 0,
+        zhOptions: ['那是什么声音？', '那是什么海龟？', '那是什么宝箱？'],
+      },
+    ],
+    zh: '那是什么声音？',
+    hint: '听到动静时问一句',
+    unitSlug: 'monty-the-diver',
+    lessonId: 4,
+  },
+  {
+    id: 'l1-monty-the-diver-7-seals',
+    pattern: 'Six ___ in the sea.',
+    blanks: [
+      {
+        options: ['seals', 'snails', 'seagulls'],
+        answer: 0,
+        zhOptions: ['六只海豹在海里。', '六只蜗牛在海里。', '六只海鸥在海里。'],
+      },
+    ],
+    zh: '六只海豹在海里。',
+    hint: '练 /s/ 音：Six seals',
+    unitSlug: 'monty-the-diver',
+    lessonId: 7,
+  },
+  {
+    id: 'l1-monty-the-diver-8-music',
+    pattern: 'Music can be ___.',
+    blanks: [
+      {
+        options: ['slow', 'fast', 'quiet'],
+        answer: 0,
+        zhOptions: ['音乐可以很慢。', '音乐可以很快。', '音乐可以很轻。'],
+      },
+    ],
+    zh: '音乐可以很慢。',
+    hint: '描述音乐的快慢轻重',
+    unitSlug: 'monty-the-diver',
+    lessonId: 8,
+  },
+  {
+    id: 'l1-monty-the-diver-9-crab',
+    pattern: 'Is it a ___?',
+    blanks: [
+      {
+        options: ['crab', 'turtle', 'shell'],
+        answer: 0,
+        zhOptions: ['它是螃蟹吗？', '它是海龟吗？', '它是贝壳吗？'],
+      },
+    ],
+    zh: '它是螃蟹吗？',
+    hint: '确认是什么动物',
+    unitSlug: 'monty-the-diver',
+    lessonId: 9,
+  },
+  {
+    id: 'l1-monty-the-diver-10-soccer',
+    pattern: 'Fantastic! I can play ___.',
+    blanks: [
+      {
+        options: ['soccer', 'music', 'games'],
+        answer: 0,
+        zhOptions: ['太棒了！我会踢足球。', '太棒了！我会玩音乐。', '太棒了！我会玩游戏。'],
+      },
+    ],
+    zh: '太棒了！我会踢足球。',
+    hint: '说自己会做什么',
+    unitSlug: 'monty-the-diver',
+    lessonId: 10,
+  },
+  {
+    id: 'l1-monty-the-diver-11-winner',
+    pattern: 'The red team is the ___!',
+    blanks: [
+      {
+        options: ['winner', 'referee', 'player'],
+        answer: 0,
+        zhOptions: ['红队是获胜者！', '红队是裁判！', '红队是队员！'],
+      },
+    ],
+    zh: '红队是获胜者！',
+    hint: '宣布比赛结果',
+    unitSlug: 'monty-the-diver',
+    lessonId: 11,
   },
 ]
 

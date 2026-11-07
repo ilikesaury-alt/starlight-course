@@ -484,6 +484,72 @@ export const u2_book: Record<string, LessonBook> = {
 // 3. 句型框架卡（Language Focus 课 5、6 抽取，unitSlug = 'lola-the-doctor'）
 // ============================================================================
 export const u2_frames: SentenceFrame[] = [
+  // L1 / L2 / L3 / L4 补齐：每课 1 张，pattern 逐字取自本课 sentences，挖 1 个空
+  {
+    id: 'l1-lola-the-doctor-1-look-at-my',
+    pattern: 'Look at my ___.',
+    blanks: [
+      {
+        options: ['eyes', 'ears', 'nose', 'mouth', 'teeth'],
+        answer: 0,
+        zhOptions: ['看我的眼睛。', '看我的耳朵。', '看我的鼻子。', '看我的嘴。', '看我的牙齿。'],
+      },
+    ],
+    zh: '看我的眼睛。',
+    hint: 'Look at my... 指认自己的身体部位',
+    unitSlug: 'lola-the-doctor',
+    lessonId: 1,
+  },
+  {
+    id: 'l1-lola-the-doctor-2-look-at-my-hair',
+    pattern: 'Look at ___ hair.',
+    blanks: [
+      {
+        options: ['my', 'your', 'his', 'her'],
+        answer: 0,
+        zhOptions: ['看我的头发。', '看你的头发。', '看他的头发。', '看她的头发。'],
+      },
+    ],
+    zh: '看我的头发。',
+    hint: 'my / your / his / her 表示「谁的」',
+    unitSlug: 'lola-the-doctor',
+    lessonId: 2,
+  },
+  {
+    id: 'l1-lola-the-doctor-3-look-have-a',
+    pattern: 'Look! I have a ___.',
+    blanks: [
+      {
+        options: ['mouth', 'nose', 'face', 'ear'],
+        answer: 0,
+        zhOptions: ['看！我有一张嘴。', '看！我有一个鼻子。', '看！我有一张脸。', '看！我有一只耳朵。'],
+      },
+    ],
+    zh: '看！我有一张嘴。',
+    hint: 'a + 单数身体部位',
+    unitSlug: 'lola-the-doctor',
+    lessonId: 3,
+  },
+  {
+    id: 'l1-lola-the-doctor-4-nose-and-eyes',
+    pattern: 'Look! I have a ___ and eyes.',
+    blanks: [
+      {
+        options: ['nose', 'mouth', 'face', 'ear'],
+        answer: 0,
+        zhOptions: [
+          '看！我有一个鼻子和两只眼睛。',
+          '看！我有一张嘴和两只眼睛。',
+          '看！我有一张脸和两只眼睛。',
+          '看！我有一只耳朵和两只眼睛。',
+        ],
+      },
+    ],
+    zh: '看！我有一个鼻子和两只眼睛。',
+    hint: 'and 连接两个身体部位',
+    unitSlug: 'lola-the-doctor',
+    lessonId: 4,
+  },
   {
     id: 'l1-lola-the-doctor-5-have',
     pattern: 'I have ___.',
@@ -531,15 +597,15 @@ export const u2_frames: SentenceFrame[] = [
   },
   {
     id: 'l1-lola-the-doctor-6-his-her-shampoo',
-    pattern: 'This is ___ shampoo.',
+    pattern: 'This is ___ soap.',
     blanks: [
       {
-        options: ['his', 'her'],
+        options: ['his', 'her', 'my', 'your'],
         answer: 0,
-        zhOptions: ['这是他的洗发水。', '这是她的洗发水。'],
+        zhOptions: ['这是他的肥皂。', '这是她的肥皂。', '这是我的肥皂。', '这是你的肥皂。'],
       },
     ],
-    zh: '这是他的洗发水。',
+    zh: '这是他的肥皂。',
     hint: 'his = 他的，her = 她的',
     unitSlug: 'lola-the-doctor',
     lessonId: 6,
@@ -573,6 +639,104 @@ export const u2_frames: SentenceFrame[] = [
     hint: 'her = 她的',
     unitSlug: 'lola-the-doctor',
     lessonId: 6,
+  },
+  // L7 / L8 / L9 / L10 / L11 补齐：每课 1 张，pattern 逐字取自本课 sentences，挖 1 个空
+  {
+    id: 'l1-lola-the-doctor-7-brush-your',
+    pattern: 'Brush your ___.',
+    blanks: [
+      {
+        options: ['teeth', 'mouth', 'hair', 'face'],
+        answer: 0,
+        zhOptions: ['刷你的牙齿。', '刷你的嘴。', '刷你的头发。', '刷你的脸。'],
+      },
+    ],
+    zh: '刷你的牙齿。',
+    hint: 'brush = 刷（th 音：teeth / mouth）',
+    unitSlug: 'lola-the-doctor',
+    lessonId: 7,
+  },
+  {
+    id: 'l1-lola-the-doctor-8-when-you-are',
+    pattern: 'When you are ___, you get adult teeth.',
+    blanks: [
+      {
+        options: ['six', 'three', 'thirteen', 'twenty'],
+        answer: 0,
+        zhOptions: [
+          '你六岁时，开始长恒牙。',
+          '你三岁时，开始长恒牙。',
+          '你十三岁时，开始长恒牙。',
+          '你二十岁时，开始长恒牙。',
+        ],
+      },
+    ],
+    zh: '你六岁时，开始长恒牙。',
+    hint: '数字 + 岁：six / three / thirteen / twenty',
+    unitSlug: 'lola-the-doctor',
+    lessonId: 8,
+  },
+  {
+    id: 'l1-lola-the-doctor-9-his-object',
+    pattern: 'This is his ___.',
+    blanks: [
+      {
+        options: ['toothbrush', 'towel', 'soap', 'comb', 'brush'],
+        answer: 0,
+        zhOptions: [
+          '这是他的牙刷。',
+          '这是他的毛巾。',
+          '这是他的肥皂。',
+          '这是他的梳子。',
+          '这是他的刷子。',
+        ],
+      },
+    ],
+    zh: '这是他的牙刷。',
+    hint: 'his = 他的（洗漱用品）',
+    unitSlug: 'lola-the-doctor',
+    lessonId: 9,
+  },
+  {
+    id: 'l1-lola-the-doctor-10-my-object',
+    pattern: "It's my ___.",
+    blanks: [
+      {
+        options: ['pencil', 'schoolbag', 'towel', 'comb', 'soap'],
+        answer: 0,
+        zhOptions: [
+          '它是我的铅笔。',
+          '它是我的书包。',
+          '它是我的毛巾。',
+          '它是我的梳子。',
+          '它是我的肥皂。',
+        ],
+      },
+    ],
+    zh: '它是我的铅笔。',
+    hint: 'my = 我的',
+    unitSlug: 'lola-the-doctor',
+    lessonId: 10,
+  },
+  {
+    id: 'l1-lola-the-doctor-11-grade-six',
+    pattern: "I'm in grade 1. I'm ___.",
+    blanks: [
+      {
+        options: ['six', 'three', 'thirteen', 'twenty'],
+        answer: 0,
+        zhOptions: [
+          '我上一年级，六岁。',
+          '我上一年级，三岁。',
+          '我上一年级，十三岁。',
+          '我上一年级，二十岁。',
+        ],
+      },
+    ],
+    zh: '我上一年级，六岁。',
+    hint: 'I am + 数字：说自己几岁',
+    unitSlug: 'lola-the-doctor',
+    lessonId: 11,
   },
 ]
 

@@ -582,6 +582,70 @@ export const u3_book: Record<string, LessonBook> = {
 // ===================== Sentence Frames（句型框架卡） =====================
 // 从 Language Focus 课（L5 单复数、L6 外貌描写）抽取；unitSlug = 'monty-the-clown'。
 export const u3_frames: SentenceFrame[] = [
+  // ---- Lesson 1: Family at the Circus（从本课真实句子 'This is my grandma.' 挖空） ----
+  {
+    id: 'l1-monty-the-clown-1-this-grandma',
+    pattern: 'This is my ___.',
+    blanks: [
+      {
+        options: ['grandma', 'dad', 'grandpa', 'mom'],
+        answer: 0,
+        zhOptions: ['这是我的奶奶。', '这是我的爸爸。', '这是我的爷爷。', '这是我的妈妈。'],
+      },
+    ],
+    zh: '这是我的奶奶。',
+    hint: '指着家人介绍：This is my ...',
+    unitSlug: 'monty-the-clown',
+    lessonId: 1,
+  },
+  // ---- Lesson 2: More Family（'This is my uncle.'） ----
+  {
+    id: 'l1-monty-the-clown-2-this-uncle',
+    pattern: 'This is my ___.',
+    blanks: [
+      {
+        options: ['uncle', 'aunt', 'brother', 'sister'],
+        answer: 0,
+        zhOptions: ['这是我的叔叔。', '这是我的阿姨。', '这是我的兄弟。', '这是我的姐妹。'],
+      },
+    ],
+    zh: '这是我的叔叔。',
+    hint: '介绍更多家庭成员',
+    unitSlug: 'monty-the-clown',
+    lessonId: 2,
+  },
+  // ---- Lesson 3: Bam Bam in the Tree（'Grandpa jumps.'） ----
+  {
+    id: 'l1-monty-the-clown-3-who-jumps',
+    pattern: '___ jumps.',
+    blanks: [
+      {
+        options: ['Grandpa', 'Dad', 'Grandma', 'Bam Bam'],
+        answer: 0,
+        zhOptions: ['爷爷跳。', '爸爸跳。', '奶奶跳。', 'Bam Bam 跳。'],
+      },
+    ],
+    zh: '爷爷跳。',
+    hint: '救猫时谁先跳起来？',
+    unitSlug: 'monty-the-clown',
+    lessonId: 3,
+  },
+  // ---- Lesson 4: We Get Bam Bam!（'Now Bam Bam is happy.'） ----
+  {
+    id: 'l1-monty-the-clown-4-bam-bam-happy',
+    pattern: 'Now Bam Bam is ___.',
+    blanks: [
+      {
+        options: ['happy', 'sad', 'high', 'big'],
+        answer: 0,
+        zhOptions: ['现在 Bam Bam 开心了。', '现在 Bam Bam 难过了。', '现在 Bam Bam 很高。', '现在 Bam Bam 很大。'],
+      },
+    ],
+    zh: '现在 Bam Bam 开心了。',
+    hint: '故事结局：Bam Bam 得救了，心情怎样？',
+    unitSlug: 'monty-the-clown',
+    lessonId: 4,
+  },
   // ---- Lesson 5: This is / These are ----
   {
     id: 'l1-monty-the-clown-5-this-cousin',
@@ -644,32 +708,34 @@ export const u3_frames: SentenceFrame[] = [
     lessonId: 5,
   },
   {
+    // 原卡拼出 "This is my brother."（L5 无此句）。保留 id 不改，内容改为从 L5 真实句 'This is my dad.' 挖空。
     id: 'l1-monty-the-clown-5-this-brother',
     pattern: 'This is my ___.',
     blanks: [
       {
-        options: ['brother', 'sister', 'cousin', 'dad'],
+        options: ['dad', 'grandma', 'grandpa', 'cousin'],
         answer: 0,
-        zhOptions: ['这是我的兄弟。', '这是我的姐妹。', '这是我的表兄弟姐妹。', '这是我的爸爸。'],
+        zhOptions: ['这是我的爸爸。', '这是我的奶奶。', '这是我的爷爷。', '这是我的表兄弟姐妹。'],
       },
     ],
-    zh: '这是我的兄弟。',
-    hint: '介绍同辈家人',
+    zh: '这是我的爸爸。',
+    hint: '单数：介绍一位家人（this is）',
     unitSlug: 'monty-the-clown',
     lessonId: 5,
   },
   // ---- Lesson 6: He has / She has ----
   {
+    // 原卡拼出 "He has big eyes."（L6 无此句）。保留 id 不改，内容改为从 L6 真实句 'He has small eyes.' 挖空。
     id: 'l1-monty-the-clown-6-he-big-eyes',
     pattern: 'He has ___.',
     blanks: [
       {
-        options: ['big eyes', 'small eyes', 'long hair', 'gray hair'],
+        options: ['small eyes', 'big eyes', 'long hair', 'gray hair'],
         answer: 0,
-        zhOptions: ['他有一双大眼睛。', '他有一双小眼睛。', '他有一头长发。', '他有一头灰白头发。'],
+        zhOptions: ['他有一双小眼睛。', '他有一双大眼睛。', '他有一头长发。', '他有一头灰白头发。'],
       },
     ],
-    zh: '他有一双大眼睛。',
+    zh: '他有一双小眼睛。',
     hint: '描述男生外貌（he has）',
     unitSlug: 'monty-the-clown',
     lessonId: 6,
@@ -718,6 +784,86 @@ export const u3_frames: SentenceFrame[] = [
     hint: '描述头发颜色（she has）',
     unitSlug: 'monty-the-clown',
     lessonId: 6,
+  },
+  // ---- Lesson 7: Phonics /er/（'This is my teacher.'） ----
+  {
+    id: 'l1-monty-the-clown-7-this-teacher',
+    pattern: 'This is my ___.',
+    blanks: [
+      {
+        options: ['teacher', 'brother', 'sister', 'eraser'],
+        answer: 0,
+        zhOptions: ['这是我的老师。', '这是我的兄弟。', '这是我的姐妹。', '这是我的橡皮。'],
+      },
+    ],
+    zh: '这是我的老师。',
+    hint: '四个选项都含 /er/ 音，读一读',
+    unitSlug: 'monty-the-clown',
+    lessonId: 7,
+  },
+  // ---- Lesson 8: CLIL Twins（'They are identical.'） ----
+  {
+    id: 'l1-monty-the-clown-8-they-identical',
+    pattern: 'They are ___.',
+    blanks: [
+      {
+        options: ['identical', 'different', 'similar', 'twins'],
+        answer: 0,
+        zhOptions: ['他们一模一样。', '他们不一样。', '他们很像。', '他们是双胞胎。'],
+      },
+    ],
+    zh: '他们一模一样。',
+    hint: '双胞胎科学：不一样／很像／一模一样',
+    unitSlug: 'monty-the-clown',
+    lessonId: 8,
+  },
+  // ---- Lesson 9: Practice（'He has a balloon and a spider.'） ----
+  {
+    id: 'l1-monty-the-clown-9-balloon-spider',
+    pattern: 'He has a balloon and a ___.',
+    blanks: [
+      {
+        options: ['spider', 'flower', 'clown', 'teacher'],
+        answer: 0,
+        zhOptions: ['他有一个气球和一只蜘蛛。', '他有一个气球和一朵花。', '他有一个气球和一个小丑。', '他有一个气球和一位老师。'],
+      },
+    ],
+    zh: '他有一个气球和一只蜘蛛。',
+    hint: '练习 has：他还有什么？',
+    unitSlug: 'monty-the-clown',
+    lessonId: 9,
+  },
+  // ---- Lesson 10: Secret Agent 10（'He has brown hair and blue eyes.'） ----
+  {
+    id: 'l1-monty-the-clown-10-brown-blue-eyes',
+    pattern: 'He has brown hair and ___.',
+    blanks: [
+      {
+        options: ['blue eyes', 'brown eyes', 'green eyes', 'black eyes'],
+        answer: 0,
+        zhOptions: ['他有棕色头发和蓝色眼睛。', '他有棕色头发和棕色眼睛。', '他有棕色头发和绿色眼睛。', '他有棕色头发和黑眼睛。'],
+      },
+    ],
+    zh: '他有棕色头发和蓝色眼睛。',
+    hint: '描述特工：头发颜色 + 眼睛颜色',
+    unitSlug: 'monty-the-clown',
+    lessonId: 10,
+  },
+  // ---- Lesson 11: Who Is Agent 10?（'He has big feet.'） ----
+  {
+    id: 'l1-monty-the-clown-11-big-feet',
+    pattern: 'He has ___.',
+    blanks: [
+      {
+        options: ['big feet', 'brown hair', 'black hair', 'blond hair'],
+        answer: 0,
+        zhOptions: ['他有一双大脚。', '他有棕色头发。', '他有黑头发。', '他有金发。'],
+      },
+    ],
+    zh: '他有一双大脚。',
+    hint: '10 号特工最明显的特征',
+    unitSlug: 'monty-the-clown',
+    lessonId: 11,
   },
 ]
 

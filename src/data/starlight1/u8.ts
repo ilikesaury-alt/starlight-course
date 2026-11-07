@@ -641,6 +641,143 @@ export const u8_frames: SentenceFrame[] = [
     unitSlug: 'lola-the-athlete',
     lessonId: 6,
   },
+  // ==== 补齐缺卡课（1/2/3/4/7/8/9/10/11）：每课逐字复制本课一句，挖 1 个空 ====
+  {
+    id: 'l1-lola-the-athlete-1-boy-can',
+    pattern: 'The boy can ___.',
+    blanks: [
+      {
+        options: ['walk', 'climb', 'swing', 'fly'],
+        answer: 0,
+        zhOptions: ['男孩会走路。', '男孩会爬。', '男孩会荡秋千。', '男孩会飞。'],
+      },
+    ],
+    zh: '男孩会走路。',
+    hint: 'The boy can + 动词 = 男孩会……',
+    unitSlug: 'lola-the-athlete',
+    lessonId: 1,
+  },
+  {
+    id: 'l1-lola-the-athlete-2-she-can',
+    pattern: 'She can ___.',
+    blanks: [
+      {
+        options: ['run', 'jump', 'skip', 'skate'],
+        answer: 0,
+        zhOptions: ['她会跑。', '她会跳。', '她会跳绳。', '她会滑冰。'],
+      },
+    ],
+    zh: '她会跑。',
+    hint: 'She can + 动词 = 她会……',
+    unitSlug: 'lola-the-athlete',
+    lessonId: 2,
+  },
+  {
+    id: 'l1-lola-the-athlete-3-can-jump',
+    pattern: 'I can ___! Yes, I can!',
+    blanks: [
+      {
+        options: ['jump', 'run', 'skate', 'climb'],
+        answer: 0,
+        zhOptions: ['我会跳！是的，我会！', '我会跑！是的，我会！', '我会滑冰！是的，我会！', '我会爬！是的，我会！'],
+      },
+    ],
+    zh: '我会跳！是的，我会！',
+    hint: '姜饼人的口头禅：I can ...! Yes, I can!',
+    unitSlug: 'lola-the-athlete',
+    lessonId: 3,
+  },
+  {
+    // 原句 "Oh no! I can’t fly!" 里是弯引号 U+2019，逐字保留，不可换成直撇号
+    id: 'l1-lola-the-athlete-4-cant-fly',
+    pattern: 'Oh no! I can’t ___!',
+    blanks: [
+      {
+        options: ['fly', 'climb', 'jump', 'run'],
+        answer: 0,
+        zhOptions: ['哦不！我不会飞！', '哦不！我不会爬！', '哦不！我不会跳！', '哦不！我不会跑！'],
+      },
+    ],
+    zh: '哦不！我不会飞！',
+    hint: 'can’t = 不会 / 不能',
+    unitSlug: 'lola-the-athlete',
+    lessonId: 4,
+  },
+  {
+    id: 'l1-lola-the-athlete-7-drive-park',
+    pattern: 'He can drive in the ___.',
+    blanks: [
+      {
+        options: ['park', 'garden', 'dark', 'farm'],
+        answer: 0,
+        zhOptions: ['他能在公园里开。', '他能在花园里开。', '他能在黑暗里开。', '他能在农场里开。'],
+      },
+    ],
+    zh: '他能在公园里开。',
+    hint: 'ar 发音：park / garden / dark / farm',
+    unitSlug: 'lola-the-athlete',
+    lessonId: 7,
+  },
+  {
+    id: 'l1-lola-the-athlete-8-want-throw',
+    pattern: 'I want to ___!',
+    blanks: [
+      {
+        options: ['throw a ball', 'kick a ball', 'play a game', 'ride a bike'],
+        answer: 0,
+        zhOptions: ['我想扔一个球！', '我想踢一个球！', '我想玩一个游戏！', '我想骑一辆自行车！'],
+      },
+    ],
+    zh: '我想扔一个球！',
+    hint: 'I want to + 动作 = 我想做……',
+    unitSlug: 'lola-the-athlete',
+    lessonId: 8,
+  },
+  {
+    id: 'l1-lola-the-athlete-9-can-swing',
+    pattern: 'I can ___.',
+    blanks: [
+      {
+        options: ['swing', 'fly', 'walk', 'climb'],
+        answer: 0,
+        zhOptions: ['我会荡秋千。', '我会飞。', '我会走路。', '我会爬。'],
+      },
+    ],
+    zh: '我会荡秋千。',
+    hint: 'I can + 动词 = 我会……',
+    unitSlug: 'lola-the-athlete',
+    lessonId: 9,
+  },
+  {
+    id: 'l1-lola-the-athlete-10-want-doll',
+    pattern: 'I want a ___.',
+    blanks: [
+      {
+        options: ['doll', 'plane', 'car', 'guitar'],
+        answer: 0,
+        zhOptions: ['我想要一个玩偶。', '我想要一架飞机。', '我想要一辆小汽车。', '我想要一把吉他。'],
+      },
+    ],
+    zh: '我想要一个玩偶。',
+    hint: 'I want a + 名词 = 我想要一个……',
+    unitSlug: 'lola-the-athlete',
+    lessonId: 10,
+  },
+  {
+    id: 'l1-lola-the-athlete-11-favorite-sport',
+    pattern: 'My favorite sport is ___.',
+    blanks: [
+      {
+        options: ['hockey', 'basketball', 'baseball'],
+        answer: 0,
+        zhOptions: ['我最喜欢的运动是曲棍球。', '我最喜欢的运动是篮球。', '我最喜欢的运动是棒球。'],
+      },
+    ],
+    zh: '我最喜欢的运动是曲棍球。',
+    hint: 'favorite = 最喜欢的',
+    unitSlug: 'lola-the-athlete',
+    lessonId: 11,
+  },
 ]
 
 // ============================================================================
