@@ -6,7 +6,7 @@ import { chineseUnits } from '@/data/chinese'
 import { useCourseStore } from '@/store/useCourseStore'
 import type { ModuleId } from '@/data/modules'
 import StarlightLevelSwitch from './StarlightLevelSwitch'
-import { readHomeLevel, writeHomeLevel } from '@/data/homeLevel'
+import { useHomeLevel } from '@/hooks/useHomeLevel'
 import { STARLIGHT_LEVELS, levelOfUnitSlug, type StarlightLevel } from '@/data/starlightSeries'
 
 // 首页与「课程」页共用的模块入口宫格 + 快捷入口。
@@ -24,11 +24,9 @@ export default function CourseEntries() {
   const getTodayDueCount = useCourseStore((s) => s.getTodayDueCount)
 
   // 册次是视图偏好，不是学习进度：放 localStorage，不进 Zustand persist。
-  const [level, setLevel] = useState<StarlightLevel>(readHomeLevel)
-  const changeLevel = (next: StarlightLevel) => {
-    setLevel(next)
-    writeHomeLevel(next)
-  }
+  // 用 useHomeLevel 而非本地 useState —— 「今日任务」也读同一份偏好，
+  // 切册要让两处同时换，靠 data/homeLevel.ts 的订阅广播同步。
+  const [level, changeLevel] = useHomeLevel()
   const meta = STARLIGHT_LEVELS[level]
   const readingPath = level === 'starlight1' ? '/reading1' : '/reading'
 

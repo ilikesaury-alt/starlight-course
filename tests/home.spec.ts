@@ -126,5 +126,37 @@ test.describe('首页与导航', () => {
       )
       await expect(page.locator('.sl-home-entry')).toHaveAttribute('href', /#\/starlight1$/)
     })
+
+    // 回归：原来「今日任务」两册各推一条 Starlight，只取前 2 条 →
+    // 两条 Starlight 占满，语文/英语/绘本永远轮不上。现在只推当前册一条。
+    test('今日任务跟着册次走：只推当前册一条 Starlight，第 2 格留给别的模块', async ({
+      page,
+    }) => {
+      await page.goto('/')
+      const rows = page.locator('.today-row')
+      const modules = page.locator('.today-row .today-module')
+
+      // 预备级视图
+      await expect(page.locator('.sl-level-opt[data-level="starlight"]')).toHaveAttribute(
+        'aria-pressed',
+        'true',
+        { timeout: 15000 },
+      )
+      await expect(rows).toHaveCount(2)
+      await expect(modules.nth(0)).toContainText('Starlight')
+      // 绝不能两格都是 Starlight
+      await expect(modules.nth(1)).not.toContainText('Starlight')
+
+      // 切到第一册：任务当场换册，不用刷新
+      await page.locator('.sl-level-opt[data-level="starlight1"]').click()
+      await expect(modules.filter({ hasText: 'Starlight 1' })).toHaveCount(1, {
+        timeout: 15000,
+      })
+      await expect(rows).toHaveCount(2)
+
+      // 第一册那条真的链到第一册的课，不是预备级的
+      const book1Row = page.locator('.today-row', { hasText: 'Starlight 1' })
+      await expect(book1Row).toHaveAttribute('href', /#\/preview\/monty-the-artist\/\d+$/)
+    })
   })
 })
