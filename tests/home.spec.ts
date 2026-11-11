@@ -81,4 +81,50 @@ test.describe('首页与导航', () => {
     // 全角约 16px；拉丁字体约 4.6px。放宽到 12 以免不同平台字体差异导致抖动。
     expect(widths.typographic).toBeLessThan(12)
   })
+
+  test.describe('Starlight 册次切换', () => {
+    test('默认预备级；切到第一册后主课与阅读入口一起换册', async ({ page }) => {
+      await page.goto('/')
+      const starter = page.locator('.sl-level-opt[data-level="starlight"]')
+      const book1 = page.locator('.sl-level-opt[data-level="starlight1"]')
+      await expect(starter).toHaveAttribute('aria-pressed', 'true', { timeout: 15000 })
+      await expect(book1).toHaveAttribute('aria-pressed', 'false')
+
+      const sl = page.locator('.sl-home-entry')
+      const rd = page.locator('.rd-home-entry')
+      await expect(sl).toHaveAttribute('href', /#\/starlight$/)
+      await expect(rd).toHaveAttribute('href', /#\/reading$/)
+
+      await book1.click()
+      await expect(book1).toHaveAttribute('aria-pressed', 'true')
+      await expect(sl).toHaveAttribute('href', /#\/starlight1$/)
+      await expect(rd).toHaveAttribute('href', /#\/reading1$/)
+      await expect(sl).toContainText('第一册')
+      await expect(rd).toContainText('第一册')
+
+      // 点阅读卡真的进第一册阅读，不是只换了文案
+      await rd.click()
+      await expect(page).toHaveURL(/#\/reading1$/)
+    })
+
+    test('偏好刷新后保留；第一册阅读直达链始终可进 /reading1', async ({ page }) => {
+      await page.goto('/')
+      const direct = page.locator('.rd1-home-entry')
+      await expect(direct).toBeVisible({ timeout: 15000 })
+      await expect(direct).toContainText('阅读小故事')
+      await expect(direct).toHaveAttribute('href', /#\/reading1$/)
+
+      await page.locator('.sl-level-opt[data-level="starlight1"]').click()
+      // 已选第一册时主阅读卡本身就是 /reading1，直达链收起来避免重复
+      await expect(page.locator('.rd-home-entry')).toHaveAttribute('href', /#\/reading1$/)
+
+      await page.reload()
+      await expect(page.locator('.sl-level-opt[data-level="starlight1"]')).toHaveAttribute(
+        'aria-pressed',
+        'true',
+        { timeout: 15000 },
+      )
+      await expect(page.locator('.sl-home-entry')).toHaveAttribute('href', /#\/starlight1$/)
+    })
+  })
 })

@@ -3,13 +3,19 @@ import { Link } from 'react-router-dom'
 import { Type, ChartColumn } from 'lucide-react'
 import { totalEngLessons, eng3aWordCount, eng3aUnits, eng3aPlays } from '@/data/eng3a'
 import { chineseUnits } from '@/data/chinese'
-import { modules as starlightModules } from '@/data/starlight'
 import { useCourseStore } from '@/store/useCourseStore'
 import type { ModuleId } from '@/data/modules'
+import StarlightLevelSwitch from './StarlightLevelSwitch'
+import { readHomeLevel, writeHomeLevel } from '@/data/homeLevel'
+import { STARLIGHT_LEVELS, levelOfUnitSlug, type StarlightLevel } from '@/data/starlightSeries'
 
 // 首页与「课程」页共用的模块入口宫格 + 快捷入口。
 // 每张卡片带实时徽章：模块进度百分比 + 今日 SRS 到期数，让复习提醒在所有入口可见。
 // 故事类词表体积大,统计数字经 import() 动态获取,不进首屏 chunk。
+//
+// Starlight 是两册系列：首页只放一组「主课 / 阅读」入口，由册次切换条决定当前册。
+// 册次元信息（单元数/课数/slug 归属）全在零数据的 starlightSeries.ts 里，
+// 首页不必再动态 import 第一册教材（那条老路会把 350KB 数据 chunk 拉进首屏加载）。
 export default function CourseEntries() {
   const completedPreviews = useCourseStore((s) => s.completedPreviews)
   const completedStories = useCourseStore((s) => s.completedStories)
@@ -17,16 +23,18 @@ export default function CourseEntries() {
   const completedEng3a = useCourseStore((s) => s.completedEng3a)
   const getTodayDueCount = useCourseStore((s) => s.getTodayDueCount)
 
+  // 册次是视图偏好，不是学习进度：放 localStorage，不进 Zustand persist。
+  const [level, setLevel] = useState<StarlightLevel>(readHomeLevel)
+  const changeLevel = (next: StarlightLevel) => {
+    setLevel(next)
+    writeHomeLevel(next)
+  }
+  const meta = STARLIGHT_LEVELS[level]
+  const readingPath = level === 'starlight1' ? '/reading1' : '/reading'
+
   // 故事模块动态统计:总数(进度%)与 Fly Guy 文案用数字
   const [fgStats, setFgStats] = useState<{ stories: number; words: number } | null>(null)
   const [storyTotals, setStoryTotals] = useState<{ flyguy?: number; rocketgirl?: number }>({})
-  // Starlight 第一册的汇总同样动态取:第一册教材数据约 350KB 源码,
-  // 静态 import 会把首页首屏 chunk 顶大(与故事模块同一策略)。
-  const [sl1Summary, setSl1Summary] = useState<{
-    units: number
-    lessons: number
-    slugs: Set<string>
-  } | null>(null)
 
   useEffect(() => {
     let alive = true
@@ -39,15 +47,6 @@ export default function CourseEntries() {
       if (!alive) return
       setStoryTotals((s) => ({ ...s, rocketgirl: m.rocketGirlStories.length }))
     })
-    void import('@/data/starlightSeriesData').then((m) => {
-      if (!alive) return
-      const mods = m.modulesOfLevel('starlight1')
-      setSl1Summary({
-        units: mods.length,
-        lessons: mods.reduce((n, x) => n + x.lessons.length, 0),
-        slugs: new Set(mods.map((x) => x.slug)),
-      })
-    })
     return () => {
       alive = false
     }
@@ -59,14 +58,15 @@ export default function CourseEntries() {
   const chineseLessonTotal = chineseUnits.reduce((n, u) => n + u.lessons.length, 0)
   const eng3aLessonTotal = eng3aUnits.reduce((n, u) => n + u.lessons.length, 0)
 
-  // Starlight 是一个系列：预备级与第一册共用一份 completedPreviews（按 slug 记），
-  // 但进度百分比必须各算各的 —— 否则第一册学完会把预备级的进度条顶上去。
-  const starterSlugs = new Set(starlightModules.map((m) => m.slug))
-  const starterDone = completedPreviews.filter((s) => starterSlugs.has(s)).length
-  const starter1Done = sl1Summary
-    ? completedPreviews.filter((s) => sl1Summary.slugs.has(s)).length
-    : 0
-  const starlightLessonTotal = starlightModules.reduce((n, m) => n + m.lessons.length, 0)
+  // Starlight 是一个系列：两册共用一份 completedPreviews（按单元 slug 记），
+  // 进度百分比必须各算各的 —— 否则第一册学完会把预备级的进度条顶上去。
+  // slug → 册 的归属表在零数据的 starlightSeries.ts，首页不必 import 教材。
+  const doneByLevel = { starlight: 0, starlight1: 0 }
+  for (const slug of completedPreviews) {
+    const l = levelOfUnitSlug(slug)
+    if (l) doneByLevel[l] += 1
+  }
+  const unitTotalOf = (l: StarlightLevel) => STARLIGHT_LEVELS[l].unitCount
 
   const badges: Partial<Record<ModuleId, { percent?: number; due: number }>> = {
     chinese: {
@@ -78,11 +78,11 @@ export default function CourseEntries() {
       due: getTodayDueCount('eng3a'),
     },
     starlight: {
-      percent: pct(starterDone, starlightModules.length),
+      percent: pct(doneByLevel.starlight, unitTotalOf('starlight')),
       due: getTodayDueCount('starlight'),
     },
     starlight1: {
-      percent: pct(starter1Done, sl1Summary?.units),
+      percent: pct(doneByLevel.starlight1, unitTotalOf('starlight1')),
       due: getTodayDueCount('starlight1'),
     },
     rocketgirl: {
@@ -114,6 +114,18 @@ export default function CourseEntries() {
 
   return (
     <>
+      {/* Starlight 是一个系列：一条册次切换条管着下面「主课 / 阅读」两张卡，
+          选哪一册，两张卡的链接、文案、进度徽章就一起换到哪一册。
+          另一个册次仍留一条直达链，孩子不用先切再进（也是既有 e2e 锚点）。 */}
+      <div className="sl-level-block" data-level={level}>
+        <StarlightLevelSwitch current={level} onChange={changeLevel} />
+        {/* 另一册的阅读直达链：预备级视图下给第一册留一个不用先切换就能进的口子。
+            class 保留 rd1-home-entry —— reading.spec 用它唯一定位首页第一册阅读入口。 */}
+        <Link to="/reading1" className="rd1-home-entry sl-direct-book1">
+          阅读小故事 · 第一册 <span aria-hidden="true">↗</span>
+        </Link>
+      </div>
+
       <div className="home-entries">
         <Link to="/chinese" className="cn-home-entry">
           <span className="cn-home-emoji">📚</span>
@@ -133,21 +145,12 @@ export default function CourseEntries() {
           </div>
           <span className="en3-home-arrow">›</span>
         </Link>
-        <Link to="/starlight" className="sl-home-entry">
+        <Link to={meta.path} className="sl-home-entry">
           <span className="sl-home-emoji">🌟</span>
           <div className="sl-home-body">
-            <div className="sl-home-title">Starlight 主课 · 预备级</div>
-            <div className="sl-home-sub">牛津 Starlight Starter · {starlightModules.length} 单元 / {starlightLessonTotal} 课 / 全教材单词</div>
-            <Badge id="starlight" />
-          </div>
-          <span className="sl-home-arrow">›</span>
-        </Link>
-        <Link to="/starlight1" className="sl-home-entry">
-          <span className="sl-home-emoji">🌟</span>
-          <div className="sl-home-body">
-            <div className="sl-home-title">Starlight 主课 · 第一册</div>
-            <div className="sl-home-sub">牛津 Starlight 1 · {sl1Summary ? `${sl1Summary.units} 单元 / ${sl1Summary.lessons} 课 / 全教材单词` : '第一册 · 9 单元'}</div>
-            <Badge id="starlight1" />
+            <div className="sl-home-title">Starlight 主课 · {meta.labelZh}</div>
+            <div className="sl-home-sub">{meta.bookTitle} · {meta.unitCount} 单元 / {meta.lessonCount} 课 / 全教材单词</div>
+            <Badge id={level} />
           </div>
           <span className="sl-home-arrow">›</span>
         </Link>
@@ -185,24 +188,13 @@ export default function CourseEntries() {
           </div>
           <span className="ab-home-arrow">›</span>
         </Link>
-        <Link to="/reading" className="rd-home-entry">
+        <Link to={readingPath} className="rd-home-entry">
           <span className="rd-home-emoji">📚</span>
           <div className="rd-home-body">
             <div className="rd-home-title">阅读小故事</div>
-            <div className="rd-home-sub">预备级 · {starlightLessonTotal} 篇 · 用每课学过的词写的小故事</div>
+            <div className="rd-home-sub">{meta.labelZh} · {meta.lessonCount} 篇 · 用每课学过的词写的小故事</div>
           </div>
           <span className="rd-home-arrow">›</span>
-        </Link>
-        {/* 系列第二册：单独一张卡，孩子/家长不用先点进去才知道还有第一册。
-            刻意用 rd1-home-entry 而非 rd-home-entry：reading.spec 的入口用例
-            用 .rd-home-entry 唯一定位，同名会让 strict mode 炸掉。 */}
-        <Link to="/reading1" className="rd1-home-entry">
-          <span className="rd1-home-emoji">📖</span>
-          <div className="rd1-home-body">
-            <div className="rd1-home-title">阅读小故事 · 第一册</div>
-            <div className="rd1-home-sub">牛津 Starlight 1 · 阅读课小故事，一课一课补上</div>
-          </div>
-          <span className="rd1-home-arrow">›</span>
         </Link>
       </div>
 
