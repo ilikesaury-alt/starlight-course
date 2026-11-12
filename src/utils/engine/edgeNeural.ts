@@ -29,10 +29,26 @@ import { generateSecMsGecV2, SEC_MS_GEC_VERSION, TRUSTED_CLIENT_TOKEN } from './
 
 const WSS_URL = 'wss://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1'
 
-/** 少儿友好的音色（微软神经音色，48kbps） */
-const VOICES: Record<'en' | 'zh', { id: string; lang: string }> = {
-  // Ana：清晰、语调平稳，适合幼儿跟读；Aria/Emma 音色更活泼
-  en: { id: 'en-US-AnaNeural', lang: 'en-US' },
+/**
+ * 音色（微软神经音色，48kbps）。
+ *
+ * ⚠️ 英文**不能用童声 AnaNeural**（曾经用它，2026-11-12 改掉）。
+ * 童声的发声器官决定了词尾清辅音（/t/ /p/ /k/ /s/）又轻又短，再经 48kbps 压缩后
+ * 基本糊掉 —— 孩子听到的是「ca…」而不是「cat」，表现为「永远只听到第一个字母」。
+ *
+ * 实测（同一段 SSML，只换 voice，解码到 PCM 后按 10ms 求 RMS 包络）：
+ *   Ana 念 hat：主元音之后能量单调衰减到静音，词尾 /t/ **无二次爆破峰**；
+ *   Jenny 念 hat：主元音后 ~0.75s 处出现一道横跨全频段的竖条（爆破音特征）。
+ * 频谱图上差异一目了然。
+ *
+ * 对自然拼读（/alphablocks 要孩子听出「几个音」）这是硬伤：词尾听不见 = 音数数不对。
+ * 故英文改用 Jenny（成人女声，词尾清晰、语调温和，仍适合幼儿跟读）。
+ * 中文维持 Xiaoxiao。
+ *
+ * 换音色前请先量化验证词尾，别凭「听起来还行」——那正是当初选错 Ana 的原因。
+ */
+export const VOICES: Record<'en' | 'zh', { id: string; lang: string }> = {
+  en: { id: 'en-US-JennyNeural', lang: 'en-US' },
   zh: { id: 'zh-CN-XiaoxiaoNeural', lang: 'zh-CN' },
 }
 

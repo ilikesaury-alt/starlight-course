@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { buildSsml, extractMp3Payload, canUseEdgeNeural, isEdgeUserAgent } from './edgeNeural'
+import {
+  buildSsml,
+  extractMp3Payload,
+  canUseEdgeNeural,
+  isEdgeUserAgent,
+  VOICES,
+} from './edgeNeural'
 import { buildBaiduTtsUrl, BAIDU_DEFAULT_SPD, BAIDU_SLOW_SPD } from './baidu'
 
 describe('edgeNeural（微软神经语音引擎）', () => {
@@ -8,7 +14,7 @@ describe('edgeNeural（微软神经语音引擎）', () => {
     expect(ssml).toContain('&amp;')
     expect(ssml).toContain('&lt;')
     expect(ssml).not.toMatch(/<3/)
-    expect(ssml).toContain("voice name='en-US-AnaNeural'")
+    expect(ssml).toContain(`voice name='${VOICES.en.id}'`)
   })
 
   it('SSML 按语言切换音色与 lang 属性', () => {
@@ -74,6 +80,28 @@ describe('edgeNeural（微软神经语音引擎）', () => {
         delete g.navigator
       }
     }
+  })
+})
+
+describe('音色选择（回归：别再用童声念单词）', () => {
+  // 2026-11-12：/alphablocks 上「永远只听到第一个字母」的根因是音色。
+  // 童声 AnaNeural 的词尾清辅音（/t/ /p/ /k/ /s/）几乎不发声 —— 实测念 hat 时
+  // 主元音后能量单调衰减到静音，无二次爆破峰；Jenny 在同一位置有一道横跨
+  // 全频段的竖条。自然拼读要求孩子听出「几个音」，词尾听不见就数不对。
+  it('英文用成人女声，不用童声（童声吞词尾辅音）', () => {
+    expect(VOICES.en.id).toBe('en-US-JennyNeural')
+    expect(VOICES.en.id).not.toMatch(/AnaNeural/)
+    expect(VOICES.en.lang).toBe('en-US')
+  })
+
+  it('中文仍是 Xiaoxiao', () => {
+    expect(VOICES.zh.id).toBe('zh-CN-XiaoxiaoNeural')
+    expect(VOICES.zh.lang).toBe('zh-CN')
+  })
+
+  it('SSML 里的 voice 与 VOICES 表一致（防止改表漏改生成）', () => {
+    expect(buildSsml('cat', 'en', '+0%')).toContain(`voice name='${VOICES.en.id}'`)
+    expect(buildSsml('猫', 'zh', '+0%')).toContain(`voice name='${VOICES.zh.id}'`)
   })
 })
 

@@ -88,6 +88,14 @@ npm run electron:build  # 打包 Windows NSIS 安装包（产物在 release/）
     - ⚠️ **慢速要用「源端慢速档」而不是「播放端慢放」**：慢放（`playbackRate=0.6`）有金属感与轻微变调，听着「不像人在说话」；源端 spd=1 是合成的自然慢速人声。「慢而自然」远好于「慢而糊」
     - 慢放只保留给**原生合成器**（`webSpeech` rate=0.6）—— 它没有「源端慢速」这个概念
   - **有道不是通用 TTS**（实测 `dict.youdao.com`）：单词稳定，整句约 **65% 返回 HTTP 500**，中文几乎只回**同一段 48ms 空白音频**（不同文本字节完全相同）。所以它只能当「锦上添花」，句子发音的真正底线是云 TTS + 设备自带的 WebSpeech —— 这条链路必须保证任何设备（含手机）都能出声
+  - ⚠️ **英文音色不能用童声 AnaNeural**（2026-11-12 改掉，现用 `en-US-JennyNeural`）：
+    - 症状：家长报「/alphablocks 的发音永远只能听到第一个字母」。查下来**音频没被截断** —— 8496 字节 / 59 帧 / 1.416s，播放范围 `[0, 1.368]` 全程，`turn.end` 后 `pendingFrames=0` 无丢帧
+    - 根因：童声的词尾清辅音（/t/ /p/ /k/ /s/）又轻又短，经 48kbps 压缩后基本糊掉。孩子听到「ca…」而不是「cat」
+    - 判据（可复现）：解码到 PCM，按 5~10ms 求 RMS 包络，看主峰衰减后**有没有二次爆破峰**。Ana 念 hat：主元音后单调衰减到静音，`burst/peak = 0%`；Jenny 同位置 `29.9%`（sit 20.6%、map 8.3%）。频谱图上 Jenny 在词尾有一道横跨全频段的竖条，Ana 没有
+    - 为什么这件事对本项目是硬伤：`/alphablocks` 要孩子听出「这个词有几个音」，词尾听不见 = 音数数不对 = 整个模块失效
+    - **换音色前先做上面这个量化验证，别凭「听起来还行」** —— 那正是当初选错 Ana 的原因（注释写着「清晰、语调平稳，适合幼儿跟读」）
+    - 单测 `edgeNeural.test.ts` 已钉死 `VOICES.en.id` 不得匹配 `/AnaNeural/`
+    - 顺带记录：微软服务端对单词会补约 **0.9s 尾部静音**（与 `sentenceBoundaryEnabled` 无关，实测开关两种都是 8928 字节）。只影响按钮「播放中」多停留一会儿，不影响听感
   - **Chrome 网页端拿不到神经音色**（2026-11-02 全面实测）：Google Translate TTS 国内**连接超时**；有道整句 500；搜狗/腾讯/讯飞/阿里/火山全部不可用；微软的 HTTP 合成接口全 404/403（只有 `voices/list` 可直连）。**唯一可用的是百度**（整句 12/12 成功，TTFB 385~925ms）。所以 Chrome 端的质量上限就是百度的 24kbps/16kHz —— 想再提升只能等微软放开 UA 校验
   - ⚠️ **Windows 上的原生合成器没有英文本地嗓音**（实测本机：只有 zh-CN Huihui/Kangkang/Yaoyao + en-US Google 远端）。Google 远端嗓音在国内 `speak()` 既不 onstart 也不 onerror（静默无回调）→ 英文句子的最终兜底**不可靠**，这也是「整句朗读必须有云 TTS 兜底」的原因
   - **百度云 TTS 是「句子没声」的解药**（`engine/baidu.ts`，实测 `fanyi.baidu.com/gettts` 整句 8/8、中文 3/3 返回真实音频，TTFB ≈ 480ms）。⚠️ **带非百度的 Referer 就回 0 字节 `text/html`**（`Origin` 头无害、`Referer` 有罪），所以 `index.html` 必须保留 `<meta name="referrer" content="no-referrer">` —— 删掉它 `<audio>` 会拿到空 HTML（`MEDIA_ERR_SRC_NOT_SUPPORTED`），整句重新变静音。百度也没有 CORS 头，只能 `<audio>` 直连播放、不能 `fetch` 成 blob（统一走 `playUrl`）
