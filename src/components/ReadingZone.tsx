@@ -35,9 +35,13 @@ interface Props {
   vocab: Word[]
   /** en → 记忆盒号，来自 SRS（沿用全站三色记忆状态） */
   boxOf?: (en: string) => number | undefined
+  /** 页面级补充词典（透传给 TappableWords）。默认不传 = /reading 行为不变。 */
+  lookup?: (base: string) => string | undefined
+  /** PlayTools 顶部提示语。默认仍是「金色波浪线…宝藏词」 */
+  hint?: string
 }
 
-export default function ReadingZone({ passage, vocab, boxOf }: Props) {
+export default function ReadingZone({ passage, vocab, boxOf, lookup, hint }: Props) {
   const [showZh, setShowZh] = useState(false)
   const [playing, setPlaying] = useState(false)
   // 朗读（整篇连读）时高亮当前句；逐句点击朗读也点亮对应句
@@ -158,7 +162,7 @@ export default function ReadingZone({ passage, vocab, boxOf }: Props) {
     // is-zh：显示中文对照时，切成「逐句双语」排版（一句一行、译文紧跟其下）。
     //        不显示中文时是「流式散文」排版（同一段的句子连成一段）。
     <div className={'reading-zone' + (playing ? ' is-playing' : '') + (showZh ? ' is-zh' : '')}>
-      <PlayTools hint="点单词听发音 · 金色波浪线的是本课学过的词（宝藏词）">
+      <PlayTools hint={hint ?? '点单词听发音 · 金色波浪线的是本课学过的词（宝藏词）'}>
         <button type="button" className="btn btn--soft" onClick={playAll} data-testid="reading-play-all">
           {playing ? '⏸ 停止朗读' : '🔊 听整篇'}
         </button>
@@ -197,6 +201,8 @@ export default function ReadingZone({ passage, vocab, boxOf }: Props) {
                       vocab={vocab}
                       boxOf={boxOf}
                       mark={(base) => lessonWords.has(base)}
+                      lookup={lookup}
+                      sentenceZh={s.zh}
                     />
                     <button
                       type="button"

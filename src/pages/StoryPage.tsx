@@ -10,6 +10,7 @@ import SafeBoundary from '@/components/SafeBoundary'
 import ConfirmDialog from '@/components/ConfirmDialog'
 import QuizEngine from '@/components/QuizEngine'
 import BookTextView from '@/components/BookTextView'
+import ReadingZone from '@/components/ReadingZone'
 import { useCourseStore } from '@/store/useCourseStore'
 import { useSettleQuiz } from '@/hooks/useSettleQuiz'
 import { speakText } from '@/utils/speak'
@@ -28,6 +29,14 @@ interface StoryPageProps {
   basePath: string
   label: string
   moduleEmoji: string
+  /** 「并入阅读模块」的可选配置：传了就把「例句」Tab 换成阅读模块那套阅读器。
+   *  Fly Guy 不传 → 完全保留原来的 BookTextView / 例句列表，行为逐字节不变。 */
+  reading?: {
+    pagesOf: (story: Story) => import('@/data/reading/index').ReadingPassage[]
+    vocabOf: (story: Story) => import('@/data/starlight').Word[]
+    lookup: (base: string) => string | undefined
+    hint: string
+  }
 }
 
 type Tab = 'vocab' | 'sentences' | 'quiz'
@@ -40,6 +49,7 @@ export default function StoryPage({
   basePath,
   label,
   moduleEmoji,
+  reading,
 }: StoryPageProps) {
   const { slug = '' } = useParams()
   const story = getStory(slug)
@@ -129,7 +139,9 @@ export default function StoryPage({
         </div>
 
         {tab === 'vocab' && <VocabTab words={words} mc={mc} />}
-        {tab === 'sentences' && <SentencesTab story={story} words={words} mc={mc} />}
+        {tab === 'sentences' && (
+          <SentencesTab story={story} words={words} mc={mc} reading={reading} />
+        )}
         {tab === 'quiz' && (
           <QuizEngine
             quiz={quiz}
@@ -269,9 +281,27 @@ function VocabTab({ words, mc }: { words: StoryWord[]; mc: React.CSSProperties }
   )
 }
 
-function SentencesTab({ story, words, mc }: { story: Story; words: StoryWord[]; mc: React.CSSProperties }) {
+/** 「例句 / 绘本原文」Tab。
+ *  - 有 bookText（Fly Guy）→ 原来的 BookTextView，行为不变；
+ *  - 传了 reading（Rocket Girl）→ 复用阅读模块的 ReadingZone：逐词中文点读、
+ *    高亮、逐句/整篇朗读、中文对照、慢速、记忆色。这是「并入阅读模块」的落点；
+ *  - 都不满足 → 原来的例句列表。 */
+type ReadingConfig = NonNullable<StoryPageProps['reading']>
+
+function SentencesTab({
+  story,
+  words,
+  mc,
+  reading,
+}: {
+  story: Story
+  words: StoryWord[]
+  mc: React.CSSProperties
+  reading?: ReadingConfig
+}) {
   const bookText = story.bookText
-  // 绘本原文优先:按章节 / 页码顺序整段展示,不按单词列句
+
+  // 绘本原文优先（Fly Guy 22 本里 15 本走这里）
   if (bookText && bookText.length > 0) {
     return (
       <BookTextView
@@ -286,6 +316,12 @@ function SentencesTab({ story, words, mc }: { story: Story; words: StoryWord[]; 
       />
     )
   }
+
+  // 阅读模块分支：RG 没有绘本正文，用「这一关的例句」当阅读材料
+  if (reading) {
+    return <RocketGirlReading story={story} reading={reading} />
+  }
+
   // 回退:无绘本原文的故事,仍按单词展示(学法句型 / 绘本原句)
   const withSent = words.filter((w) => w.sentence || w.bookSentence)
   if (withSent.length === 0) return <div className="empty"><p>这一关还没有例句。</p></div>
@@ -336,5 +372,64 @@ function SentencesTab({ story, words, mc }: { story: Story; words: StoryWord[]; 
         })}
       </div>
     </>
+  )
+}
+
+/** RG 例句阅读器：把一关的例句切成 2~3 页，复用 ReadingZone。
+ *
+ * ⚠️ pages / vocab 必须 useMemo 稳定引用：ReadingZone 的 useEffect([passage]) 会在
+ * 引用变化时 cancelSpeech()，如果每次渲染都新建对象，切「显示中文」都会把朗读掐断。
+ */
+function RocketGirlReading({ story, reading }: { story: Story; reading: ReadingConfig }) {
+  const [pageIdx, setPageIdx] = useState(0)
+  const srsCards = useCourseStore((s) => s.srsCards)
+
+  const pages = useMemo(() => reading.pagesOf(story), [story, reading])
+  const vocab = useMemo(() => reading.vocabOf(story), [story, reading])
+
+  // 换关时回到第一页（story.slug 变了但组件可能复用）
+  useEffect(() => { setPageIdx(0) }, [story.slug])
+
+  const safeIdx = Math.min(pageIdx, Math.max(0, pages.length - 1))
+  const passage = pages[safeIdx]
+
+  if (!passage) return <div className="empty"><p>这一关还没有例句。</p></div>
+
+  return (
+    <div className="rg-reading">
+      <p className="lead">
+        这些是<b>这一关的例句</b>，不是绘本原文。点单词能听发音、看中文；
+        读不顺的句子点右边的小喇叭单句重听。
+      </p>
+      {pages.length > 1 && (
+        <div className="rg-page-nav" aria-label="例句分页">
+          <button
+            type="button"
+            className="btn btn--soft"
+            disabled={safeIdx === 0}
+            onClick={() => setPageIdx((i) => Math.max(0, i - 1))}
+          >
+            ← 上一页
+          </button>
+          <span className="rg-page-num">第 {safeIdx + 1} / {pages.length} 页</span>
+          <button
+            type="button"
+            className="btn btn--soft"
+            disabled={safeIdx >= pages.length - 1}
+            onClick={() => setPageIdx((i) => Math.min(pages.length - 1, i + 1))}
+          >
+            下一页 →
+          </button>
+        </div>
+      )}
+      <ReadingZone
+        key={`${story.slug}-${safeIdx}`}
+        passage={passage}
+        vocab={vocab}
+        boxOf={(en) => srsCards[en]?.box}
+        lookup={reading.lookup}
+        hint={reading.hint}
+      />
+    </div>
   )
 }

@@ -196,6 +196,17 @@ export default function CourseEntries() {
         </Link>
       </div>
 
+      {/* 阅读模块的跨系列入口：Rocket Girl 不是第三册（它没有绘本正文、词汇也不属于
+          Starlight 课本词），但它的「例句」Tab 已复用同一套 ReadingZone。
+          用一条独立小链连过去，而不塞进 .sl-series-tab —— 后者被 33 条 e2e
+          钉死为恰好 2 项。文案刻意不含「阅读小故事」整串，避免 getByText 歧义。 */}
+      <div className="rg-reading-link">
+        <Link to="/rocketgirl" className="rg-reading-entry">
+          🚀 更多阅读 · Rocket Girl 例句阅读 <span aria-hidden="true">↗</span>
+        </Link>
+        <span className="rg-reading-hint">108 关 · 逐词中文点读 / 中文对照 / 逐句朗读</span>
+      </div>
+
       <div className="quick-row">
         <Link to="/alphabet" className="quick-card quick-alphabet">
           <Type size={21} strokeWidth={1.9} className="qc-emoji" aria-hidden="true" />

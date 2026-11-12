@@ -1,0 +1,80 @@
+// Rocket Girl 例句阅读（复用 ReadingZone）
+//
+// ⚠️ 刻意**不加 .reading-module 类**：那是 /reading 目录页的布局作用域，
+// 挂上去会把 rm-* 的栅格与金色「宝藏词」误套到 StoryPage 上。
+// 这里只补 RG 独有的两件东西：分页条 + 例句说明。
+//
+// 逐词高亮复用 _study.scss 的全局 .tt-word--mark（紫色波浪线，跟着 --mc-deep
+// 走 RG 主题色），不复制阅读模块的金色宝藏样式 —— RG 的词不是「课本学过的词」，
+// 是「这一关的词」，视觉上就该有区别。
+
+.rg-reading {
+  > .lead {
+    margin-bottom: 12px;
+  }
+}
+
+.rg-page-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  margin: 0 0 14px;
+
+  .btn[disabled] {
+    opacity: 0.45;
+    cursor: default;
+  }
+}
+
+.rg-page-num {
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+  min-width: 6em;
+  text-align: center;
+}
+
+// 例句页里「听整篇」合成的是 10 句互不相关的例句，不是连贯故事；
+// 阅读器标题按页文案已经说明，这里稍微收一下标题字号，别让它像故事标题那么大。
+.rg-reading .reading-title-en {
+  font-size: var(--fs-lg);
+}
+
+// 首页「阅读小故事」卡下方的跨系列入口。
+// 与 .sl-direct-book1 同一套内联小链视觉，但用独立 class，不参与册次切换断言。
+.rg-reading-link {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  margin: 0 0 12px;
+}
+
+.rg-reading-entry {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--brand-deep);
+  text-decoration: none;
+  white-space: nowrap;
+  &:hover { background: var(--brand-tint); }
+}
+
+.rg-reading-hint {
+  font-size: 11px;
+  color: var(--ink-soft);
+  line-height: 1.35;
+}
+
+@media (min-width: 900px) {
+  .home--workbench > .rg-reading-link { grid-column: 1 / -1; }
+}
