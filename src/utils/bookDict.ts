@@ -277,6 +277,108 @@ export const BOOK_WORD_ZH: Record<string, string> = {
   'abc': "字母表", 'tv': "电视", 'www': "网址",
   'vs': "对阵", 'fix': "修好",
   'list': "清单", 'patterns': "规律(复数)", 'actions': "动作(复数)", 'add': "加", 'lay': "放置",
+
+  // ---------- 阅读短文补词（2026-11-12） ----------
+  // 起因：家长反馈「阅读时点单词经常提示查不到」。系统性扫了 96 篇预备级 +
+  // 96 篇第一册短文，按 `wordBase` 归一后统计查不到的词形：
+  //   预备级 8629 词次里缺 455（5.3%），第一册 7814 词次里缺 1112（14.2%），
+  //   两册合并共 287 个不同词形。补完后两册都是 0.00%。
+  //
+  // 这批词的来源分三类，写的时候要保留各自的判据：
+  //   ① 教材角色/人名地名（Monty / Lola / Mia / Tokyo…）—— 词典里本就没有，
+  //      但孩子一定会点它们，所以给「人名」标注，别硬编成实义词；
+  //   ② 真正的常用词漏收（must / near / people / story / chair / river…）——
+  //      这是词典的洞，必须补；
+  //   ③ 词形变化（goes / cries / tries / uses / waves…）—— `lookupZh` 的
+  //      -s/-ed/-ing 回退只看「去掉词尾后的词根」，对 goes→go、cries→cry
+  //      这类不规则变化无效，故按原形单列。
+  //
+  // ⚠️ 覆盖率由 src/utils/bookDict.test.ts 钉死：改短文或加课时若引入
+  //    词典没有的词，那条测试会立刻红。别只靠肉眼翻短文。
+  // 核心漏词
+  'must': "必须", 'near': "在…附近", 'people': "人们", 'story': "故事",
+  'use': "使用", 'uses': "使用(三单)", 'different': "不同的", 'alone': "独自",
+  'board': "木板；黑板", 'much': "很多", 'fit': "合身", 'goal': "进球；目标",
+  'grade': "年级", 'gray': "灰色的", 'him': "他(宾格)", 'mum': "妈妈",
+  'bunny': "小兔子", 'bump': "撞",
+  // 词形变化
+  'goes': "去(三单)", 'cries': "哭(三单)", 'tries': "试(三单)", 'try': "试",
+  'carries': "搬(三单)", 'picks': "摘下(三单)", 'pick': "摘；挑", 'kicks': "踢(三单)",
+  'kick': "踢", 'pushes': "推(三单)", 'push': "推", 'climbs': "爬(三单)",
+  'climb': "爬", 'hops': "单脚跳(三单)", 'hop': "单脚跳", 'waves': "挥手(三单)",
+  'wave': "挥手；波浪", 'whispers': "小声说(三单)", 'whisper': "小声说", 'lives': "住在(三单)",
+  'live': "居住",
+  // 名词
+  'wolf': "狼", 'woman': "女人",
+  'chair': "椅子", 'chairs': "椅子(复数)", 'cup': "杯子", 'plate': "盘子",
+  'plates': "盘子(复数)", 'pen': "笔", 'pens': "笔(复数)", 'pencil': "铅笔",
+  'sock': "袜子", 'socks': "袜子(复数)", 'shoe': "鞋", 'shoes': "鞋(复数)",
+  'pack': "打包", 'seeds': "种子(复数)", 'seed': "种子", 'candle': "蜡烛",
+  'candy': "糖果", 'coat': "外套", 'crayon': "蜡笔", 'dress': "连衣裙",
+  'drum': "鼓", 'hill': "小山", 'jacket': "夹克", 'kite': "风筝",
+  'lamb': "小羊", 'lemon': "柠檬", 'lemons': "柠檬(复数)", 'lemonade': "柠檬水",
+  'lime': "青柠", 'limes': "青柠(复数)", 'mango': "芒果", 'mangoes': "芒果(复数)",
+  'mouse': "老鼠", 'moon': "月亮", 'nut': "坚果", 'pear': "梨",
+  'plane': "飞机", 'ribbon': "丝带", 'river': "河", 'rock': "岩石",
+  'skirt': "裙子", 'soap': "肥皂", 'soccer': "足球", 'square': "正方形",
+  'squares': "正方形(复数)", 'suitcase': "行李箱", 'sunlight': "阳光", 'swan': "天鹅",
+  'sweater': "毛衣", 'treasure': "宝藏", 'vacation': "假期", 'wall': "墙",
+  'yard': "院子", 'airport': "机场", 'desert': "沙漠", 'jungle': "丛林",
+  'shore': "岸边", 'stadium': "体育场", 'weather': "天气", 'rain': "雨；下雨",
+  'shampoo': "洗发水", 'whistle': "口哨", 'wand': "魔杖", 'puppet': "木偶",
+  'pyramid': "金字塔", 'mummy': "木乃伊", 'horn': "角；喇叭", 'bandage': "绷带",
+  'bandages': "绷带(复数)", 'handprint': "手印", 'handprints': "手印(复数)", 'cheeks': "脸颊(复数)",
+  'chest': "胸口", 'message': "消息", 'history': "历史", 'climate': "气候",
+  'climates': "气候(复数)", 'coconut': "椰子", 'coconuts': "椰子(复数)", 'blossoms': "花(复数)",
+  'daisy': "雏菊", 'figs': "无花果(复数)", 'gingerbread': "姜饼", 'smoothie': "奶昔",
+  'chopsticks': "筷子", 'sherwani': "舍瓦尼(印度礼服)", 'sari': "纱丽", 'uniform': "制服",
+  'pants': "裤子", 'shirt': "衬衫", 'tshirt': "T恤", 'baseball': "棒球",
+  'hockey': "冰球", 'sport': "运动", 'sports': "运动(复数)", 'hoop': "篮筐",
+  'puck': "冰球(球)", 'prize': "奖品", 'drums': "鼓(复数)", 'clarinet': "单簧管",
+  'oboe': "双簧管",
+  // 形容词副词
+  'rainy': "下雨的", 'windy': "有风的", 'sunny': "晴朗的", 'thirsty': "口渴的",
+  'dry': "干的", 'poor': "可怜的", 'similar': "相似的", 'identical': "一模一样的",
+  'symmetrical': "对称的", 'symmetry': "对称", 'normal': "正常的", 'blond': "金发的",
+  'golden': "金色的",
+  // 动词
+  'measure': "测量", 'imagine': "想象", 'skate': "滑冰", 'skip': "跳绳；跳过",
+  'shoot': "射门", 'toward': "朝向", 'splash': "溅水", 'splish': "哗啦",
+  // 其他
+  'tomorrow': "明天", 'tonight': "今晚", 'sound': "声音", 'noise': "噪音",
+  'distance': "距离", 'distances': "距离(复数)", 'meters': "米(复数)", 'centimeters': "厘米(复数)",
+  'eighty': "八十", 'thirteen': "十三", 'twenty': "二十", 'rectangle': "长方形",
+  'rectangles': "长方形(复数)", 'triangle': "三角形", 'triangles': "三角形(复数)", 'shapes': "形状(复数)",
+  'shape': "形状", 'states': "州(复数)；国家", 'adult': "成年人", 'agent': "特工",
+  'anyone': "任何人", 'artist': "艺术家", 'artists': "艺术家(复数)", 'athlete': "运动员",
+  'aunt': "阿姨", 'twins': "双胞胎", 'uncle': "叔叔", 'cousin': "表亲",
+  'cousins': "表亲(复数)", 'doctor': "医生", 'clown': "小丑", 'magician': "魔术师",
+  'mermaid': "美人鱼", 'referee': "裁判", 'players': "球员(复数)", 'penguins': "企鹅(复数)",
+  'seals': "海豹(复数)", 'seagulls': "海鸥(复数)", 'snails': "蜗牛(复数)", 'sheep': "绵羊",
+  'foal': "小马驹", 'calf': "小牛", 'chick': "小鸡", 'lemur': "狐猴",
+  'fossa': "马岛獴", 'lizard': "蜥蜴", 'gnome': "地精", 'gnomes': "地精(复数)",
+  'baobab': "猴面包树", 'festival': "节日", 'diwali': "排灯节", 'trex': "霸王龙",
+  'triceratops': "三角龙", 'sphinx': "狮身人面像", 'whose': "谁的", 'mr': "先生(Mr.)",
+  'photos': "照片(复数)", 'doesnt': "不(doesn't)", 'isnt': "不是(isn't)", 'theyre': "他们是(they're)",
+  'ok': "好的", 'bye': "再见", 'hurray': "好耶", 'phew': "呼(松口气)",
+  'brr': "好冷", 'aww': "啊(感叹)", 'tweet': "啾啾(鸟叫)", 'bam': "砰",
+  'bang': "砰", 'th': "第(th)", 'o': "哦", 'u': "你(U)",
+  'er': "呃", 's': "的(所有格)", 'ch': "嗤(拟声)", 'mo': "哞(牛叫)",
+  'pe': "呸(拟声)", 'ra': "啦(拟声)", 'merrygoround': "旋转木马", 'africa': "非洲",
+  'america': "美国", 'india': "印度", 'indian': "印度的", 'japan': "日本",
+  'egypt': "埃及", 'egyptian': "埃及的", 'french': "法国的", 'usa': "美国",
+  'tokyo': "东京", 'sydney': "悉尼", 'york': "约克(纽约)", 'madagascar': "马达加斯加",
+  'nile': "尼罗河", 'arctic': "北极的", 'polar': "极地的",
+  // 人名
+  'sammy': "萨米(人名)", 'pete': "皮特(人名)", 'paul': "保罗(人名)", 'nick': "尼克(人名)",
+  'dan': "丹(人名)", 'alex': "亚历克斯(人名)", 'alice': "爱丽丝(人名)", 'anna': "安娜(人名)",
+  'ann': "安(人名)", 'ben': "本(人名)", 'billy': "比利(人名)", 'charlie': "查理(人名)",
+  'emma': "艾玛(人名)", 'jack': "杰克(人名)", 'jane': "简(人名)", 'jenny': "珍妮(人名)",
+  'kate': "凯特(人名)", 'lily': "莉莉(人名)", 'lou': "卢(人名)", 'lucy': "露西(人名)",
+  'mia': "米娅(人名)", 'mickey': "米奇(人名)", 'miho': "美穗(人名)", 'pia': "皮娅(人名)",
+  'ruby': "露比(人名)", 'sato': "佐藤(人名)", 'tom': "汤姆(人名)", 'monty': "蒙蒂(人名)",
+  'lola': "罗拉(人名)", 'pippa': "皮帕(人名)", 'bull': "公牛", 'sonic': "声波的",
+
 }
 
 // 查词：先精确匹配，再尝试去掉常见词尾(-s/-es/-ed/-ing/-ly/-er/-est)回退到词根。
