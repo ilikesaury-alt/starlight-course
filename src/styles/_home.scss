@@ -424,8 +424,11 @@ a.lesson-link {
   column-gap: 24px;
 }
 @media (min-width: 900px) {
-  .home--workbench { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
-  .home--workbench > .hero { grid-column: 1; grid-row: 1; }
+  // 左窄右宽：「今日任务」现在是**全模块**列表（最多 5 行），比左边那段说明文字
+  // 高得多。左右等宽会让左栏下方空出三四百像素。给任务卡多一点宽度，
+  // 文案列自然收窄、换行变多，两栏高度接近。
+  .home--workbench { grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr); }
+  .home--workbench > .hero { grid-column: 1; grid-row: 1; align-self: start; }
   .home--workbench > .today-card {
     grid-column: 2;
     grid-row: 1;

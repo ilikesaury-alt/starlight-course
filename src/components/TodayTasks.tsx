@@ -132,7 +132,14 @@ export default function TodayTasks() {
 
   tasks.push(...storyTasks)
 
-  const shown = tasks.slice(0, 2)
+  // ⚠️ 不再 `slice(0, 2)`：原来只露 2 条，而模块有 5 个（Starlight 当前册 /
+  // 语文 / 英语 / Fly Guy / Rocket Girl），于是永远有 3 个模块的「下一课」看不见，
+  // 家长想带孩子学语文，得自己从宫格里找、再点进去找课。
+  //
+  // 现在每个模块各占一行、全部可见 —— 这不是新增功能，是把既有能力（每模块找
+  // 第一个未完成课）从「只露 2 个」放开到「全露」。行数天然有界（≤5），
+  // 不需要再截断。
+  const shown = tasks
   const allDone = todayDue === 0 && shown.length === 0
 
   return (

@@ -127,11 +127,10 @@ test.describe('首页与导航', () => {
       await expect(page.locator('.sl-home-entry')).toHaveAttribute('href', /#\/starlight1$/)
     })
 
-    // 回归：原来「今日任务」两册各推一条 Starlight，只取前 2 条 →
-    // 两条 Starlight 占满，语文/英语/绘本永远轮不上。现在只推当前册一条。
-    test('今日任务跟着册次走：只推当前册一条 Starlight，第 2 格留给别的模块', async ({
-      page,
-    }) => {
+    // 回归：原来「今日任务」两册各推一条 Starlight，又只取前 2 条 →
+    // 两条 Starlight 占满，语文/英语/绘本永远轮不上。
+    // 现在：只推当前册一条，且每个模块各占一行、全部可见。
+    test('今日任务跟着册次走，且每个模块都露出来（不再只显示 2 条）', async ({ page }) => {
       await page.goto('/')
       const rows = page.locator('.today-row')
       const modules = page.locator('.today-row .today-module')
@@ -142,17 +141,23 @@ test.describe('首页与导航', () => {
         'true',
         { timeout: 15000 },
       )
-      await expect(rows).toHaveCount(2)
-      await expect(modules.nth(0)).toContainText('Starlight')
-      // 绝不能两格都是 Starlight
-      await expect(modules.nth(1)).not.toContainText('Starlight')
+      // 5 个模块各一行：Starlight / 语文 / 英语 / Fly Guy / Rocket Girl
+      // （后两个由动态 import 补齐，故给宽超时）
+      await expect(rows).toHaveCount(5, { timeout: 15000 })
+      // ⚠️ 用精确文本匹配：hasText 是子串匹配，'Starlight' 会连 'Starlight 1' 一起命中
+      await expect(modules.filter({ hasText: /^Starlight ·/ })).toHaveCount(1)
+      await expect(modules.filter({ hasText: /^Starlight 1 ·/ })).toHaveCount(0)
+      for (const name of ['语文', '英语', 'Fly Guy', 'Rocket Girl']) {
+        await expect(modules.filter({ hasText: name })).toHaveCount(1)
+      }
 
-      // 切到第一册：任务当场换册，不用刷新
+      // 切到第一册：任务当场换册，不用刷新；行数不变（仍是一册一条）
       await page.locator('.sl-level-opt[data-level="starlight1"]').click()
-      await expect(modules.filter({ hasText: 'Starlight 1' })).toHaveCount(1, {
+      await expect(modules.filter({ hasText: /^Starlight 1 ·/ })).toHaveCount(1, {
         timeout: 15000,
       })
-      await expect(rows).toHaveCount(2)
+      await expect(modules.filter({ hasText: /^Starlight ·/ })).toHaveCount(0)
+      await expect(rows).toHaveCount(5)
 
       // 第一册那条真的链到第一册的课，不是预备级的
       const book1Row = page.locator('.today-row', { hasText: 'Starlight 1' })
