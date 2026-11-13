@@ -1,6 +1,7 @@
-// 故事类模块(Fly Guy / Rocket Girl)首页的共享骨架。
-// 两类页面原本约 95% 逐行相同(搜索过滤、进度 pill、关卡卡片、书单折叠区),
-// 差异(数据源、主题色、文案、跳转前缀、书单条目)全部通过 props 注入。
+// 故事类模块首页的共享骨架（2026-11-13 起**仅 Fly Guy 使用**）。
+// Rocket Girl 已重做成阅读模块（RocketGirlHome → ReadingBook），不再走这里。
+// 差异(数据源、主题色、文案、跳转前缀、书单条目)通过 props 注入；
+// 骨架含搜索过滤、进度 pill、关卡卡片、书单折叠区。
 
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'

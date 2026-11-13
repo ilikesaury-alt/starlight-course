@@ -1,5 +1,7 @@
-// 故事类模块（Fly Guy / Rocket Girl 等）共享的数据结构。
-// flyguy.FGStory / rocketgirl.RGStory 均为 Story 的类型别名，可被 StoryPage 直接复用。
+// 故事类模块的数据结构（2026-11-13 起**仅 Fly Guy 的 StoryPage 使用**）。
+// flyguy.FGStory 是 Story 的类型别名。
+// ⚠️ Rocket Girl 仍复用 `Story` 形态作为**数据源**（rocketgirl.ts 的 rocketGirlStories），
+// 但它已重做成阅读模块，走 ReadingBook / ReadingZone，不再走 StoryPage。
 
 export interface StoryWord {
   en: string

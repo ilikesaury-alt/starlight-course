@@ -1,4 +1,5 @@
-// 通用测验引擎：被故事页（FlyGuy/RocketGirl）与 Starlight 听力测验共用。
+// 通用测验引擎：被故事页（Fly Guy）与 Starlight 听力测验共用。
+// ⚠️ Rocket Girl 已改为阅读模块，不再有测验/闯关，故不使用本引擎。
 // 只负责「选项卡 UI + 进度/正误状态机 + 结果卡」的渲染与交互，
 // 具体的出题逻辑（buildQuiz）、选词后的 SRS 记录（onPick）、完成后的副作用（onFinish）
 // 全部由调用方注入，保证各模块行为可独立定制、互不干扰。
