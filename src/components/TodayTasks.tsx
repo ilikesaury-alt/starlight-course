@@ -22,6 +22,8 @@ interface Task {
   module: string
   label: string
   to: string
+  /** 没有持久化完成记录的「入口式」任务：不参与「今天都完成了」判定 */
+  always?: boolean
 }
 
 export default function TodayTasks() {
@@ -34,17 +36,24 @@ export default function TodayTasks() {
 
   const [storyTasks, setStoryTasks] = useState<Task[]>([])
 
-  // 故事类下一关:动态加载数据后计算(避免首屏拉起大词表 chunk)
+  // 故事类下一关:动态加载数据后计算(避免首屏拉起大词表 chunk)。
+  // Rocket Girl 已整体并入阅读模块，不再有「下一关」也没有可靠已读记录 ——
+  // 只给一条静态入口，直达 /rocketgirl（阅读目录），不伪造进度。
   useEffect(() => {
     let alive = true
-    void Promise.all([import('@/data/flyguy'), import('@/data/rocketgirl')]).then(
+    void Promise.all([import('@/data/flyguy'), import('@/data/rocketgirlReading')]).then(
       ([fg, rg]) => {
         if (!alive) return
         const t: Task[] = []
         const fgNext = fg.flyGuyStories.find((s) => !completedStories.includes(s.slug))
         if (fgNext) t.push({ emoji: '🐝', module: 'Fly Guy', label: fgNext.title, to: `/flyguy/${fgNext.slug}` })
-        const rgNext = rg.rocketGirlStories.find((s) => !completedStories.includes(s.slug))
-        if (rgNext) t.push({ emoji: '🚀', module: 'Rocket Girl', label: rgNext.title, to: `/rocketgirl/${rgNext.slug}` })
+        t.push({
+          emoji: '🚀',
+          module: 'Rocket Girl',
+          label: `${rg.rgArcCount} 个故事 · ${rg.rgStoryCount} 段例句`,
+          to: '/rocketgirl',
+          always: true,
+        })
         setStoryTasks(t)
       }
     )
@@ -140,7 +149,9 @@ export default function TodayTasks() {
   // 第一个未完成课）从「只露 2 个」放开到「全露」。行数天然有界（≤5），
   // 不需要再截断。
   const shown = tasks
-  const allDone = todayDue === 0 && shown.length === 0
+  // Rocket Girl 那条是「入口」不是「待办」：阅读模块不记已读，不能让它把
+  // 「今天都完成了」永远压成 false。
+  const allDone = todayDue === 0 && shown.every((t) => t.always)
 
   return (
     <div className="today-card">

@@ -504,3 +504,43 @@ a.lesson-link {
   font-weight: 700;
   padding: 10px 0 4px;
 }
+
+// ============================================================
+//  首页「更多阅读」跨系列入口（Rocket Girl 已并入阅读模块）
+//  ------------------------------------------------------------
+//  不塞进 .sl-series-tab（那条被 e2e 钉死恰好 2 项），用一条独立小链。
+//  原来写在 _rocketgirl-reading.scss（随旧 StoryPage 一起删除），现归入首页样式。
+// ============================================================
+.rg-reading-link {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  margin: 0 0 12px;
+}
+
+.rg-reading-entry {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--brand-deep);
+  text-decoration: none;
+  white-space: nowrap;
+  &:hover { background: var(--brand-tint); }
+}
+
+.rg-reading-hint {
+  font-size: 11px;
+  color: var(--ink-soft);
+  line-height: 1.35;
+}
+
+@media (min-width: 900px) {
+  .home--workbench > .rg-reading-link { grid-column: 1 / -1; }
+}

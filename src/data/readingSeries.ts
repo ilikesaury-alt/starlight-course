@@ -11,9 +11,31 @@
 // 两册现在都是 96 课篇篇有短文。readingLessonsOf 仍保留「滤掉没有短文的课」：
 // 万一以后某册新增一课却还没配短文，页面不会出现点开是空态的死链卡片。
 
-import type { Lesson, Module } from './starlight'
+import type { Word } from './starlight'
 import type { ReadingPassage } from './reading/index'
 import type { StarlightLevel } from './starlightSeries'
+
+// ReadingBook 只依赖「一组单元 → 每单元若干课 → 每课词表」这个结构。
+// 刻意不复用 starlight.ts 的 Module/Lesson：那里还带 preview / quiz / sentences，
+// 而 Rocket Girl 的「单元」是故事弧、「课」是一集故事，根本没有这些东西。
+// Module[] 在结构上可以原样传给 ReadingModule[]，Starlight 两个路由页零改动。
+export interface ReadingLesson {
+  id: number
+  title: string
+  titleZh: string
+  words: Word[]
+}
+
+export interface ReadingModule {
+  id: number
+  slug: string
+  title: string
+  titleZh: string
+  emoji: string
+  color: string
+  colorSoft: string
+  lessons: ReadingLesson[]
+}
 
 /** 阅读模块的册次路由（与 STARLIGHT_LEVELS[].path 不同：那是主课目录页） */
 export const READING_PATHS: Record<StarlightLevel, string> = {
@@ -24,10 +46,12 @@ export const READING_PATHS: Record<StarlightLevel, string> = {
 /** 阅读模块专属主题色（靛蓝）：区别于主课暖橙、Rocket Girl 紫、英语蓝、听写青绿。 */
 export const READING_THEME = { color: '#6366f1', colorSoft: '#eef2ff' } as const
 
-/** 一册的阅读数据源，由各路由页构造后喂给共享组件 */
+/** 一册的阅读数据源，由各路由页构造后喂给共享组件。
+ *  `level` 是 Starlight 册次；Rocket Girl 这类「自定义书」不填 ——
+ *  它没有系列切换条，也不该被当成第三册（见 ReadingBook 的 custom 分支）。 */
 export interface ReadingSource {
-  level: StarlightLevel
-  mods: Module[]
+  level?: StarlightLevel
+  mods: ReadingModule[]
   passageOf: (unitId: number, lessonId: number) => ReadingPassage | undefined
   /** 首屏宝藏词示例；不传则自动从该册 Unit 1 的真实课本词里取 */
   heroWords?: string[]
@@ -36,7 +60,7 @@ export interface ReadingSource {
 /** 该册里真正有短文的课。
  *  预备级 = 全部 96 课（数据完整，行为与改造前逐字节一致）；
  *  第一册 = 已写好的 27 课。阅读页只列这些课，杜绝「读一读」点了是空态的死链。 */
-export function readingLessonsOf(src: ReadingSource, m: Module): Lesson[] {
+export function readingLessonsOf(src: ReadingSource, m: ReadingModule): ReadingLesson[] {
   return m.lessons.filter((l) => !!src.passageOf(m.id, l.id))
 }
 

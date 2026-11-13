@@ -4,7 +4,7 @@ import { useCourseStore } from '../store/useCourseStore'
 import { totalChineseLessons } from '../data/chinese'
 import { totalEngLessons } from '../data/eng3a'
 import { flyGuyStories, flyGuyStoryCount } from '../data/flyguy'
-import { rocketGirlStories, rocketGirlStoryCount } from '../data/rocketgirl'
+import { rgArcCount, rgStoryCount } from '../data/rocketgirlReading'
 import { moduleThemeOf } from '../data/modules'
 import {
   STARLIGHT_LEVEL_ORDER,
@@ -34,7 +34,6 @@ export default function Progress() {
   const chineseRecited = Object.keys(reciteCheckins).filter((k) => (reciteCheckins[k]?.length ?? 0) > 0).length
   const eng3aRead = Object.keys(eng3aRecite).filter((k) => (eng3aRecite[k]?.length ?? 0) > 0).length
   const flyguyDone = flyGuyStories.filter((s) => completedStories.includes(s.slug)).length
-  const rocketgirlDone = rocketGirlStories.filter((s) => completedStories.includes(s.slug)).length
 
   // Starlight 是一个系列：两册的完成记录都存在同一份 lessonCompleted /
   // completedQuizzes 里（键是单元 slug，全局唯一）。按册拆开统计，分母取自
@@ -65,14 +64,18 @@ export default function Progress() {
     { id: 'chinese', to: '/chinese', emoji: '📚', name: '三年级上册语文', status: `已学完 ${completedChinese.length}/${totalChineseLessons} 课 · 已背 ${chineseRecited} 课`, total: totalChineseLessons, done: completedChinese.length },
     { id: 'eng3a', to: '/eng3a', emoji: '📘', name: '三年级上册英语', status: `已学完 ${completedEng3a.length}/${totalEngLessons} 课 · 已读 ${eng3aRead} 课`, total: totalEngLessons, done: completedEng3a.length },
     { id: 'flyguy', to: '/flyguy', emoji: '🐝', name: 'Fly Guy 绘本闯关', status: `已通关 ${flyguyDone}/${flyGuyStoryCount} 关`, total: flyGuyStoryCount, done: flyguyDone },
-    { id: 'rocketgirl', to: '/rocketgirl', emoji: '🚀', name: 'Rocket Girl 闯关', status: `已通关 ${rocketgirlDone}/${rocketGirlStoryCount} 关`, total: rocketGirlStoryCount, done: rocketgirlDone },
+    // Rocket Girl 已整体并入阅读模块：阅读不写「已读」记录，所以这里只报静态规模，
+    // total=0 → 不画进度条。绝不把 `completedStories` 里的历史 rg-* 当成阅读进度。
+    { id: 'rocketgirl', to: '/rocketgirl', emoji: '🚀', name: 'Rocket Girl 阅读', status: `${rgArcCount} 个故事 · ${rgStoryCount} 段例句`, total: 0, done: 0 },
   ]
 
   const stats = [
     { emoji: '⭐', value: totalStars, label: '累计星星', to: undefined as string | undefined },
     { emoji: '🧠', value: todayDue, label: '今日到期', to: '/smart' },
     { emoji: '📋', value: wrongWords.length, label: '错题本', to: '/wrong' },
-    { emoji: '🏆', value: completedStories.length, label: '已通关故事', to: undefined },
+    // Rocket Girl 已并入阅读模块（不记「已读」）：历史 localStorage 里的 rg-* 不再
+    // 算作通关进度，只统计还有通关语义的 Fly Guy 绘本。
+    { emoji: '🏆', value: completedStories.filter((s) => !s.startsWith('rg-')).length, label: '已通关绘本', to: undefined },
   ]
 
   return (
@@ -120,9 +123,13 @@ export default function Progress() {
               <div className="mp-body">
                 <div className="mp-name">{r.name}</div>
                 <div className="mp-status">{r.status}</div>
-                <div className="mp-bar">
-                  <div className="mp-bar-fill" style={{ width: `${pct}%` }} />
-                </div>
+                {/* 没有可靠进度记录的模块（Rocket Girl 阅读）不画空进度条 ——
+                    空的 0% 也是一种「你没读过」的伪造陈述。 */}
+                {r.total > 0 && (
+                  <div className="mp-bar">
+                    <div className="mp-bar-fill" style={{ width: `${pct}%` }} />
+                  </div>
+                )}
               </div>
               <span className="mp-arrow">›</span>
             </Link>

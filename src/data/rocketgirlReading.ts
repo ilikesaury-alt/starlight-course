@@ -1,26 +1,34 @@
-// Rocket Girl → 阅读器适配层（零 UI，纯函数）。
+// Rocket Girl → 阅读模块适配层（零 UI，纯函数）。
 //
-// 为什么单独一层：`rocketgirl.ts` 的 Story 是「108 个闯关关卡 + 词条 + 例句」，
-// 而阅读模块的 ReadingZone 需要 `ReadingPassage`（连贯段落）+ `Word[]`。
+// 为什么单独一层：`rocketgirl.ts` 的 Story 是「108 集故事 + 词条 + 例句」，
+// 而阅读模块需要 `ReadingModule[]`（单元 → 课 → 词表）+ `ReadingPassage`。
 // 两者语义不同，这里做**只读适配**，不改 rocketgirl.ts 的导出形状，
 // 也不把 RG 例句塞进 READING_PASSAGES（那会污染 readingPassage.test.ts 的零超纲口径）。
 //
+// Rocket Girl 现在**整个就是阅读模块**：
+//   108 集故事按标题里的故事弧分组 → 27 个「单元」，每单元 4 集「课」。
+//   标题形如 `Rocket Girl and the Aliens 1: Sloppy Joe Day`，
+//   冒号前的共同前缀（去掉结尾的序号）就是弧名。
+//
 // 三条硬约束：
 //   1. RG 没有绘本正文（0/108 有 bookText），只有 2301 条「例句 + 中文」。
-//      所以这里产出的是**例句页**，文案一律说「这一关的例句」，绝不标成「绘本原文 / 小故事」。
-//   2. 例句互不相关（每关 12~31 句），串成「听整篇」的长音频没意义，
-//      而且会踩云 TTS 超时。故按 SENTENCES_PER_PAGE 切成 2~3 页。
+//      所以这里产出的是**例句页**，文案一律说「这一集的例句」，绝不标成「绘本原文 / 小故事」。
+//   2. 阅读模块的流程是「点一条 → 就地展开一篇」，不是分页器。
+//      每集只取前 10 句合成 1 个 ReadingPassage（与 Starlight 短文 8~12 句同口径，
+//      也避免「听整篇」合成超长音频被云 TTS 超时）。
 //   3. 词条里 777/2797 是多词或带噪声（`sloppy joe`、`drip (`），
 //      TappableWords 按单 token 查词表，多词 key 永远不会命中高亮 —— 必须归一化。
 
 import { rocketGirlStories } from './rocketgirl'
 import { lookupZh, wordBase } from '@/utils/bookDict'
+import { RG_THEME } from './story-themes'
 import type { ReadingPassage, ReadingSentence } from './reading/index'
+import type { ReadingModule, ReadingSource } from './readingSeries'
 import type { Word } from './starlight'
 import type { Story } from './story-types'
 
-/** 每页最多几句。Starlight 短文规格是 8~12 句；RG 例句按同口径切，避免长音频超时 */
-export const SENTENCES_PER_PAGE = 10
+/** 每篇最多几句。与 Starlight 短文规格（8~12 句）同口径；多出的句子不再分页。 */
+export const RG_SENTENCES_PER_PASSAGE = 10
 
 /** 把一条 StoryWord 归一成 Word 能用的单 token 形态；不是单词返回 null */
 function toWordToken(en: string): string | null {
@@ -30,7 +38,7 @@ function toWordToken(en: string): string | null {
   return w
 }
 
-/** 一关的词表（用于阅读器高亮「这一关的词」）。按 token 去重，多词/噪声剔除。
+/** 一集的词表（用于阅读器高亮「这一集的词」）。按 token 去重，多词/噪声剔除。
  *  ⚠️ 实测 2797 个词条里有 **458 条 zh 为空**（如 blink / case / frown）——
  *  原文数据就没翻译。这类词先拿 `lookupZh` 兜；仍查不到就**不进词表**：
  *  否则高亮了却弹出空释义，比不高亮更糟。它们仍会被 `lookupRgZh` 的查词链
@@ -49,39 +57,162 @@ export function rgReadingVocab(story: Story): Word[] {
   return out
 }
 
-/** 一关的例句 → 若干「例句页」。同关内完全重复的句子去重（实测 164 条）。 */
-export function rgStoryPages(story: Story): ReadingPassage[] {
+/** 一集的例句（同集内去重、保序、每句带中文）。
+ *
+ * ⚠️ 去重 key 要额外抹掉**标点前的空格**：原始数据里同一句会同时出现
+ * `"...Elementary School."` 与 `"...Elementary School ."` 两种写法，
+ * 只按空白折叠会把它们当成两句，孩子读的时候同一句连着念两遍。
+ * 显示时也顺手清掉那个空格（句点前留空格读着别扭）。 */
+function rgSentences(story: Story): ReadingSentence[] {
   const seen = new Set<string>()
   const lines: ReadingSentence[] = []
   for (const w of story.words) {
-    const text = (w.bookSentence || w.sentence || '').trim()
+    const raw = (w.bookSentence || w.sentence || '').trim()
+    if (!raw) continue
+    const text = raw.replace(/\s+([.,!?;:])/g, '$1')
     const zh = (w.bookSentenceZh || w.sentenceZh || '').trim()
-    if (!text) continue
     const key = text.toLowerCase().replace(/\s+/g, ' ')
     if (seen.has(key)) continue
     seen.add(key)
     lines.push({ en: text, zh: zh || lookupZh(wordBase(text)) || '' })
   }
-  if (lines.length === 0) return []
+  return lines
+}
 
-  const pages: ReadingPassage[] = []
-  for (let i = 0; i < lines.length; i += SENTENCES_PER_PAGE) {
-    const part = lines.slice(i, i + SENTENCES_PER_PAGE)
-    const pageNo = Math.floor(i / SENTENCES_PER_PAGE) + 1
-    const total = Math.ceil(lines.length / SENTENCES_PER_PAGE)
-    pages.push({
-      title: `Part ${pageNo} · ${story.title}`,
-      titleZh: total > 1 ? `第 ${pageNo}/${total} 页 · 这一关的例句` : '这一关的例句',
-      paragraphs: [part],
-    })
+/** 一集故事 → 一个阅读页（最多 10 句，不分页）。 */
+export function rgPassage(story: Story): ReadingPassage | undefined {
+  const lines = rgSentences(story).slice(0, RG_SENTENCES_PER_PASSAGE)
+  if (lines.length === 0) return undefined
+  return {
+    title: story.title,
+    // 文案必须诚实：RG 只有词条例句，没有绘本原文。
+    titleZh: '这一集的例句',
+    paragraphs: [lines],
   }
-  return pages
+}
+
+// ---------- 故事弧分组 ----------
+
+export interface RgArc {
+  id: number
+  /** 弧名（标题冒号前、去掉结尾序号的共同前缀） */
+  name: string
+  stories: Story[]
+  emoji: string
+}
+
+/** 标题 → 弧名。`Rocket Girl vs. the Robot 3: ...` → `Rocket Girl vs. the Robot` */
+function arcNameOf(title: string): string {
+  const beforeColon = title.includes(':') ? title.slice(0, title.indexOf(':')) : title
+  return beforeColon.replace(/\s+\d+\s*$/, '').trim()
+}
+
+/** 一集在弧内的「第几集」：优先取标题冒号前的序号，否则按数组顺序 */
+function partOf(story: Story, fallback: number): number {
+  const m = story.title.match(/\s(\d+)\s*:/)
+  const n = m ? Number(m[1]) : NaN
+  return Number.isFinite(n) && n > 0 ? n : fallback
+}
+
+/** 课列表里显示的英文标题：冒号后的副标题；没有副标题（4 集同名 Rocket Girl）就用 Part N */
+function lessonTitleOf(story: Story, part: number): string {
+  const i = story.title.indexOf(':')
+  return i >= 0 ? story.title.slice(i + 1).trim() : `Part ${part}`
+}
+
+/** 108 集 → 27 个故事弧（实测每条弧恰好 4 集），保持原顺序。 */
+export const rgArcs: RgArc[] = (() => {
+  const groups = new Map<string, Story[]>()
+  for (const s of rocketGirlStories) {
+    const name = arcNameOf(s.title)
+    const list = groups.get(name)
+    if (list) list.push(s)
+    else groups.set(name, [s])
+  }
+  return [...groups.entries()].map(([name, stories], i) => ({
+    id: i + 1,
+    name,
+    stories,
+    emoji: stories[0]?.emoji ?? '🚀',
+  }))
+})()
+
+export const rgArcCount = rgArcs.length
+export const rgStoryCount = rocketGirlStories.length
+
+/** 弧 → 阅读模块的「单元」。unitId = 弧序号，lessonId = 弧内第几集（1 起）。 */
+const rgModules: ReadingModule[] = rgArcs.map((arc) => {
+  const firstId = arc.stories[0]?.id
+  const lastId = arc.stories[arc.stories.length - 1]?.id
+  return {
+    id: arc.id,
+    slug: `rg-arc-${arc.id}`,
+    title: arc.name,
+    titleZh: firstId && lastId ? `第 ${firstId}—${lastId} 集` : `${arc.stories.length} 集`,
+    emoji: arc.emoji,
+    color: RG_THEME.color,
+    colorSoft: RG_THEME.colorSoft,
+    lessons: arc.stories.map((s, i) => {
+      const part = partOf(s, i + 1)
+      return {
+        id: part,
+        title: lessonTitleOf(s, part),
+        titleZh: `第 ${part} 集`,
+        words: rgReadingVocab(s),
+      }
+    }),
+  }
+})
+
+/**
+ * (弧号, 集号) → 阅读页。集号是标题里的序号（1..4），不是数组下标。
+ *
+ * ⚠️ **必须返回稳定引用**：ReadingZone 有 `useEffect([passage])`，引用一变就会
+ * `cancelSpeech()` 掐断正在播的朗读。ReadingBook 每次渲染都会调 `passageOf`
+ * （`readingLessonsOf` 还会为全部 108 课各调一次），若这里每次 `rgPassage()`
+ * 新建一个对象，孩子点「慢速 / 记忆 / 中文」或 SRS 一更新，整篇朗读就断了。
+ * Starlight 的 `getReadingPassage` 返回静态 map 里的引用，天然稳定；RG 是现算的，
+ * 故按 key 缓存一次。旧 StoryPage 时代是用 useMemo 稳住的，并入 ReadingBook 后
+ * 那层 useMemo 没了，缓存必须落在这里。
+ */
+const PASSAGE_CACHE = new Map<string, ReadingPassage | undefined>()
+
+export function rgPassageOf(arcId: number, lessonId: number): ReadingPassage | undefined {
+  const key = `${arcId}-${lessonId}`
+  if (PASSAGE_CACHE.has(key)) return PASSAGE_CACHE.get(key)
+  const arc = rgArcs[arcId - 1]
+  const story = arc?.stories.find((s, i) => partOf(s, i + 1) === lessonId)
+  const passage = story ? rgPassage(story) : undefined
+  PASSAGE_CACHE.set(key, passage)
+  return passage
+}
+
+/** 首屏宝藏词示例：第一弧里真实可点、有中文的前 5 个单词。 */
+export const rgHeroWords: string[] = (() => {
+  const seen = new Set<string>()
+  const out: string[] = []
+  for (const s of rgArcs[0]?.stories ?? []) {
+    for (const w of rgReadingVocab(s)) {
+      if (seen.has(w.en)) continue
+      seen.add(w.en)
+      out.push(w.en)
+      if (out.length === 5) return out
+    }
+  }
+  return out
+})()
+
+/** 喂给 ReadingBook 的完整数据源（自定义书：没有 level、没有系列切换条）。 */
+export const RG_READING_SOURCE: ReadingSource = {
+  mods: rgModules,
+  passageOf: rgPassageOf,
+  heroWords: rgHeroWords,
 }
 
 // ---------- RG 专属词表（不进 BOOK_WORD_ZH） ----------
 
 /**
- * 从 108 关词条自动生成的 en→zh 表（1067 个单 token）。
+ * 从 108 集词条自动生成的 en→zh 表（1067 个单 token）。
  * 作用域只限 Rocket Girl：不合并进全局 BOOK_WORD_ZH，因为后者还被
  * `bookQuiz.ts` 用来挑挖空候选，倒进去会悄悄改变 Fly Guy / Starlight 的出题分布。
  */
@@ -149,7 +280,7 @@ const SUFFIXES = ['est', 'ing', 'ed', 'es', 'ly', 'er', 's'] as const
 
 /**
  * RG 页级查词：bookDict → 自动/人工词表 → 词形回退。
- * 只由 Rocket Girl 的阅读器调用，不影响其它 5 个 TappableWords 消费者。
+ * 只由 Rocket Girl 的阅读器调用，不影响其它 TappableWords 消费者。
  */
 export function lookupRgZh(base: string): string | undefined {
   const b = wordBase(base)

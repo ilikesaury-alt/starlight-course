@@ -1,8 +1,13 @@
-// 📚 阅读模块共享组件 —— 预备级与第一册共用同一套页面，只换「数据源」。
+// 📚 阅读模块共享组件 —— 预备级、第一册、Rocket Girl 共用同一套页面，只换「数据源」。
 //
 // Starlight 是一个系列：/reading（预备级，96 篇）与 /reading1（第一册，96 篇）
 // 渲染的是同一个组件，差别只在传入的 ReadingSource。这样不写第二套页面，
 // 首屏母题、阅读器、e2e 契约全部只有一份。
+//
+// Rocket Girl（/rocketgirl）也走这里：传 **同一个** ReadingSource 形状
+//（27 个故事弧 = 「单元」，每弧 4 集 = 「课」），再加一个可选的 `custom`
+// 覆盖掉 Starlight 专属的五处：面包屑 / 系列切换条 / 单元图形 / 标题文案 / testid。
+// `custom` 不传时，下面每条渲染路径都与改造前逐字节一致（/reading 的 e2e 契约）。
 //
 // 单页聚合（用户已确认的形态）：
 //   单元用原生 <details> 折叠（默认全收起，短文不一次性铺满首屏）；
@@ -21,10 +26,10 @@
 //
 // 不做：不播种 SRS、不做理解测验、不引跟读 STT、不持久化「已读」进度。
 
-import { useMemo, useState } from 'react'
+import { useMemo, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { Gem } from 'lucide-react'
-import Breadcrumb from '@/components/Breadcrumb'
+import Breadcrumb, { type Crumb } from '@/components/Breadcrumb'
 import ZoneCard from '@/components/ZoneCard'
 import ReadingZone from '@/components/ReadingZone'
 import UnitGlyph from '@/components/UnitGlyph'
@@ -35,19 +40,69 @@ import {
   readingHeroWords,
   readingLessonsOf,
   readingStoryCount,
+  type ReadingLesson,
+  type ReadingModule,
   type ReadingSource,
 } from '@/data/readingSeries'
 import { STARLIGHT_LEVELS } from '@/data/starlightSeries'
 import { useCourseStore } from '@/store/useCourseStore'
-import { moduleThemeVars } from '@/utils/theme'
+import { moduleThemeVars, type ModuleTheme } from '@/utils/theme'
 import { useMemoryState } from '@/utils/memoryState'
 import { useSlowMode } from '@/utils/slowMode'
 import { speakText } from '@/utils/speak'
 import { cleanForSpeak } from '@/utils/bookDict'
+import type { ReadingPassage } from '@/data/reading/index'
 
-const mcStyle = moduleThemeVars(READING_THEME)
+/** 首屏支撑句可用的三个真实数字 */
+export interface ReadingHeroStats {
+  storyCount: number
+  unitCount: number
+  distinctWords: number
+}
 
-export default function ReadingBook({ source }: { source: ReadingSource }) {
+/**
+ * 「自定义书」覆盖项。全部可选，且**不传 = 走原本的 Starlight 分支**。
+ * Rocket Girl 用它把同一套骨架换成自己的书名 / 文案 / 目录语义。
+ */
+export interface ReadingBookCustom {
+  /** 面包屑（默认 🏠 › 阅读小故事 [› 册次]） */
+  breadcrumb: Crumb[]
+  heroTitle: ReactNode
+  heroStatement: ReactNode
+  /** 支撑句：拿得到三个已算好的真实数字 */
+  heroSub: (stats: ReadingHeroStats) => ReactNode
+  /** 默认渲染 Starlight 系列切换条；自定义书必须显式关掉 */
+  hideSeriesTabs?: boolean
+  /** 模块主题色（默认阅读模块靛蓝） */
+  theme?: ModuleTheme
+  /** 单元标题（默认 `Module N · 标题`） */
+  unitTitle?: (m: ReadingModule) => ReactNode
+  /** 单元副标题（默认 m.titleZh） */
+  unitZh?: (m: ReadingModule) => ReactNode
+  /** 单元图形（默认 UnitGlyph；RG 用故事 emoji，绝不借用 Starlight 的主题图形） */
+  unitIcon?: (m: ReadingModule) => ReactNode
+  /** 展开后宝藏词表的 aria-label（默认 `Module N 的课本词`） */
+  treasureLabel?: (m: ReadingModule) => string
+  /** 课按钮的 data-testid（默认 `rm-lesson-{unit}-{lesson}`） */
+  lessonTestId?: (m: ReadingModule, l: ReadingLesson) => string
+  /** 阅读器分区标题（默认 `📚 Lesson N · 短文标题`）。ZoneCard 的 title 是纯文本 */
+  readerTitle?: (m: ReadingModule, l: ReadingLesson, passage: ReadingPassage) => string
+  /** 阅读器右侧提示 */
+  readerSide?: string
+  /** 页面级补充词典（透传 ReadingZone → TappableWords） */
+  lookup?: (base: string) => string | undefined
+  /** PlayTools 提示语 */
+  hint?: string
+  /** 附加到页面根节点的 class，供自定义书挂局部样式（不传则无） */
+  pageClass?: string
+}
+
+interface Props {
+  source: ReadingSource
+  custom?: ReadingBookCustom
+}
+
+export default function ReadingBook({ source, custom }: Props) {
   // 当前展开的那一篇（key 形如 '1-1'）；null = 全部收起
   const [openKey, setOpenKey] = useState<string | null>(null)
   const srsCards = useCourseStore((s) => s.srsCards)
@@ -55,10 +110,13 @@ export default function ReadingBook({ source }: { source: ReadingSource }) {
   const memOn = useMemoryState()
   const slow = useSlowMode()
 
-  const { level, mods, passageOf } = source
+  // 不传 level 的只有自定义书（RG）；默认分支仍走 Starlight 的册次语义。
+  const level = source.level ?? 'starlight'
   const levelMeta = STARLIGHT_LEVELS[level]
+  const { mods, passageOf } = source
   const storyCount = useMemo(() => readingStoryCount(source), [source])
   const heroWords = useMemo(() => readingHeroWords(source), [source])
+  const mcStyle = useMemo(() => moduleThemeVars(custom?.theme ?? READING_THEME), [custom?.theme])
 
   // 每个单元的宝藏词：本单元各课课本词**去重**后的词表。
   // 去重的原因：同一单元会反复出现共词，重复计数会让「💎 120 词」看着像虚数。
@@ -85,17 +143,27 @@ export default function ReadingBook({ source }: { source: ReadingSource }) {
   const distinctWords = mods.reduce((n, m) => n + (unitTreasures.get(m.id)?.length ?? 0), 0)
 
   return (
-    <div className={'page reading-module reading-sheet' + (memOn ? ' sr-mem' : '')} style={mcStyle}>
-      <Breadcrumb items={[{ label: '🏠', to: '/' }, { label: '阅读小故事' }, ...(level === 'starlight1' ? [{ label: levelMeta.labelZh }] : [])]} />
+    <div className={'page reading-module reading-sheet' + (memOn ? ' sr-mem' : '') + (custom?.pageClass ? ` ${custom.pageClass}` : '')} style={mcStyle}>
+      <Breadcrumb
+        items={
+          custom?.breadcrumb ?? [
+            { label: '🏠', to: '/' },
+            { label: '阅读小故事' },
+            ...(level === 'starlight1' ? [{ label: levelMeta.labelZh }] : []),
+          ]
+        }
+      />
 
       <section className="rm-hero">
         <div className="rm-hero-main">
-          <h1 className="rm-hero-title">阅读小故事</h1>
+          <h1 className="rm-hero-title">{custom?.heroTitle ?? '阅读小故事'}</h1>
           <p className="rm-hero-statement">
-            这些故事<b>只用了你学过的词</b>
+            {custom?.heroStatement ?? <>这些故事<b>只用了你学过的词</b></>}
           </p>
           <p className="rm-hero-sub">
-            {level === 'starlight1' ? (
+            {custom?.heroSub ? (
+              custom.heroSub({ storyCount, unitCount: mods.length, distinctWords })
+            ) : level === 'starlight1' ? (
               <>
                 第一册的小故事正跟着阅读课<b>一课一课补上</b>，现在收录 <b>{storyCount}</b> 篇 · {mods.length} 个单元 ·{' '}
                 {distinctWords} 个不同的词。点开一课自己读一遍，读不出的词点一下就能听发音。
@@ -125,8 +193,11 @@ export default function ReadingBook({ source }: { source: ReadingSource }) {
         </div>
       </section>
 
-      {/* 系列切换：预备级 / 第一册。路径落到阅读模块自己的两个路由 */}
-      <StarlightSeriesTabs current={level} paths={READING_PATHS} label="Starlight 系列 · 阅读" />
+      {/* 系列切换：预备级 / 第一册。路径落到阅读模块自己的两个路由。
+          自定义书（RG）不是第三册，不渲染这一条 —— /reading 的 e2e 钉死恰好 2 项。 */}
+      {!custom?.hideSeriesTabs && (
+        <StarlightSeriesTabs current={level} paths={READING_PATHS} label="Starlight 系列 · 阅读" />
+      )}
 
       <div className="rm-units">
         {mods.map((m) => {
@@ -146,17 +217,23 @@ export default function ReadingBook({ source }: { source: ReadingSource }) {
           >
             <summary className="rm-unit-head">
               <span className="rm-unit-emoji">
-                <UnitGlyph
-                  unitId={m.id}
-                  level={level}
-                  fallback={m.emoji}
-                  color={m.color}
-                  soft={m.colorSoft}
-                  size={26}
-                />
+                {custom?.unitIcon ? (
+                  custom.unitIcon(m)
+                ) : (
+                  <UnitGlyph
+                    unitId={m.id}
+                    level={source.level}
+                    fallback={m.emoji}
+                    color={m.color}
+                    soft={m.colorSoft}
+                    size={26}
+                  />
+                )}
               </span>
-              <span className="rm-unit-title">Module {m.id} · {m.title}</span>
-              <span className="rm-unit-zh">{m.titleZh}</span>
+              <span className="rm-unit-title">
+                {custom?.unitTitle ? custom.unitTitle(m) : <>Module {m.id} · {m.title}</>}
+              </span>
+              <span className="rm-unit-zh">{custom?.unitZh ? custom.unitZh(m) : m.titleZh}</span>
               <span className="rm-unit-badges">
                 <span className="rm-unit-count">{lessons.length} 篇</span>
                 <span className="rm-unit-treasure">
@@ -166,7 +243,10 @@ export default function ReadingBook({ source }: { source: ReadingSource }) {
               </span>
             </summary>
 
-            <div className="rm-treasure-list" aria-label={`Module ${m.id} 的课本词`}>
+            <div
+              className="rm-treasure-list"
+              aria-label={custom?.treasureLabel ? custom.treasureLabel(m) : `Module ${m.id} 的课本词`}
+            >
               {(unitTreasures.get(m.id) ?? []).map((w) => (
                 <button
                   type="button"
@@ -190,7 +270,11 @@ export default function ReadingBook({ source }: { source: ReadingSource }) {
                     <button
                       type="button"
                       className={'rm-lesson' + (open ? ' is-open' : '')}
-                      data-testid={`rm-lesson-${key}`}
+                      data-testid={
+                        custom?.lessonTestId
+                          ? custom.lessonTestId(m, l)
+                          : `rm-lesson-${key}`
+                      }
                       aria-expanded={open}
                       onClick={() => setOpenKey(open ? null : key)}
                     >
@@ -206,8 +290,12 @@ export default function ReadingBook({ source }: { source: ReadingSource }) {
                     {open && (
                       passage ? (
                         <ZoneCard
-                          title={`📚 Lesson ${l.id} · ${passage.title}`}
-                          side="🧒 自己读一遍 · 点词听发音"
+                          title={
+                            custom?.readerTitle
+                              ? custom.readerTitle(m, l, passage)
+                              : `📚 Lesson ${l.id} · ${passage.title}`
+                          }
+                          side={custom?.readerSide ?? '🧒 自己读一遍 · 点词听发音'}
                           mcStyle={mcStyle}
                           className="rm-reader"
                           collapsible={false}
@@ -216,6 +304,8 @@ export default function ReadingBook({ source }: { source: ReadingSource }) {
                             passage={passage}
                             vocab={l.words}
                             boxOf={(en) => srsCards[en]?.box}
+                            lookup={custom?.lookup}
+                            hint={custom?.hint}
                           />
                         </ZoneCard>
                       ) : (

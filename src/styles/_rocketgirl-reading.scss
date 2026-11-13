@@ -1,80 +1,50 @@
-// Rocket Girl 例句阅读（复用 ReadingZone）
+// Rocket Girl 阅读 —— 复用 ReadingBook 白纸页骨架后的局部修正。
 //
-// ⚠️ 刻意**不加 .reading-module 类**：那是 /reading 目录页的布局作用域，
-// 挂上去会把 rm-* 的栅格与金色「宝藏词」误套到 StoryPage 上。
-// 这里只补 RG 独有的两件东西：分页条 + 例句说明。
-//
-// 逐词高亮复用 _study.scss 的全局 .tt-word--mark（紫色波浪线，跟着 --mc-deep
-// 走 RG 主题色），不复制阅读模块的金色宝藏样式 —— RG 的词不是「课本学过的词」，
-// 是「这一关的词」，视觉上就该有区别。
+// ⚠️ 只在 .rg-reading-sheet 作用域内生效（ReadingBook 的 custom.pageClass 挂上），
+// 绝不改 .reading-sheet 全局规则，/reading 与 /reading1 逐字节不受影响。
 
-.rg-reading {
-  > .lead {
-    margin-bottom: 12px;
+.rg-reading-sheet {
+  // 故事弧名是英文长串（"Rocket Girl and the Hypnotized Students"）。
+  // 原来的通栏行把「图形 + 标题 + 中文 + 徽章」全挤在一行，长标题会折行、
+  // 中文被省略号截断。这里改成两行栅格：
+  //   第一行：图形 | 弧名（可折） | 4 篇 / 💎N 词
+  //   第二行：第 9—12 集（缩进对齐弧名）
+  // 保证 27 行不至于把首屏推得太远。
+  .rm-unit-head {
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: 12px;
+    row-gap: 2px;
+    padding: 10px 2px;
   }
-}
 
-.rg-page-nav {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 10px 14px;
-  margin: 0 0 14px;
-
-  .btn[disabled] {
-    opacity: 0.45;
-    cursor: default;
+  .rm-unit-emoji {
+    grid-column: 1;
+    grid-row: 1 / 3;
+    align-self: center;
   }
-}
 
-.rg-page-num {
-  font-size: var(--fs-sm);
-  font-weight: 700;
-  color: var(--ink-soft);
-  font-variant-numeric: tabular-nums;
-  min-width: 6em;
-  text-align: center;
-}
+  .rm-unit-title {
+    grid-column: 2;
+    grid-row: 1;
+    white-space: normal;
+    line-height: 1.3;
+    min-width: 0;
+  }
 
-// 例句页里「听整篇」合成的是 10 句互不相关的例句，不是连贯故事；
-// 阅读器标题按页文案已经说明，这里稍微收一下标题字号，别让它像故事标题那么大。
-.rg-reading .reading-title-en {
-  font-size: var(--fs-lg);
-}
+  .rm-unit-zh {
+    grid-column: 2;
+    grid-row: 2;
+    white-space: nowrap;
+    overflow: visible;
+    text-overflow: clip;
+    font-size: 12px;
+  }
 
-// 首页「阅读小故事」卡下方的跨系列入口。
-// 与 .sl-direct-book1 同一套内联小链视觉，但用独立 class，不参与册次切换断言。
-.rg-reading-link {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 6px 12px;
-  margin: 0 0 12px;
-}
-
-.rg-reading-entry {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 6px 12px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  background: transparent;
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--brand-deep);
-  text-decoration: none;
-  white-space: nowrap;
-  &:hover { background: var(--brand-tint); }
-}
-
-.rg-reading-hint {
-  font-size: 11px;
-  color: var(--ink-soft);
-  line-height: 1.35;
-}
-
-@media (min-width: 900px) {
-  .home--workbench > .rg-reading-link { grid-column: 1 / -1; }
+  .rm-unit-badges {
+    grid-column: 3;
+    grid-row: 1 / 3;
+    margin-left: 0;
+  }
 }

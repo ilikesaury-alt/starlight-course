@@ -30,20 +30,20 @@ export default function CourseEntries() {
   const meta = STARLIGHT_LEVELS[level]
   const readingPath = level === 'starlight1' ? '/reading1' : '/reading'
 
-  // 故事模块动态统计:总数(进度%)与 Fly Guy 文案用数字
+  // 故事模块动态统计:总数(进度%)与文案用数字
   const [fgStats, setFgStats] = useState<{ stories: number; words: number } | null>(null)
-  const [storyTotals, setStoryTotals] = useState<{ flyguy?: number; rocketgirl?: number }>({})
+  // Rocket Girl 已并入阅读模块：只报静态的「故事弧 / 例句段数」，不伪造已读进度。
+  const [rgStats, setRgStats] = useState<{ arcs: number; stories: number } | null>(null)
 
   useEffect(() => {
     let alive = true
     void import('@/data/flyguy').then((m) => {
       if (!alive) return
       setFgStats({ stories: m.flyGuyStoryCount, words: m.flyGuyWordCount })
-      setStoryTotals((s) => ({ ...s, flyguy: m.flyGuyStories.length }))
     })
-    void import('@/data/rocketgirl').then((m) => {
+    void import('@/data/rocketgirlReading').then((m) => {
       if (!alive) return
-      setStoryTotals((s) => ({ ...s, rocketgirl: m.rocketGirlStories.length }))
+      setRgStats({ arcs: m.rgArcCount, stories: m.rgStoryCount })
     })
     return () => {
       alive = false
@@ -84,16 +84,14 @@ export default function CourseEntries() {
       due: getTodayDueCount('starlight1'),
     },
     rocketgirl: {
-      percent: pct(
-        completedStories.filter((s) => s.startsWith('rg-')).length,
-        storyTotals.rocketgirl
-      ),
+      // 阅读模块不记「已读」，不再显示进度百分比（那会是伪造进度）；
+      // 到期复习数来自 SRS，仍如实显示。
       due: getTodayDueCount('rocketgirl'),
     },
     flyguy: {
       percent: pct(
         completedStories.filter((s) => !s.startsWith('rg-')).length,
-        storyTotals.flyguy
+        fgStats?.stories
       ),
       due: getTodayDueCount('flyguy'),
     },
@@ -155,8 +153,10 @@ export default function CourseEntries() {
         <Link to="/rocketgirl" className="rg-home-entry">
           <span className="rg-home-emoji">🚀</span>
           <div className="rg-home-body">
-            <div className="rg-home-title">Rocket Girl 英语闯关</div>
-            <div className="rg-home-sub">宝贝最爱的动画片主题课 · 108 个故事关卡</div>
+            <div className="rg-home-title">Rocket Girl 阅读</div>
+            <div className="rg-home-sub">
+              每集一段故事例句 · {rgStats ? `${rgStats.arcs} 个故事 / ${rgStats.stories} 段` : '故事阅读'}
+            </div>
             <Badge id="rocketgirl" />
           </div>
           <span className="rg-home-arrow">›</span>
@@ -197,14 +197,17 @@ export default function CourseEntries() {
       </div>
 
       {/* 阅读模块的跨系列入口：Rocket Girl 不是第三册（它没有绘本正文、词汇也不属于
-          Starlight 课本词），但它的「例句」Tab 已复用同一套 ReadingZone。
+          Starlight 课本词），但整个 RG 模块已经走同一套 ReadingBook。
           用一条独立小链连过去，而不塞进 .sl-series-tab —— 后者被 33 条 e2e
           钉死为恰好 2 项。文案刻意不含「阅读小故事」整串，避免 getByText 歧义。 */}
       <div className="rg-reading-link">
         <Link to="/rocketgirl" className="rg-reading-entry">
-          🚀 更多阅读 · Rocket Girl 例句阅读 <span aria-hidden="true">↗</span>
+          🚀 更多阅读 · Rocket Girl 故事阅读 <span aria-hidden="true">↗</span>
         </Link>
-        <span className="rg-reading-hint">108 关 · 逐词中文点读 / 中文对照 / 逐句朗读</span>
+        <span className="rg-reading-hint">
+          {rgStats ? `${rgStats.arcs} 个故事 · ${rgStats.stories} 段例句` : '故事例句'} ·
+          逐词中文点读 / 中文对照 / 逐句朗读
+        </span>
       </div>
 
       <div className="quick-row">

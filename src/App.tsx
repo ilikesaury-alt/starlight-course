@@ -18,7 +18,6 @@ const Progress = lazy(() => import('@/pages/Progress'))
 const AlphabetPage = lazy(() => import('@/pages/AlphabetPage'))
 const SmartReview = lazy(() => import('@/pages/SmartReview'))
 const RocketGirlHome = lazy(() => import('@/pages/RocketGirlHome'))
-const RocketGirlStory = lazy(() => import('@/pages/RocketGirlStory'))
 const FlyGuyHome = lazy(() => import('@/pages/FlyGuyHome'))
 const FlyGuyStory = lazy(() => import('@/pages/FlyGuyStory'))
 const StarlightHome = lazy(() => import('@/pages/StarlightHome'))
@@ -86,7 +85,9 @@ function AppRoutes() {
           <Route path="/progress" element={<Progress />} />
           <Route path="/alphabet" element={<AlphabetPage />} />
           <Route path="/rocketgirl" element={<RocketGirlHome />} />
-          <Route path="/rocketgirl/:slug" element={<RocketGirlStory />} />
+          {/* Rocket Girl 已整体并入阅读模块：旧的单集路由重定向回阅读目录，
+              兼容已存的书签（以前是 108 个「关卡页」）。 */}
+          <Route path="/rocketgirl/:slug" element={<Navigate to="/rocketgirl" replace />} />
           <Route path="/flyguy" element={<FlyGuyHome />} />
           <Route path="/flyguy/:slug" element={<FlyGuyStory />} />
           <Route path="/starlight" element={<StarlightHome />} />

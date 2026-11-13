@@ -11,7 +11,7 @@ export default function Home() {
           配合校内课程与一对一外教课，每本教材都有 <b>预习导学</b>、<b>单词卡</b>、<b>句型对话</b>、<b>互动测验</b>。
         </p>
         <p className="hero-scope">
-          牛津 Starlight 预备级 + 第一册 · 人教版语文 · 外研版英语 · Fly Guy / Rocket Girl 绘本
+          牛津 Starlight 预备级 + 第一册 · 人教版语文 · 外研版英语 · Fly Guy 绘本 · Rocket Girl 阅读
         </p>
       </section>
 

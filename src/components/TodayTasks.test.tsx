@@ -75,7 +75,8 @@ describe('首页今日任务', () => {
     for (const row of Array.from(container.querySelectorAll('.today-row'))) {
       const href = row.getAttribute('href')
       expect(href, '每个任务行都要有 href').toBeTruthy()
-      expect(href).toMatch(/^\/(preview|chinese|eng3a|flyguy|rocketgirl)\//)
+      // Rocket Girl 并入阅读模块后直达 /rocketgirl（阅读目录），不再有 /rocketgirl/rg-N
+      expect(href).toMatch(/^\/(preview|chinese|eng3a|flyguy)\/|^\/rocketgirl$/)
     }
   })
 
