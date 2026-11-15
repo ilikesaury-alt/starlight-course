@@ -1,7 +1,7 @@
 # Starlight English Learning App - Agent Instructions
 
 ## Project Overview
-- **Type**: Pure frontend PWA (no backend)
+- **Type**: Pure frontend PWA (no backend) + Electron desktop shell
 - **Stack**: React 18 + TypeScript 5.8 + Vite 6 + Zustand + Tailwind CSS
 - **Purpose**: English learning tool for preschool/elementary children, paired with Oxford Starlight Starter textbook
 
@@ -47,9 +47,13 @@ npm run electron:build  # 打包 Windows NSIS 安装包（产物在 release/）
 - **⚠️ 未开「开发者模式」的 Windows 打包必失败**（winCodeSign 包内含 macOS `.dylib` 软链，7-Zip `-snld` 建链被拒）：`electron-build.mjs` 会预先用 `7za` 解压到 `Cache/winCodeSign/winCodeSign-2.6.0` 并**排除 `darwin`/`linux`**（Windows 只需 `signtool`/`rcedit`），幂等、可自愈
 - **STT 在 Electron 必挂**（需 Google 语音后端）：无需处理，`useSpeechRecognition` 的 `supported` 守卫 + 跟读 Tab 默认隐藏天然兜住
 - **WebGPU 不可用是常态**（老核显/虚拟机拿不到适配器）：自动退回云 TTS/WebSpeech，**不静音**（验收标准 #3）
+- **当前壳尚无 IPC**：`main.cjs` 里没有 `preload` / `ipcMain` / `contextBridge`。数据全在 localStorage。平台化路线见 `docs/features/platform/平台化演进路线.md`（P0 第一步已落地：备份导出/导入）
 
 ## Development Notes
 - TypeScript strict mode is **disabled** (`strict: false` in tsconfig.json)
+- **`strict: false` 的两个实际后果**（都踩过）：
+  1. **判别联合不会按 `ok` 收窄** —— 写 `{ok:true,...} | {ok:false,...}` 后 `if (res.ok)` 里取 `res.error` 会报「Property 'error' does not exist」。`utils/backup.ts` 的 `RestoreResult` 因此用「可选字段 + ok 布尔」表示。别改成判别联合。
+  2. 可空性检查更松，`?.` / `??` 该写还得写
 - No Prettier config - code formatting is not enforced
 - ESLint uses react-hooks and react-refresh plugins
 - `react-dev-locator` babel plugin included for development debugging
@@ -152,14 +156,27 @@ npm run electron:build  # 打包 Windows NSIS 安装包（产物在 release/）
   - ❗**判定必须按位置不按文本**：`tight → t/igh/t`、`nine → n/i/n/e` 有重复块，只比文本的话孩子把第 3 位的 `t` 先点上去也算对。现在用 `usedPoolIdx`（已用块下标）+ 比对“下一个所需块”来判，e2e A7 盯着这条
   - 复用 `phonemeSegments` 的概念分类给积木配色/标签；星规复用 `quizStars`；错词回灌错题本与 SRS，`module='alphablocks'`（已加入 `ModuleId` 联合类型，不新增持久化字段，因此 **无需升 localStorage version**）
 
+## 数据备份 / 恢复（`src/utils/backup.ts` + `components/BackupPanel.tsx`）
+
+这是「数据主权」的第一步（平台化 P0 的前半），入口在「学习进度」页、**紧挨着「重置全部数据」上方** —— 那里是最容易手滑的地方，备份必须同屏可见，不许藏进设置。
+
+- **字段清单不另写一份**：`pickPersisted()` 直接调用 store 的 `persist.partialize`。以后 store 加持久化字段，备份自动包含，不会漏（手写第二份清单必然不同步，表现为「备份了但恢复不回来」）
+- **恢复必须走 store 自己的 `migrate`**：`parseBackup` 取 `persist.getOptions().migrate`，用备份文件里的 `storeVersion` 跑迁移链。旧备份（v1~v7）因此能升到当前结构
+- ⚠️ **校验时旧版本字段必须原样透传给 migrate**：`validateData` 只对「当前字段」做类型检查，当前状态里已不存在的旧键（例：v8 之前的 `masteredWords`）要保留 —— 丢掉它们 = 把旧备份恢复成空进度。**这个 bug 真的发生过**，`backup.test.ts` 有一条专门钉它
+- ⚠️ **测试文件必须写 `// @vitest-environment jsdom`**：没有 localStorage 时 persist 中间件不挂 `persist` API，`useCourseStore.persist` 是 undefined，整个文件会以 `Cannot read properties of undefined (reading 'getOptions')` 全红
+- **导入是两段式**：`readBackupFile` 只解析不写状态，界面先展示摘要让用户确认，点「确认恢复」才 `applyBackup`。选错文件不会覆盖进度
+- **`applyBackup` 用合并语义**（`setState(data, false)`），不能 replace —— 否则 actions 被一起冲掉
+- 接受两种输入格式：本应用的备份信封（`{kind, schema, storeVersion, data}`）与 zustand persist 原始落盘格式（`{state, version}`）
+- **手动导出仍是当前唯一的数据保护手段**：卸载重装会清空 userData，自动落盘 / IPC 属平台化 P0 后半，尚未实现
+
 ## File Structure
 ```
 src/
-├── components/     # Layout, SpeakButton, SafeBoundary + 跟读/框架卡/点读/拓展词录入
+├── components/     # Layout, SpeakButton, SafeBoundary + 跟读/框架卡/点读/拓展词录入 + BackupPanel(备份恢复)
 ├── pages/         # page components (Home, LessonPreview, SmartReview, etc.)
 ├── hooks/         # useSettleQuiz(结算) / useSpeechRecognition(STT) / useSentenceReader(跟读编排)
 ├── data/          # 课程内容(starlight.ts, lessons.ts) + sentenceFrame.ts(句型框架) + extensionTopics.ts(拓展词主题库) + srs.ts / fsrsScheduler.ts
-├── utils/         # stars.ts(星规) / similarity.ts(跟读评分) / reviewQueue.ts(复习配额) / speakService + engine/(youdao·baidu·webSpeech·kokoro·edgeTts·edgeNeural·msGecV2·segmentedSpeak)
+├── utils/         # stars.ts(星规) / similarity.ts(跟读评分) / reviewQueue.ts(复习配额) / backup.ts(备份恢复) / speakService + engine/(youdao·baidu·webSpeech·kokoro·edgeTts·edgeNeural·msGecV2·segmentedSpeak)
 └── store/         # Zustand state management (含 starlightExtensions 拓展词 + extensionRound 填充轮次)
 ```
 
@@ -167,4 +184,4 @@ src/
 - **PWA caching**: Service Worker may cache old versions; use `skipWaiting: true` config
 - **Speech errors**: speechSynthesis throws async errors that can crash React 18; global handlers prevent this
 - **GitHub Pages**: HashRouter required; direct URL routing won't work without server config
-- **localStorage**: User progress persists across sessions; clear via store.resetAll() or browser dev tools
+- **localStorage**: User progress persists across sessions; clear via store.resetAll() or browser dev tools. **导出备份是唯一可恢复手段**（见上节）

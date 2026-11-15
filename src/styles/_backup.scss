@@ -1,0 +1,87 @@
+// 学习数据备份面板（进度页底部）
+//
+// 视觉口径与 .module-progress-row 一致：白卡片 + 1px 线 + 大圆角 + 主题色左条，
+// 但左条用中性色（它不是模块，不该抢模块主题色的语义）。
+// 危险色只出现在「恢复会覆盖」的警告上 —— 这一块的目的是让人放心，不是吓人。
+
+.backup-panel {
+  margin-top: 20px;
+  padding: 16px 18px;
+  border-radius: var(--r-lg);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-left: 6px solid var(--line-strong, var(--line));
+  box-shadow: var(--shadow-sm);
+}
+
+.bp-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.bp-emoji { font-size: 26px; flex-shrink: 0; }
+.bp-title { font-size: var(--fs-md); font-weight: 800; }
+.bp-sub {
+  font-size: var(--fs-sm);
+  color: var(--ink-soft);
+  margin-top: 2px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.bp-hint {
+  margin: 10px 0 0;
+  font-size: var(--fs-sm);
+  color: var(--ink-soft);
+  line-height: 1.65;
+}
+
+.bp-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+// 隐藏的原生文件输入：点击由上面的按钮代理（原生 file 按钮样式无法统一）
+.bp-file { display: none; }
+
+.bp-note {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: var(--r-md);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  line-height: 1.6;
+  background: var(--brand-soft);
+  color: var(--brand-deep);
+}
+.bp-note--error { background: var(--no-soft); color: var(--no-deep); }
+.bp-note--ok { background: var(--ok-soft); color: var(--ok-deep); }
+
+// 恢复前的确认区：与上面的操作区在视觉上分开，避免误点
+.bp-confirm {
+  margin-top: 14px;
+  padding: 14px 16px;
+  border-radius: var(--r-md);
+  background: var(--sun-soft, var(--brand-soft));
+  border: 1px dashed var(--sun, var(--line));
+}
+.bp-confirm-title { font-size: var(--fs-md); font-weight: 800; }
+.bp-confirm-body {
+  margin-top: 6px;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.bp-confirm-warn {
+  margin-top: 8px;
+  font-size: var(--fs-sm);
+  line-height: 1.65;
+  color: var(--ink-soft);
+}
+.bp-confirm-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+}

@@ -36,3 +36,5 @@
 @use 'styles/review-module';
 // 三年级英语专属（同一套 paper-sheet 骨架 + 外研版五关路径）。
 @use 'styles/eng3a-module';
+// 学习数据备份面板（进度页底部；数据主权第一步，见 docs/features/platform/）。
+@use 'styles/backup';

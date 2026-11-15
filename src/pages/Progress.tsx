@@ -14,6 +14,7 @@ import {
 } from '../data/starlightSeries'
 import { moduleThemeVars } from '../utils/theme'
 import ConfirmDialog from '../components/ConfirmDialog'
+import BackupPanel from '../components/BackupPanel'
 
 // 学习进度：每模块一栏带进度条（Starlight 两册各一栏 + 语文 / 英语3A / 两个绘本），
 // 点任意模块可直接跳转到对应课程首页，减少「看进度 → 回首页 → 找模块」的往返。
@@ -137,6 +138,10 @@ export default function Progress() {
         })}
       </div>
 
+      {/* 数据备份：放在「重置」上方且同屏可见 —— 这里正是最容易手滑的地方，
+          备份入口必须紧挨着它，而不是藏进设置页。 */}
+      <BackupPanel />
+
       <div style={{ textAlign: 'center', marginTop: '24px' }}>
         <button type="button" className="btn btn--soft" onClick={() => setShowReset(true)}>
           🔄 重置全部数据
@@ -147,7 +152,7 @@ export default function Progress() {
         open={showReset}
         emoji="🔄"
         title="确定重置所有进度吗？"
-        message="星星、单词、错题和学习记录都会清空，而且找不回来哦。"
+        message="星星、单词、错题和学习记录都会清空，而且找不回来哦。建议先在上面「导出备份」再重置。"
         confirmText="全部清空"
         cancelText="再想想"
         danger
