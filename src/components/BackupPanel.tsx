@@ -8,7 +8,7 @@
 // - 导入成功后立刻重新读一次 store 渲染，让孩子看到「数据回来了」。
 // - 任何失败都显示人话原因，不弹技术堆栈。
 
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   applyBackup,
   buildCurrentBackup,
@@ -19,6 +19,7 @@ import {
   type BackupSummary,
   type PersistedState,
 } from '@/utils/backup'
+import { dataFilePath, isFilePersistenceActive } from '@/utils/storage'
 
 type Pending = { data: PersistedState; summary: BackupSummary; migratedFrom?: number }
 
@@ -37,10 +38,23 @@ export default function BackupPanel() {
   const [pending, setPending] = useState<Pending | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [done, setDone] = useState<string | null>(null)
+  const [fileDir, setFileDir] = useState<string | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
 
   // 当前进度摘要：让家长在导出前就知道「这份备份里有什么」
   const current = summarize(pickPersisted())
+
+  // 桌面版：显示数据文件所在位置，家长可以自己去那个目录拷走备份。
+  // 网页版 hasFileStore() 为 false，这一行整块不渲染。
+  useEffect(() => {
+    let alive = true
+    void dataFilePath().then((p) => {
+      if (alive) setFileDir(p)
+    })
+    return () => {
+      alive = false
+    }
+  }, [])
 
   const onExport = () => {
     setError(null)
@@ -94,8 +108,18 @@ export default function BackupPanel() {
       </div>
 
       <p className="bp-hint">
-        卸载重装、换电脑、或者不小心清了数据，都可以用备份文件恢复。建议每周导出一份。
+        {isFilePersistenceActive()
+          ? '进度已自动保存在本机数据文件里。换电脑、或者不小心清了数据，都可以用下面的备份文件恢复。'
+          : '卸载重装、换电脑、或者不小心清了数据，都可以用备份文件恢复。建议每周导出一份。'}
       </p>
+
+      {/* 桌面版专属：数据文件在哪。家长想自己拷走 / 归档时不必问人。 */}
+      {fileDir && (
+        <p className="bp-path" title={fileDir}>
+          <span className="bp-path-label">保存位置</span>
+          <code>{fileDir}</code>
+        </p>
+      )}
 
       <div className="bp-actions">
         <button type="button" className="btn btn--soft" onClick={onExport} disabled={busy}>

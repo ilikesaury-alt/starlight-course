@@ -4,13 +4,33 @@ import { registerSW } from 'virtual:pwa-register'
 import App from './App'
 import { installSpeechErrorGuard } from './utils/speechGuard'
 import { installAudioUnlock } from './utils/audioUnlock'
+import { attachFileStore, hydrateFromFile } from './utils/storage'
 import './index.scss'
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
-)
+/**
+ * 启动顺序（桌面版的数据落盘依赖它）：
+ *   水合（读数据文件 → store）→ 挂载 → 接上写回通道。
+ *
+ * 为什么水合必须在挂载前 await：IPC 读盘是异步的，若先挂载再异步填数据，
+ * 首屏会按空 store 渲染一帧（星星/进度条闪一下 0）。放在挂载前没有这个窗口期。
+ * 网页版没有 window.starlightStore，hydrateFromFile 立即返回 null，行为与改前一致。
+ */
+async function boot() {
+  // 桌面版：把磁盘上的学习数据读进 store（文件不存在则把 localStorage 里的进度种进去）。
+  // 失败不阻塞启动 —— 函数内部已兜底，读不到就继续用 localStorage。
+  await hydrateFromFile()
+
+  createRoot(document.getElementById('root')!).render(
+    <StrictMode>
+      <App />
+    </StrictMode>,
+  )
+
+  // 挂载后接上「store 变更 → 写数据文件」的防抖同步（网页版是空操作）
+  attachFileStore()
+}
+
+void boot()
 
 // 注册 Service Worker,检测到新版本时自动刷新页面
 // 配合 workbox.skipWaiting + clientsClaim,实现"部署后用户下次访问即拿到新版"

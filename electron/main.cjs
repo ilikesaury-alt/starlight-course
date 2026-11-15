@@ -7,11 +7,58 @@
 // - --smoke 模式：程序化验证「非白屏 / WebGPU / localStorage / 云 TTS」，输出 JSON 后退出。
 //   这是验收标准 #3 #4 的证据来源（真实发声仍需人工听）。
 
-const { app, BrowserWindow } = require('electron')
+const { app, BrowserWindow, ipcMain } = require('electron')
 const path = require('node:path')
+const fs = require('node:fs')
 
 const DEV_URL = process.env.VITE_DEV_SERVER_URL || 'http://localhost:5173'
 const SMOKE = process.argv.includes('--smoke')
+
+// ---- 学习数据落盘 ----
+//
+// 为什么要有这一层：学习进度原来只存在 localStorage 里，而「卸载重装 = 进度清零」
+// 且没有恢复手段（见 AGENTS.md）。现在整份数据在 userData 下留一份 JSON，
+// 备份/恢复之外多了一层「数据本来就在磁盘上」的保障，也为后续多档案 / 报告留地基。
+//
+// 路径固定由主进程决定，渲染进程**不能指定路径**（preload 只暴露 read/write/path）。
+function dataFilePath() {
+  return path.join(app.getPath('userData'), 'starlight-data.json')
+}
+
+/** 原子写：先写临时文件再 rename。避免写到一半断电 / 崩溃留下半截 JSON 把数据弄坏。 */
+function writeDataFile(json) {
+  const target = dataFilePath()
+  const tmp = target + '.tmp'
+  fs.mkdirSync(path.dirname(target), { recursive: true })
+  fs.writeFileSync(tmp, json, 'utf8')
+  fs.renameSync(tmp, target) // 同目录 rename 在 Windows 上也是原子的
+}
+
+function registerStoreIpc() {
+  ipcMain.handle('starlight-store:read', () => {
+    try {
+      const file = dataFilePath()
+      if (!fs.existsSync(file)) return null
+      return fs.readFileSync(file, 'utf8')
+    } catch (e) {
+      console.error('[store] read failed', e)
+      return null
+    }
+  })
+
+  ipcMain.handle('starlight-store:write', (_evt, json) => {
+    try {
+      if (typeof json !== 'string') return { ok: false, error: 'payload must be a string' }
+      writeDataFile(json)
+      return { ok: true }
+    } catch (e) {
+      console.error('[store] write failed', e)
+      return { ok: false, error: String(e) }
+    }
+  })
+
+  ipcMain.handle('starlight-store:path', () => dataFilePath())
+}
 
 // WebGPU 在 Electron 中并非所有构建都默认开启，显式打开以避免 Kokoro 神经 TTS 静默降级。
 // 拿不到适配器时链路本来就会退回云 TTS / WebSpeech，不会静音（见 src/utils/speakService.ts）。
@@ -91,6 +138,8 @@ async function createWindow() {
       // 前端是纯静态应用，不需要 Node 能力：保持最小权限面
       nodeIntegration: false,
       contextIsolation: true,
+      // 数据落盘通道：只经 preload 暴露 3 个白名单方法（见 electron/preload.cjs）
+      preload: path.join(__dirname, 'preload.cjs'),
       // file:// 下 localStorage 需要非 opaque origin 才能持久化（smoke 会断言）
       partition: 'persist:starlight',
     },
@@ -110,7 +159,11 @@ async function createWindow() {
   }
 }
 
-app.whenReady().then(createWindow)
+app.whenReady().then(() => {
+  // IPC 必须在窗口创建前注册好，否则 preload 的首次 read 会打空
+  registerStoreIpc()
+  return createWindow()
+})
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit()

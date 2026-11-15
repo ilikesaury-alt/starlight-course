@@ -47,7 +47,8 @@ npm run electron:build  # 打包 Windows NSIS 安装包（产物在 release/）
 - **⚠️ 未开「开发者模式」的 Windows 打包必失败**（winCodeSign 包内含 macOS `.dylib` 软链，7-Zip `-snld` 建链被拒）：`electron-build.mjs` 会预先用 `7za` 解压到 `Cache/winCodeSign/winCodeSign-2.6.0` 并**排除 `darwin`/`linux`**（Windows 只需 `signtool`/`rcedit`），幂等、可自愈
 - **STT 在 Electron 必挂**（需 Google 语音后端）：无需处理，`useSpeechRecognition` 的 `supported` 守卫 + 跟读 Tab 默认隐藏天然兜住
 - **WebGPU 不可用是常态**（老核显/虚拟机拿不到适配器）：自动退回云 TTS/WebSpeech，**不静音**（验收标准 #3）
-- **当前壳尚无 IPC**：`main.cjs` 里没有 `preload` / `ipcMain` / `contextBridge`。数据全在 localStorage。平台化路线见 `docs/features/platform/平台化演进路线.md`（P0 第一步已落地：备份导出/导入）
+- **壳已有最小 IPC**：`electron/preload.cjs` 经 `contextBridge` 只暴露 `starlightStore.{read,write,path}` 三个方法，背后是 `main.cjs` 的 `starlight-store:*` 三个 handler。**渲染进程不能指定路径**（数据文件路径由主进程固定为 `userData/starlight-data.json`），也没有通用 `invoke(channel)` 逃生口。平台化路线见 `docs/features/platform/平台化演进路线.md`（P0 已落地：备份导出/导入 + 数据落盘）
+- **`files` 白名单是 `electron/**/*`**：新增主进程文件（如以后的 tray / updater）无需改 `package.json`，但**别放到 `electron/` 之外**，否则不会被打进包
 
 ## Development Notes
 - TypeScript strict mode is **disabled** (`strict: false` in tsconfig.json)
@@ -156,9 +157,22 @@ npm run electron:build  # 打包 Windows NSIS 安装包（产物在 release/）
   - ❗**判定必须按位置不按文本**：`tight → t/igh/t`、`nine → n/i/n/e` 有重复块，只比文本的话孩子把第 3 位的 `t` 先点上去也算对。现在用 `usedPoolIdx`（已用块下标）+ 比对“下一个所需块”来判，e2e A7 盯着这条
   - 复用 `phonemeSegments` 的概念分类给积木配色/标签；星规复用 `quizStars`；错词回灌错题本与 SRS，`module='alphablocks'`（已加入 `ModuleId` 联合类型，不新增持久化字段，因此 **无需升 localStorage version**）
 
+## 数据落盘（`src/utils/storage.ts` + `electron/preload.cjs`）
+
+桌面版把整份学习数据写进 `userData/starlight-data.json`，磁盘上始终有一份。这是「数据主权」的核心（平台化 P0）。
+
+- **⚠️ 水合必须在 React 挂载之前 await**（`src/main.tsx` 的 `boot()`）：IPC 读盘是异步的，先挂载再异步填数据会让首屏按空 store 渲染一帧（星星/进度条闪成 0）。放在挂载前既没有这个窗口期，也天然绕开 React 18 StrictMode 对 effect 的双次执行（**不需要防重入锁**）
+- **文件格式 = zustand persist 的原始落盘格式 `{ state, version }`**：与 localStorage 同构，因此读写都复用 `backup.ts` 里已过单测的解析 + **store 自己的 migrate**，不另造一套。旧格式数据文件在新版本下自动升级
+- **首启迁移**：文件不存在时把当前 localStorage 的进度写进文件（一次性），**进度不丢**。这是「从旧版本升级上来」的路径
+- **读失败一律退回 localStorage**：文件坏了 / 解析不动 / bridge 抛错，都保留现有进度并继续启动，绝不因为读盘问题打不开应用
+- **写是防抖 400ms + 页面隐藏时立刻 flush**：学习动作密集（点词/翻页/答题），每次 setState 都写盘太频繁；`pagehide` / `beforeunload` / `visibilitychange:hidden` 会把挂起的写入立刻落地，否则最后 400ms 的动作会丢
+- **写失败只记录不抛**：内存里的数据仍在，下次变更会重试 —— 不能因为磁盘问题中断学习
+- ⚠️ **`storage.test.ts` 用的是假 bridge**（内存变量），它证明不了 preload/IPC/主进程真实链路通。真实链路的验证靠 `scripts/probe-file-store.cjs`（真 Electron、真 fs、真重启水合，9 条断言）。**改动 preload / IPC / 水合后必须跑它**：`ELECTRON_BUILD=1 npx vite build && npx electron scripts/probe-file-store.cjs`
+- 数据文件内容与 localStorage **是两份**：localStorage 是 persist 中间件的原生落点（照旧），数据文件是给用户/备份/后续迁移用的磁盘副本。二者由同一份 `partialize` 产出，不会分叉
+
 ## 数据备份 / 恢复（`src/utils/backup.ts` + `components/BackupPanel.tsx`）
 
-这是「数据主权」的第一步（平台化 P0 的前半），入口在「学习进度」页、**紧挨着「重置全部数据」上方** —— 那里是最容易手滑的地方，备份必须同屏可见，不许藏进设置。
+平台化 P0 的另一半，入口在「学习进度」页、**紧挨着「重置全部数据」上方** —— 那里是最容易手滑的地方，备份必须同屏可见，不许藏进设置。
 
 - **字段清单不另写一份**：`pickPersisted()` 直接调用 store 的 `persist.partialize`。以后 store 加持久化字段，备份自动包含，不会漏（手写第二份清单必然不同步，表现为「备份了但恢复不回来」）
 - **恢复必须走 store 自己的 `migrate`**：`parseBackup` 取 `persist.getOptions().migrate`，用备份文件里的 `storeVersion` 跑迁移链。旧备份（v1~v7）因此能升到当前结构
@@ -176,7 +190,7 @@ src/
 ├── pages/         # page components (Home, LessonPreview, SmartReview, etc.)
 ├── hooks/         # useSettleQuiz(结算) / useSpeechRecognition(STT) / useSentenceReader(跟读编排)
 ├── data/          # 课程内容(starlight.ts, lessons.ts) + sentenceFrame.ts(句型框架) + extensionTopics.ts(拓展词主题库) + srs.ts / fsrsScheduler.ts
-├── utils/         # stars.ts(星规) / similarity.ts(跟读评分) / reviewQueue.ts(复习配额) / backup.ts(备份恢复) / speakService + engine/(youdao·baidu·webSpeech·kokoro·edgeTts·edgeNeural·msGecV2·segmentedSpeak)
+├── utils/         # stars.ts(星规) / similarity.ts(跟读评分) / reviewQueue.ts(复习配额) / backup.ts(备份恢复) / storage.ts(桌面版落盘) / speakService + engine/(youdao·baidu·webSpeech·kokoro·edgeTts·edgeNeural·msGecV2·segmentedSpeak)
 └── store/         # Zustand state management (含 starlightExtensions 拓展词 + extensionRound 填充轮次)
 ```
 
