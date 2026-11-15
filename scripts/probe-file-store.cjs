@@ -88,6 +88,8 @@ async function run() {
   //    （渲染进程里发起，与界面写 store 后防抖触发的调用是同一入口）
   const written = await win.webContents.executeJavaScript(
     `(async () => {
+       // 故意写成 version 8（当前是 9）：模拟「老数据文件 + 新版应用」，
+       // 用来验证水合路径确实跑了 store 的迁移链，而不是只做 JSON 透传
        const payload = JSON.stringify({ state: { totalStars: 4242, wrongWords: [] }, version: 8 })
        const res = await window.starlightStore.write(payload)
        const p = await window.starlightStore.path()
@@ -129,11 +131,23 @@ async function run() {
        const raw = localStorage.getItem('starlight-course')
        if (!raw) return JSON.stringify({ found: false })
        const parsed = JSON.parse(raw)
-       return JSON.stringify({ found: true, stars: parsed.state ? parsed.state.totalStars : null })
+       const st = parsed.state || {}
+       return JSON.stringify({
+         found: true,
+         stars: st.totalStars,
+         hasProfile: !!st.profile,
+         profileName: st.profile ? st.profile.name : null,
+       })
      })()`
   )
   const rh = JSON.parse(rehydrated)
   check('重启后水合把数据读回 store', rh.found && rh.stars === 4242, JSON.stringify(rh))
+  // v9：水合时迁移链补出了 profile（老数据文件里没有这个字段）
+  check(
+    'v8 数据文件水合后补出 profile',
+    rh.hasProfile === true && rh.profileName === '',
+    `hasProfile=${rh.hasProfile} name=${JSON.stringify(rh.profileName)}`
+  )
 
   const failed = results.filter((r) => !r.pass)
   console.log(`\n[probe] ${results.length - failed.length}/${results.length} passed`)

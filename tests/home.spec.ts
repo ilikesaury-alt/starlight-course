@@ -165,3 +165,46 @@ test.describe('首页与导航', () => {
     })
   })
 })
+
+test.describe('孩子档案', () => {
+  /**
+   * 档案的 e2e 契约有两面，两面都要钉：
+   *  ① 未设置时首页标题保持原样（上面的用例已覆盖，别改坏它）；
+   *  ② 设置后就该叫孩子的名字 —— 这是这个功能存在的理由。
+   */
+  test('未设置昵称时首页标题不变；设置后改写为孩子的名字', async ({ page }) => {
+    await page.goto('/')
+
+    // ① 未设置：原样
+    await expect(page.getByRole('heading', { name: '课前预习 · 课后复习' })).toBeVisible()
+
+    // ② 在进度页设置昵称与头像
+    await page.goto('/#/progress')
+    await expect(page.locator('.profile-card')).toBeVisible()
+    await page.locator('.pc-edit-btn').click()
+
+    await page.locator('#pc-name-input').fill('小明')
+    await page.locator('.pc-avatar-opt').nth(2).click()
+    await page.getByRole('button', { name: '保存' }).click()
+
+    // 就地回显，不跳页
+    await expect(page.locator('.pc-name')).toHaveText('小明')
+    await expect(page.locator('.pc-edit-btn')).toHaveText('改')
+
+    // ③ 回首页：标题换成孩子的名字
+    await page.goto('/')
+    await expect(page.locator('.hero-title')).toContainText('小明')
+    await expect(page.locator('.hero-title')).toContainText('今天学点什么')
+  })
+
+  test('刷新后昵称仍在（持久化生效）', async ({ page }) => {
+    await page.goto('/#/progress')
+    await page.locator('.pc-edit-btn').click()
+    await page.locator('#pc-name-input').fill('小红')
+    await page.getByRole('button', { name: '保存' }).click()
+
+    await page.reload()
+
+    await expect(page.locator('.pc-name')).toHaveText('小红')
+  })
+})

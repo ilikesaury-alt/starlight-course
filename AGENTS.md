@@ -157,6 +157,27 @@ npm run electron:build  # 打包 Windows NSIS 安装包（产物在 release/）
   - ❗**判定必须按位置不按文本**：`tight → t/igh/t`、`nine → n/i/n/e` 有重复块，只比文本的话孩子把第 3 位的 `t` 先点上去也算对。现在用 `usedPoolIdx`（已用块下标）+ 比对“下一个所需块”来判，e2e A7 盯着这条
   - 复用 `phonemeSegments` 的概念分类给积木配色/标签；星规复用 `quizStars`；错词回灌错题本与 SRS，`module='alphablocks'`（已加入 `ModuleId` 联合类型，不新增持久化字段，因此 **无需升 localStorage version**）
 
+## 孩子档案（`Profile`，store v9）
+
+应用此前是「一台电脑一份进度」，没有「这是谁在学」的概念。现在 store 有 `profile: Profile`（`id` / `name` / `avatar` / `createdAt`）。
+
+- **`profile` 永不为空**：结构上留了多档位（`id` 稳定为 `'main'`），但不做可选/可空 —— 否则每个页面都要写 `profile?.name` 判断。用 **`name` 为空串**表示「还没设置昵称」。⚠️ **绝不能填假名字**，否则界面无法区分「还没设置」和「就叫这个名字」
+- **不做首启强制引导**：孩子点开应用是想学英语，先拦一个「请输入昵称」纯属阻碍。未设置时档案卡显示「给自己起个名字吧」，不填照常学
+- **`resetAll` 保留档案**：重置的是「学习进度」，不是「这是谁」。把昵称一起抹掉会让界面退回未初始化状态
+- **档案是视图门槛，不是数据门槛**：`Home` 的标题在设置昵称后换成「{头像} {名字}，今天学点什么呢？」，未设置时**保持原文案不变**（`tests/home.spec.ts` 钉死这条 e2e 契约，别改坏）
+- **昵称截断到 12 字**（`updateProfile` 里截，`normalizeProfile` 里也截）
+- **头像用 emoji 不用图片文件**：零资源、任意缩放不糊、孩子自己挑一个（`PROFILE_AVATARS` 12 个）
+
+### ⚠️ `migrate` 只在版本号变化时跑 —— 所以有 `normalizeProfile` + `onRehydrateStorage`
+
+`persist` 的 `migrate` **只在 version 与当前不一致时才执行**。因此「同版本但字段残缺」的数据（手改过的 localStorage、被别的构建写过一半、备份导入、数据文件被外部编辑）**永远等不到迁移**。
+
+修法：把补齐逻辑抽成幂等的 `normalizeProfile(raw)`（逐字段兜底、保留有效值），**两处共用**：
+1. `migrate` 里（版本变化时）；
+2. `onRehydrateStorage` 里**无条件跑一次**（同版本残缺兜底），仅在真的变了才 `setState`（避免每次启动多写一次盘）。
+
+这个坑是**测试逼出来的**：`profile.test.ts` 有一条「profile 残缺时逐字段兜底」，用 version 9 的数据喂进去时失败 —— 因为版本相同、migrate 没跑。别把 `onRehydrateStorage` 那一段删掉。
+
 ## 数据落盘（`src/utils/storage.ts` + `electron/preload.cjs`）
 
 桌面版把整份学习数据写进 `userData/starlight-data.json`，磁盘上始终有一份。这是「数据主权」的核心（平台化 P0）。
@@ -181,12 +202,12 @@ npm run electron:build  # 打包 Windows NSIS 安装包（产物在 release/）
 - **导入是两段式**：`readBackupFile` 只解析不写状态，界面先展示摘要让用户确认，点「确认恢复」才 `applyBackup`。选错文件不会覆盖进度
 - **`applyBackup` 用合并语义**（`setState(data, false)`），不能 replace —— 否则 actions 被一起冲掉
 - 接受两种输入格式：本应用的备份信封（`{kind, schema, storeVersion, data}`）与 zustand persist 原始落盘格式（`{state, version}`）
-- **手动导出仍是当前唯一的数据保护手段**：卸载重装会清空 userData，自动落盘 / IPC 属平台化 P0 后半，尚未实现
+- **已有自动落盘托底**（见上节「数据落盘」）：桌面版进度写在 `userData/starlight-data.json`，导出/导入是「跨机器迁移 / 归档」的手段。但**卸载重装仍会清空 userData**，所以导出备份在换机/重装前依然必要
 
 ## File Structure
 ```
 src/
-├── components/     # Layout, SpeakButton, SafeBoundary + 跟读/框架卡/点读/拓展词录入 + BackupPanel(备份恢复)
+├── components/     # Layout, SpeakButton, SafeBoundary + 跟读/框架卡/点读/拓展词录入 + BackupPanel(备份恢复) + ProfileCard(孩子档案)
 ├── pages/         # page components (Home, LessonPreview, SmartReview, etc.)
 ├── hooks/         # useSettleQuiz(结算) / useSpeechRecognition(STT) / useSentenceReader(跟读编排)
 ├── data/          # 课程内容(starlight.ts, lessons.ts) + sentenceFrame.ts(句型框架) + extensionTopics.ts(拓展词主题库) + srs.ts / fsrsScheduler.ts

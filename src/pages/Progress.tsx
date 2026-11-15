@@ -15,6 +15,7 @@ import {
 import { moduleThemeVars } from '../utils/theme'
 import ConfirmDialog from '../components/ConfirmDialog'
 import BackupPanel from '../components/BackupPanel'
+import ProfileCard from '../components/ProfileCard'
 
 // 学习进度：每模块一栏带进度条（Starlight 两册各一栏 + 语文 / 英语3A / 两个绘本），
 // 点任意模块可直接跳转到对应课程首页，减少「看进度 → 回首页 → 找模块」的往返。
@@ -88,6 +89,9 @@ export default function Progress() {
           <h1 className="page-title">我的成长记录</h1>
         </div>
       </div>
+
+      {/* 档案放在最上面：这一页是「谁的成长记录」，先答「这是谁」。 */}
+      <ProfileCard />
 
       <div className="stats-grid">
         {stats.map((s, i) =>

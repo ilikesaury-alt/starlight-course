@@ -36,8 +36,62 @@ export interface WrongWord {
   module: ModuleId
 }
 
+/**
+ * 孩子档案（学习主体）。
+ *
+ * 为什么需要：应用此前是「一台电脑一份进度」，没有「这是谁在学」的概念 ——
+ * 家长的设置、孩子的成绩混在同一视图里，也没法做成长报告。
+ *
+ * 本阶段只支持**单档案**，但结构上留好位置：
+ * - `id` 是稳定标识，将来多档位时按它隔离数据，不必再改数据结构；
+ * - **不要**把它做成可选/可空 —— 空档案会让每个页面都要写 `profile?.name` 判断。
+ *   用「`name` 为空串 = 还没设置昵称」表达未初始化状态。
+ */
+export interface Profile {
+  /** 稳定 id：当前只有 'main'，预留多档位 */
+  id: string
+  /** 昵称。空串 = 还没设置（首启引导会请孩子填） */
+  name: string
+  /** 头像 emoji（不用图片文件：零资源、任意缩放不糊、孩子自己挑一个） */
+  avatar: string
+  /** 建立档案的日期戳（dayStamp），将来算「学龄」用 */
+  createdAt: number
+}
+
+/** 未设置昵称时的默认档案 */
+export function defaultProfile(): Profile {
+  return { id: 'main', name: '', avatar: '🐣', createdAt: dayStamp() }
+}
+
+/**
+ * 把任意来源的档案补齐成完整形状（逐字段兜底，保留有效值）。
+ *
+ * 为什么不能只靠 persist 的 `migrate`：**migrate 只在版本号变化时才跑**。
+ * 所以「同版本但字段残缺」的数据（手改过的 localStorage、被别的构建写过一半、
+ * 或将来某个新增字段在旧同版本数据里不存在）永远等不到迁移。这里提供一个
+ * 幂等的规范化入口，由 rehydrate 后无条件调用一次（见 normalizeState）。
+ */
+export function normalizeProfile(raw: unknown): Profile {
+  const p = (raw ?? {}) as Partial<Profile>
+  return {
+    id: typeof p.id === 'string' && p.id ? p.id : 'main',
+    // ⚠️ 不能填假名字：空串才是「还没设置」的唯一表示
+    name: typeof p.name === 'string' ? p.name.slice(0, 12) : '',
+    avatar:
+      typeof p.avatar === 'string' && PROFILE_AVATARS.includes(p.avatar)
+        ? p.avatar
+        : defaultProfile().avatar,
+    createdAt: typeof p.createdAt === 'number' ? p.createdAt : dayStamp(),
+  }
+}
+
+/** 可选头像：够挑、不至于挑花眼 */
+export const PROFILE_AVATARS = ['🐣', '🐱', '🐶', '🐼', '🦊', '🐰', '🐨', '🦁', '🐯', '🐸', '🦄', '🚀']
+
 interface CourseStore {
   // 状态
+  /** 孩子档案。永不为空 —— 未设置昵称时 name 为空串（见 defaultProfile） */
+  profile: Profile
   wrongWords: WrongWord[]
   totalStars: number
   completedPreviews: string[]
@@ -104,6 +158,9 @@ interface CourseStore {
   markChineseDone: (slug: string) => void
   /** 标记英语3A 某课已学完(自测 ≥80% 自动触发 / 手动按钮触发) */
   markEng3aDone: (slug: string) => void
+  /** 更新孩子档案（昵称 / 头像）。只合并传入的字段，不清空其它。 */
+  updateProfile: (patch: Partial<Omit<Profile, 'id' | 'createdAt'>>) => void
+  /** 清空学习数据。**保留档案** —— 档案不是学习数据，重置进度不该把孩子名字也抹了。 */
   resetAll: () => void
 
   // SRS 智能复习相关
@@ -135,6 +192,7 @@ interface CourseStore {
 export const useCourseStore = create<CourseStore>()(
   persist(
     (set, get) => ({
+      profile: defaultProfile(),
       wrongWords: [],
       totalStars: 0,
       completedPreviews: [],
@@ -266,8 +324,23 @@ export const useCourseStore = create<CourseStore>()(
             : { completedEng3a: [...s.completedEng3a, slug] }
         ),
 
+      updateProfile: (patch) =>
+        set((s) => ({
+          // id / createdAt 不允许被外部改动（不在 patch 的类型里），
+          // name 去首尾空白并截断 —— 昵称不该是一串空格或 200 字
+          profile: {
+            ...s.profile,
+            ...patch,
+            name: patch.name !== undefined ? patch.name.trim().slice(0, 12) : s.profile.name,
+            avatar: patch.avatar !== undefined ? patch.avatar : s.profile.avatar,
+          },
+        })),
+
       resetAll: () =>
-        set({
+        set((s) => ({
+          // ⚠️ 不动 profile：重置的是「学习进度」，不是「这是谁」。
+          // 把孩子的昵称一起抹掉会让重置后的界面退回未初始化状态，是更糟的体验。
+          profile: s.profile,
           wrongWords: [],
           totalStars: 0,
           completedPreviews: [],
@@ -283,7 +356,7 @@ export const useCourseStore = create<CourseStore>()(
           eng3aQuiz: {},
           completedChinese: [],
           completedEng3a: [],
-        }),
+        })),
 
       // ============ SRS ============
       seedCard: (en, module) =>
@@ -483,9 +556,11 @@ export const useCourseStore = create<CourseStore>()(
     }),
     {
       name: 'starlight-course',
-      version: 8,
+      // v9: 新增 profile（孩子档案）。字段只增不改语义，迁移只需补默认值。
+      version: 9,
       // 只持久化数据字段,避免函数/瞬态状态被写入 localStorage
       partialize: (state) => ({
+        profile: state.profile,
         wrongWords: state.wrongWords,
         totalStars: state.totalStars,
         completedPreviews: state.completedPreviews,
@@ -567,8 +642,13 @@ export const useCourseStore = create<CourseStore>()(
           if (prev.length >= lessons.length) continue
           lessonCompleted[slug] = [...new Set([...prev, ...lessons.map((l) => l.id)])]
         }
+        // v9:补孩子档案。旧数据没有这个字段 ⇒ 给默认档案（name 为空串，
+        // 首启会提示孩子填昵称）。规范化逻辑与 normalizeProfile 共用一份，
+        // 避免「迁移链」和「同版本兜底」两处写法分叉。
+        const profile = normalizeProfile((s as { profile?: unknown }).profile)
         return {
           ...s,
+          profile,
           srsCards,
           starlightExtensions: s.starlightExtensions ?? {},
           // v8:补自动填充轮次标记(缺省 = 从未自动填充过,进课时空词表才会自动填一次)
@@ -580,6 +660,21 @@ export const useCourseStore = create<CourseStore>()(
           completedChinese: s.completedChinese ?? [],
           completedEng3a: s.completedEng3a ?? [],
         } as CourseStore
+      },
+      /**
+       * 水合后无条件规范化。
+       *
+       * `migrate` 只在版本号变化时跑，所以「同版本但字段残缺」的数据等不到迁移
+       * （手改过 localStorage / 写到一半 / 备份导入 / 数据文件被外部编辑）。
+       * 这里每次水合都跑一次幂等的兜底，只补不删 —— 有效值一律保留。
+       */
+      onRehydrateStorage: () => (state) => {
+        if (!state) return
+        const fixed = normalizeProfile(state.profile)
+        // 只在真的需要时 setState，避免每次启动都触发一次多余写盘
+        if (JSON.stringify(fixed) !== JSON.stringify(state.profile)) {
+          useCourseStore.setState({ profile: fixed })
+        }
       },
     }
   )
