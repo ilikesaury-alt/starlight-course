@@ -157,6 +157,31 @@ npm run electron:build  # 打包 Windows NSIS 安装包（产物在 release/）
   - ❗**判定必须按位置不按文本**：`tight → t/igh/t`、`nine → n/i/n/e` 有重复块，只比文本的话孩子把第 3 位的 `t` 先点上去也算对。现在用 `usedPoolIdx`（已用块下标）+ 比对“下一个所需块”来判，e2e A7 盯着这条
   - 复用 `phonemeSegments` 的概念分类给积木配色/标签；星规复用 `quizStars`；错词回灌错题本与 SRS，`module='alphablocks'`（已加入 `ModuleId` 联合类型，不新增持久化字段，因此 **无需升 localStorage version**）
 
+## 首页结构（`styles/_hall.scss` + `components/CourseEntries.tsx`，2026-11-16 重设计）
+
+**主课优先 + 卡片化**（Lichun 定）。旧版问题（实测）：`home-entries` 是 2 列等宽栅格，8 张卡片**全是 474×177px 等高** —— 语文/英语/主课/RG/FlyGuy/听写/积木/阅读全部平级，视觉上分不出「主课」和「听写练习」，首屏滚很久看不完。
+
+新结构**三档**（层次 = 决策依据）：
+| 分区 | 版式 | 实测尺寸 |
+|---|---|---|
+| `.hall-main` 主课 | Starlight 全宽 + 语文/英语并排 | 961 / 474px 宽，135px 高 |
+| `.hall-reading` 阅读 | 3 列 | 312px 宽，132px 高 |
+| `.hall-tools` 练习 | 4 列紧凑条 | 233px 宽，95px 高 |
+
+### ⚠️ 三个必须知道的坑（都实测踩过）
+
+1. **`@mixin home-entry` 是 `flex-direction: column`**。只写 `.hall-card { display:flex }` 不覆盖方向 ⇒ emoji 和文字纵向堆叠，卡片从 116px 撑到 **245px**。必须用 `.home-entries.hall .hall-card`（0,3,0）压过单类选择器
+2. **文案是 e2e 契约，排版调整不能顺手改**。我一度把「Starlight 主课 · 预备级」改成「Starlight · 预备级」、把「Rocket Girl 阅读」缩成「Rocket Girl」⇒ 3 条 e2e 立刻红。现有断言：`Starlight 主课`(home.spec×2, eng3a.spec)、`Rocket Girl 阅读`(rocketgirl-reading.spec)、`听写练习`、`字母积木`、`阅读小故事`(reading.spec×2)
+3. **`.home-entries > a:last-child:nth-child(odd)` 等旧选择器仍被引用**，`.home-entries` 容器本身保留，内部改分区
+
+### 其它口径
+
+- **所有 e2e class 锚点一个都不能改名**：`.cn-home-entry` `.en3-home-entry` `.sl-home-entry` `.rg-home-entry` `.fg-home-entry` `.dt-home-entry` `.ab-home-entry` `.rd-home-entry` `.rd1-home-entry`
+- **首页在 ≥900px 从「左 hero / 右清单」两栏改成单列纵向流**。旧两栏是给三段文案的 hero 配的（文案高，右栏填空洞）；hero 收薄到 82px 后并排只剩反效果 —— 实测主课区被推到首屏下方 589px
+- **今日清单在 ≥900px 三列并排**（350px → 212px），把主课从 657px 提到 519px。窄屏保持纵向（横排会把文字压成两三个字）
+- `.hero--hall` 只作用于首页；`.hero-sub` 被 BookHome / StoryHome / Eng3aHome 共用，**样式不能删**
+- 进度环 `.hall-ring` 是纯 SVG（零资源），比进度条更有「到哪了」的到达感；`data-tone` 区分模块色
+
 ## 每日节律（`data/dailyPlan.ts` + `components/TodayTasks.tsx`，store v10）
 
 **方案 C「混合封顶」**（2026-11-16 Lichun 定）：`今日 = min(到期复习卡, 40) + 1 节新课 + 1 篇阅读`。

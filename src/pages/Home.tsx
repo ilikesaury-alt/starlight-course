@@ -10,8 +10,14 @@ export default function Home() {
 
   return (
     <div className="home home--workbench">
-      {/* 首页第一屏：一个标题 + 一句说明。看五秒就知道是什么、给谁用、下一步做什么。 */}
-      <section className="hero">
+      {/* 首页第一屏：一句问候 + 一行范围说明。
+          ⚠️ 2026-11-16 重设计后**刻意做薄**：旧版是三段文案（标题 + 功能列表 +
+          教材清单），占了首屏 193px 高，但没有一处指向「现在该做什么」。
+          卡片化之后首屏要留给「今日清单 + 主课」，文案退成一行副标题。
+
+          hero-title 保留原样（未设昵称时仍是「课前预习 · 课后复习」）——
+          tests/home.spec.ts 用它做锚点，且设昵称后换成孩子名字是明确的产品契约。 */}
+      <section className="hero hero--hall">
         <h1 className="hero-title">
           {named ? (
             <>
@@ -21,9 +27,6 @@ export default function Home() {
             '课前预习 · 课后复习'
           )}
         </h1>
-        <p className="hero-sub">
-          配合校内课程与一对一外教课，每本教材都有 <b>预习导学</b>、<b>单词卡</b>、<b>句型对话</b>、<b>互动测验</b>。
-        </p>
         <p className="hero-scope">
           牛津 Starlight 预备级 + 第一册 · 人教版语文 · 外研版英语 · Fly Guy 绘本 · Rocket Girl 阅读
         </p>

@@ -11,6 +11,9 @@
 @use 'styles/base';
 @use 'styles/components';
 @use 'styles/home';
+// 首页「门厅」结构（主课优先 + 卡片化）。必须在 home / theme 之后 ——
+// 它按分区覆盖 .home-entries 的旧等高栅格与 home-entry mixin 的默认排版。
+@use 'styles/hall';
 @use 'styles/study';
 @use 'styles/smart';
 @use 'styles/theme';

@@ -1,0 +1,424 @@
+// ============================================================
+//  首页「门厅」结构 —— 主课优先 + 卡片化（2026-11-16 重设计）
+//  ------------------------------------------------------------
+//  三档层次，解决「8 张等高卡平铺、分不出主次」：
+//    ① .hall-main    主课大卡（2 列）—— 真正要「学」的三门
+//    ② .hall-reading 阅读中卡（3 列）—— 自选拓展
+//    ③ .hall-tools   练习紧凑条（4 列）—— 工具性质，不占大块
+//
+//  视觉规则沿用项目既有的 tasteskill · pastel-consumer：
+//  **浅色调底 + 同色系深字 + 一根满色条**；无渐变、无常驻阴影、满色只做小面积标记。
+//  新增的「卡片化」手段只有三个，都很克制：
+//    · 大 emoji 字标（.hall-card-glyph）当视觉锚点，不用图片资源
+//    · 进度环（.hall-ring）—— 比进度条更有"到哪了"的到达感
+//    · 字号跳到 3 档（主课标题 / 分区标题 / 说明），明确层级
+//
+//  ⚠️ 这一层**只加类，不改名**：`.home-entries > a` / `.sl-home-entry` 等
+//  原有锚点全部保留（e2e 靠它们定位）。旧样式里的等高规则被这里按分区覆盖。
+// ============================================================
+
+// ---------- 今日清单在大屏收横向 ----------
+// 3 行纵向占 350px，把「主课」挤出首屏。大屏空间横向富余，改成 3 列并排：
+// 清单还是那个清单（三件衣服挂一排，不是叠成三层），纵向只占 ~100px。
+// ⚠️ 只在大屏做（<900px 保持纵向），窄屏横排会让每行文字被压成两三个字。
+@media (min-width: 900px) {
+  .today-card {
+    // 头部 + 三列行区：用 grid 让行进列，head 独占第一行
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    align-items: stretch;
+    > .today-head { grid-column: 1 / -1; }
+    > .today-done { grid-column: 1 / -1; }
+    > .today-row {
+      margin-top: 0;
+      align-items: flex-start;
+      padding: 12px 13px;
+      // 横排后行更窄：说明文字换行，行高由内容撑开（约 110~130px）
+    }
+    > .today-row .today-label {
+      white-space: normal;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+  }
+}
+
+// ---------- Hero 收薄 ----------
+// 旧版占 193px（标题 + 功能列表 + 教材清单三段），首屏被文案吃掉大半。
+// 卡片化后首屏要留给「今日清单 + 主课」，这里压到 ~80px。
+// ⚠️ 只作用于首页（.hero--hall）；其它页面的 .hero-sub 保持原样。
+.hero--hall {
+  padding: 14px 0 16px;
+  max-width: none;
+  .hero-title {
+    margin: 0 0 6px;
+    font-size: clamp(21px, 1.9vw, 26px);
+  }
+  .hero-scope {
+    margin: 0;
+    font-size: var(--fs-sm);
+    color: var(--ink-mute);
+    line-height: 1.55;
+  }
+}
+
+// ---------- 首页整体改为单列纵向流 ----------
+// 旧版在 ≥900px 时把首页切成「左 hero（398px）/ 右 今日清单（539px）」两栏。
+// 那是为**三段文案的 hero** 配的：文案很高，右栏任务卡用来填它的空洞。
+// 现在 hero 收薄到 104px，并排就只剩反效果 —— 实测主课区被推到首屏下方 589px 处，
+// 打开首页先看到两块并排的东西，看不到"主课"。
+//
+// 新顺序（一条纵向流，首屏就是「今天做什么 + 主课」）：
+//   ① hero（薄）
+//   ② 今日清单（全宽，3 行）
+//   ③ 册次切换
+//   ④ 主课 → 阅读 → 练习（三档）
+.home--workbench {
+  display: flex;
+  flex-direction: column;
+}
+// 覆盖 ≥900px 的旧两栏规则（特异性压过 .home--workbench > .hero 等）
+.home.home--workbench {
+  > .hero--hall { order: 0; }
+  > .today-card { order: 1; margin-top: 0; }
+  > .section-title { order: 2; }
+  > .sl-level-block { order: 3; }
+  > .home-entries { order: 4; }
+  > .quick-row { order: 5; }
+}
+@media (min-width: 900px) {
+  .home.home--workbench {
+    grid-template-columns: none;
+    > .hero,
+    > .today-card,
+    > .section-title,
+    > .sl-level-block,
+    > .home-entries,
+    > .quick-row {
+      grid-column: auto;
+      grid-row: auto;
+    }
+    // 今日清单里的三行在大屏可以并排（省纵向空间，也不失"清单"的完整感）
+    > .today-card .today-row { margin-top: 10px; }
+  }
+}
+
+.home-entries.hall {
+  display: block; // 旧版是 2 列 grid；这里改成纵向分区，由内部各自栅格
+  margin-top: 4px;
+}
+
+.hall-section { margin-bottom: 26px; }
+.hall-section:last-child { margin-bottom: 0; }
+
+.hall-heading {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0 0 12px;
+  font-size: var(--fs-lg);
+  font-weight: 800;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+.hall-heading-emoji { font-size: 18px; line-height: 1; }
+.hall-heading-note {
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  color: var(--ink-mute);
+  margin-left: 2px;
+}
+
+// ---------- 卡片基座 ----------
+// 三层版式共用一个底座，只靠 --card-* 变量区分尺寸与色调。
+//
+// ⚠️ 特异性必须压过 @mixin home-entry 生成的 `.<prefix>-entry { flex-direction: column }`。
+// `.hall-card` 是单类（0,1,0），而 `.sl-home-entry` 也是单类 —— 后加载者胜，
+// 但 _theme.scss 的 mixin 在 _hall.scss 之前 @use，且 mixin 内选择器在同一层，
+// 实测单写 `.hall-card` 会被 `column` 吃掉（卡片从 116px 撑到 245px）。
+// 用 `.home-entries.hall .hall-card`（0,3,0）稳定压过它。
+.home-entries.hall .hall-card {
+  position: relative;
+  display: flex;
+  // ⚠️ 必须显式声明横向：旧的 @mixin home-entry 里是 `flex-direction: column`，
+  // 不写就被继承成纵向堆叠（emoji 在上、文字在下），卡片会从 116px 撑到 245px。
+  // 这个坑实测踩过一次 —— 只加 .hall-card 而不覆盖方向是不够的。
+  flex-direction: row;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 18px 16px 22px;
+  border-radius: var(--r-lg);
+  text-decoration: none;
+  color: var(--ink);
+  overflow: hidden;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 1px 2px rgba(16, 40, 60, 0.04);
+  &:active { transform: scale(0.985); }
+  &:hover { box-shadow: 0 4px 14px rgba(16, 40, 60, 0.08); }
+
+  // 满色条：模块身份标记（沿用既有规则，只是加宽到 5px 让大卡更有"脊"）
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 5px;
+    background: var(--hall-hue, var(--brand));
+  }
+}
+
+// 大 emoji 字标：卡片化最有效的一招 —— 不用图片，一眼认出是哪个模块
+.hall-card-glyph {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  font-size: 30px;
+  line-height: 1;
+  border-radius: var(--r-md);
+  background: rgba(255, 255, 255, 0.62);
+}
+
+.hall-card-body { flex: 1; min-width: 0; }
+
+.hall-card-foot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+.hall-card-go {
+  font-size: var(--fs-sm);
+  font-weight: 800;
+  color: var(--hall-ink, var(--brand-deep));
+  opacity: 0.85;
+}
+.hall-due {
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  color: var(--no-deep);
+  background: rgba(255, 255, 255, 0.82);
+  padding: 2px 8px;
+  border-radius: var(--r-pill);
+}
+
+// ---------- ① 主课大卡 ----------
+.hall-main {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+@media (min-width: 760px) {
+  .hall-main { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  // Starlight 是主课中的主课 —— 大屏上横跨两列，视觉上坐头把交椅
+  .hall-card--main.sl-home-entry { grid-column: 1 / -1; }
+}
+
+.hall-card--main {
+  min-height: 116px;
+  align-items: center;
+  // 标题放大到 fs-2xl（比旧版 fs-lg 大两档）—— 主课的标题就该压得住画面
+  .sl-home-title,
+  .cn-home-title,
+  .en3-home-title {
+    font-size: var(--fs-xl);
+    font-weight: 800;
+    line-height: 1.25;
+    margin: 0 0 4px;
+    color: var(--hall-ink, var(--ink));
+    white-space: normal;
+  }
+  .sl-home-sub,
+  .cn-home-sub,
+  .en3-home-sub {
+    font-size: var(--fs-sm);
+    line-height: 1.5;
+    color: var(--hall-ink, var(--ink));
+    opacity: 0.78;
+    min-height: 0; // 旧规则强制 2.9em 高；大卡不需要（有页脚撑开）
+    white-space: normal;
+  }
+}
+
+// 模块色调（沿用既有 pastel 体系，只补齐 --hall-* 两个变量）
+.sl-home-entry.hall-card {
+  background: var(--amber-soft, #fef3c7);
+  --hall-hue: var(--amber, #f59e0b);
+  --hall-ink: var(--amber-deep, #92400e);
+}
+.cn-home-entry.hall-card {
+  background: var(--no-soft, #ffe4e6);
+  --hall-hue: var(--no, #ef4444);
+  --hall-ink: var(--no-deep, #991b1b);
+}
+.en3-home-entry.hall-card {
+  background: #dbeafe;
+  --hall-hue: #2563eb;
+  --hall-ink: #1e3a8a;
+}
+.rd-home-entry.hall-card {
+  background: #e0e7ff;
+  --hall-hue: #6366f1;
+  --hall-ink: #312e81;
+}
+.rg-home-entry.hall-card {
+  background: var(--grape-soft, #f3e8ff);
+  --hall-hue: var(--grape, #a855f7);
+  --hall-ink: var(--grape-deep, #4a1875);
+}
+.fg-home-entry.hall-card {
+  background: var(--green-soft, #d1fae5);
+  --hall-hue: var(--green, #34d399);
+  --hall-ink: var(--green-deep, #065f46);
+}
+
+// ---------- ② 阅读中卡 ----------
+.hall-reading {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+@media (min-width: 620px) {
+  .hall-reading { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+.hall-card--read {
+  flex-direction: column;
+  gap: 8px;
+  min-height: 132px;
+  padding: 16px 16px 14px 20px;
+  .hall-card-glyph { width: 40px; height: 40px; font-size: 22px; }
+  .rd-home-title,
+  .rg-home-title,
+  .fg-home-title {
+    font-size: var(--fs-md);
+    font-weight: 800;
+    margin: 0 0 2px;
+    color: var(--hall-ink, var(--ink));
+  }
+  .rd-home-sub,
+  .rg-home-sub,
+  .fg-home-sub {
+    font-size: var(--fs-xs);
+    line-height: 1.45;
+    color: var(--hall-ink, var(--ink));
+    opacity: 0.78;
+    min-height: 0;
+    white-space: normal;
+  }
+  .hall-card-glyph { align-self: flex-start; }
+}
+
+// ---------- ③ 练习紧凑条 ----------
+// 工具不该占大块：压到 62px 高、横排 4 列，一眼扫完
+.hall-tools {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+@media (min-width: 760px) {
+  .hall-tools { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+// ⚠️ 同 .hall-card：dt-home-entry / ab-home-entry 也被 mixin 设成 column，
+// 必须用更高特异性压回横排（否则 58px 的工具条会撑到 129px）。
+.home-entries.hall .hall-tool {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  min-height: 58px;
+  border-radius: var(--r-md);
+  background: var(--card);
+  border: 1px solid var(--line);
+  text-decoration: none;
+  color: var(--ink);
+  transition: transform 0.15s ease, border-color 0.15s ease;
+  &:active { transform: scale(0.985); }
+  &:hover { border-color: var(--brand); }
+
+  // 带主题色的工具（听写/积木）用浅底 + 左细条，与纯工具（字母表/进度）区分
+  &.dt-home-entry,
+  &.ab-home-entry {
+    background: var(--hall-tool-bg, var(--card));
+    border-left: 4px solid var(--hall-tool-hue, var(--line));
+  }
+}
+.dt-home-entry { --hall-tool-bg: #ccfbf1; --hall-tool-hue: #0d9488; }
+.ab-home-entry { --hall-tool-bg: #ffedd5; --hall-tool-hue: #ea580c; }
+
+.hall-tool-emoji { font-size: 20px; line-height: 1; flex-shrink: 0; }
+.hall-tool-body { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.dt-home-title,
+.ab-home-title,
+.hall-tool-title {
+  font-size: var(--fs-sm);
+  font-weight: 800;
+  line-height: 1.3;
+}
+.dt-home-sub,
+.ab-home-sub,
+.hall-tool-sub {
+  font-size: 11px;
+  line-height: 1.35;
+  color: var(--ink-soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hall-tool--plain svg { flex-shrink: 0; color: var(--brand-deep); }
+
+// ---------- 进度环 ----------
+// 比进度条更有"到达感"：环形 + 百分比居中。纯 SVG，零资源。
+.hall-ring {
+  position: relative;
+  flex-shrink: 0;
+  width: 46px;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+}
+.hall-ring svg { position: absolute; inset: 0; }
+.hall-ring-track {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.78);
+  stroke-width: 3.4;
+}
+.hall-ring-fill {
+  fill: none;
+  stroke: var(--hall-hue, var(--brand));
+  stroke-width: 3.4;
+  stroke-linecap: round;
+  transition: stroke-dasharray 0.5s ease;
+}
+.hall-ring-text {
+  position: relative;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--hall-ink, var(--brand-deep));
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.hall-ring[data-tone='rose'] { --hall-hue: var(--no, #ef4444); --hall-ink: var(--no-deep, #991b1b); }
+.hall-ring[data-tone='blue'] { --hall-hue: #2563eb; --hall-ink: #1e3a8a; }
+.hall-ring[data-tone='amber'] { --hall-hue: var(--amber, #f59e0b); --hall-ink: var(--amber-deep, #92400e); }
+.hall-ring[data-tone='green'] { --hall-hue: var(--green, #34d399); --hall-ink: var(--green-deep, #065f46); }
+
+// ---------- 窄屏收敛 ----------
+@media (max-width: 620px) {
+  .hall-card--main { min-height: 104px; padding: 16px 16px 14px 20px; }
+  .hall-card-glyph { width: 44px; height: 44px; font-size: 26px; }
+  .hall-card--main .sl-home-title,
+  .hall-card--main .cn-home-title,
+  .hall-card--main .en3-home-title { font-size: var(--fs-lg); }
+  .hall-ring { width: 40px; height: 40px; }
+  .hall-heading-note { display: none; } // 窄屏靠标题本身表达，不挤说明
+}
