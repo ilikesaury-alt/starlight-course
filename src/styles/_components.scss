@@ -56,6 +56,48 @@
 }
 .brand-text { color: var(--ink); }
 
+// 家长模式开关：顶栏右侧角落，**刻意做小、做安静**。
+// 它不该和主导航抢注意力 —— 那是孩子每天要点的四个位置，这是家长的抽屉。
+// 排布靠 header 的 space-between：brand | nav | mode-toggle 三段。
+// 窄屏 .app-nav 是 display:none（不占位），锁自动落到最右 —— 不需要 margin-left:auto。
+.mode-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+  padding: 6px 11px;
+  min-height: 32px;
+  font-family: inherit;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--ink-mute);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--r-pill);
+  transition: var(--ease);
+  opacity: 0.55;
+  &:hover {
+    opacity: 1;
+    background: var(--bg-3);
+    color: var(--ink-soft);
+  }
+  &:active { transform: scale(0.96); }
+  // 家长模式是「打开抽屉」的状态，必须显眼 —— 家长做完设置要记得切回去
+  &.is-parent {
+    opacity: 1;
+    color: var(--brand-deep);
+    background: var(--brand-soft);
+    border-color: var(--brand);
+    font-weight: 700;
+  }
+}
+.mode-toggle-text { white-space: nowrap; }
+// 窄屏：只留图标，给底部导航让位（顶栏本来就窄）
+@media (max-width: 640px) {
+  .mode-toggle-text { display: none; }
+}
+
 // 顶栏导航（桌面）：字标 + 几个朴素链接
 .app-nav { display: none; }
 .app-nav-link {

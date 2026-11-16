@@ -1,5 +1,6 @@
 import { Link, NavLink } from 'react-router-dom'
-import { House, BookOpen, Type, ChartColumn, Sparkles } from 'lucide-react'
+import { House, BookOpen, Type, ChartColumn, Sparkles, Lock, Unlock } from 'lucide-react'
+import { useViewMode } from '@/hooks/useViewMode'
 
 // 主导航项（桌面：顶栏横排；窄屏：底部图标栏）
 const navItems = [
@@ -10,8 +11,14 @@ const navItems = [
 ]
 
 export default function Layout({ children }: { children: React.ReactNode }) {
+  // 「孩子 / 家长」模式。默认孩子模式；切换入口是顶栏右侧角落的小锁 ——
+  // 不放进主导航：那是孩子每天要点的四个位置，塞一个家长开关进去会稀释它。
+  // 也不做密码：这是产品分层不是安全边界（详见 data/viewMode.ts 头注释）。
+  const [mode, setMode] = useViewMode()
+  const isParent = mode === 'parent'
+
   return (
-    <div className="app">
+    <div className="app" data-mode={mode}>
       {/* 顶栏：品牌字标 + 主导航（桌面）；窄屏只留字标，导航移到底部 */}
       <header className="app-header">
         <Link to="/" className="brand">
@@ -20,6 +27,22 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </span>
           <span className="brand-text">Starlight 学习伙伴</span>
         </Link>
+
+        {/* 家长模式标记 + 角落切换：家长模式开着时给一条明确的横幅，
+            免得家长做完设置忘了切回去，孩子下次打开看到的是家长界面。 */}
+        <button
+          type="button"
+          className={'mode-toggle' + (isParent ? ' is-parent' : '')}
+          onClick={() => setMode(isParent ? 'kid' : 'parent')}
+          title={isParent ? '回到孩子模式' : '家长设置'}
+          aria-label={isParent ? '回到孩子模式' : '进入家长模式'}
+          aria-pressed={isParent}
+        >
+          {isParent ? <Unlock size={15} strokeWidth={2.1} /> : <Lock size={15} strokeWidth={2.1} />}
+          {/* 孩子模式下只说「家长」两个字（小、安静），进去后变成明确的「退出家长」，
+              让家长一眼知道当前在哪个模式、怎么回去。 */}
+          <span className="mode-toggle-text">{isParent ? '退出家长' : '家长'}</span>
+        </button>
 
         <nav className="app-nav" aria-label="主导航">
           {navItems.map((item) => (

@@ -16,6 +16,7 @@ import { moduleThemeVars } from '../utils/theme'
 import ConfirmDialog from '../components/ConfirmDialog'
 import BackupPanel from '../components/BackupPanel'
 import ProfileCard from '../components/ProfileCard'
+import { useIsParent } from '../hooks/useViewMode'
 
 // 学习进度：每模块一栏带进度条（Starlight 两册各一栏 + 语文 / 英语3A / 两个绘本），
 // 点任意模块可直接跳转到对应课程首页，减少「看进度 → 回首页 → 找模块」的往返。
@@ -32,6 +33,8 @@ export default function Progress() {
   const todayDue = useCourseStore((s) => s.getTodayDueCount())
   const resetAll = useCourseStore((s) => s.resetAll)
   const [showReset, setShowReset] = useState(false)
+  // 家长模式才渲染档案编辑 / 备份 / 重置（见页面底部注释）
+  const isParent = useIsParent()
 
   const chineseRecited = Object.keys(reciteCheckins).filter((k) => (reciteCheckins[k]?.length ?? 0) > 0).length
   const eng3aRead = Object.keys(eng3aRecite).filter((k) => (eng3aRecite[k]?.length ?? 0) > 0).length
@@ -90,8 +93,9 @@ export default function Progress() {
         </div>
       </div>
 
-      {/* 档案放在最上面：这一页是「谁的成长记录」，先答「这是谁」。 */}
-      <ProfileCard />
+      {/* 档案放在最上面：这一页是「谁的成长记录」，先答「这是谁」。
+          孩子模式只显示（看得到自己的头像和名字），编辑入口收进家长模式。 */}
+      <ProfileCard editable={isParent} />
 
       <div className="stats-grid">
         {stats.map((s, i) =>
@@ -142,30 +146,39 @@ export default function Progress() {
         })}
       </div>
 
-      {/* 数据备份：放在「重置」上方且同屏可见 —— 这里正是最容易手滑的地方，
-          备份入口必须紧挨着它，而不是藏进设置页。 */}
-      <BackupPanel />
+      {/* ⚠️ 数据备份 + 重置只给家长模式。
+          孩子模式下这两块整段不渲染 —— 不是「藏起来」，是根本不在 DOM 里
+          （藏起来仍能被点到、被 Tab 聚焦）。孩子不该看到「清空全部进度」这种按钮。 */}
+      {isParent && (
+        <>
+          {/* 数据备份：放在「重置」上方且同屏可见 —— 这里正是最容易手滑的地方，
+              备份入口必须紧挨着它，而不是再藏一层。 */}
+          <BackupPanel />
 
-      <div style={{ textAlign: 'center', marginTop: '24px' }}>
-        <button type="button" className="btn btn--soft" onClick={() => setShowReset(true)}>
-          🔄 重置全部数据
-        </button>
-      </div>
+          <div style={{ textAlign: 'center', marginTop: '24px' }}>
+            <button type="button" className="btn btn--soft" onClick={() => setShowReset(true)}>
+              🔄 重置全部数据
+            </button>
+          </div>
+        </>
+      )}
 
-      <ConfirmDialog
-        open={showReset}
-        emoji="🔄"
-        title="确定重置所有进度吗？"
-        message="星星、单词、错题和学习记录都会清空，而且找不回来哦。建议先在上面「导出备份」再重置。"
-        confirmText="全部清空"
-        cancelText="再想想"
-        danger
-        onConfirm={() => {
-          resetAll()
-          setShowReset(false)
-        }}
-        onCancel={() => setShowReset(false)}
-      />
+      {isParent && (
+        <ConfirmDialog
+          open={showReset}
+          emoji="🔄"
+          title="确定重置所有进度吗？"
+          message="星星、单词、错题和学习记录都会清空，而且找不回来哦。建议先在上面「导出备份」再重置。"
+          confirmText="全部清空"
+          cancelText="再想想"
+          danger
+          onConfirm={() => {
+            resetAll()
+            setShowReset(false)
+          }}
+          onCancel={() => setShowReset(false)}
+        />
+      )}
 
       <div className="page-nav">
         <Link to="/" className="back-link">← 返回首页</Link>

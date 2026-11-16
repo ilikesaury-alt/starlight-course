@@ -12,7 +12,11 @@
 import { useState } from 'react'
 import { PROFILE_AVATARS, useCourseStore } from '@/store/useCourseStore'
 
-export default function ProfileCard() {
+/**
+ * @param editable 是否允许改昵称 / 头像。孩子模式传 false —— 孩子看得到自己的
+ *   头像和名字（那是他的成就），但「改档案」是家长的事，不该出现在孩子路径上。
+ */
+export default function ProfileCard({ editable = false }: { editable?: boolean }) {
   const profile = useCourseStore((s) => s.profile)
   const updateProfile = useCourseStore((s) => s.updateProfile)
 
@@ -96,7 +100,9 @@ export default function ProfileCard() {
         )}
       </div>
 
-      {!editing && (
+      {/* 只有家长模式给编辑入口。孩子模式下这一页仍显示头像+名字（那是他的），
+          但没有「改」按钮 —— 不是禁用，是不渲染。 */}
+      {editable && !editing && (
         <button type="button" className="pc-edit-btn" onClick={open}>
           {named ? '改' : '设置'}
         </button>

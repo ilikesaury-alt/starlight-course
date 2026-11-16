@@ -157,6 +157,18 @@ npm run electron:build  # 打包 Windows NSIS 安装包（产物在 release/）
   - ❗**判定必须按位置不按文本**：`tight → t/igh/t`、`nine → n/i/n/e` 有重复块，只比文本的话孩子把第 3 位的 `t` 先点上去也算对。现在用 `usedPoolIdx`（已用块下标）+ 比对“下一个所需块”来判，e2e A7 盯着这条
   - 复用 `phonemeSegments` 的概念分类给积木配色/标签；星规复用 `quizStars`；错词回灌错题本与 SRS，`module='alphablocks'`（已加入 `ModuleId` 联合类型，不新增持久化字段，因此 **无需升 localStorage version**）
 
+## 孩子 / 家长模式（`data/viewMode.ts` + `hooks/useViewMode.ts`）
+
+产品口径（2026-11-16 Lichun 定，**C 方案：完全分开的入口，家长模式藏在角落**）。此前孩子和家长看同一套界面 —— 「重置全部数据」「导出备份」「改档案」就摆在孩子点得到的地方。
+
+- **默认孩子模式**。默认值是最重要的产品决定：家长打开少看几块，孩子打开看到的全是他能用的
+- **切换入口是顶栏右侧的小锁**（`.mode-toggle`），**不进主导航** —— 那是孩子每天要点的四个位置，塞个家长开关进去会稀释它。窄屏只留图标
+- **孩子模式下破坏性操作整块不渲染**（不在 DOM 里），不是 CSS 隐藏 —— 藏起来的按钮仍能被 Tab 聚焦、被脚本点到。`tests/home.spec.ts` 用 `innerHTML` 断言「连文本都没有」
+- **家长模式给人话状态**：开关文字变「退出家长」、`aria-pressed=true`、`.app[data-mode=parent]`。做完设置要能让家长一眼看到怎么切回去
+- **档案卡在孩子模式下仍显示**（头像+名字是孩子的成就），只是没有「改」按钮 → `ProfileCard` 的 `editable` prop
+- ⚠️ **这不是安全边界，是产品分层**。孩子点得到角落里那把锁，但那是「家长的抽屉」，不是要防的人。真正的防线是「破坏性操作不在孩子路径上」+ 已有的 `ConfirmDialog`。**别把它当密码锁宣传**
+- 状态存 localStorage（`starlight-view-mode`），**不进 Zustand / 不参与 persist 版本号** —— 与 `homeLevel.ts` 同一套模式：单独成文件（避免 react-refresh 整页刷新）+ `useSyncExternalStore` + 订阅广播（localStorage 同页静默，`storage` 事件只在别的标签页触发）
+
 ## 孩子档案（`Profile`，store v9）
 
 应用此前是「一台电脑一份进度」，没有「这是谁在学」的概念。现在 store 有 `profile: Profile`（`id` / `name` / `avatar` / `createdAt`）。
@@ -209,7 +221,7 @@ npm run electron:build  # 打包 Windows NSIS 安装包（产物在 release/）
 src/
 ├── components/     # Layout, SpeakButton, SafeBoundary + 跟读/框架卡/点读/拓展词录入 + BackupPanel(备份恢复) + ProfileCard(孩子档案)
 ├── pages/         # page components (Home, LessonPreview, SmartReview, etc.)
-├── hooks/         # useSettleQuiz(结算) / useSpeechRecognition(STT) / useSentenceReader(跟读编排)
+├── hooks/         # useSettleQuiz(结算) / useSpeechRecognition(STT) / useSentenceReader(跟读编排) / useViewMode(孩子·家长模式)
 ├── data/          # 课程内容(starlight.ts, lessons.ts) + sentenceFrame.ts(句型框架) + extensionTopics.ts(拓展词主题库) + srs.ts / fsrsScheduler.ts
 ├── utils/         # stars.ts(星规) / similarity.ts(跟读评分) / reviewQueue.ts(复习配额) / backup.ts(备份恢复) / storage.ts(桌面版落盘) / speakService + engine/(youdao·baidu·webSpeech·kokoro·edgeTts·edgeNeural·msGecV2·segmentedSpeak)
 └── store/         # Zustand state management (含 starlightExtensions 拓展词 + extensionRound 填充轮次)

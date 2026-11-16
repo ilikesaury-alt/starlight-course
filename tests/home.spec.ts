@@ -166,6 +166,78 @@ test.describe('首页与导航', () => {
   })
 })
 
+test.describe('孩子 / 家长模式（C 方案：完全分开的入口）', () => {
+  /**
+   * 产品口径（2026-11-16 定）：默认孩子模式，家长模式从顶栏角落的小锁进入。
+   * 最要紧的一条是 —— 孩子模式下破坏性操作**根本不在 DOM 里**，
+   * 不是「藏起来」：藏起来的按钮仍能被 Tab 聚焦、被脚本点到。
+   */
+  test('默认孩子模式：看不到备份与重置，且它们不在 DOM 中', async ({ page }) => {
+    await page.goto('/#/progress')
+
+    await expect(page.locator('.app')).toHaveAttribute('data-mode', 'kid')
+
+    // 档案卡还在（孩子看得到自己的头像和名字），但没有「改」入口
+    await expect(page.locator('.profile-card')).toBeVisible()
+    await expect(page.locator('.pc-edit-btn')).toHaveCount(0)
+
+    // 破坏性操作整块不渲染
+    await expect(page.locator('.backup-panel')).toHaveCount(0)
+    await expect(page.getByRole('button', { name: /重置全部数据/ })).toHaveCount(0)
+
+    // 不只是 CSS 隐藏：HTML 里连文本都没有
+    const html = await page.locator('body').innerHTML()
+    expect(html).not.toContain('重置全部数据')
+    expect(html).not.toContain('导出备份')
+  })
+
+  test('从角落小锁进入家长模式：备份 / 重置 / 改档案全部出现', async ({ page }) => {
+    await page.goto('/#/progress')
+
+    await page.locator('.mode-toggle').click()
+
+    await expect(page.locator('.app')).toHaveAttribute('data-mode', 'parent')
+    await expect(page.locator('.backup-panel')).toBeVisible()
+    await expect(page.getByRole('button', { name: /重置全部数据/ })).toBeVisible()
+    await expect(page.locator('.pc-edit-btn')).toBeVisible()
+
+    // 开关自己也要明确表达「当前在家长模式、怎么回去」
+    await expect(page.locator('.mode-toggle-text')).toHaveText('退出家长')
+    await expect(page.locator('.mode-toggle')).toHaveAttribute('aria-pressed', 'true')
+  })
+
+  test('模式会被记住；切回孩子模式后破坏性操作重新消失', async ({ page }) => {
+    await page.goto('/#/progress')
+    await page.locator('.mode-toggle').click()
+    await expect(page.locator('.app')).toHaveAttribute('data-mode', 'parent')
+
+    // 刷新后仍是家长模式（家长做完设置不该被踢回孩子界面）
+    await page.reload()
+    await expect(page.locator('.app')).toHaveAttribute('data-mode', 'parent')
+    await expect(page.locator('.backup-panel')).toBeVisible()
+
+    // 切回孩子模式
+    await page.locator('.mode-toggle').click()
+    await expect(page.locator('.app')).toHaveAttribute('data-mode', 'kid')
+    await expect(page.locator('.backup-panel')).toHaveCount(0)
+    await expect(page.getByRole('button', { name: /重置全部数据/ })).toHaveCount(0)
+
+    // 再刷新一次，确认孩子的选择也记住了
+    await page.reload()
+    await expect(page.locator('.app')).toHaveAttribute('data-mode', 'kid')
+  })
+
+  test('家长模式开关在主导航之外，不挤占孩子的四个入口', async ({ page }) => {
+    await page.goto('/')
+    // 主导航仍是四项（首页/课程/字母/进度），家长开关不在其中
+    const nav = page.locator('.app-nav')
+    await expect(nav.locator('a')).toHaveCount(4)
+    await expect(nav.getByRole('button')).toHaveCount(0)
+    // 开关独立存在
+    await expect(page.locator('.mode-toggle')).toBeVisible()
+  })
+})
+
 test.describe('孩子档案', () => {
   /**
    * 档案的 e2e 契约有两面，两面都要钉：
@@ -178,8 +250,9 @@ test.describe('孩子档案', () => {
     // ① 未设置：原样
     await expect(page.getByRole('heading', { name: '课前预习 · 课后复习' })).toBeVisible()
 
-    // ② 在进度页设置昵称与头像
+    // ② 在进度页设置昵称与头像（改档案是家长操作，先进家长模式）
     await page.goto('/#/progress')
+    await page.locator('.mode-toggle').click()
     await expect(page.locator('.profile-card')).toBeVisible()
     await page.locator('.pc-edit-btn').click()
 
@@ -199,6 +272,7 @@ test.describe('孩子档案', () => {
 
   test('刷新后昵称仍在（持久化生效）', async ({ page }) => {
     await page.goto('/#/progress')
+    await page.locator('.mode-toggle').click()
     await page.locator('.pc-edit-btn').click()
     await page.locator('#pc-name-input').fill('小红')
     await page.getByRole('button', { name: '保存' }).click()
