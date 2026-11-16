@@ -133,6 +133,21 @@ interface CourseStore {
   /** 英语3A 已完成课 slug 列表 */
   completedEng3a: string[]
 
+  // ---- 每日节律（v10）----
+  //
+  // 「今天做完了吗」推不出来，只能记。判定三项分别来自：
+  //   复习 = SRS 卡的 lastReview（已有，不用新字段）
+  //   新课 / 阅读 = 下面两个日期戳（新增）
+  //
+  // 只存**日期戳本身**而不是「今天的完成列表」：
+  // 每日计划要回答的只是「今天有没有做过」，不是「今天做了哪几节」。
+  // 存日期戳的好处是不需要任何清理逻辑 —— 昨天写的值今天自动就不等于 today。
+
+  /** 最近一次「完成一节课」的日期戳（dayStamp）。不等于今天 = 今天还没做 */
+  lessonDoneOn: number
+  /** 最近一次「读一篇阅读」的日期戳（dayStamp） */
+  readingDoneOn: number
+
   // 动作
   addWrongWord: (w: WrongWord) => void
   removeWrongWord: (en: string, module?: ModuleId) => void
@@ -158,6 +173,19 @@ interface CourseStore {
   markChineseDone: (slug: string) => void
   /** 标记英语3A 某课已学完(自测 ≥80% 自动触发 / 手动按钮触发) */
   markEng3aDone: (slug: string) => void
+  /**
+   * 记一次「今天完成了一节课」。
+   *
+   * 为什么需要单独的字段：`completedXxx` / `lessonCompleted` 都是**无日期的累积集合**
+   * （见各字段注释），它们回答「学到哪了」，回答不了「今天做了没有」。
+   * 而「今天完成了新课」正是每日计划完成判定的第三项，推不出来，只能记。
+   *
+   * 只存今天：每次写入先把日期戳刷成今天，昨天的记录自然被覆盖 ——
+   * 不需要清理任务，也不会无限增长（一个数字而已）。
+   */
+  markLessonToday: () => void
+  /** 记一次「今天读了一篇阅读」。与 markLessonToday 同理，分开记是因为完成判据要分开。 */
+  markReadingToday: () => void
   /** 更新孩子档案（昵称 / 头像）。只合并传入的字段，不清空其它。 */
   updateProfile: (patch: Partial<Omit<Profile, 'id' | 'createdAt'>>) => void
   /** 清空学习数据。**保留档案** —— 档案不是学习数据，重置进度不该把孩子名字也抹了。 */
@@ -208,6 +236,9 @@ export const useCourseStore = create<CourseStore>()(
       eng3aQuiz: {},
       completedChinese: [],
       completedEng3a: [],
+      // 0 = 从未做过（dayStamp 从 1970 起算，永远不会是 0）
+      lessonDoneOn: 0,
+      readingDoneOn: 0,
 
       addWrongWord: (w) =>
         set((s) =>
@@ -244,15 +275,19 @@ export const useCourseStore = create<CourseStore>()(
               changed = true
             }
           }
+          // 手动「标记单元完成」同样算今天学了一节
+          const lessonDoneOn = dayStamp()
           return changed
-            ? { completedPreviews, lessonCompleted: { ...s.lessonCompleted, [slug]: merged } }
-            : { completedPreviews }
+            ? { completedPreviews, lessonCompleted: { ...s.lessonCompleted, [slug]: merged }, lessonDoneOn }
+            : { completedPreviews, lessonDoneOn }
         }),
 
       markLessonDone: (unitId, lessonId, totalLessons) =>
         set((s) => {
+          // 今日戳无论这节课是否已学过都要刷（重做旧课也算「今天学了一节」）
+          const today = dayStamp()
           const prev = s.lessonCompleted[unitId] ?? []
-          if (prev.includes(lessonId)) return s
+          if (prev.includes(lessonId)) return { lessonDoneOn: today }
           const next = { ...s.lessonCompleted, [unitId]: [...prev, lessonId] }
           // 全部课时完成后自动同步单元级完成标记(保持 completedPreviews 语义不变)
           const total = totalLessons ?? lessonsOf(unitId).length
@@ -261,7 +296,7 @@ export const useCourseStore = create<CourseStore>()(
             allDone && !s.completedPreviews.includes(unitId)
               ? [...s.completedPreviews, unitId]
               : s.completedPreviews
-          return { lessonCompleted: next, completedPreviews }
+          return { lessonCompleted: next, completedPreviews, lessonDoneOn: today }
         }),
 
       markQuizDone: (slug) =>
@@ -310,19 +345,28 @@ export const useCourseStore = create<CourseStore>()(
           },
         })),
 
+      // ⚠️ 下面两个「标记完成」除了加进累积集合，还要刷今日戳。
+      // 注意**不能**保留「已包含就 return s」的短路 —— 今天重做一节昨天学过的课，
+      // 累积集合确实没变，但「今天完成了一节课」这个事实变了。
       markChineseDone: (slug) =>
-        set((s) =>
-          s.completedChinese.includes(slug)
-            ? s
-            : { completedChinese: [...s.completedChinese, slug] }
-        ),
+        set((s) => ({
+          completedChinese: s.completedChinese.includes(slug)
+            ? s.completedChinese
+            : [...s.completedChinese, slug],
+          lessonDoneOn: dayStamp(),
+        })),
 
       markEng3aDone: (slug) =>
-        set((s) =>
-          s.completedEng3a.includes(slug)
-            ? s
-            : { completedEng3a: [...s.completedEng3a, slug] }
-        ),
+        set((s) => ({
+          completedEng3a: s.completedEng3a.includes(slug)
+            ? s.completedEng3a
+            : [...s.completedEng3a, slug],
+          lessonDoneOn: dayStamp(),
+        })),
+
+      // 每日节律：只记「今天做过」，故直接刷成今天的戳（见字段注释）
+      markLessonToday: () => set({ lessonDoneOn: dayStamp() }),
+      markReadingToday: () => set({ readingDoneOn: dayStamp() }),
 
       updateProfile: (patch) =>
         set((s) => ({
@@ -356,6 +400,9 @@ export const useCourseStore = create<CourseStore>()(
           eng3aQuiz: {},
           completedChinese: [],
           completedEng3a: [],
+          // 每日节律一起清：重置后不该还留着「今天已完成」的戳
+          lessonDoneOn: 0,
+          readingDoneOn: 0,
         })),
 
       // ============ SRS ============
@@ -556,8 +603,10 @@ export const useCourseStore = create<CourseStore>()(
     }),
     {
       name: 'starlight-course',
-      // v9: 新增 profile（孩子档案）。字段只增不改语义，迁移只需补默认值。
-      version: 9,
+      // v10: 新增每日节律（lessonDoneOn / readingDoneOn）。
+      // v9: 新增 profile（孩子档案）。
+      // 两次都只增字段、不改语义，迁移只需补默认值。
+      version: 10,
       // 只持久化数据字段,避免函数/瞬态状态被写入 localStorage
       partialize: (state) => ({
         profile: state.profile,
@@ -576,6 +625,8 @@ export const useCourseStore = create<CourseStore>()(
         eng3aQuiz: state.eng3aQuiz,
         completedChinese: state.completedChinese,
         completedEng3a: state.completedEng3a,
+        lessonDoneOn: state.lessonDoneOn,
+        readingDoneOn: state.readingDoneOn,
       }),
       // 迁移：补上模块维度字段 + 拆分 completedPreviews 语义
       migrate: (persistedState: unknown, version: number) => {
@@ -659,6 +710,9 @@ export const useCourseStore = create<CourseStore>()(
           lessonCompleted,
           completedChinese: s.completedChinese ?? [],
           completedEng3a: s.completedEng3a ?? [],
+          // v10:每日节律。旧数据没有 ⇒ 0（= 从未做过，见字段注释）
+          lessonDoneOn: typeof s.lessonDoneOn === 'number' ? s.lessonDoneOn : 0,
+          readingDoneOn: typeof s.readingDoneOn === 'number' ? s.readingDoneOn : 0,
         } as CourseStore
       },
       /**
@@ -670,11 +724,26 @@ export const useCourseStore = create<CourseStore>()(
        */
       onRehydrateStorage: () => (state) => {
         if (!state) return
+        const patch: Partial<CourseStore> = {}
+
+        // ① 档案：同版本但字段残缺时 migrate 不会跑，这里兜底（见 profile 章节）
         const fixed = normalizeProfile(state.profile)
-        // 只在真的需要时 setState，避免每次启动都触发一次多余写盘
         if (JSON.stringify(fixed) !== JSON.stringify(state.profile)) {
-          useCourseStore.setState({ profile: fixed })
+          patch.profile = fixed
         }
+
+        // ② 每日节律：同上。缺字段 / 非数字都收敛成 0，
+        //    否则 `lessonDoneOn === dayStamp()` 会因 undefined 静默判成「没做」——
+        //    那是对的，但 NaN 会让比较永远 false 且写盘后成为脏数据。
+        if (typeof state.lessonDoneOn !== 'number' || !Number.isFinite(state.lessonDoneOn)) {
+          patch.lessonDoneOn = 0
+        }
+        if (typeof state.readingDoneOn !== 'number' || !Number.isFinite(state.readingDoneOn)) {
+          patch.readingDoneOn = 0
+        }
+
+        // 只在真的需要时 setState，避免每次启动都触发一次多余写盘
+        if (Object.keys(patch).length > 0) useCourseStore.setState(patch)
       },
     }
   )

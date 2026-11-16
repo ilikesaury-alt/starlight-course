@@ -106,6 +106,8 @@ export default function ReadingBook({ source, custom }: Props) {
   // 当前展开的那一篇（key 形如 '1-1'）；null = 全部收起
   const [openKey, setOpenKey] = useState<string | null>(null)
   const srsCards = useCourseStore((s) => s.srsCards)
+  // 每日节律：展开任一篇阅读即记「今天读过了」（见下方 onClick 注释）
+  const markReadingToday = useCourseStore((s) => s.markReadingToday)
   // 🧠 记忆状态着色的 CSS 是 `.sr-mem .tt-word--*`，着色类必须由**页面根节点**挂上。
   const memOn = useMemoryState()
   const slow = useSlowMode()
@@ -276,7 +278,15 @@ export default function ReadingBook({ source, custom }: Props) {
                           : `rm-lesson-${key}`
                       }
                       aria-expanded={open}
-                      onClick={() => setOpenKey(open ? null : key)}
+                      onClick={() => {
+                        setOpenKey(open ? null : key)
+                        // 「读完一篇」的信号取**展开阅读器**这一刻：
+                        // 展开即进入阅读（逐词点读/逐句朗读都在里面），
+                        // 比「要求孩子点一个『我读完了』按钮」自然得多 ——
+                        // 6~9 岁不会主动去点确认按钮，那会让完成态永远亮不起来。
+                        // 收起（open === true 分支）不重复记。
+                        if (!open) markReadingToday()
+                      }}
                     >
                       <span className="rm-lesson-num">{l.id}</span>
                       <span className="rm-lesson-body">

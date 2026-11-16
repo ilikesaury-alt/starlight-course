@@ -1,13 +1,16 @@
-// 首页「今日任务」聚合卡：把「现在该做什么」的决策统一到一处。
-// 内容 = 今日到期复习(如有) + 按模块顺序推荐的前 2 条未完成课；
-// 全部完成时显示鼓励态。取数全部来自 store 现有完成记录,无新增字段。
-// 故事类词表体积大,经 import() 动态获取,不拖慢首屏。
+// 首页「今日清单」：从「推荐该做什么」升级为「今天要做完什么」（P1 每日节律）。
 //
-// ⚠️ Starlight 是**两册一个系列**，但这里只推**当前册**的一条：
-// 原来两册各推一条（预备级 + 第一册），而下面只取前 2 条 ——
-// 结果是只要两册都有没学完的课，语文/英语/绘本永远轮不上，
-// 「今日任务」变成两条 Starlight 的重复。现在跟着册次偏好走，
-// 与上面那条册次切换条同源（data/homeLevel.ts），切册时一起换。
+// 产品口径（2026-11-16 Lichun 定，方案 C **混合封顶**）：
+//   今日 = min(到期复习卡, 40) + 1 节新课 + 1 篇阅读
+// 配额与完成判据全在 `data/dailyPlan.ts`（纯函数、已单测），这里只负责取数与渲染。
+//
+// 为什么不再「每个模块各露一条」：
+// 那是「内容目录」，不是「今天的任务」—— 孩子看到 5 条平级入口，不知道做哪个才算完，
+// 于是永远没有「今天做完了」这个终点。现在收敛成 3 项，做完就是真的做完了。
+// 想自由挑内容仍然可以：下面「课程入口」宫格一个都没少。
+//
+// ⚠️ Starlight 是两册一个系列，只推**当前册**的一条（跟册次偏好同源）。
+// 原来两册各推一条会把清单位置占满，语文/英语永远轮不上。
 
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
@@ -16,58 +19,43 @@ import { useHomeLevel } from '@/hooks/useHomeLevel'
 import { modules as starlightModules } from '@/data/starlight'
 import { chineseUnits } from '@/data/chinese'
 import { eng3aUnits } from '@/data/eng3a'
+import {
+  DAILY_REVIEW_CAP,
+  countReviewedToday,
+  dailyProgress,
+  isToday,
+} from '@/data/dailyPlan'
 
-interface Task {
+interface PlanItem {
+  key: 'review' | 'lesson' | 'reading'
   emoji: string
-  module: string
-  label: string
+  title: string
+  /** 已完成时的说明 */
+  doneLabel: string
   to: string
-  /** 没有持久化完成记录的「入口式」任务：不参与「今天都完成了」判定 */
-  always?: boolean
+  done: boolean
+  /** 复习项的进度描述；其它项为空 */
+  progress?: string
+  /** 超上限没排进今天的提醒 */
+  overflow?: string
 }
 
 export default function TodayTasks() {
+  const srsCards = useCourseStore((s) => s.srsCards)
   const todayDue = useCourseStore((s) => s.getTodayDueCount())
   const lessonCompleted = useCourseStore((s) => s.lessonCompleted)
-  const completedStories = useCourseStore((s) => s.completedStories)
   const completedChinese = useCourseStore((s) => s.completedChinese)
   const completedEng3a = useCourseStore((s) => s.completedEng3a)
+  const lessonDoneOn = useCourseStore((s) => s.lessonDoneOn)
+  const readingDoneOn = useCourseStore((s) => s.readingDoneOn)
   const [level] = useHomeLevel()
 
-  const [storyTasks, setStoryTasks] = useState<Task[]>([])
-
-  // 故事类下一关:动态加载数据后计算(避免首屏拉起大词表 chunk)。
-  // Rocket Girl 已整体并入阅读模块，不再有「下一关」也没有可靠已读记录 ——
-  // 只给一条静态入口，直达 /rocketgirl（阅读目录），不伪造进度。
-  useEffect(() => {
-    let alive = true
-    void Promise.all([import('@/data/flyguy'), import('@/data/rocketgirlReading')]).then(
-      ([fg, rg]) => {
-        if (!alive) return
-        const t: Task[] = []
-        const fgNext = fg.flyGuyStories.find((s) => !completedStories.includes(s.slug))
-        if (fgNext) t.push({ emoji: '🐝', module: 'Fly Guy', label: fgNext.title, to: `/flyguy/${fgNext.slug}` })
-        t.push({
-          emoji: '🚀',
-          module: 'Rocket Girl',
-          label: `${rg.rgArcCount} 个故事 · ${rg.rgStoryCount} 段例句`,
-          to: '/rocketgirl',
-          always: true,
-        })
-        setStoryTasks(t)
-      }
-    )
-    return () => {
-      alive = false
-    }
-  }, [completedStories])
-
-  // Starlight 第一册:第一册教材数据体积大,经 import() 动态获取,不拖慢首屏。
-  // 只在当前册是第一册时才去加载/展示 —— 预备级视图下没必要拉这份 chunk。
-  const [sl1Task, setSl1Task] = useState<Task | null>(null)
+  // 新课候选：当前册 / 语文 / 英语三选一（Starlight 优先 —— 它是主课）。
+  // Starlight 第一册教材数据体积大，按需 import，不拖首屏。
+  const [sl1Next, setSl1Next] = useState<{ to: string; label: string } | null>(null)
   useEffect(() => {
     if (level !== 'starlight1') {
-      setSl1Task(null)
+      setSl1Next(null)
       return
     }
     let alive = true
@@ -77,113 +65,157 @@ export default function TodayTasks() {
         .modulesOfLevel('starlight1')
         .flatMap((x) => x.lessons.map((l) => ({ x, l })))
         .find(({ x, l }) => !(lessonCompleted[x.slug] ?? []).includes(l.id))
-      if (found) {
-        setSl1Task({
-          emoji: '🌟',
-          module: 'Starlight 1',
-          label: `Lesson ${found.l.id} · ${found.l.title}`,
-          to: `/preview/${found.x.slug}/${found.l.id}`,
-        })
-      } else {
-        setSl1Task(null)
-      }
+      setSl1Next(
+        found
+          ? { to: `/preview/${found.x.slug}/${found.l.id}`, label: `Lesson ${found.l.id} · ${found.l.title}` }
+          : null
+      )
     })
     return () => {
       alive = false
     }
   }, [lessonCompleted, level])
 
-  const tasks: Task[] = []
+  // ---- ① 复习 ----
+  const reviewedToday = countReviewedToday(Object.values(srsCards))
+  const progress = dailyProgress({
+    reviewedToday,
+    reviewDue: todayDue,
+    lessonDone: isToday(lessonDoneOn),
+    readingDone: isToday(readingDoneOn),
+  })
+  const reviewTarget = Math.min(todayDue, DAILY_REVIEW_CAP)
+  const overflow = todayDue > DAILY_REVIEW_CAP ? todayDue - DAILY_REVIEW_CAP : 0
 
-  // Starlight 主课:只推当前册的一条（两册各推一条会把下面 2 格全占满）
+  // ---- ② 新课 ----
+  // 优先 Starlight（主课），其次语文、英语 —— 顺序刻意固定，不做「智能推荐」：
+  // 孩子需要的是稳定可预期的清单，而不是每天变一个花样的算法。
+  let lessonTitle = ''
+  let lessonTo = ''
   if (level === 'starlight1') {
-    if (sl1Task) tasks.push(sl1Task)
+    if (sl1Next) {
+      lessonTitle = sl1Next.label
+      lessonTo = sl1Next.to
+    }
   } else {
-    // 预备级:按单元→课顺序找第一个未完成课
     const slNext = starlightModules
       .flatMap((m) => m.lessons.map((l) => ({ m, l })))
       .find(({ m, l }) => !(lessonCompleted[m.slug] ?? []).includes(l.id))
     if (slNext) {
-      tasks.push({
-        emoji: '🌟',
-        module: 'Starlight',
-        label: `Lesson ${slNext.l.id} · ${slNext.l.title}`,
-        to: `/preview/${slNext.m.slug}/${slNext.l.id}`,
-      })
+      lessonTitle = `Lesson ${slNext.l.id} · ${slNext.l.title}`
+      lessonTo = `/preview/${slNext.m.slug}/${slNext.l.id}`
+    }
+  }
+  if (!lessonTo && todayDue === 0) {
+    // Starlight 学完了就退到语文
+    const cnNext = chineseUnits
+      .flatMap((u) => u.lessons.map((l) => ({ u, l })))
+      .find(({ l }) => !completedChinese.includes(l.slug))
+    if (cnNext) {
+      lessonTitle = `${cnNext.u.title} · ${cnNext.l.title}`
+      lessonTo = `/chinese/${cnNext.u.slug}/${cnNext.l.slug}`
+    } else {
+      const enNext = eng3aUnits
+        .flatMap((u) => u.lessons.map((l) => ({ u, l })))
+        .find(({ l }) => !completedEng3a.includes(l.slug))
+      if (enNext) {
+        lessonTitle = `${enNext.u.title} · 第 ${enNext.l.id} 课 ${enNext.l.title}`
+        lessonTo = `/eng3a/${enNext.u.slug}/${enNext.l.slug}`
+      }
     }
   }
 
-  // 语文:第一个未学完课
-  const cnNext = chineseUnits
-    .flatMap((u) => u.lessons.map((l) => ({ u, l })))
-    .find(({ l }) => !completedChinese.includes(l.slug))
-  if (cnNext) {
-    tasks.push({
+  // ---- ③ 阅读 ----
+  const readingTo = level === 'starlight1' ? '/reading1' : '/reading'
+
+  const items: PlanItem[] = [
+    {
+      key: 'review',
+      emoji: '🧠',
+      title:
+        reviewTarget > 0
+          ? `复习 ${reviewTarget} 个单词`
+          : '今天没有到期的单词',
+      doneLabel: '复习完成',
+      to: '/smart',
+      // 没有到期卡时「复习」这件事本身是完成了的（无事可做 = 做完）
+      // ⚠️ 「无到期卡」不等于「复习完了」。
+      // 空数据的新用户如果看到复习项打勾，会以为「今天已经复习过了」——
+      // 那是假的完成。所以这里只在**真的复习过**（reviewedToday > 0）
+      // 或者**本来就有到期卡且已做满**时才算完成。
+      done: reviewTarget > 0 && progress.reviewDone,
+      progress: reviewTarget > 0 ? `${Math.min(reviewedToday, reviewTarget)} / ${reviewTarget}` : undefined,
+      overflow: overflow > 0 ? `还有 ${overflow} 个没排进今天，明天继续` : undefined,
+    },
+    {
+      key: 'lesson',
+      emoji: '📖',
+      title: lessonTo ? `学一节新课：${lessonTitle}` : '课程都学完啦',
+      doneLabel: '新课完成',
+      to: lessonTo || '/courses',
+      // 只在**今天真的学了一节**时才算完成。
+      // ⚠️ 「没有下一节课」不能算完成：那是「课程都学完了」的另一件事，
+      // 而且新用户一打开就看到打勾会以为任务已达成，收束文案也就失去意义。
+      done: progress.lessonDone,
+    },
+    {
+      key: 'reading',
       emoji: '📚',
-      module: '语文',
-      label: `${cnNext.u.title} · ${cnNext.l.title}`,
-      to: `/chinese/${cnNext.u.slug}/${cnNext.l.slug}`,
-    })
-  }
+      title: '读一篇小故事',
+      doneLabel: '阅读完成',
+      to: readingTo,
+      done: progress.readingDone,
+    },
+  ]
 
-  // 英语3A:第一个未学完课
-  const enNext = eng3aUnits
-    .flatMap((u) => u.lessons.map((l) => ({ u, l })))
-    .find(({ l }) => !completedEng3a.includes(l.slug))
-  if (enNext) {
-    tasks.push({
-      emoji: '📘',
-      module: '英语',
-      label: `${enNext.u.title} · 第 ${enNext.l.id} 课 ${enNext.l.title}`,
-      to: `/eng3a/${enNext.u.slug}/${enNext.l.slug}`,
-    })
-  }
-
-  tasks.push(...storyTasks)
-
-  // ⚠️ 不再 `slice(0, 2)`：原来只露 2 条，而模块有 5 个（Starlight 当前册 /
-  // 语文 / 英语 / Fly Guy / Rocket Girl），于是永远有 3 个模块的「下一课」看不见，
-  // 家长想带孩子学语文，得自己从宫格里找、再点进去找课。
-  //
-  // 现在每个模块各占一行、全部可见 —— 这不是新增功能，是把既有能力（每模块找
-  // 第一个未完成课）从「只露 2 个」放开到「全露」。行数天然有界（≤5），
-  // 不需要再截断。
-  const shown = tasks
-  // Rocket Girl 那条是「入口」不是「待办」：阅读模块不记已读，不能让它把
-  // 「今天都完成了」永远压成 false。
-  const allDone = todayDue === 0 && shown.every((t) => t.always)
+  // 收束判定与行状态必须同源：直接数 items，不复用 progress.allDone。
+  // ⚠️ progress.allDone 把「无到期卡」算作复习完成（对配额层是对的），
+  // 但界面上「打勾」的语义是「我做了」，两者在空数据下会分叉 ——
+  // 曾经因此让新用户一打开就看到 2/3 和「都完成啦」。
+  const doneCount = items.filter((i) => i.done).length
+  const allDone = doneCount === items.length
 
   return (
     <div className="today-card">
-      <div className="today-head">今日任务</div>
+      <div className="today-head">
+        <span>今日清单</span>
+        <span className="today-count">
+          {doneCount} / {items.length}
+        </span>
+      </div>
 
-      {todayDue > 0 && (
-        <Link to="/smart" className="smart-hero-entry">
-          <div className="smart-hero-body">
-            <div className="smart-hero-title">今日复习 · 大脑健身</div>
-            <div className="smart-hero-sub">
-              科学记忆编排,<b>{todayDue}</b> 个单词到期,几分钟就练完
-            </div>
-          </div>
-          <span className="smart-hero-badge">{todayDue}</span>
-          <span className="smart-hero-arrow">›</span>
-        </Link>
+      {/* 全部完成时给一个明确的收束 —— 孩子需要「做完了」这个终点，
+          否则清单永远做不完，也就永远没有成就感。 */}
+      {allDone && (
+        <p className="today-done" role="status">
+          🎉 今天的任务都完成啦，真棒！明天再来。
+        </p>
       )}
 
-      {shown.map((t) => (
-        <Link key={t.to} to={t.to} className="today-row">
-          <span className="today-emoji">{t.emoji}</span>
+      {items.map((it) => (
+        <Link
+          key={it.key}
+          to={it.to}
+          className={'today-row' + (it.done ? ' is-done' : '')}
+          aria-label={it.done ? `${it.doneLabel}：${it.title}` : it.title}
+        >
+          <span className="today-emoji" aria-hidden="true">
+            {it.done ? '✅' : it.emoji}
+          </span>
           <div className="today-body">
-            <div className="today-module">{t.module} · 继续学</div>
-            <div className="today-label">{t.label}</div>
+            <div className="today-module">
+              {it.key === 'review' ? '复习' : it.key === 'lesson' ? '新课' : '阅读'}
+              {it.done && <span className="today-badge">已完成</span>}
+            </div>
+            <div className="today-label">{it.done ? it.doneLabel : it.title}</div>
+            {it.progress && !it.done && <div className="today-sub">{it.progress}</div>}
+            {it.overflow && <div className="today-sub today-sub--muted">{it.overflow}</div>}
           </div>
-          <span className="today-arrow">›</span>
+          <span className="today-arrow" aria-hidden="true">
+            ›
+          </span>
         </Link>
       ))}
-
-      {allDone && (
-        <p className="today-done">🎉 今天的学习任务都完成啦,随时来复习哦!</p>
-      )}
     </div>
   )
 }

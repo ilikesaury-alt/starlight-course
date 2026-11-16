@@ -157,6 +157,41 @@ npm run electron:build  # 打包 Windows NSIS 安装包（产物在 release/）
   - ❗**判定必须按位置不按文本**：`tight → t/igh/t`、`nine → n/i/n/e` 有重复块，只比文本的话孩子把第 3 位的 `t` 先点上去也算对。现在用 `usedPoolIdx`（已用块下标）+ 比对“下一个所需块”来判，e2e A7 盯着这条
   - 复用 `phonemeSegments` 的概念分类给积木配色/标签；星规复用 `quizStars`；错词回灌错题本与 SRS，`module='alphablocks'`（已加入 `ModuleId` 联合类型，不新增持久化字段，因此 **无需升 localStorage version**）
 
+## 每日节律（`data/dailyPlan.ts` + `components/TodayTasks.tsx`，store v10）
+
+**方案 C「混合封顶」**（2026-11-16 Lichun 定）：`今日 = min(到期复习卡, 40) + 1 节新课 + 1 篇阅读`。
+
+为什么不用另外两种：
+- **固定条数**（每天 3 件）在到期 40 张那天严重失真 —— 「复习」被压成 1 行，孩子以为做一下就算完
+- **完全跟 SRS 浮动**在到期 40 张那天给出做不完的清单 —— 孩子会直接放弃，这是最糟的结果
+- 封顶取中间：**够得着**（看得见终点）又**不失真**（超出部分如实说「还有 N 个没排进今天」）
+
+### 三条必须守住的规则
+
+1. **`DAILY_REVIEW_CAP = 40`** —— 6~9 岁 5~8 分钟专注量（实测单卡 8~12 秒）。改这个数就是改产品节奏，先想清楚
+2. **做完排的量就算「复习完成」**，不要求清空全部到期。到期 100 只排 40 时，做完 40 就是完成。**否则孩子永远看不到完成态**，封顶也就失去意义
+3. ⚠️ **「无到期卡」不等于「复习完了」**。配额层（`dailyProgress`）把它算作完成是对的（无事可做 = 做完），但**界面上的打勾语义是「我做了」**，两者在空数据下会分叉。曾经因此让新用户一打开首页就是 `2/3 已完成` + 「都完成啦」。`TodayTasks` 因此按 `items.filter(done)` 自行判定，不复用 `progress.allDone`
+
+### 完成证据从哪来（三项分别不同源，不能混成一个布尔）
+
+| 项 | 证据 | 说明 |
+|---|---|---|
+| 复习 | SRS 卡 `lastReview === 今天` | 已有字段，不新增计数器（避免两套口径打架） |
+| 新课 | `store.lessonDoneOn`（v10 新增） | 完成动作顺带刷；**重做旧课也要刷** |
+| 阅读 | `store.readingDoneOn`（v10 新增） | 展开阅读器即记（见下） |
+
+- ⚠️ **`completedXxx` / `lessonCompleted` 都是无日期的累积集合**，它们回答「学到哪了」，**回答不了「今天做了没有」** —— 这就是必须新增两个日期戳字段的原因
+- ⚠️ `markChineseDone` / `markEng3aDone` / `markLessonDone` / `markPreviewDone` **不能保留「已包含就 return s」的短路**：今天重做一节昨天学过的课，累积集合确实没变，但「今天学了一节」这个事实变了
+- **阅读的完成信号取「展开阅读器」那一刻**（`ReadingBook` 的 `onClick`）：比「要求孩子点『我读完了』按钮」自然得多 —— 6~9 岁不会主动去点确认按钮，那会让完成态永远亮不起来
+- **「今天」一律用 `dayStamp()`**（本地日历日 → UTC 天戳），与 SRS 到期判定同源。用 `Date.now()` 相减会在跨零点 / 时区 / 夏令时上出错
+
+### 界面
+
+- 固定三行，**行数不随模块数膨胀**（旧版是按模块出 5 行内容目录，2026-11-16 已废弃 —— 那是「内容目录」不是「今天的任务」，孩子不知道做哪个才算完）
+- 右上角 `x / 3` 进度；已完成的行 `is-done`（**用 opacity 不用 display:none**：保持稳定的三行结构，否则做完一行就消失会让剩下的行跳位置）
+- 三项全完成才出收束文案「🎉 今天的任务都完成啦」—— **孩子需要「做完了」这个终点**，否则清单永远做不完
+- 想自由挑内容仍可走下面的「课程入口」宫格，一个都没少
+
 ## 孩子 / 家长模式（`data/viewMode.ts` + `hooks/useViewMode.ts`）
 
 产品口径（2026-11-16 Lichun 定，**C 方案：完全分开的入口，家长模式藏在角落**）。此前孩子和家长看同一套界面 —— 「重置全部数据」「导出备份」「改档案」就摆在孩子点得到的地方。
@@ -222,7 +257,7 @@ src/
 ├── components/     # Layout, SpeakButton, SafeBoundary + 跟读/框架卡/点读/拓展词录入 + BackupPanel(备份恢复) + ProfileCard(孩子档案)
 ├── pages/         # page components (Home, LessonPreview, SmartReview, etc.)
 ├── hooks/         # useSettleQuiz(结算) / useSpeechRecognition(STT) / useSentenceReader(跟读编排) / useViewMode(孩子·家长模式)
-├── data/          # 课程内容(starlight.ts, lessons.ts) + sentenceFrame.ts(句型框架) + extensionTopics.ts(拓展词主题库) + srs.ts / fsrsScheduler.ts
+├── data/          # 课程内容(starlight.ts, lessons.ts) + sentenceFrame.ts(句型框架) + extensionTopics.ts(拓展词主题库) + srs.ts / fsrsScheduler.ts + dailyPlan.ts(每日节律) + viewMode.ts(孩子·家长模式)
 ├── utils/         # stars.ts(星规) / similarity.ts(跟读评分) / reviewQueue.ts(复习配额) / backup.ts(备份恢复) / storage.ts(桌面版落盘) / speakService + engine/(youdao·baidu·webSpeech·kokoro·edgeTts·edgeNeural·msGecV2·segmentedSpeak)
 └── store/         # Zustand state management (含 starlightExtensions 拓展词 + extensionRound 填充轮次)
 ```

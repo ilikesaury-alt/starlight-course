@@ -127,13 +127,13 @@ test.describe('首页与导航', () => {
       await expect(page.locator('.sl-home-entry')).toHaveAttribute('href', /#\/starlight1$/)
     })
 
-    // 回归：原来「今日任务」两册各推一条 Starlight，又只取前 2 条 →
-    // 两条 Starlight 占满，语文/英语/绘本永远轮不上。
-    // 现在：只推当前册一条，且每个模块各占一行、全部可见。
-    test('今日任务跟着册次走，且每个模块都露出来（不再只显示 2 条）', async ({ page }) => {
+    // ⚠️ 契约在 2026-11-16 整体改版：原来是「每个模块各占一行」的内容目录（5 行），
+    // 现在是**固定的三件事**（复习 / 新课 / 阅读，P1 每日节律·方案 C 混合封顶）。
+    // 旧断言「rows toHaveCount(5)」已经不存在，别再按旧印象改回去。
+    test('今日清单固定三行：复习 / 新课 / 阅读', async ({ page }) => {
       await page.goto('/')
       const rows = page.locator('.today-row')
-      const modules = page.locator('.today-row .today-module')
+      const kinds = page.locator('.today-row .today-module')
 
       // 预备级视图
       await expect(page.locator('.sl-level-opt[data-level="starlight"]')).toHaveAttribute(
@@ -141,28 +141,98 @@ test.describe('首页与导航', () => {
         'true',
         { timeout: 15000 },
       )
-      // 5 个模块各一行：Starlight / 语文 / 英语 / Fly Guy / Rocket Girl
-      // （后两个由动态 import 补齐，故给宽超时）
-      await expect(rows).toHaveCount(5, { timeout: 15000 })
-      // ⚠️ 用精确文本匹配：hasText 是子串匹配，'Starlight' 会连 'Starlight 1' 一起命中
-      await expect(modules.filter({ hasText: /^Starlight ·/ })).toHaveCount(1)
-      await expect(modules.filter({ hasText: /^Starlight 1 ·/ })).toHaveCount(0)
-      for (const name of ['语文', '英语', 'Fly Guy', 'Rocket Girl']) {
-        await expect(modules.filter({ hasText: name })).toHaveCount(1)
-      }
 
-      // 切到第一册：任务当场换册，不用刷新；行数不变（仍是一册一条）
+      // 恰好 3 行，顺序固定
+      await expect(rows).toHaveCount(3, { timeout: 15000 })
+      await expect(kinds).toHaveCount(3)
+      await expect(kinds.nth(0)).toContainText('复习')
+      await expect(kinds.nth(1)).toContainText('新课')
+      await expect(kinds.nth(2)).toContainText('阅读')
+
+      // 新课链到预备级的课
+      await expect(rows.nth(1)).toHaveAttribute('href', /#\/preview\/.+\/\d+$/)
+    })
+
+    test('切册时「新课」当场换册（订阅广播，不靠刷新），行数不变', async ({ page }) => {
+      await page.goto('/')
+      const lessonRow = page.locator('.today-row').nth(1)
+
+      await expect(lessonRow).toHaveAttribute('href', /#\/preview\/.+\/\d+$/)
+
+      // 切到第一册：新课应指向第一册的单元（slug 形如 monty-the-artist）
       await page.locator('.sl-level-opt[data-level="starlight1"]').click()
-      await expect(modules.filter({ hasText: /^Starlight 1 ·/ })).toHaveCount(1, {
+      await expect(lessonRow).toHaveAttribute('href', /#\/preview\/monty-the-artist\/\d+$/, {
         timeout: 15000,
       })
-      await expect(modules.filter({ hasText: /^Starlight ·/ })).toHaveCount(0)
-      await expect(rows).toHaveCount(5)
 
-      // 第一册那条真的链到第一册的课，不是预备级的
-      const book1Row = page.locator('.today-row', { hasText: 'Starlight 1' })
-      await expect(book1Row).toHaveAttribute('href', /#\/preview\/monty-the-artist\/\d+$/)
+      // 仍是 3 行（清单结构不随册次变）
+      await expect(page.locator('.today-row')).toHaveCount(3)
     })
+  })
+})
+
+test.describe('今日清单 · 每日节律', () => {
+  /** 直接写 localStorage 再造档 —— 比「真去学完一课」快且稳定，测的是判定逻辑 */
+  const seedRhythm = async (
+    page: import('@playwright/test').Page,
+    state: Record<string, unknown>
+  ) => {
+    await page.addInitScript((s) => {
+      const raw = localStorage.getItem('starlight-course')
+      const parsed = raw ? JSON.parse(raw) : { state: {}, version: 10 }
+      parsed.state = { ...parsed.state, ...s }
+      localStorage.setItem('starlight-course', JSON.stringify(parsed))
+    }, state)
+  }
+
+  test('空数据：0/3，不做假完成', async ({ page }) => {
+    await page.goto('/')
+    await expect(page.locator('.today-count')).toHaveText('0 / 3')
+    await expect(page.locator('.today-badge')).toHaveCount(0)
+    await expect(page.locator('.today-done')).toHaveCount(0)
+  })
+
+  test('三项全完成：出现收束文案，3 个已完成徽章', async ({ page }) => {
+    // dayStamp = 本地日历日 → UTC 天戳；用同一个算法算「今天」
+    const today = await page.evaluate(() => {
+      const d = new Date()
+      const utc = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()))
+      return Math.floor(utc.getTime() / 86_400_000)
+    })
+    await seedRhythm(page, {
+      srsCards: {
+        apple: {
+          en: 'apple',
+          box: 0,
+          nextReview: 0,
+          lastReview: today,
+          streak: 1,
+          reviews: 1,
+          modules: ['starlight'],
+        },
+      },
+      lessonDoneOn: today,
+      readingDoneOn: today,
+    })
+    await page.goto('/')
+
+    await expect(page.locator('.today-done')).toBeVisible({ timeout: 15000 })
+    await expect(page.locator('.today-count')).toHaveText('3 / 3')
+    await expect(page.locator('.today-badge')).toHaveCount(3)
+  })
+
+  test('跨天：昨天完成的不算今天', async ({ page }) => {
+    const today = await page.evaluate(() => {
+      const d = new Date()
+      const utc = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()))
+      return Math.floor(utc.getTime() / 86_400_000)
+    })
+    await seedRhythm(page, { lessonDoneOn: today - 1, readingDoneOn: today - 1 })
+    await page.goto('/')
+
+    // 「新课」「阅读」两项都不该是已完成（复习也没到期，故整体 0/3）
+    await expect(page.locator('.today-count')).toHaveText('0 / 3')
+    await expect(page.locator('.today-done')).toHaveCount(0)
   })
 })
 
