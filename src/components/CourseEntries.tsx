@@ -30,7 +30,6 @@ import { STARLIGHT_LEVELS, levelOfUnitSlug, type StarlightLevel } from '@/data/s
 
 export default function CourseEntries() {
   const completedPreviews = useCourseStore((s) => s.completedPreviews)
-  const completedStories = useCourseStore((s) => s.completedStories)
   const completedChinese = useCourseStore((s) => s.completedChinese)
   const completedEng3a = useCourseStore((s) => s.completedEng3a)
   const getTodayDueCount = useCourseStore((s) => s.getTodayDueCount)
@@ -39,14 +38,14 @@ export default function CourseEntries() {
   const meta = STARLIGHT_LEVELS[level]
   const readingPath = level === 'starlight1' ? '/reading1' : '/reading'
 
-  const [fgStats, setFgStats] = useState<{ stories: number; words: number } | null>(null)
+  const [fgStats, setFgStats] = useState<{ stories: number; chapters: number } | null>(null)
   const [rgStats, setRgStats] = useState<{ arcs: number; stories: number } | null>(null)
 
   useEffect(() => {
     let alive = true
-    void import('@/data/flyguy').then((m) => {
+    void import('@/data/flyguyReading').then((m) => {
       if (!alive) return
-      setFgStats({ stories: m.flyGuyStoryCount, words: m.flyGuyWordCount })
+      setFgStats({ stories: m.fgReadingStats.books, chapters: m.fgReadingStats.chapters })
     })
     void import('@/data/rocketgirlReading').then((m) => {
       if (!alive) return
@@ -101,10 +100,9 @@ export default function CourseEntries() {
     starlight: { percent: pct(doneByLevel.starlight, unitTotalOf('starlight')), due: getTodayDueCount('starlight') },
     starlight1: { percent: pct(doneByLevel.starlight1, unitTotalOf('starlight1')), due: getTodayDueCount('starlight1') },
     rocketgirl: { due: getTodayDueCount('rocketgirl') },
-    flyguy: {
-      percent: pct(completedStories.filter((s) => !s.startsWith('rg-')).length, fgStats?.stories),
-      due: getTodayDueCount('flyguy'),
-    },
+    // Fly Guy 已并入阅读模块（2026-11-17）：阅读不记「已读/已通关」进度，
+    // 所以不再画进度环。历史 flyguy SRS 卡仍会到期，Due 徽章保留。
+    flyguy: { due: getTodayDueCount('flyguy') },
   }
 
   /** 到期复习徽章（"12 待复习"）—— 只在真的有时才出现 */
@@ -221,13 +219,14 @@ export default function CourseEntries() {
               <div className="fg-home-body hall-card-body">
                 <div className="fg-home-title">Fly Guy 绘本</div>
                 <div className="fg-home-sub">
-                  {fgStats ? `${fgStats.stories} 个故事 / ${fgStats.words} 词` : '分级绘本闯关'}
+                  {fgStats
+                    ? `${fgStats.stories} 本真实绘本 · ${fgStats.chapters} 章原文`
+                    : '真实绘本阅读'}
                 </div>
                 <div className="hall-card-foot">
                   <Due id="flyguy" />
                 </div>
               </div>
-              <Ring percent={badges.flyguy?.percent} tone="green" />
             </Link>
           </div>
         </div>

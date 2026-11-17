@@ -1,0 +1,57 @@
+// Fly Guy 阅读 —— 复用 ReadingBook 白纸页骨架后的局部修正。
+//
+// ⚠️ 只在 .fg-reading-sheet 作用域内生效（ReadingBook 的 custom.pageClass 挂上），
+// 绝不改 .reading-sheet 全局规则，/reading 与 /reading1 逐字节不受影响。
+
+.fg-reading-sheet {
+  // 书名是英文长串（"There Was an Old Lady Who Swallowed Fly Guy"）。
+  // 与 RG 同一问题：通栏行会把「图形 + 书名 + 中文 + 徽章」挤在一行，
+  // 长标题折行、中文被截断。改成两行栅格：
+  //   第一行：图形 | 书名（可折） | N 篇 / 💎N 词
+  //   第二行：中文书名（缩进对齐书名）
+  .rm-unit-head {
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: 12px;
+    row-gap: 2px;
+    padding: 10px 2px;
+  }
+
+  .rm-unit-emoji {
+    grid-column: 1;
+    grid-row: 1 / 3;
+    align-self: center;
+  }
+
+  .rm-unit-title {
+    grid-column: 2;
+    grid-row: 1;
+    white-space: normal;
+    line-height: 1.3;
+    min-width: 0;
+  }
+
+  .rm-unit-zh {
+    grid-column: 2;
+    grid-row: 2;
+    white-space: nowrap;
+    overflow: visible;
+    text-overflow: clip;
+    font-size: 12px;
+  }
+
+  .rm-unit-badges {
+    grid-column: 3;
+    grid-row: 1 / 3;
+    margin-left: 0;
+  }
+
+  // hero 底部的版权口径说明：字号小一档、弱化色，讲给家长看
+  .fg-copyright-note {
+    display: block;
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--ink-mute);
+  }
+}

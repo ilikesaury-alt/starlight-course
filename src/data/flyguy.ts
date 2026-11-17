@@ -1,14 +1,14 @@
 // Fly Guy 主题课程数据层
 // 内容来源:基于 Tedd Arnold 的《Fly Guy》系列童书(早期分级读物,适读年龄 4-7 岁,
-// 共约 22 本,2005–2020)。课程按真实书目主题拆分 22 个故事关卡,
-// 每关 8 个适龄高频词汇(英文 + 中文释义 + 例句),书单为真实书目清单。
+// 共约 22 本,2005–2020)。数据按真实书目拆分 22 本故事书,每本 8 个适龄高频词汇
+// (英文 + 中文释义 + 例句),书单为真实书目清单。
 //
 // 例句 / 绘本原文模块:
 //   1) sentence / sentenceZh  —— 适合小朋友的「学法句型」(短、清楚、直接用到该词)。
 //   2) bookSentence / bookSentenceZh —— 每词对应的「绘本原句」短句摘录。
 //   3) bookText —— 用户提供的实体书【整段原文】(按章节 / 页码组织,见 .txt 文件)。
-//      存在时「例句」tab 改为「📖 绘本原文」视图,按章节顺序整段展示真实书文、
-//      不再按单词列句;无 bookText 的故事则回退显示学法句型。
+//      阅读模式(2026-11-17 起,见 flyguyReading.ts)按章拆成「绘本原文」课;
+//      无 bookText 的书收一节「这一本的例句」课。
 //   以上原文均仅作合理使用展示,不内置整本受版权保护的书。
 
 import type { BookTextChapter, Story } from './story-types'
@@ -16,10 +16,6 @@ import { makeEmojiPicker, type EmojiRule } from '@/utils/storyEmoji'
 
 // FGStory 与共享的 Story 结构完全一致;保留类型别名以兼容既有引用
 export type FGStory = Story
-
-export interface FGBook {
-  title: string
-}
 
 // Fly Guy 专属主题色(鲜绿 + 柔绿),区别于 Starlight 天蓝与 Rocket Girl 紫罗兰
 export { FG_THEME } from './story-themes'
@@ -32,10 +28,10 @@ const STORY_EMOJI_RULES: EmojiRule[] = [
   { test: /shoo/i, emoji: '🍔' },                       // #3 Shoo, Fly Guy!
   { test: /fly high/i, emoji: '🌤️' },                   // #4 Fly High, Fly Guy!
   { test: /hooray/i, emoji: '🎉' },                     // #5 Hooray for Fly Guy!
-  { test: /i spy/i, emoji: '🫣' },                      // #6 I Spy Fly Guy!
+  { test: /i spy/i, emoji: '🔍' },                      // #6 I Spy Fly Guy!（🫣 是 Unicode 14，Windows Chromium 渲染成方框）
   { test: /fly girl|meets/i, emoji: '🤝' },             // #7 Fly Guy Meets Fly Girl
-  { test: /buzz boy/i, emoji: '🦸' },                   // #8 Buzz Boy and Fly Guy
-  { test: /flyswatter|swatter/i, emoji: '🪤' },         // #9 Fly Guy vs. the Flyswatter!
+  { test: /buzz boy/i, emoji: '⚡' },                   // #8 Buzz Boy and Fly Guy（🦸 是 Unicode 12，Windows Chromium 渲染成方框）
+  { test: /flyswatter|swatter/i, emoji: '🔨' },         // #9 Fly Guy vs. the Flyswatter!（🪤 是 Unicode 13，Windows Chromium 渲染成方框）
   { test: /ride/i, emoji: '🚗' },                       // #10 Ride, Fly Guy, Ride!
   { test: /in my soup|soup/i, emoji: '🍲' },            // #11 There's a Fly Guy in My Soup
   { test: /franken/i, emoji: '👹' },                    // #12 Fly Guy and the Frankenfly
@@ -43,14 +39,14 @@ const STORY_EMOJI_RULES: EmojiRule[] = [
   { test: /prince fly guy|prince/i, emoji: '👑' },      // #14 Prince Fly Guy
   { test: /old lady|swallowed/i, emoji: '👵' },         // #15 There Was an Old Lady Who Swallowed Fly Guy
   { test: /amazing tricks|tricks/i, emoji: '🎩' },      // #16 Fly Guy's Amazing Tricks
-  { test: /ninja|christmas/i, emoji: '🥷' },            // #17 Fly Guy's Ninja Christmas
+  { test: /ninja|christmas/i, emoji: '🎄' },            // #17 Fly Guy's Ninja Christmas（🥷 是 Unicode 13，Windows Chromium 渲染成方框）
   { test: /big family|family/i, emoji: '👪' },          // #18 Fly Guy's Big Family
   { test: /alien/i, emoji: '👽' },                      // #19 Fly Guy and the Alienzz
   { test: /50-foot|attack/i, emoji: '🗼' },             // #20 Attack of the 50-Foot Fly Guy!
   { test: /sharks/i, emoji: '🦈' },                     // #21 Fly Guy Presents: Sharks
   { test: /dinosaurs|dino/i, emoji: '🦕' },             // #22 Fly Guy Presents: Dinosaurs
 ]
-const STORY_EMOJI_FALLBACK = ['🐝', '🟢', '✨', '🌟', '🍀', '💚', '🪁', '🐝']
+const STORY_EMOJI_FALLBACK = ['🐝', '🟢', '✨', '🌟', '🍀', '💚', '🎨', '🐝']
 
 const matchStoryEmoji = makeEmojiPicker(STORY_EMOJI_RULES, STORY_EMOJI_FALLBACK)
 
@@ -68,7 +64,7 @@ const WORD_EMOJI_RULES: EmojiRule[] = [
   { test: /book|read|story|school|class|teacher|student|learn|write|pen|pencil|spy|书|读|学|写|老师|学校|寻找|看/i, emoji: '📚' },
   { test: /sun|moon|star|sky|space|rocket|planet|night|day|cloud|wind|wind|太阳|月亮|星星|天空|夜|云|风|白天/i, emoji: '🌟' },
   { test: /house|home|door|window|room|bed|tree|garden|park|city|street|table|castle|throne|房子|家|门|窗|树|公园|城市|街道|桌子|城堡|王座/i, emoji: '🏠' },
-  { test: /king|queen|prince|princess|castle|magic|wizard|witch|dragon|robot|alien|monster|ghost|franken|royal|rule|魔法|龙|机器|外星|怪物|皇家|统治/i, emoji: '🪄' },
+  { test: /king|queen|prince|princess|castle|magic|wizard|witch|dragon|robot|alien|monster|ghost|franken|royal|rule|魔法|龙|机器|外星|怪物|皇家|统治/i, emoji: '✨' },
   { test: /big|small|little|tall|short|long|fast|slow|high|hot|cold|new|old|strong|brave|safe|quick|scary|spooky|big|大|小|高|矮|长|快|慢|新|旧|热|冷|强大|勇敢|安全|可怕/i, emoji: '📏' },
   { test: /car|bus|train|boat|ship|plane|bike|truck|wheel|road|cape|mask|car|巴士|火车|船|飞机|自行车|轮子|路|披风|面具/i, emoji: '🚗' },
   { test: /sing|cheer|gift|party|hooray|dance|fun|surprise|sing|唱|欢呼|礼物|派对|好玩|惊讶/i, emoji: '🎉' },
@@ -1196,35 +1192,8 @@ export const flyGuyStories: FGStory[] = rawStories.map((s, i) => {
   }
 })
 
-// 真实《Fly Guy》书目清单(来自网络资料,共约 22 本),作为课程参考书单
-export const flyGuyBooks: FGBook[] = [
-  { title: 'Hi! Fly Guy' },
-  { title: 'Super Fly Guy' },
-  { title: 'Shoo, Fly Guy!' },
-  { title: 'There Was an Old Lady Who Swallowed Fly Guy' },
-  { title: 'Fly High, Fly Guy!' },
-  { title: 'Hooray for Fly Guy!' },
-  { title: 'I Spy Fly Guy!' },
-  { title: 'Fly Guy Meets Fly Girl' },
-  { title: 'Buzz Boy and Fly Guy' },
-  { title: 'Fly Guy vs. the Flyswatter!' },
-  { title: 'Ride, Fly Guy, Ride!' },
-  { title: "There's a Fly Guy in My Soup" },
-  { title: 'Fly Guy and the Frankenfly' },
-  { title: "Fly Guy's Amazing Tricks" },
-  { title: 'A Pet for Fly Guy' },
-  { title: 'Prince Fly Guy' },
-  { title: "Fly Guy's Ninja Christmas" },
-  { title: "Fly Guy's Big Family" },
-  { title: 'Fly Guy and the Alienzz' },
-  { title: 'Attack of the 50-Foot Fly Guy!' },
-  { title: 'Fly Guy Presents: Sharks' },
-  { title: 'Fly Guy Presents: Dinosaurs' },
-]
-
-export const flyGuyStoryCount = flyGuyStories.length
-export const flyGuyWordCount = flyGuyStories.reduce((a, s) => a + s.words.length, 0)
-
-export function getStory(slug: string): FGStory | undefined {
-  return flyGuyStories.find((s) => s.slug === slug)
-}
+// 2026-11-17 起 Fly Guy 并入阅读模块（见 flyguyReading.ts / FlyGuyHome.tsx）：
+// 旧的 flyGuyBooks（参考书单）/ getStory（关卡页路由）/ flyGuyStoryCount /
+// flyGuyWordCount（首页闯关统计）随 StoryHome/StoryPage 一起移除。
+// 本文件保留 22 本故事数据 + 章节化绘本原文，供 modules.ts 的 SRS 动态加载
+// 与 flyguyReading.ts 适配层消费。

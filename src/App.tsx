@@ -19,7 +19,6 @@ const AlphabetPage = lazy(() => import('@/pages/AlphabetPage'))
 const SmartReview = lazy(() => import('@/pages/SmartReview'))
 const RocketGirlHome = lazy(() => import('@/pages/RocketGirlHome'))
 const FlyGuyHome = lazy(() => import('@/pages/FlyGuyHome'))
-const FlyGuyStory = lazy(() => import('@/pages/FlyGuyStory'))
 const StarlightHome = lazy(() => import('@/pages/StarlightHome'))
 const ChineseHome = lazy(() => import('@/pages/ChineseHome'))
 const ChineseUnit = lazy(() => import('@/pages/ChineseUnit'))
@@ -89,7 +88,9 @@ function AppRoutes() {
               兼容已存的书签（以前是 108 个「关卡页」）。 */}
           <Route path="/rocketgirl/:slug" element={<Navigate to="/rocketgirl" replace />} />
           <Route path="/flyguy" element={<FlyGuyHome />} />
-          <Route path="/flyguy/:slug" element={<FlyGuyStory />} />
+          {/* Fly Guy 已整体并入阅读模块：旧的单本路由重定向回书架，
+              兼容已存的书签（以前是 22 个「关卡页」）。 */}
+          <Route path="/flyguy/:slug" element={<Navigate to="/flyguy" replace />} />
           <Route path="/starlight" element={<StarlightHome />} />
           {/* Starlight 是一个系列：第一册（Book 1）与预备级共用同一套页面，按 level 取数据 */}
           <Route path="/starlight1" element={<StarlightHome level="starlight1" />} />

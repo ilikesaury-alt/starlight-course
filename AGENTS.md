@@ -133,12 +133,17 @@ npm run electron:build  # 打包 Windows NSIS 安装包（产物在 release/）
   - **第一册（Starlight 1）是另一套数据，别用上面的脚本/词表**：短文在 `src/data/starlight1/reading.ts`（Unit 1）与 `uN.ts` 的 `uN_reading`，9 单元 / 96 课全有短文。零超纲允许域真源 = `src/data/starlight1/readingVocab1.ts`（预备级 `BASE_WORDS` ∪ `BOOK1_EXTRA_WORDS` 教材角色名/口语词 ∪ 本单元课词表 ∪ 本单元课本原文 token）——第一册教材故事必须能写 Monty/Lola/Mr. Gnome 这些人物。校验器 `readingPassage1.test.ts`、自检脚本 `node scripts/check-reading1.mjs N --brief / --stats`、唯一口径实现 `validateReadingPassage1()`（生成与单测共用）。文体要求与预备级通用，见 `docs/reading-passage-style.md` 第 3 节
   - **外教课堂对话**：预备级 96 课在 `src/data/dialogue/unit1..12.ts`，门面 `lessonDialogue.ts`（`getLessonDialogue(unitId, lessonId)`，key 形如 `5-5`）；第一册 96 课在 `src/data/starlight1/dialogue/u1..9.ts`，独立门面 `starlight1/dialogue1.ts`（`getLessonDialogue1` / `LESSON_DIALOGUE1`）。**两册单元号都从 1 开始，必须按 level 分发**（`starlightSeriesData.ts` 的 `seriesDialogue`），直接按裸 unitId 查会串书。第一册校验器 `dialogue1.test.ts` + `node scripts/check-dialogue1.mjs N --brief / --stats`，唯一口径 `validateDialogue1()`：10~15 轮、T/S 都有、每轮 en+zh、英文无中文标点、无重复台词、本课词覆盖 ≥60%（对话有课堂用语，不像短文那样要求零超纲 / 100% 覆盖）
   - 阅读区视觉：`.reading-body` 是「书页」（暖纸色 + 斜向纤维纹 + 顶部丝带），`.reading-title` 居中带手写下划线；**两种排版模式**由 `.reading-zone.is-zh` 切换 —— 默认「流式散文」（句子 inline-block 连成一段），显示中文后切「逐句双语」（一句一行、译文紧跟其下）。改样式**不得破坏** e2e 契约（`tests/starlight-zones.spec.ts`）：类名一个都不能改、`.reading-sent` == `.reading-zh` == `.reading-say` 数量、译文必须在英文**下方**且与英文**左对齐**（偏差 < 6px）、`.tt-word` 默认透明底
-  - ⚠️ **Rocket Girl 是阅读模块，不是故事闯关**（2026-11-13 重做，`be0c950`）：`/rocketgirl` = `RocketGirlHome` → `ReadingBook source={RG_READING_SOURCE} custom={RG_BOOK}`，与 `/reading` 共用白纸页 / hero / 通栏目录 / 展开见宝藏词 / 点一条就地展开 `ReadingZone` 的**同一套组件和流程**。RG 没有单词卡 / 闯关测验 / 标记本关完成 / 星数 / 128 本绘本馆 / 搜索 / Tab，`/rocketgirl/:slug` 只重定向回 `/rocketgirl`。`StoryHome` / `StoryPage` / `BookTextView` / `QuizEngine` **现在只服务 Fly Guy**，别按旧印象给 RG 加回去
+  - ⚠️ **Rocket Girl 是阅读模块，不是故事闯关**（2026-11-13 重做，`be0c950`）：`/rocketgirl` = `RocketGirlHome` → `ReadingBook source={RG_READING_SOURCE} custom={RG_BOOK}`，与 `/reading` 共用白纸页 / hero / 通栏目录 / 展开见宝藏词 / 点一条就地展开 `ReadingZone` 的**同一套组件和流程**。RG 没有单词卡 / 闯关测验 / 标记本关完成 / 星数 / 128 本绘本馆 / 搜索 / Tab，`/rocketgirl/:slug` 只重定向回 `/rocketgirl`。别按旧印象给 RG 加回去
     - `ReadingBook` 的 `custom` 覆盖项**全部可选**，不传就走原 Starlight 分支逐字节不变 —— 这是保住 `/reading`、`/reading1` 的 41 条 e2e 契约的机制。**不要**扩展 `StarlightLevel` / `STARLIGHT_LEVEL_ORDER` / `READING_PATHS`，也不要给 `.sl-series-tab` 加第三项（e2e 钉死恰好 2 项，RG 用面包屑代替切换条）
     - RG 的 108 集按标题冒号前共同前缀分成 **27 个故事弧 × 4 集**，弧 = 「单元」、集 = 「课」。数据适配在 `src/data/rocketgirlReading.ts`：`rgPassageOf` **必须返回稳定引用**（`ReadingZone` 的 `useEffect([passage])` 会因引用变化 `cancelSpeech()` 掐断朗读）——按 key 缓存，别每次现算新对象
     - RG 没有绘本正文（0/108 有 `bookText`），读的是**词条例句**（每集 ≤10 句），文案一律写「这一集的例句」，绝不标成「绘本原文 / 小故事」；128 本 PDF 是用户本地版权材料（435MB，已 gitignore），**不要抽取/提交**
-    - 查词链 `lookupRgZh`（bookDict → RG 自动词表 → 词形回退）是 **RG 专属独立文件**，别倒进 `BOOK_WORD_ZH`（后者被 `bookQuiz.ts` 用来挑挖空候选，会改变 Fly Guy / Starlight 出题分布）；查不到的长尾靠 `TappableWords` 的 `sentenceZh` 整句中文兜底
+    - 查词链 `lookupRgZh`（bookDict → RG 自动词表 → 词形回退）是 **RG 专属独立文件**，别倒进 `BOOK_WORD_ZH`（后者被 `bookQuiz.ts` 用来挑挖空候选，会改变出题分布）；查不到的长尾靠 `TappableWords` 的 `sentenceZh` 整句中文兜底
     - `completedStories` 持久化字段**保留但 RG 页不再读/写**（不删字段、不升 store version，避免迁移）。首页 / `Progress` / `TodayTasks` 的 RG 文案是静态数量，不伪造「已读/已通关」进度
+  - ⚠️ **Fly Guy 也是阅读模块了**（2026-11-17 重做，对齐 RG 口径）：`/flyguy` = `FlyGuyHome` → `ReadingBook source={FG_READING_SOURCE} custom={FG_BOOK}`（`src/data/flyguyReading.ts` 适配层）。**书 = 单元**（22 本）、**章 = 课**：15 本有 `bookText`（用户提供的实体书 txt 按章/页，58 章 457 页，真实原文 → 课标题写「绘本原文」），7 本无原文收 1 节例句课（≤10 句 → 写「这一本的例句」）。文案诚实规则与 RG 相同：有真实原文才可标「绘本原文」
+    - `StoryHome` / `StoryPage` / `FlyGuyStory` **已删除**；`BookTextView` 只服务 LessonPreview（课本原文），`QuizEngine` 只服务 Starlight 主课/单元测验。`/flyguy/:slug` 重定向回 `/flyguy`。**别再给 FG 加单词卡/闯关/加星** —— 阅读归阅读，复习归 SmartReview
+    - `flyguy.ts` 保留 22 本故事数据（modules.ts 的 SRS 动态加载 + 适配层共用）；`flyGuyBooks` / `getStory` / `flyGuyStoryCount` / `flyGuyWordCount` 已随闯关形态删除。`fgPassageOf` 同样**必须返回稳定引用**（PASSAGE_CACHE），`fgReadingStats` 是 Progress / 首页卡的静态规模数字
+    - `completedStories` 对 FG 同 RG：字段保留不读写，历史 `fg-*` 通关记录不算阅读进度；Fly Guy 的 SRS 卡 / 错题**保留**在复习池（SmartReview 的 flyguy 筛选与 Due 徽章照常工作）
+    - FG 页级样式在 `_flyguy-reading.scss`（`.fg-reading-sheet` 作用域，两行书名栅格 + 版权口径小字），不碰 `.reading-sheet` 全局规则
 
 - Phonics: `src/data/phonics.ts` 的音素切分口径**对齐《字母积木》(Alphablocks / BBC CBeebies) 的教学分级** —— 孩子正在看的动画是这套片，app 必须跟动画对得上号，否则提示反而干扰：
   - L1-2 单字母 / L3 字母小队（两三个字母合成一个音：`ch`/`ai`/`igh`/`ar`/`er`…）/ L4 手拉手（辅音簇各发各的音：`st`/`bl`/`-nd`）/ L5 魔法E（`e` **单独成格**、自己不发声、但让前面元音发长音）/ 特别篇双写（`ll`/`ss`/`ff` 合成一个音）
@@ -179,7 +184,7 @@ npm run electron:build  # 打包 Windows NSIS 安装包（产物在 release/）
 - **所有 e2e class 锚点一个都不能改名**：`.cn-home-entry` `.en3-home-entry` `.sl-home-entry` `.rg-home-entry` `.fg-home-entry` `.dt-home-entry` `.ab-home-entry` `.rd-home-entry` `.rd1-home-entry`
 - **首页在 ≥900px 从「左 hero / 右清单」两栏改成单列纵向流**。旧两栏是给三段文案的 hero 配的（文案高，右栏填空洞）；hero 收薄到 82px 后并排只剩反效果 —— 实测主课区被推到首屏下方 589px
 - **今日清单在 ≥900px 三列并排**（350px → 212px），把主课从 657px 提到 519px。窄屏保持纵向（横排会把文字压成两三个字）
-- `.hero--hall` 只作用于首页；`.hero-sub` 被 BookHome / StoryHome / Eng3aHome 共用，**样式不能删**
+- `.hero--hall` 只作用于首页；`.hero-sub` 被 BookHome / Eng3aHome 共用，**样式不能删**
 - 进度环 `.hall-ring` 是纯 SVG（零资源），比进度条更有「到哪了」的到达感；`data-tone` 区分模块色
 
 ## 每日节律（`data/dailyPlan.ts` + `components/TodayTasks.tsx`，store v10）

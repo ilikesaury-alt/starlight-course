@@ -101,6 +101,9 @@ scripts/ocr_book.py
 # pi 编码代理的临时任务输出（本次会话产生，不入库）
 .pi/
 
+# ZCode 代理的计划草稿（计划模式生成，不入库）
+.zcode/
+
 # taste-skill 设计审查的临时工作区（inspect 截图 / draw 方向单 / 技能副本），不入库
 .taste-skill/
 

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { useCourseStore } from '../store/useCourseStore'
 import { totalChineseLessons } from '../data/chinese'
 import { totalEngLessons } from '../data/eng3a'
-import { flyGuyStories, flyGuyStoryCount } from '../data/flyguy'
+import { fgReadingStats } from '../data/flyguyReading'
 import { rgArcCount, rgStoryCount } from '../data/rocketgirlReading'
 import { moduleThemeOf } from '../data/modules'
 import {
@@ -25,7 +25,6 @@ export default function Progress() {
   const wrongWords = useCourseStore((s) => s.wrongWords)
   const completedQuizzes = useCourseStore((s) => s.completedQuizzes)
   const lessonCompleted = useCourseStore((s) => s.lessonCompleted)
-  const completedStories = useCourseStore((s) => s.completedStories)
   const reciteCheckins = useCourseStore((s) => s.reciteCheckins)
   const eng3aRecite = useCourseStore((s) => s.eng3aRecite)
   const completedChinese = useCourseStore((s) => s.completedChinese)
@@ -38,7 +37,6 @@ export default function Progress() {
 
   const chineseRecited = Object.keys(reciteCheckins).filter((k) => (reciteCheckins[k]?.length ?? 0) > 0).length
   const eng3aRead = Object.keys(eng3aRecite).filter((k) => (eng3aRecite[k]?.length ?? 0) > 0).length
-  const flyguyDone = flyGuyStories.filter((s) => completedStories.includes(s.slug)).length
 
   // Starlight 是一个系列：两册的完成记录都存在同一份 lessonCompleted /
   // completedQuizzes 里（键是单元 slug，全局唯一）。按册拆开统计，分母取自
@@ -68,7 +66,10 @@ export default function Progress() {
     ...starlightRows,
     { id: 'chinese', to: '/chinese', emoji: '📚', name: '三年级上册语文', status: `已学完 ${completedChinese.length}/${totalChineseLessons} 课 · 已背 ${chineseRecited} 课`, total: totalChineseLessons, done: completedChinese.length },
     { id: 'eng3a', to: '/eng3a', emoji: '📘', name: '三年级上册英语', status: `已学完 ${completedEng3a.length}/${totalEngLessons} 课 · 已读 ${eng3aRead} 课`, total: totalEngLessons, done: completedEng3a.length },
-    { id: 'flyguy', to: '/flyguy', emoji: '🐝', name: 'Fly Guy 绘本闯关', status: `已通关 ${flyguyDone}/${flyGuyStoryCount} 关`, total: flyGuyStoryCount, done: flyguyDone },
+    // Fly Guy 已整体并入阅读模块（2026-11-17）：阅读不写「已读/已通关」记录，
+    // 所以这里只报静态规模，total=0 → 不画进度条。绝不把 completedStories 里的
+    // 历史 fg-* 通关数当成阅读进度（与 Rocket Girl 行同一口径）。
+    { id: 'flyguy', to: '/flyguy', emoji: '🐝', name: 'Fly Guy 绘本', status: `${fgReadingStats.books} 本真实绘本 · ${fgReadingStats.chapters} 章原文`, total: 0, done: 0 },
     // Rocket Girl 已整体并入阅读模块：阅读不写「已读」记录，所以这里只报静态规模，
     // total=0 → 不画进度条。绝不把 `completedStories` 里的历史 rg-* 当成阅读进度。
     { id: 'rocketgirl', to: '/rocketgirl', emoji: '🚀', name: 'Rocket Girl 阅读', status: `${rgArcCount} 个故事 · ${rgStoryCount} 段例句`, total: 0, done: 0 },
@@ -78,9 +79,9 @@ export default function Progress() {
     { emoji: '⭐', value: totalStars, label: '累计星星', to: undefined as string | undefined },
     { emoji: '🧠', value: todayDue, label: '今日到期', to: '/smart' },
     { emoji: '📋', value: wrongWords.length, label: '错题本', to: '/wrong' },
-    // Rocket Girl 已并入阅读模块（不记「已读」）：历史 localStorage 里的 rg-* 不再
-    // 算作通关进度，只统计还有通关语义的 Fly Guy 绘本。
-    { emoji: '🏆', value: completedStories.filter((s) => !s.startsWith('rg-')).length, label: '已通关绘本', to: undefined },
+    // Fly Guy / Rocket Girl 都已并入阅读模块（不记「已读/已通关」）：
+    // completedStories 里的历史 fg-*/rg-* 不再算进度，奖杯位改成静态的绘本规模。
+    { emoji: '🏆', value: fgReadingStats.books, label: '可读绘本', to: '/flyguy' },
   ]
 
   return (
