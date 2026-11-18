@@ -24,7 +24,7 @@ test.describe('绘本桥梁书馆 · 入口与结构', () => {
     await expect(entry).toBeVisible()
     await expect(entry).toContainText('绘本桥梁书馆')
     await expect(entry).toHaveAttribute('href', /#\/books$/)
-    await expect(entry).toContainText('14 套书 · 2 套可读')
+    await expect(entry).toContainText('14 套书 · 3 套可读')
     await entry.click()
 
     await expect(page).toHaveURL(/#\/books$/)
@@ -32,17 +32,18 @@ test.describe('绘本桥梁书馆 · 入口与结构', () => {
     await expect(page.locator('h1.rm-hero-title')).toContainText('绘本桥梁书馆')
   })
 
-  test('14 张书卡齐全：2 张可读 <a> + 12 张准备中 <div>', async ({ page }) => {
+  test('14 张书卡齐全：3 张可读 <a> + 11 张准备中 <div>', async ({ page }) => {
     await page.goto(BOOKS)
     await expect(page.locator('[data-testid^="bw-series-"]')).toHaveCount(14, { timeout: 15000 })
-    await expect(page.locator('a[data-testid^="bw-series-"]')).toHaveCount(2)
-    await expect(page.locator('div[data-testid^="bw-series-"]')).toHaveCount(12)
-    // 可读两套的路由
+    await expect(page.locator('a[data-testid^="bw-series-"]')).toHaveCount(3)
+    await expect(page.locator('div[data-testid^="bw-series-"]')).toHaveCount(11)
+    // 可读三套的路由
     await expect(page.getByTestId('bw-series-fly-guy')).toHaveAttribute('href', /#\/flyguy$/)
     await expect(page.getByTestId('bw-series-rocket-girl')).toHaveAttribute(
       'href',
       /#\/rocketgirl$/,
     )
+    await expect(page.getByTestId('bw-series-winnie-the-witch')).toHaveAttribute('href', /#\/winnie$/)
     // 准备中的灰卡不可点
     const soon = page.getByTestId('bw-series-frog-and-toad')
     await expect(soon).toContainText('准备中')
@@ -50,15 +51,18 @@ test.describe('绘本桥梁书馆 · 入口与结构', () => {
     await expect(soon).toHaveAttribute('aria-disabled', 'true')
   })
 
-  test('可读书排在最前，其余按蓝思从易到难', async ({ page }) => {
+  test('可读书排在最前（按蓝思升序），其余按蓝思从易到难', async ({ page }) => {
     await page.goto(BOOKS)
     await expect(page.locator('[data-testid^="bw-series-"]')).toHaveCount(14, { timeout: 15000 })
     const slugs = await page
       .locator('[data-testid^="bw-series-"]')
       .evaluateAll((els) => els.map((e) => e.getAttribute('data-testid')))
-    expect(slugs[0]).toBe('bw-series-fly-guy')
-    expect(slugs[1]).toBe('bw-series-rocket-girl')
-    expect(slugs[2]).toBe('bw-series-nate-the-great') // 230L 起步，最易
+    expect(slugs.slice(0, 3)).toEqual([
+      'bw-series-fly-guy',
+      'bw-series-winnie-the-witch',
+      'bw-series-rocket-girl',
+    ])
+    expect(slugs[3]).toBe('bw-series-nate-the-great') // 230L 起步，最易
   })
 })
 
@@ -90,9 +94,9 @@ test.describe('绘本桥梁书馆 · 筛选与跳转', () => {
     await page.goto(BOOKS)
     await expect(page.locator('[data-testid^="bw-series-"]')).toHaveCount(14, { timeout: 15000 })
     await page.getByRole('group', { name: '按状态筛选' }).getByRole('button', { name: '可以读' }).click()
-    await expect(page.locator('[data-testid^="bw-series-"]')).toHaveCount(2)
+    await expect(page.locator('[data-testid^="bw-series-"]')).toHaveCount(3)
     await page.getByRole('group', { name: '按状态筛选' }).getByRole('button', { name: '准备中' }).click()
-    await expect(page.locator('[data-testid^="bw-series-"]')).toHaveCount(12)
+    await expect(page.locator('[data-testid^="bw-series-"]')).toHaveCount(11)
   })
 
   test('点可读书卡进入对应阅读模块', async ({ page }) => {
@@ -106,6 +110,12 @@ test.describe('绘本桥梁书馆 · 筛选与跳转', () => {
     await expect(page.getByTestId('bw-series-rocket-girl')).toBeVisible({ timeout: 15000 })
     await page.getByTestId('bw-series-rocket-girl').click()
     await expect(page).toHaveURL(/#\/rocketgirl$/)
+    await expect(page.locator('.reading-sheet')).toBeVisible({ timeout: 15000 })
+
+    await page.goto(BOOKS)
+    await expect(page.getByTestId('bw-series-winnie-the-witch')).toBeVisible({ timeout: 15000 })
+    await page.getByTestId('bw-series-winnie-the-witch').click()
+    await expect(page).toHaveURL(/#\/winnie$/)
     await expect(page.locator('.reading-sheet')).toBeVisible({ timeout: 15000 })
   })
 })

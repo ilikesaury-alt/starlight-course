@@ -16,3 +16,9 @@ export const BOOK_WALL_THEME = {
   color: '#d97706',
   colorSoft: '#fef3c7',
 } as const
+
+/** Winnie the Witch 绘本（/winnie）：魔女紫粉，区别于 RG 紫与 FG 绿。 */
+export const WINNIE_THEME = {
+  color: '#9333ea',
+  colorSoft: '#f3e8ff',
+} as const

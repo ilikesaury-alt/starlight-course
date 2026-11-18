@@ -11,6 +11,7 @@ import { warmupKokoro } from '@/utils/engine/kokoro'
 const Home = lazy(() => import('@/pages/Home'))
 const Courses = lazy(() => import('@/pages/Courses'))
 const BookWall = lazy(() => import('@/pages/BookWall'))
+const WinnieHome = lazy(() => import('@/pages/WinnieHome'))
 const LessonList = lazy(() => import('@/pages/LessonList'))
 const LessonPreview = lazy(() => import('@/pages/LessonPreview'))
 const UnitQuiz = lazy(() => import('@/pages/UnitQuiz'))
@@ -73,6 +74,7 @@ function AppRoutes() {
           <Route path="/" element={<Home />} />
           <Route path="/courses" element={<Courses />} />
           <Route path="/books" element={<BookWall />} />
+          <Route path="/winnie" element={<WinnieHome />} />
           <Route path="/preview" element={<Navigate to="/starlight" replace />} />
           <Route path="/preview/:unitId" element={<LessonList />} />
           <Route path="/preview/:unitId/:lessonId" element={<LessonPreview />} />

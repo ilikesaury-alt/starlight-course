@@ -1,0 +1,11 @@
+// Winnie the Witch 阅读（/winnie）—— 复用 ReadingBook 白纸页骨架后的局部修正。
+// ⚠️ 只在 .winnie-reading-sheet 作用域内生效，不碰 .reading-sheet 全局规则。
+
+.winnie-reading-sheet {
+  .winnie-copyright-note {
+    display: block;
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--ink-mute);
+  }
+}
