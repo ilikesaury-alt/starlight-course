@@ -91,6 +91,19 @@
     margin: 0;
   }
 
+  // 题型标签（板块分类，只作提示，不喧宾夺主）
+  .mp-topic-chip {
+    display: inline-block;
+    margin-bottom: 12px;
+    padding: 2px 10px;
+    border-radius: var(--r-pill);
+    background: var(--mp-soft);
+    color: var(--mp-hue);
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.6;
+  }
+
   // ---------- 可标记题干（审题三步法第①步：圈关系词 / 划数字）----------
   // 模拟纸上动作：关系词点一下 = 椭圆圈起来；数字点一下 = 底部横线。
   // 判定后 .is-standard 把标准答案亮出来（淡靛圈 / 下划线），孩子对照补漏。
@@ -99,7 +112,6 @@
     flex-wrap: wrap;
     align-items: baseline;
     row-gap: 10px;
-    padding: 22px 24px;
     font-size: 19px;
     font-weight: 700;
     line-height: 1.8;

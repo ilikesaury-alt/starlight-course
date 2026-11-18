@@ -122,6 +122,8 @@ test.describe('M1/M2 入口与结构', () => {
     await expect(chips.nth(1)).toContainText('求什么')
     await expect(chips.nth(2)).toContainText('先算什么')
     await expect(chips.nth(3)).toContainText('得数')
+    // 题型标签在题干卡顶部（不混进题干文本，避免 e2e 题干匹配被污染）
+    await expect(page.locator('[data-testid="topic-chip"]')).toBeVisible()
   })
 })
 

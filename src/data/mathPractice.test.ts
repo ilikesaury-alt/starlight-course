@@ -1,13 +1,22 @@
 // 应用题数据的不变量：题干分词拼接 === 原文、每题都有可圈的关系词和可划的
-// 数字（审题三步法的载体）、每步恰有一个正确选项、分步末步结果 = answer。
-// 这些检查保护「题目自相矛盾 / 答案算错」这类最难肉眼发现的错误。
+// 数字（审题三步法的载体）、每步恰有一个正确选项、分步末步结果 = answer、
+// 第一步算式不含最终答案（防「得数」步提前泄露）。这些检查保护「题目自相
+// 矛盾 / 答案算错」这类最难肉眼发现的错误。
 import { describe, it, expect } from 'vitest'
-import { WORD_PROBLEMS, wordProblemRound } from './mathPractice'
+import { TOPIC_LABEL, WORD_PROBLEMS, wordProblemRound } from './mathPractice'
 
 describe('应用题数据', () => {
-  it('题量充足，id 唯一', () => {
-    expect(WORD_PROBLEMS.length).toBeGreaterThanOrEqual(10)
+  it('题量 ≥ 28，id 唯一', () => {
+    expect(WORD_PROBLEMS.length).toBeGreaterThanOrEqual(28)
     expect(new Set(WORD_PROBLEMS.map((p) => p.id)).size).toBe(WORD_PROBLEMS.length)
+  })
+
+  it('每题的 topic 合法，且 7 个板块都有题', () => {
+    for (const p of WORD_PROBLEMS) {
+      expect(TOPIC_LABEL[p.topic], `${p.id} topic ${p.topic}`).toBeTruthy()
+    }
+    const topics = new Set(WORD_PROBLEMS.map((p) => p.topic))
+    expect(topics.size).toBe(Object.keys(TOPIC_LABEL).length)
   })
 
   it('segments 拼接 === text（题干渲染不失真）', () => {
@@ -35,7 +44,7 @@ describe('应用题数据', () => {
     }
   })
 
-  it('分步算式两步齐全，末步结果 === answer', () => {
+  it('分步算式 ≥2 步，末步结果 === answer', () => {
     for (const p of WORD_PROBLEMS) {
       expect(p.steps.length, `${p.id} 分步`).toBeGreaterThanOrEqual(2)
       const last = p.steps[p.steps.length - 1]
@@ -75,6 +84,13 @@ describe('出题', () => {
     const list = wordProblemRound(5, 999)
     expect(list.length).toBeLessThanOrEqual(5)
     expect(new Set(list.map((p) => p.id)).size).toBe(list.length)
+  })
+
+  it('按板块轮转：每轮 5 题至少覆盖 4 个不同板块（不会一整轮同类题）', () => {
+    for (let seed = 1; seed <= 20; seed++) {
+      const topics = new Set(wordProblemRound(5, seed).map((p) => p.topic))
+      expect(topics.size, `seed=${seed} 板块覆盖`).toBeGreaterThanOrEqual(4)
+    }
   })
 
   it('指定 ids 时只取这些题（重练错题），忽略 count', () => {

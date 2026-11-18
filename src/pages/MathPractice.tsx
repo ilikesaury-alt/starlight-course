@@ -21,6 +21,7 @@ import { useMemo, useState, useSyncExternalStore } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowLeft, RotateCcw, Check, X, Lightbulb } from 'lucide-react'
 import {
+  TOPIC_LABEL,
   WORD_PROBLEMS,
   wordProblemRound,
   type WordProblem,
@@ -252,7 +253,9 @@ export default function MathPractice() {
                 「一共、还剩、比…多、比…少、几倍、每、至少」是题目的骨头 —— 点一下圈起来；
                 数字和单位点一下划上横线。笔到了，脑子才到。
               </p>
-              <div className="mp-stem-card mp-stem-markable" data-testid="problem-text">
+              <div className="mp-stem-card">
+                <span className="mp-topic-chip" data-testid="topic-chip">{TOPIC_LABEL[q.topic]}</span>
+                <div className="mp-stem-markable" data-testid="problem-text">
                 {q.segments.map((seg, i) => {
                   const hit = marked.includes(i)
                   // 判定后：标对的显示标准标注；**失败时漏标的用红色标出来**，
@@ -275,6 +278,7 @@ export default function MathPractice() {
                     </button>
                   )
                 })}
+                </div>
               </div>
               {!stepDone ? (
                 <button type="button" className="mp-btn" onClick={() => submitMark(q)}>标好了，读题完成</button>
