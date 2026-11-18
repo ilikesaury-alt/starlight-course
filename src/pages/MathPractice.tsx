@@ -245,6 +245,36 @@ export default function MathPractice() {
             })}
           </div>
 
+          {/* ---------- 题干卡：四步全程可见（孩子在①步的圈画保留在题上，
+              像"已经动过笔的试卷"，②③④步随时回看题意）---------- */}
+          <div className="mp-stem-card">
+            <span className="mp-topic-chip" data-testid="topic-chip">{TOPIC_LABEL[q.topic]}</span>
+            <div className={`mp-stem-markable ${step === 'mark' ? '' : 'is-locked'}`} data-testid="problem-text">
+              {q.segments.map((seg, i) => {
+                const hit = marked.includes(i)
+                // 标记步判定后：标对的显示标准标注；**失败时漏标的用红色标出来**，
+                // 否则孩子看不出到底漏了哪个（红圈=关系词，红下划线=数字）。
+                const isMissed = step === 'mark' && stepDone && !stepCorrect && !!seg.k && !hit
+                const showStandard = step === 'mark' && stepDone && stepCorrect && !!seg.k
+                const isExtra = step === 'mark' && stepDone && hit && !seg.k
+                return (
+                  <button
+                    key={i}
+                    type="button"
+                    className={`mp-seg ${seg.k === 'rel' ? 'mp-seg--rel' : ''} ${seg.k === 'num' ? 'mp-seg--num' : ''} ${
+                      hit ? 'is-marked' : ''
+                    } ${showStandard ? 'is-standard' : ''} ${isMissed ? 'is-missed' : ''} ${isExtra ? 'is-extra' : ''}`}
+                    aria-pressed={hit}
+                    disabled={step !== 'mark' || stepDone}
+                    onClick={() => setMarked((m) => (m.includes(i) ? m.filter((x) => x !== i) : [...m, i]))}
+                  >
+                    {seg.t}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
           {/* ---------- 第一步：标记（圈关系词 + 划数字）---------- */}
           {step === 'mark' && (
             <div className="mp-step-panel" data-testid="mark-step">
@@ -253,33 +283,6 @@ export default function MathPractice() {
                 「一共、还剩、比…多、比…少、几倍、每、至少」是题目的骨头 —— 点一下圈起来；
                 数字和单位点一下划上横线。笔到了，脑子才到。
               </p>
-              <div className="mp-stem-card">
-                <span className="mp-topic-chip" data-testid="topic-chip">{TOPIC_LABEL[q.topic]}</span>
-                <div className="mp-stem-markable" data-testid="problem-text">
-                {q.segments.map((seg, i) => {
-                  const hit = marked.includes(i)
-                  // 判定后：标对的显示标准标注；**失败时漏标的用红色标出来**，
-                  // 否则孩子看不出到底漏了哪个（红圈=关系词，红下划线=数字）。
-                  const isMissed = stepDone && !stepCorrect && !!seg.k && !hit
-                  const showStandard = stepDone && stepCorrect && !!seg.k
-                  const isExtra = stepDone && hit && !seg.k
-                  return (
-                    <button
-                      key={i}
-                      type="button"
-                      className={`mp-seg ${seg.k === 'rel' ? 'mp-seg--rel' : ''} ${seg.k === 'num' ? 'mp-seg--num' : ''} ${
-                        hit ? 'is-marked' : ''
-                      } ${showStandard ? 'is-standard' : ''} ${isMissed ? 'is-missed' : ''} ${isExtra ? 'is-extra' : ''}`}
-                      aria-pressed={hit}
-                      disabled={stepDone}
-                      onClick={() => setMarked((m) => (m.includes(i) ? m.filter((x) => x !== i) : [...m, i]))}
-                    >
-                      {seg.t}
-                    </button>
-                  )
-                })}
-                </div>
-              </div>
               {!stepDone ? (
                 <button type="button" className="mp-btn" onClick={() => submitMark(q)}>标好了，读题完成</button>
               ) : (

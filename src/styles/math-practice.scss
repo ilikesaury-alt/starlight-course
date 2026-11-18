@@ -107,6 +107,8 @@
   // ---------- 可标记题干（审题三步法第①步：圈关系词 / 划数字）----------
   // 模拟纸上动作：关系词点一下 = 椭圆圈起来；数字点一下 = 底部横线。
   // 判定后 .is-standard 把标准答案亮出来（淡靛圈 / 下划线），孩子对照补漏。
+  // 题干卡四步全程可见：过了标记步加 .is-locked（词块不可点、去掉 hover 反馈），
+  // 孩子在②③④步随时回看已经圈画过的题 —— 像动过笔的试卷。
   .mp-stem-markable {
     display: flex;
     flex-wrap: wrap;
@@ -116,6 +118,11 @@
     font-weight: 700;
     line-height: 1.8;
     color: var(--ink);
+
+    &.is-locked .mp-seg {
+      cursor: default;
+      &:hover { color: inherit; }
+    }
   }
   .mp-seg {
     padding: 0 2px;

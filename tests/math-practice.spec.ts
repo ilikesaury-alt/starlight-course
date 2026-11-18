@@ -190,12 +190,14 @@ test.describe('M4 全流程与错题', () => {
 })
 
 test.describe('M5 不提前泄露答案', () => {
-  test('点下一步后，下一步一进来不显示反馈', async ({ page }) => {
+  test('点下一步后，题干仍然可见（不消失），且不显示反馈', async ({ page }) => {
     await gotoMath(page)
     const text = (await page.locator('[data-testid="problem-text"]').textContent())!.trim()
     await doMarkStep(page, problemOf(text), true)
     await page.getByRole('button', { name: '下一步' }).click()
     await expect(page.locator('[data-testid="choice-step"]')).toBeVisible()
+    // 题干必须还在（曾因题干卡放在标记步分支内，下一步后整块消失）
+    await expect(page.locator('[data-testid="problem-text"]')).toContainText(text)
     // 还没选就出现反馈 = 把上一步的判定态带进了新一步（bug）
     await expect(page.locator('.mp-feedback')).toHaveCount(0)
   })
