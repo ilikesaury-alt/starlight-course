@@ -148,11 +148,16 @@ npm run electron:build  # 打包 Windows NSIS 安装包（产物在 release/）
     - **上架一本新书 = 只改 `bookWall.ts` 的一条数据**（把 `available` 改 true、填 `linkTo`），首页与其它代码零改动。`BOOK_SERIES` 是书单唯一真源：中英书名/作者/蓝思区间/年级/主题/emoji/主题色；蓝思按用户书单原样展示（联网核实有 5 套实际区间与书单有出入，差异只在 docs 说明，UI 不改用户数据）
     - 书馆是**纯目录页**：不注册 `modules.ts`、不做 SRS/测验、不升 store、不持久化进度。可读卡（`<Link>`）跳已有阅读模块，准备中卡（灰态 `<div>` + `aria-disabled`）不可点。有正文才可标可读——没有自有版权文件就不要把 `available` 置 true
     - 排序规则写在**页面渲染时**（`filtered.sort`：可读优先 + 蓝思下界升序），不依赖 `bookWall.ts` 的数据顺序——将来新书随便插哪都行。搜索/难度 chip（起步<400 / 进阶 400–550 / 挑战 550+）/状态 chip 全在页面内 `useState`，零持久化
-    - 可读的三套是 Fly Guy（`/flyguy`）、Rocket Girl（`/rocketgirl`）、女巫温妮（`/winnie`）。书馆数据 14 套 = 用户书单 13 套 + 已有 RG；`bookWallStats` 给首页卡提供静态数字（不用动态 import，避免 vitest teardown race）
-    - `.bw-home-entry` 是首页新锚点（book-wall.spec 钉死）；RG/FG/Winnie spec 的首条「首页入口」用例已改为走书馆路径
+    - 可读的四套是 Fly Guy（`/flyguy`）、Rocket Girl（`/rocketgirl`）、女巫温妮（`/winnie`）、青蛙与蟾蜍（`/frog-and-toad`）。书馆数据 14 套 = 用户书单 13 套 + 已有 RG；`bookWallStats` 给首页卡提供静态数字（不用动态 import，避免 vitest teardown race）
+    - `.bw-home-entry` 是首页新锚点（book-wall.spec 钉死）；RG/FG/Winnie/Frog spec 的首条「首页入口」用例已改为走书馆路径
   - ⚠️ **Winnie the Witch 女巫温妮（`/winnie`，`src/data/winnie.ts` + `winnieReading.ts`）是自有正版绘本按页读**（2026-11-18 添加）：用户提供的 PDF（Valerie Thomas 著 / Korky Paul 绘，HarperCollins）是 27 页全页扫描无文本层，经 `scripts/_ocr_winnie.py`（RapidOCR，**gitignore 草稿不提交**）提取 + 对照原图人工校对（修 ABRAGADABRA/dosed→closed/angway→anyway 等 OCR 错）+ 逐句中文翻译。**注意同名 EPUB 是 Anthony Clark 改编的儿童舞台剧剧本，是另一部作品，别混**
     - 20 个正文页（27 页剔除封面/扉页/纯插画 4·6·11·18/版权页），页 = 课（lessonId 用原书页码 3..26）；与 Fly Guy 同构：`winniePassageOf` 按页缓存稳定引用、查词用全局 `lookupZh`，`WINNIE_THEME` 紫粉色
     - 版权口径同 Fly Guy：只放文字 en/zh，不内置扫描图片；原 PDF/EPUB 不进 git（`.gitignore` 已有 `*.pdf`）。`WINNIE_PAGES` 每句必须有中文（ReadingZone sentenceZh 兜底），单测钉死咒语拼写与 OCR 纠错
+    - 词典：Winnie 的 506 词次曾有 20 个词形查不到（主角 Winnie/Wilbur 各 18/19 次）→ 补在 `src/data/winnieDict.ts`，由 `bookDict.ts` 只补缺失键合并（与课本原文零重叠），覆盖率 100%。与 Frog 的 `frogDict.ts` 同一模式，单测钉死覆盖率
+  - ⚠️ **青蛙与蟾蜍（`/frog-and-toad`，`src/data/frogAndToad.ts` + `frogAndToadReading.ts`）是自有正版绘本按故事读**（2026-11-18 添加）：用户提供《Frog and Toad Storybook Favorites》（Arnold Lobel 著，HarperCollins，266 页 = 4 本子书 × 5 故事）。原书是 4 本子书 → 4 个「单元」，故事 → 课，**20 故事 953 句全部收录**（逐句 en/zh 中文翻译）；每篇故事数据单独放 `src/data/frog-stories/*.ts`（20 个文件），由 `frogAndToad.ts` 聚合
+    - 提取方式：PDF 本身有文本层（Internet Archive 扫描），直接 `get_text()` 提取（**不是 OCR**），但噪声重：`T`→`I`、`'"'` 弯引号、诗歌断行、环绕插画页乱序，15 个 Agent 并行按故事校对+翻译（草稿 `scripts/_frog_*.txt` / `tmp-frog-pages/` 不进 git）。单测钉死 20 故事 953 句、每句 en/zh 非空、英文无中文标点、无 `T will/am/...` 残留、passageOf 稳定引用
+    - `FROG_THEME` 青蛙绿；版权口径同 Winnie/FG：只放文字 en/zh，不内置扫描图，页脚注明借阅原版看插画
+    - ⚠️ **新增绘本后必查词典覆盖率**：点词弹层靠 `lookupZh`（`utils/bookDict.ts` 的 `BOOK_WORD_ZH`），查不到就只显示「这句的意思」兜底。Frog 的 953 句曾有 252 个词形查不到（主角 `toad` 一个就 392 次）→ 补在 `src/data/frogDict.ts`，由 `bookDict.ts` **只补缺失键**地合并（绝不覆盖既有释义），覆盖率 86.8%→100%。补词前必须验证与 Starlight 课本原文（`bookQuiz` 唯一出题来源，`LessonPreview` 用）无重叠，否则会改变出题分布；Frog 252 词仅 sick/mother 与课本重叠且原本就查不到。单测钉死「20 故事每个词形都查得到中文」。**以后每加一套绘本都要跑一遍覆盖率检查**（`lookupZh(wordBase(token))` 遍历全部句子），别漏
 
 - Phonics: `src/data/phonics.ts` 的音素切分口径**对齐《字母积木》(Alphablocks / BBC CBeebies) 的教学分级** —— 孩子正在看的动画是这套片，app 必须跟动画对得上号，否则提示反而干扰：
   - L1-2 单字母 / L3 字母小队（两三个字母合成一个音：`ch`/`ai`/`igh`/`ar`/`er`…）/ L4 手拉手（辅音簇各发各的音：`st`/`bl`/`-nd`）/ L5 魔法E（`e` **单独成格**、自己不发声、但让前面元音发长音）/ 特别篇双写（`ll`/`ss`/`ff` 合成一个音）

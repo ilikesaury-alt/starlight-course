@@ -2,6 +2,9 @@
 // 小写、去标点后的词形 → 中文；覆盖 Fly Guy 各书高频词 + 每本核心词 + 全本生词 + Starlight 主课基础词汇。
 // 由 scripts 从 StoryPage 抽取并归一化，供 StoryPage / LessonPreview 复用。
 
+import { FROG_DICT } from '@/data/frogDict'
+import { WINNIE_DICT } from '@/data/winnieDict'
+
 export const BOOK_WORD_ZH: Record<string, string> = {
   // 通用绘本词典(小写、去标点词形 → 中文)；覆盖 Fly Guy 各书高频词 + 每本核心词 + 全本生词。
   'a': "一个", 'about': "关于", 'above': "在…上面", 'action': "行动", 'adventures': "冒险(复数)", 'after': "在…之后",
@@ -379,6 +382,20 @@ export const BOOK_WORD_ZH: Record<string, string> = {
   'ruby': "露比(人名)", 'sato': "佐藤(人名)", 'tom': "汤姆(人名)", 'monty': "蒙蒂(人名)",
   'lola': "罗拉(人名)", 'pippa': "皮帕(人名)", 'bull': "公牛", 'sonic': "声波的",
 
+}
+
+// 青蛙与蟾蜍（Frog and Toad）绘本词汇（252 词：toad/button/woods/porch…）。
+// ⚠️ 只补 BOOK_WORD_ZH 里**缺失**的键，绝不覆盖既有释义（最安全）。
+// 已验证与 Starlight 课本原文（bookQuiz 出题来源）几乎零重叠（仅 sick/mother），
+// 不影响出题分布；详见 src/data/frogDict.ts 头部说明。
+for (const [en, zh] of Object.entries(FROG_DICT)) {
+  if (BOOK_WORD_ZH[en] === undefined) BOOK_WORD_ZH[en] = zh
+}
+
+// Winnie the Witch 绘本词汇（20 词：winnie/wilbur/witch/rosebush…）。
+// 同样只补缺失键；已验证与 Starlight 课本原文零重叠，不影响出题。
+for (const [en, zh] of Object.entries(WINNIE_DICT)) {
+  if (BOOK_WORD_ZH[en] === undefined) BOOK_WORD_ZH[en] = zh
 }
 
 // 查词：先精确匹配，再尝试去掉常见词尾(-s/-es/-ed/-ing/-ly/-er/-est)回退到词根。

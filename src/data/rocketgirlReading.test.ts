@@ -173,10 +173,14 @@ describe('lookupRgZh', () => {
 
 describe('并入阅读模块的边界', () => {
   it('RG 词表是独立文件，没有倒进全局 BOOK_WORD_ZH', () => {
-    // 全局词典仍只有补阅读短文后的规模；RG 专属词表单独计数。
-    // 这条防的是「图省事把 1067 个 RG 词倒进全局」——那会改变 bookQuiz 的
-    // 挖空候选分布，悄悄改变 Fly Guy / Starlight 的出题。
-    expect(Object.keys(BOOK_WORD_ZH).length).toBeLessThan(2000)
+    // 这条防的是「图省事把 1013 个 RG 词倒进全局」——那会改变 bookQuiz 的
+    // 挖空候选分布，悄悄改变出题。
+    // ⚠️ 不能用「字典 < 2000」当代理：2026-11-18 合法补入 Frog/Winnie 绘本
+    //    词典（frogDict/winnieDict 共 272 词）后字典涨到 2005，是正当增长。
+    //    改为直接钉死 RG 专属词不在全局字典里（更贴合本条测试的本意）。
+    for (const w of ['metro', 'roxy', 'hypnotized', 'sweeps', 'footprints', 'plaza', 'delivery']) {
+      expect(BOOK_WORD_ZH[w], `RG 专属词 ${w} 不该进全局字典`).toBeUndefined()
+    }
     expect(RG_GLOSS_SIZE).toBeGreaterThan(1000)
   })
 

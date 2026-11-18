@@ -37,10 +37,15 @@ describe('书馆目录数据', () => {
     }
   })
 
-  it('可读 3 套（Fly Guy / Rocket Girl / Winnie）必有路由；准备中 11 套必无路由', () => {
+  it('可读 4 套（Fly Guy / Rocket Girl / Winnie / Frog and Toad）必有路由；准备中 10 套必无路由', () => {
     const available = BOOK_SERIES.filter((s) => s.available)
-    expect(available).toHaveLength(3)
-    expect(available.map((s) => s.slug).sort()).toEqual(['fly-guy', 'rocket-girl', 'winnie-the-witch'])
+    expect(available).toHaveLength(4)
+    expect(available.map((s) => s.slug).sort()).toEqual([
+      'fly-guy',
+      'frog-and-toad',
+      'rocket-girl',
+      'winnie-the-witch',
+    ])
     for (const s of available) {
       expect(s.linkTo, `${s.slug} 缺 linkTo`).toBeTruthy()
       expect(s.linkTo).toMatch(/^\//)
@@ -48,7 +53,7 @@ describe('书馆目录数据', () => {
     for (const s of BOOK_SERIES.filter((x) => !x.available)) {
       expect(s.linkTo, `${s.slug} 是准备中却给了路由（会误导成可点）`).toBeUndefined()
     }
-    expect(bookWallStats).toEqual({ total: 14, available: 3 })
+    expect(bookWallStats).toEqual({ total: 14, available: 4 })
   })
 
   it('难度分档：每套都落在 起步/进阶/挑战 之一，边界正确', () => {
@@ -69,13 +74,14 @@ describe('书馆目录数据', () => {
     const sorted = [...BOOK_SERIES].sort(
       (a, b) => Number(b.available) - Number(a.available) || a.lexileMin - b.lexileMin,
     )
-    // 可读组按蓝思升序：Fly Guy 270L → Winnie 330L → Rocket Girl 370L
-    expect(sorted.slice(0, 3).map((s) => s.slug)).toEqual([
+    // 可读组按蓝思升序：Fly Guy 270L → Winnie 330L → Rocket Girl 370L → Frog 400L
+    expect(sorted.slice(0, 4).map((s) => s.slug)).toEqual([
       'fly-guy',
       'winnie-the-witch',
       'rocket-girl',
+      'frog-and-toad',
     ])
-    const rest = sorted.slice(3).map((s) => s.lexileMin)
+    const rest = sorted.slice(4).map((s) => s.lexileMin)
     expect([...rest].sort((a, b) => a - b)).toEqual(rest)
   })
 })

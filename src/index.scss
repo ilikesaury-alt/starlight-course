@@ -33,6 +33,7 @@
 // 绘本桥梁书馆（/books）：纯目录页，只在 .book-wall 作用域内覆盖栅格与卡片排版。
 @use 'styles/book-wall';
 @use 'styles/winnie-reading';
+@use 'styles/frog-reading';
 // 听写模块专属（同一套 paper-sheet 骨架 + 一条难度阶梯）。
 @use 'styles/dictation-module';
 // 字母积木模块专属（同一套 paper-sheet 骨架 + 动画五级关卡轴）。

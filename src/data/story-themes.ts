@@ -22,3 +22,9 @@ export const WINNIE_THEME = {
   color: '#9333ea',
   colorSoft: '#f3e8ff',
 } as const
+
+/** 青蛙与蟾蜍（/frog-and-toad）： Frog 绿 + Toad 棕的青蛙绿，区别于 FG 亮绿。 */
+export const FROG_THEME = {
+  color: '#4d7c0f',
+  colorSoft: '#ecfccb',
+} as const

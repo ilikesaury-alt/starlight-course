@@ -1,12 +1,12 @@
 /**
  * 绘本桥梁书馆（/#/books）E2E。
  *
- * 书馆是纯目录：14 套书（用户书单 13 套 + 已有 RG），可读 2 套、准备中 12 套。
+ * 书馆是纯目录：14 套书（用户书单 13 套 + 已有 RG），可读 4 套、准备中 10 套。
  * 契约：
  *  ① 首页阅读区恒定 2 卡，新书馆卡可达；
  *  ② 14 张 tile 齐全，可读卡是 <a>、准备中是灰态 <div>（不可点）；
  *  ③ 搜索 / 难度 chip / 状态 chip 过滤正常；
- *  ④ 点可读卡分别进 /flyguy 与 /rocketgirl；
+ *  ④ 点可读卡分别进 /flyguy、/rocketgirl、/winnie、/frog-and-toad；
  *  ⑤ 书馆是「加书只改数据」的目录：页面本身不承载正文。
  */
 
@@ -24,7 +24,7 @@ test.describe('绘本桥梁书馆 · 入口与结构', () => {
     await expect(entry).toBeVisible()
     await expect(entry).toContainText('绘本桥梁书馆')
     await expect(entry).toHaveAttribute('href', /#\/books$/)
-    await expect(entry).toContainText('14 套书 · 3 套可读')
+    await expect(entry).toContainText('14 套书 · 4 套可读')
     await entry.click()
 
     await expect(page).toHaveURL(/#\/books$/)
@@ -32,20 +32,21 @@ test.describe('绘本桥梁书馆 · 入口与结构', () => {
     await expect(page.locator('h1.rm-hero-title')).toContainText('绘本桥梁书馆')
   })
 
-  test('14 张书卡齐全：3 张可读 <a> + 11 张准备中 <div>', async ({ page }) => {
+  test('14 张书卡齐全：4 张可读 <a> + 10 张准备中 <div>', async ({ page }) => {
     await page.goto(BOOKS)
     await expect(page.locator('[data-testid^="bw-series-"]')).toHaveCount(14, { timeout: 15000 })
-    await expect(page.locator('a[data-testid^="bw-series-"]')).toHaveCount(3)
-    await expect(page.locator('div[data-testid^="bw-series-"]')).toHaveCount(11)
-    // 可读三套的路由
+    await expect(page.locator('a[data-testid^="bw-series-"]')).toHaveCount(4)
+    await expect(page.locator('div[data-testid^="bw-series-"]')).toHaveCount(10)
+    // 可读四套的路由
     await expect(page.getByTestId('bw-series-fly-guy')).toHaveAttribute('href', /#\/flyguy$/)
     await expect(page.getByTestId('bw-series-rocket-girl')).toHaveAttribute(
       'href',
       /#\/rocketgirl$/,
     )
     await expect(page.getByTestId('bw-series-winnie-the-witch')).toHaveAttribute('href', /#\/winnie$/)
+    await expect(page.getByTestId('bw-series-frog-and-toad')).toHaveAttribute('href', /#\/frog-and-toad$/)
     // 准备中的灰卡不可点
-    const soon = page.getByTestId('bw-series-frog-and-toad')
+    const soon = page.getByTestId('bw-series-mercy-watson')
     await expect(soon).toContainText('准备中')
     await expect(soon.locator('xpath=self::div')).toHaveCount(1)
     await expect(soon).toHaveAttribute('aria-disabled', 'true')
@@ -57,12 +58,13 @@ test.describe('绘本桥梁书馆 · 入口与结构', () => {
     const slugs = await page
       .locator('[data-testid^="bw-series-"]')
       .evaluateAll((els) => els.map((e) => e.getAttribute('data-testid')))
-    expect(slugs.slice(0, 3)).toEqual([
+    expect(slugs.slice(0, 4)).toEqual([
       'bw-series-fly-guy',
       'bw-series-winnie-the-witch',
       'bw-series-rocket-girl',
+      'bw-series-frog-and-toad',
     ])
-    expect(slugs[3]).toBe('bw-series-nate-the-great') // 230L 起步，最易
+    expect(slugs[4]).toBe('bw-series-nate-the-great') // 230L 起步，最易
   })
 })
 
@@ -90,13 +92,13 @@ test.describe('绘本桥梁书馆 · 筛选与跳转', () => {
     await expect(page.getByTestId('bw-series-kung-pow-chicken')).toHaveCount(0)
   })
 
-  test('状态 chip 过滤：只看可以读，恰好 2 张', async ({ page }) => {
+  test('状态 chip 过滤：只看可以读，恰好 4 张', async ({ page }) => {
     await page.goto(BOOKS)
     await expect(page.locator('[data-testid^="bw-series-"]')).toHaveCount(14, { timeout: 15000 })
     await page.getByRole('group', { name: '按状态筛选' }).getByRole('button', { name: '可以读' }).click()
-    await expect(page.locator('[data-testid^="bw-series-"]')).toHaveCount(3)
+    await expect(page.locator('[data-testid^="bw-series-"]')).toHaveCount(4)
     await page.getByRole('group', { name: '按状态筛选' }).getByRole('button', { name: '准备中' }).click()
-    await expect(page.locator('[data-testid^="bw-series-"]')).toHaveCount(11)
+    await expect(page.locator('[data-testid^="bw-series-"]')).toHaveCount(10)
   })
 
   test('点可读书卡进入对应阅读模块', async ({ page }) => {
@@ -116,6 +118,12 @@ test.describe('绘本桥梁书馆 · 筛选与跳转', () => {
     await expect(page.getByTestId('bw-series-winnie-the-witch')).toBeVisible({ timeout: 15000 })
     await page.getByTestId('bw-series-winnie-the-witch').click()
     await expect(page).toHaveURL(/#\/winnie$/)
+    await expect(page.locator('.reading-sheet')).toBeVisible({ timeout: 15000 })
+
+    await page.goto(BOOKS)
+    await expect(page.getByTestId('bw-series-frog-and-toad')).toBeVisible({ timeout: 15000 })
+    await page.getByTestId('bw-series-frog-and-toad').click()
+    await expect(page).toHaveURL(/#\/frog-and-toad$/)
     await expect(page.locator('.reading-sheet')).toBeVisible({ timeout: 15000 })
   })
 })

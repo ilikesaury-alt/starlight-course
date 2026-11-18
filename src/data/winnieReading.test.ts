@@ -4,7 +4,8 @@
 //  ② 每句 en/zh 非空，英文无中文标点，咒语拼写正确（校对过 OCR）；
 //  ③ 词表全单 token、有中文/emoji；
 //  ④ passageOf 按页码返回稳定引用（ReadingZone useEffect 会 cancelSpeech）；
-//  ⑤ 不污染两册 Starlight 阅读短文（仍 96/96）。
+//  ⑤ 不污染两册 Starlight 阅读短文（仍 96/96）；
+//  ⑥ 词典覆盖：每句每个词形都能查到中文（点词不出「这句的意思」兜底）。
 
 import { describe, expect, it } from 'vitest'
 import { WINNIE_PAGES, WINNIE_VOCAB } from './winnie'
@@ -17,6 +18,8 @@ import {
 } from './winnieReading'
 import { READING_PASSAGES } from './reading'
 import { READING_PASSAGES1 } from './starlight1/reading'
+import { lookupZh, wordBase } from '@/utils/bookDict'
+import { WINNIE_DICT } from './winnieDict'
 
 describe('Winnie 绘本数据', () => {
   it('20 个正文页，页码升序且无纯插画页（4/6/11/18）', () => {
@@ -109,5 +112,32 @@ describe('Winnie 阅读适配层', () => {
     expect(WINNIE_READING_SOURCE.level).toBeUndefined()
     expect(Object.keys(READING_PASSAGES)).toHaveLength(96)
     expect(Object.keys(READING_PASSAGES1)).toHaveLength(96)
+  })
+})
+
+describe('词典覆盖（点词必出释义）', () => {
+  it('WINNIE_DICT 自身合法：key 全小写单 token，value 非空', () => {
+    expect(Object.keys(WINNIE_DICT).length).toBeGreaterThan(15)
+    for (const [en, zh] of Object.entries(WINNIE_DICT)) {
+      expect(en).toMatch(/^[a-z]+$/)
+      expect(zh.trim()).toBeTruthy()
+    }
+  })
+
+  it('20 页正文每个词形都能查到中文（覆盖率 100%）', () => {
+    let total = 0
+    const miss: string[] = []
+    for (const p of WINNIE_PAGES) {
+      for (const line of p.sentences) {
+        for (const tk of line.en.split(/\s+/)) {
+          const base = wordBase(tk)
+          if (!base) continue
+          total++
+          if (!lookupZh(base)) miss.push(base)
+        }
+      }
+    }
+    expect(total).toBeGreaterThan(400)
+    expect(miss, `查不到的词：${miss.join(', ')}`).toHaveLength(0)
   })
 })
