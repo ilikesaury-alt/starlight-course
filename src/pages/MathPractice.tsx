@@ -145,23 +145,29 @@ export default function MathPractice() {
 
   /** 进入下一步，或最后一题结算 */
   const next = () => {
+    // 每一步切换都要把「判定态」清干净：stepCorrect 是上一步的结论，
+    // 不清会带进下一步（曾出现下一步一进来就显示成「已答对」的样子）。
     if (step === 'mark') {
       setStep('ask')
       setStepDone(false)
+      setStepCorrect(false)
       setMarked([])
       setPicked(null)
     } else if (step === 'ask') {
       setStep('first')
       setStepDone(false)
+      setStepCorrect(false)
       setPicked(null)
     } else if (step === 'first') {
       setStep('answer')
       setStepDone(false)
+      setStepCorrect(false)
       setInput('')
     } else if (cursor + 1 < totalQuestions) {
       setCursor((i) => i + 1)
       setStep('mark')
       setStepDone(false)
+      setStepCorrect(false)
       setMarked([])
       setPicked(null)
       setInput('')
@@ -249,7 +255,10 @@ export default function MathPractice() {
               <div className="mp-stem-card mp-stem-markable" data-testid="problem-text">
                 {q.segments.map((seg, i) => {
                   const hit = marked.includes(i)
-                  const showStandard = stepDone && !!seg.k
+                  // 判定后：标对的显示标准标注；**失败时漏标的用红色标出来**，
+                  // 否则孩子看不出到底漏了哪个（红圈=关系词，红下划线=数字）。
+                  const isMissed = stepDone && !stepCorrect && !!seg.k && !hit
+                  const showStandard = stepDone && stepCorrect && !!seg.k
                   const isExtra = stepDone && hit && !seg.k
                   return (
                     <button
@@ -257,7 +266,7 @@ export default function MathPractice() {
                       type="button"
                       className={`mp-seg ${seg.k === 'rel' ? 'mp-seg--rel' : ''} ${seg.k === 'num' ? 'mp-seg--num' : ''} ${
                         hit ? 'is-marked' : ''
-                      } ${showStandard ? 'is-standard' : ''} ${isExtra ? 'is-extra' : ''}`}
+                      } ${showStandard ? 'is-standard' : ''} ${isMissed ? 'is-missed' : ''} ${isExtra ? 'is-extra' : ''}`}
                       aria-pressed={hit}
                       disabled={stepDone}
                       onClick={() => setMarked((m) => (m.includes(i) ? m.filter((x) => x !== i) : [...m, i]))}
@@ -275,10 +284,7 @@ export default function MathPractice() {
                     <span className="mp-fb-line">
                       {stepCorrect
                         ? <><Check size={18} aria-hidden="true" /> 关系词都圈到、数字都划到，读题这一步满分！</>
-                        : <><X size={18} aria-hidden="true" /> 有漏掉的 —— 淡紫色是要圈的关系词，下划线是要划的数字</>}
-                    </span>
-                    <span className="mp-explain">
-                      <Lightbulb size={16} aria-hidden="true" /> {q.explain}
+                        : <><X size={18} aria-hidden="true" /> 漏掉的用红色标出来了 —— 红圈是要圈的关系词，红下划线是要划的数字</>}
                     </span>
                   </div>
                   <button type="button" className="mp-btn" onClick={next}>下一步</button>
@@ -299,7 +305,6 @@ export default function MathPractice() {
               onPick={setPicked}
               onSubmit={() => submitChoice(q, 'ask')}
               onNext={next}
-              explain={stepDone ? q.explain : undefined}
             />
           )}
 
@@ -315,7 +320,8 @@ export default function MathPractice() {
               onPick={setPicked}
               onSubmit={() => submitChoice(q, 'first')}
               onNext={next}
-              explain={stepDone ? q.steps.join('　→　') : undefined}
+              // 只给第一步算式做提示 —— 第二步算式含最终答案，此时还不能露。
+              explain={stepDone ? q.steps[0] : undefined}
             />
           )}
 
@@ -324,7 +330,11 @@ export default function MathPractice() {
             <div className="mp-step-panel" data-testid="answer-step">
               <h2 className="mp-step-prompt">算出得数</h2>
               <div className="mp-steps-recap">
-                {q.steps.map((s, i) => <div key={i} className="mp-step-line">{s}</div>)}
+                {/* 只把「第一步算式」当脚手架；第二步算式含最终答案，答完才展示，
+                    否则孩子直接抄最后一行的数（实测 bug）。 */}
+                {(stepDone ? q.steps : q.steps.slice(0, 1)).map((s, i) => (
+                  <div key={i} className="mp-step-line">{s}</div>
+                ))}
               </div>
               <div className="mp-answer-row">
                 <input

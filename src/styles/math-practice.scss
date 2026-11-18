@@ -132,6 +132,17 @@
       padding: 0 8px;
       color: var(--mp-hue);
     }
+    // 判错时漏标的目标：红色标出来，孩子一眼看到差哪个（红圈 / 红下划线）
+    &.mp-seg--num.is-missed {
+      border-bottom: 3px solid var(--no);
+      color: var(--no-deep);
+    }
+    &.mp-seg--rel.is-missed {
+      border: 2px solid var(--no);
+      border-radius: 46% 54% 50% 50% / 62% 58% 60% 55%;
+      padding: 0 8px;
+      color: var(--no-deep);
+    }
     // 孩子标了但词性不对（点到普通词）：灰色波浪提示"这不是线索词"，不算错
     &.is-marked:not(.mp-seg--rel):not(.mp-seg--num) {
       color: var(--ink-mute);

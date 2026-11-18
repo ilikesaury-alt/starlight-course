@@ -84,6 +84,24 @@ test.beforeEach(async ({ page }) => {
   await page.evaluate(() => localStorage.clear())
 })
 
+/** 正确答完 ①②③，停在第四步「得数」但**尚未作答** */
+async function advanceToAnswer(page: Page) {
+  const text = (await page.locator('[data-testid="problem-text"]').textContent())!.trim()
+  const p = problemOf(text)
+  await doMarkStep(page, p, true)
+  await page.getByRole('button', { name: '下一步' }).click()
+  const askIdx = p.ask.options.findIndex((o) => o.correct)
+  await page.locator('[data-testid="choice-step"] .mp-choice').nth(askIdx).click()
+  await page.getByRole('button', { name: '确定' }).click()
+  await page.getByRole('button', { name: '下一步' }).click()
+  const firstIdx = p.first.options.findIndex((o) => o.correct)
+  await page.locator('[data-testid="choice-step"] .mp-choice').nth(firstIdx).click()
+  await page.getByRole('button', { name: '确定' }).click()
+  await page.getByRole('button', { name: '下一步' }).click()
+  await expect(page.locator('[data-testid="answer-step"]')).toBeVisible()
+  return p
+}
+
 test.describe('M1/M2 入口与结构', () => {
   test('M1 首页有专项练习卡片（应用题文案），点击进入 /math', async ({ page }) => {
     await page.goto('/')
@@ -108,7 +126,7 @@ test.describe('M1/M2 入口与结构', () => {
 })
 
 test.describe('M3 标记步（审题三步法）', () => {
-  test('漏标 → 判错且标准样式亮出', async ({ page }) => {
+  test('漏标 → 判错且漏掉的目标用红色标出', async ({ page }) => {
     await gotoMath(page)
     const text = (await page.locator('[data-testid="problem-text"]').textContent())!.trim()
     const p = problemOf(text)
@@ -116,9 +134,9 @@ test.describe('M3 标记步（审题三步法）', () => {
     // 故意漏标 → 判错
     await doMarkStep(page, p, false)
     await expect(page.locator('[data-testid="mark-step"] .mp-feedback')).toContainText('漏掉')
-    // 判定后标准样式亮出：rel / num 都有 is-standard
-    const standardCount = await page.locator('[data-testid="problem-text"] .mp-seg.is-standard').count()
-    expect(standardCount).toBe(p.segments.filter((s) => s.k).length)
+    // 漏掉的每个目标都带 is-missed（红色提示），一个不少
+    const missedCount = await page.locator('[data-testid="problem-text"] .mp-seg.is-missed').count()
+    expect(missedCount).toBe(p.segments.filter((s) => s.k).length)
   })
 
   test('多标普通词不扣：仍显示「满分」通过（宽松判定）', async ({ page }) => {
@@ -166,5 +184,29 @@ test.describe('M4 全流程与错题', () => {
     await page.getByRole('button', { name: /重练做错的题/ }).click()
     await expect(page.locator('[data-testid="mark-step"]')).toBeVisible()
     await expect(page.locator('.mp-progress')).toContainText('第 1 /')
+  })
+})
+
+test.describe('M5 不提前泄露答案', () => {
+  test('点下一步后，下一步一进来不显示反馈', async ({ page }) => {
+    await gotoMath(page)
+    const text = (await page.locator('[data-testid="problem-text"]').textContent())!.trim()
+    await doMarkStep(page, problemOf(text), true)
+    await page.getByRole('button', { name: '下一步' }).click()
+    await expect(page.locator('[data-testid="choice-step"]')).toBeVisible()
+    // 还没选就出现反馈 = 把上一步的判定态带进了新一步（bug）
+    await expect(page.locator('.mp-feedback')).toHaveCount(0)
+  })
+
+  test('得数步未作答前不显示最终答案，答完才展示完整算式', async ({ page }) => {
+    await gotoMath(page)
+    const p = await advanceToAnswer(page)
+    // 未作答：脚手架只给第一步算式，最终答案不能出现
+    const recap = (await page.locator('.mp-steps-recap').textContent()) ?? ''
+    expect(recap).not.toMatch(new RegExp(`(?<!\\d)${p.answer}(?!\\d)`))
+    // 作答后才出现完整两步（含最终答案）
+    await page.locator('[data-testid="answer-input"]').fill(String(p.answer))
+    await page.getByRole('button', { name: '确定' }).click()
+    await expect(page.locator('.mp-steps-recap')).toContainText(String(p.answer))
   })
 })

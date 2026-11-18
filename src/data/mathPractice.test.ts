@@ -45,6 +45,14 @@ describe('应用题数据', () => {
     }
   })
 
+  it('第一步算式不含最终答案（得数步只能展示它，防提前泄露）', () => {
+    // 页面在「得数」步未作答时只显示 steps[0] 当脚手架；若它本身含答案就等于给答案。
+    for (const p of WORD_PROBLEMS) {
+      const nums = (p.steps[0].match(/\d+/g) ?? []).map(Number)
+      expect(nums, `${p.id} 第一步算式不该含答案 ${p.answer}`).not.toContain(p.answer)
+    }
+  })
+
   it('题干 / 提示 / 解析都非空，且题干是中文', () => {
     for (const p of WORD_PROBLEMS) {
       expect(p.text.length).toBeGreaterThan(5)
