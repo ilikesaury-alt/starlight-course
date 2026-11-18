@@ -83,21 +83,68 @@
     padding: 18px 20px;
     margin-bottom: 20px;
   }
-  .mp-stem-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--mp-hue);
-    margin-bottom: 8px;
-  }
   .mp-stem-text {
     font-size: 19px;
     font-weight: 700;
     line-height: 1.8;
     color: var(--ink);
     margin: 0;
+  }
+
+  // ---------- 可标记题干（审题三步法第①步：圈关系词 / 划数字）----------
+  // 模拟纸上动作：关系词点一下 = 椭圆圈起来；数字点一下 = 底部横线。
+  // 判定后 .is-standard 把标准答案亮出来（淡靛圈 / 下划线），孩子对照补漏。
+  .mp-stem-markable {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    row-gap: 10px;
+    padding: 22px 24px;
+    font-size: 19px;
+    font-weight: 700;
+    line-height: 1.8;
+    color: var(--ink);
+  }
+  .mp-seg {
+    padding: 0 2px;
+    margin: 0 1px;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    line-height: inherit;
+    cursor: pointer;
+    transition: color 0.12s ease;
+    &:hover:not(:disabled) { color: var(--mp-hue); }
+
+    // 数字/单位：底边横线（"划"的动作）
+    &.mp-seg--num.is-marked,
+    &.mp-seg--num.is-standard {
+      border-bottom: 3px solid var(--mp-hue);
+      color: var(--mp-hue);
+    }
+    // 关系词：椭圆圈（"圈"的动作）
+    &.mp-seg--rel.is-marked,
+    &.mp-seg--rel.is-standard {
+      border: 2px solid var(--mp-hue);
+      border-radius: 46% 54% 50% 50% / 62% 58% 60% 55%;
+      padding: 0 8px;
+      color: var(--mp-hue);
+    }
+    // 孩子标了但词性不对（点到普通词）：灰色波浪提示"这不是线索词"，不算错
+    &.is-marked:not(.mp-seg--rel):not(.mp-seg--num) {
+      color: var(--ink-mute);
+      text-decoration: underline wavy var(--line-2) 1px;
+    }
+    &.is-extra { opacity: 0.55; }
+    &:disabled { cursor: default; }
+  }
+  .mp-step-hint {
+    font-size: 14px;
+    color: var(--ink-soft);
+    line-height: 1.7;
+    margin: 0 0 16px;
   }
 
   // ---------- 三步指示器 ----------

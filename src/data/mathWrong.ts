@@ -18,8 +18,8 @@ export interface MathWrongItem {
   given: string
   /** 正确答案 */
   answer: string
-  /** 出错环节：ask / first / answer（三步问的哪一步） */
-  step: 'ask' | 'first' | 'answer'
+  /** 出错环节：mark / ask / first / answer（四步的哪一步） */
+  step: 'mark' | 'ask' | 'first' | 'answer'
   /** 记录时间 */
   at: number
 }

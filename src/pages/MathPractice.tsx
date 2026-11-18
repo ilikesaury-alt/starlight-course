@@ -1,26 +1,25 @@
 // ============================================================
 //  应用题专项练习页 /math
 //  ------------------------------------------------------------
-//  针对陈老师反馈的「读题习惯差 / 不圈关键词」。计算另有《计算小能手》
-//  在练，这里**只做应用题**（用户 2026-11-18 明确要求去掉计算）。
+//  对齐陈老师的「审题三步法」（2026-11-18 家长沟通）：
+//    圈（关系词）→ 划（数字+单位）→ 说（求什么）
+//  练习流程 = 标记 → 说 → 算 → 得数，共 4 步（用户定）。
 //
-//  交互借鉴 GitHub 同类项目（prashantkul/help-math：把应用题拆成
-//  micro-step、每一步正确就给奖励，而非只看最终答案）：
-//    ① 这题求什么？   —— 读懂问题
-//    ② 先算什么？     —— 理清步骤
-//    ③ 算出得数       —— 填最终答案
-//  每一步都即时反馈，做错的那一步记进 localStorage（mathWrong.ts），
-//  结算后可「重练做错的题」。
+//  标记步的判定（用户定，宽松）：**漏圈/漏划才算错**；点到普通词只
+//  提醒不扣 —— 重点是养成「动手读题」的动作，不是考眼力。做完后关系
+//  词自动圈上、数字自动划上，让孩子看到"标准答案长什么样"。
 //
-//  为什么不用「把所有文字都圈上才算全对」：用户实测太繁琐（圈词等于
-//  圈大半道题），8 岁的孩子会烦。三步问保留了「读懂题」的内核，交互更轻。
+//  借鉴 GitHub 同类项目（prashantkul/help-math：每一步正确就给奖励，
+//  而非只看最终答案；greamses/Word-Problems 的标注思路收窄成「只圈
+//  骨头词」，避免「所有文字都要圈」的繁琐——用户实测踩过）。
 //
+//  计算另有《计算小能手》在练，这里**只做应用题**（用户明确要求去掉计算）。
 //  self-contained：不接 SRS / store 版本号；星数用统一口径 quizStars，
-//  只在本页结算卡展示，不写全局星星。
+//  只在本页结算卡展示，不写全局星星。错题存 localStorage（mathWrong.ts）。
 // ============================================================
 import { useMemo, useState, useSyncExternalStore } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowLeft, RotateCcw, Check, X, Lightbulb, BookOpen } from 'lucide-react'
+import { ArrowLeft, RotateCcw, Check, X, Lightbulb } from 'lucide-react'
 import {
   WORD_PROBLEMS,
   wordProblemRound,
@@ -34,18 +33,21 @@ import {
 import { quizStars } from '@/utils/stars'
 
 const ROUND_SIZE = 5
-type Step = 'ask' | 'first' | 'answer'
+type Step = 'mark' | 'ask' | 'first' | 'answer'
+const STEP_LABELS = ['① 标记', '② 求什么', '③ 先算什么', '④ 得数'] as const
 
 export default function MathPractice() {
   const [seed, setSeed] = useState(() => Date.now())
   const [retrainIds, setRetrainIds] = useState<string[] | null>(null)
   const [cursor, setCursor] = useState(0)
-  const [step, setStep] = useState<Step>('ask')
+  const [step, setStep] = useState<Step>('mark')
   const [stepCorrect, setStepCorrect] = useState(false)
   const [stepDone, setStepDone] = useState(false)
+  /** 标记步：孩子点过的 segment 下标（不分圈/划，交互上自动按词性给样式） */
+  const [marked, setMarked] = useState<number[]>([])
   const [picked, setPicked] = useState<number | null>(null)
   const [input, setInput] = useState('')
-  /** 本轮每一步是否答对（用于结算星数：总步数里答对的比例） */
+  /** 本轮每步是否答对（结算星数用） */
   const [results, setResults] = useState<boolean[]>([])
   const [finished, setFinished] = useState(false)
 
@@ -67,8 +69,9 @@ export default function MathPractice() {
     setSeed(Date.now())
     setRetrainIds(null)
     setCursor(0)
-    setStep('ask')
+    setStep('mark')
     setStepDone(false)
+    setMarked([])
     setPicked(null)
     setInput('')
     setResults([])
@@ -81,15 +84,16 @@ export default function MathPractice() {
     setSeed(Date.now())
     setRetrainIds(ids)
     setCursor(0)
-    setStep('ask')
+    setStep('mark')
     setStepDone(false)
+    setMarked([])
     setPicked(null)
     setInput('')
     setResults([])
     setFinished(false)
   }
 
-  const recordStep = (isCorrect: boolean, stepName: 'ask' | 'first' | 'answer', given: string, answer: string) => {
+  const recordStep = (isCorrect: boolean, stepName: Step, given: string, answer: string) => {
     setResults((r) => [...r, isCorrect])
     if (!isCorrect && q) {
       recordMathWrong({
@@ -103,7 +107,22 @@ export default function MathPractice() {
     }
   }
 
-  /** 第一步 / 第二步：选了一个选项后判定 */
+  /** 第一步「标记」：宽松判定 —— 该圈的都圈了、该划的都划了就过；
+   *  多点的普通词只提醒。判定后所有 rel/num 自动亮出标准样式。 */
+  const submitMark = (problem: WordProblem) => {
+    if (stepDone) return
+    const targets = problem.segments
+      .map((seg, i) => (seg.k ? i : -1))
+      .filter((i) => i >= 0)
+    const missed = targets.filter((i) => !marked.includes(i)).length
+    const extra = marked.filter((i) => !problem.segments[i].k).length
+    const ok = missed === 0
+    setStepDone(true)
+    setStepCorrect(ok)
+    recordStep(ok, 'mark', extra > 0 ? `多标 ${extra} 处` : `漏标 ${missed} 处`, `${targets.length} 处全标到`)
+  }
+
+  /** 第二步 / 第三步：选了一个选项后判定 */
   const submitChoice = (problem: WordProblem, which: 'ask' | 'first') => {
     if (stepDone || picked === null) return
     const options = which === 'ask' ? problem.ask.options : problem.first.options
@@ -114,7 +133,7 @@ export default function MathPractice() {
     recordStep(ok, which, options[picked].label, answerLabel)
   }
 
-  /** 第三步：填得数 */
+  /** 第四步：填得数 */
   const submitAnswer = (problem: WordProblem) => {
     if (stepDone) return
     const given = input.trim()
@@ -124,9 +143,14 @@ export default function MathPractice() {
     recordStep(ok, 'answer', given, String(problem.answer))
   }
 
-  /** 进入下一步，或本页最后一题结算 */
+  /** 进入下一步，或最后一题结算 */
   const next = () => {
-    if (step === 'ask') {
+    if (step === 'mark') {
+      setStep('ask')
+      setStepDone(false)
+      setMarked([])
+      setPicked(null)
+    } else if (step === 'ask') {
       setStep('first')
       setStepDone(false)
       setPicked(null)
@@ -136,8 +160,9 @@ export default function MathPractice() {
       setInput('')
     } else if (cursor + 1 < totalQuestions) {
       setCursor((i) => i + 1)
-      setStep('ask')
+      setStep('mark')
       setStepDone(false)
+      setMarked([])
       setPicked(null)
       setInput('')
     } else {
@@ -156,7 +181,7 @@ export default function MathPractice() {
           <ArrowLeft size={18} aria-hidden="true" /> 返回首页
         </Link>
         <h1 className="mp-title">应用题专项练习</h1>
-        <p className="mp-sub">读题三步走：先弄懂问什么，再想先算什么，最后算出得数</p>
+        <p className="mp-sub">审题三步法：圈关系词 → 划数字 → 说求什么，笔到了脑子才到</p>
       </header>
 
       {/* ---------- 结算卡 ---------- */}
@@ -167,7 +192,7 @@ export default function MathPractice() {
           <div className="mp-stars" aria-label={`获得 ${stars} 颗星`}>
             {'★'.repeat(stars)}<span className="mp-stars-off">{'★'.repeat(5 - stars)}</span>
           </div>
-          <p className="mp-result-sub">三步里答对 {correctSteps} / {totalSteps} 步</p>
+          <p className="mp-result-sub">四步里答对 {correctSteps} / {totalSteps} 步</p>
           <div className="mp-result-actions">
             <button type="button" className="mp-btn" onClick={resetForNewRound}>
               <RotateCcw size={16} aria-hidden="true" /> 再来一组
@@ -196,30 +221,73 @@ export default function MathPractice() {
             )}
           </div>
 
-          {/* 题干：整段展示，一步一个焦点；字号大、行距宽，照顾阅读 */}
-          <div className="mp-stem-card">
-            <span className="mp-stem-tag"><BookOpen size={14} aria-hidden="true" /> 读题</span>
-            <p className="mp-stem-text" data-testid="problem-text">{q.text}</p>
-          </div>
-
-          {/* 三步指示器 */}
-          <div className="mp-stepper" aria-label="解题三步">
-            {(['ask', 'first', 'answer'] as Step[]).map((s, i) => {
-              const result = results[cursor * 3 + i]
+          {/* 四步指示器 */}
+          <div className="mp-stepper" aria-label="审题四步">
+            {(['mark', 'ask', 'first', 'answer'] as Step[]).map((sname, i) => {
+              const result = results[cursor * 4 + i]
               return (
                 <span
-                  key={s}
-                  className={`mp-step-chip ${step === s ? 'is-current' : ''} ${
+                  key={sname}
+                  className={`mp-step-chip ${step === sname ? 'is-current' : ''} ${
                     result === true ? 'is-done-ok' : result === false ? 'is-done-no' : ''
                   }`}
                 >
-                  {['① 求什么', '② 先算什么', '③ 得数'][i]}
+                  {STEP_LABELS[i]}
                 </span>
               )
             })}
           </div>
 
-          {/* ---------- 第一步：求什么 ---------- */}
+          {/* ---------- 第一步：标记（圈关系词 + 划数字）---------- */}
+          {step === 'mark' && (
+            <div className="mp-step-panel" data-testid="mark-step">
+              <h2 className="mp-step-prompt">动手读题：圈出关系词，给数字划线</h2>
+              <p className="mp-step-hint">
+                「一共、还剩、比…多、比…少、几倍、每、至少」是题目的骨头 —— 点一下圈起来；
+                数字和单位点一下划上横线。笔到了，脑子才到。
+              </p>
+              <div className="mp-stem-card mp-stem-markable" data-testid="problem-text">
+                {q.segments.map((seg, i) => {
+                  const hit = marked.includes(i)
+                  const showStandard = stepDone && !!seg.k
+                  const isExtra = stepDone && hit && !seg.k
+                  return (
+                    <button
+                      key={i}
+                      type="button"
+                      className={`mp-seg ${seg.k === 'rel' ? 'mp-seg--rel' : ''} ${seg.k === 'num' ? 'mp-seg--num' : ''} ${
+                        hit ? 'is-marked' : ''
+                      } ${showStandard ? 'is-standard' : ''} ${isExtra ? 'is-extra' : ''}`}
+                      aria-pressed={hit}
+                      disabled={stepDone}
+                      onClick={() => setMarked((m) => (m.includes(i) ? m.filter((x) => x !== i) : [...m, i]))}
+                    >
+                      {seg.t}
+                    </button>
+                  )
+                })}
+              </div>
+              {!stepDone ? (
+                <button type="button" className="mp-btn" onClick={() => submitMark(q)}>标好了，读题完成</button>
+              ) : (
+                <>
+                  <div className={`mp-feedback ${stepCorrect ? 'is-ok' : 'is-no'}`} role="status">
+                    <span className="mp-fb-line">
+                      {stepCorrect
+                        ? <><Check size={18} aria-hidden="true" /> 关系词都圈到、数字都划到，读题这一步满分！</>
+                        : <><X size={18} aria-hidden="true" /> 有漏掉的 —— 淡紫色是要圈的关系词，下划线是要划的数字</>}
+                    </span>
+                    <span className="mp-explain">
+                      <Lightbulb size={16} aria-hidden="true" /> {q.explain}
+                    </span>
+                  </div>
+                  <button type="button" className="mp-btn" onClick={next}>下一步</button>
+                </>
+              )}
+            </div>
+          )}
+
+          {/* ---------- 第二步：这道题要我找什么 ---------- */}
           {step === 'ask' && (
             <StepChoices
               prompt={q.ask.prompt}
@@ -235,7 +303,7 @@ export default function MathPractice() {
             />
           )}
 
-          {/* ---------- 第二步：先算什么 ---------- */}
+          {/* ---------- 第三步：先算什么 ---------- */}
           {step === 'first' && (
             <StepChoices
               prompt={q.first.prompt}
@@ -251,7 +319,7 @@ export default function MathPractice() {
             />
           )}
 
-          {/* ---------- 第三步：得数 ---------- */}
+          {/* ---------- 第四步：得数 ---------- */}
           {step === 'answer' && (
             <div className="mp-step-panel" data-testid="answer-step">
               <h2 className="mp-step-prompt">算出得数</h2>
@@ -297,7 +365,7 @@ export default function MathPractice() {
   )
 }
 
-/** 第一步/第二步共用的选项面板：点选 → 提交 → 即时反馈 → 下一步 */
+/** 第二步/第三步共用的选项面板：点选 → 提交 → 即时反馈 → 下一步 */
 function StepChoices({
   prompt,
   options,
@@ -357,6 +425,3 @@ function StepChoices({
     </div>
   )
 }
-
-// 保留导出，单测/调试可直接取全量题面
-export { WORD_PROBLEMS }

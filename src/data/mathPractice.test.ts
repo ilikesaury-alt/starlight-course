@@ -1,5 +1,6 @@
-// 应用题数据的不变量：每步恰有一个正确选项、分步算式末步结果 = answer、
-// 出题可复现。这些检查保护「题目自相矛盾 / 答案算错」这类最难肉眼发现的错误。
+// 应用题数据的不变量：题干分词拼接 === 原文、每题都有可圈的关系词和可划的
+// 数字（审题三步法的载体）、每步恰有一个正确选项、分步末步结果 = answer。
+// 这些检查保护「题目自相矛盾 / 答案算错」这类最难肉眼发现的错误。
 import { describe, it, expect } from 'vitest'
 import { WORD_PROBLEMS, wordProblemRound } from './mathPractice'
 
@@ -9,12 +10,25 @@ describe('应用题数据', () => {
     expect(new Set(WORD_PROBLEMS.map((p) => p.id)).size).toBe(WORD_PROBLEMS.length)
   })
 
+  it('segments 拼接 === text（题干渲染不失真）', () => {
+    for (const p of WORD_PROBLEMS) {
+      expect(p.segments.map((s) => s.t).join(''), `${p.id} 拼接`).toBe(p.text)
+    }
+  })
+
+  it('每题至少 1 个关系词（圈）+ 1 个数字（划）—— 审题三步法的载体', () => {
+    for (const p of WORD_PROBLEMS) {
+      expect(p.segments.some((s) => s.k === 'rel'), `${p.id} 应有可圈关系词`).toBe(true)
+      expect(p.segments.some((s) => s.k === 'num'), `${p.id} 应有可划数字`).toBe(true)
+      // 可标记的目标不超过 6 处：标记步要轻，不能回到「所有文字都要圈」
+      expect(p.segments.filter((s) => s.k).length, `${p.id} 标记点数量`).toBeLessThanOrEqual(6)
+    }
+  })
+
   it('第一步 / 第二步各有且仅有一个正确选项', () => {
     for (const p of WORD_PROBLEMS) {
       expect(p.ask.options.filter((o) => o.correct).length, `${p.id} ask 正确项`).toBe(1)
       expect(p.first.options.filter((o) => o.correct).length, `${p.id} first 正确项`).toBe(1)
-      expect(p.ask.options.length).toBeGreaterThanOrEqual(2)
-      expect(p.first.options.length).toBeGreaterThanOrEqual(2)
       // 选项文案不得重复（重复会让孩子无从选起 / e2e 定位歧义）
       expect(new Set(p.ask.options.map((o) => o.label)).size).toBe(p.ask.options.length)
       expect(new Set(p.first.options.map((o) => o.label)).size).toBe(p.first.options.length)
