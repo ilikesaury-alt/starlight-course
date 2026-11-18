@@ -1,24 +1,25 @@
-// 数学专项 · 错题的本地读写 —— 单独成文件，避免组件文件里导出非组件
+// 应用题专项 · 错题的本地读写 —— 单独成文件，避免组件文件里导出非组件
 // 触发 react-refresh/only-export-components（HMR 会整页刷新）。
 //
 // 和 homeLevel.ts 同一套模式：localStorage（不放 Zustand），不参与 persist
 // 版本号，写时同页广播（storage 事件只在别的标签页触发）。
-// 只记「最近一次做错」的快照：键 = 题目的稳定 id，重复做错覆盖、不累积。
-
-import type { CalcCause } from '@/data/mathPractice'
+// 只记「最近一次做错」的快照：键 = 题目的 id，重复做错覆盖、不累积。
+//
+// 旧版本（计算专项）写过 cause 为具体错因的记录；这里统一按字符串存，
+// 读的时候不挑类型，兼容旧数据（不会读崩）。
 
 export const MATH_WRONG_KEY = 'starlight-math-wrong'
 
 export interface MathWrongItem {
   id: string
-  /** 题干（计算题是算式，读题圈关键词题是完整题干） */
+  /** 题干 */
   stem: string
   /** 用户答案 */
   given: string
   /** 正确答案 */
   answer: string
-  /** 错因（读题题记为 'reading'） */
-  cause: CalcCause | 'reading'
+  /** 出错环节：ask / first / answer（三步问的哪一步） */
+  step: 'ask' | 'first' | 'answer'
   /** 记录时间 */
   at: number
 }

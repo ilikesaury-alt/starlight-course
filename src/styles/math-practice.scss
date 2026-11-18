@@ -1,18 +1,17 @@
 // ============================================================
-//  数学专项练习页（/math）— 白纸页 + 三模式答题
+//  应用题专项练习页（/math）— 白纸页 + 读题三步走
 //  ------------------------------------------------------------
 //  方向：tasteskill v2 · framed-sheet（与其它模块共用骨架）。
 //  ⚠️ 作用域纪律：所有规则挂在 .math-practice / .mp-sheet 下，不改共享类全局定义。
-//     本模块是 self-contained，e2e 锚点（tests/math-practice.spec.ts）：
-//     .ma-home-entry（首页入口）/ .mp-tab / .mp-word(.is-picked/.is-key) /
-//     [data-testid=calc-input|keyword-input|math-result] 等，别改名。
+//     e2e 锚点（tests/math-practice.spec.ts）：.ma-home-entry（首页入口）/
+//     [data-testid=problem-text|choice-step|answer-step|answer-input|math-result]，别改名。
 // ============================================================
 @use 'mixins' as *;
 
 .math-practice {
   @include paper-sheet;
 
-  --mp-hue: #4f46e5; // 靛蓝：数学专项的分类色
+  --mp-hue: #4f46e5; // 靛蓝：应用题专项的分类色
   --mp-soft: #e0e7ff;
 
   // ---------- 页头 ----------
@@ -40,50 +39,6 @@
     margin: 0;
   }
 
-  // ---------- 模式 Tab ----------
-  .mp-tabs {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid var(--line);
-    margin-bottom: 20px;
-  }
-  .mp-tab {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 9px 16px;
-    border: 1px solid var(--line-2);
-    border-radius: var(--r-pill);
-    background: var(--card);
-    color: var(--ink-soft);
-    font-family: inherit;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: background 0.15s ease, border-color 0.15s ease;
-    &:hover { border-color: var(--mp-hue); }
-    &.is-active {
-      background: var(--mp-hue);
-      border-color: var(--mp-hue);
-      color: #fff;
-    }
-  }
-  .mp-tab-count {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 20px;
-    height: 20px;
-    padding: 0 5px;
-    border-radius: var(--r-pill);
-    background: var(--no-soft);
-    color: var(--no-deep);
-    font-size: 12px;
-  }
-  .mp-tab.is-active .mp-tab-count { background: rgba(255, 255, 255, 0.28); color: #fff; }
-
   // ---------- 进度条 ----------
   .mp-progress {
     display: flex;
@@ -91,7 +46,7 @@
     gap: 12px;
     font-size: 13px;
     color: var(--ink-soft);
-    margin-bottom: 16px;
+    margin-bottom: 20px;
   }
   .mp-progress-track {
     flex: 1;
@@ -107,33 +62,167 @@
     border-radius: var(--r-pill);
     transition: width 0.3s ease;
   }
+  .mp-link {
+    border: 0;
+    background: none;
+    color: var(--mp-hue);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: underline;
+    cursor: pointer;
+    white-space: nowrap;
+  }
 
-  // ---------- 题卡 ----------
-  .mp-question {
+  // ---------- 题干卡：整段大字，照顾阅读 ----------
+  .mp-stem-card {
     background: var(--surface-2);
     border: 1px solid var(--line);
-    border-radius: var(--r-lg);
-    padding: 24px;
+    border-left: 4px solid var(--mp-hue);
+    border-radius: var(--r-md);
+    padding: 18px 20px;
+    margin-bottom: 20px;
   }
-  .mp-q-tag {
-    display: inline-block;
+  .mp-stem-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
     font-size: 12px;
     font-weight: 700;
     color: var(--mp-hue);
-    background: var(--mp-soft);
-    padding: 3px 10px;
-    border-radius: var(--r-pill);
-    margin-bottom: 16px;
+    margin-bottom: 8px;
   }
-  .mp-stem {
-    font-size: 28px;
+  .mp-stem-text {
+    font-size: 19px;
+    font-weight: 700;
+    line-height: 1.8;
+    color: var(--ink);
+    margin: 0;
+  }
+
+  // ---------- 三步指示器 ----------
+  .mp-stepper {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  .mp-step-chip {
+    padding: 6px 14px;
+    border: 1px solid var(--line-2);
+    border-radius: var(--r-pill);
+    background: var(--card);
+    color: var(--ink-mute);
+    font-size: 13px;
+    font-weight: 700;
+    &.is-current {
+      border-color: var(--mp-hue);
+      background: var(--mp-soft);
+      color: var(--mp-hue);
+    }
+    &.is-done-ok {
+      border-color: var(--ok);
+      background: var(--ok-soft);
+      color: var(--ok-deep);
+    }
+    &.is-done-no {
+      border-color: var(--no);
+      background: var(--no-soft);
+      color: var(--no-deep);
+    }
+  }
+
+  // ---------- 每一步面板 ----------
+  .mp-step-panel {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    padding: 22px;
+  }
+  .mp-step-prompt {
+    font-size: 18px;
     font-weight: 800;
     color: var(--ink);
-    text-align: center;
-    letter-spacing: 0.04em;
-    margin: 8px 0 24px;
+    margin: 0 0 16px;
+  }
+
+  // ---------- 选项列表（第一 / 第二步）----------
+  .mp-choice-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .mp-choice {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 14px 16px;
+    border: 2px solid var(--line-2);
+    border-radius: var(--r-md);
+    background: var(--card);
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
+    &:hover:not(:disabled) { border-color: var(--mp-hue); }
+    &.is-picked {
+      border-color: var(--mp-hue);
+      background: var(--mp-soft);
+      color: var(--mp-hue);
+    }
+    &.is-correct {
+      border-color: var(--ok);
+      background: var(--ok-soft);
+      color: var(--ok-deep);
+    }
+    &.is-wrong {
+      border-color: var(--no);
+      background: var(--no-soft);
+      color: var(--no-deep);
+    }
+    &:disabled { cursor: default; }
+  }
+  .mp-choice-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: var(--r-pill);
+    background: var(--bg-3);
+    color: var(--ink-soft);
+    font-size: 13px;
+    font-weight: 800;
+  }
+  .mp-choice.is-picked .mp-choice-mark { background: var(--mp-hue); color: #fff; }
+  .mp-choice.is-correct .mp-choice-mark { background: var(--ok); color: #fff; }
+  .mp-choice.is-wrong .mp-choice-mark { background: var(--no); color: #fff; }
+  .mp-choice-label { flex: 1; }
+
+  // ---------- 分步算式回顾（第三步）----------
+  .mp-steps-recap {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: var(--brand-tint);
+    border-radius: var(--r-md);
+    padding: 14px 16px;
+    margin-bottom: 20px;
+  }
+  .mp-step-line {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--brand-deep);
     font-variant-numeric: tabular-nums;
   }
+
+  // ---------- 答案输入 ----------
   .mp-answer-row {
     display: flex;
     gap: 10px;
@@ -170,25 +259,16 @@
     cursor: pointer;
     transition: opacity 0.15s ease;
     &:hover { opacity: 0.9; }
-    &--small { padding: 8px 16px; font-size: 13px; margin-top: 12px; }
+    &:disabled { background: var(--line-2); border-color: var(--line-2); cursor: not-allowed; }
     &--ghost {
       background: var(--card);
       color: var(--mp-hue);
     }
   }
-  .mp-link {
-    border: 0;
-    background: none;
-    color: var(--ink-soft);
-    font-family: inherit;
-    font-size: 13px;
-    text-decoration: underline;
-    cursor: pointer;
-  }
 
   // ---------- 反馈 / 解析 ----------
   .mp-feedback {
-    margin-top: 20px;
+    margin: 20px 0 12px;
     padding: 14px 16px;
     border-radius: var(--r-md);
     font-size: 15px;
@@ -212,123 +292,14 @@
     }
   }
 
-  // ---------- 读题·圈关键词 ----------
-  .mp-kw-step {
-    font-size: 18px;
-    font-weight: 800;
-    color: var(--ink);
-    margin: 0 0 6px;
-  }
-  .mp-kw-hint {
-    font-size: 14px;
-    color: var(--ink-soft);
-    line-height: 1.6;
-    margin: 0 0 16px;
-  }
-  .mp-wordwall {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-bottom: 20px;
-  }
-  .mp-word {
-    padding: 6px 10px;
-    border: 1px solid var(--line-2);
-    border-radius: var(--r-sm);
-    background: var(--card);
-    color: var(--ink);
-    font-family: inherit;
-    font-size: 16px;
-    line-height: 1.4;
-    cursor: pointer;
-    transition: background 0.12s ease, border-color 0.12s ease;
-    &:hover:not(:disabled) { border-color: var(--mp-hue); }
-    &.is-picked {
-      background: var(--mp-soft);
-      border-color: var(--mp-hue);
-      color: var(--mp-hue);
-      font-weight: 700;
-    }
-    &.is-key {
-      background: var(--ok-soft);
-      border-color: var(--ok);
-      color: var(--ok-deep);
-      font-weight: 700;
-    }
-    &.is-wrong-pick {
-      background: var(--no-soft);
-      border-color: var(--no);
-      color: var(--no-deep);
-      text-decoration: line-through;
-    }
-    &:disabled { cursor: default; }
-  }
-  .mp-steps {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    background: var(--brand-tint);
-    border-radius: var(--r-md);
-    padding: 14px 16px;
-    margin-bottom: 20px;
-  }
-  .mp-step {
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--brand-deep);
-    font-variant-numeric: tabular-nums;
-  }
-
-  // ---------- 错因复盘 ----------
-  .mp-review-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 16px;
-  }
-  .mp-review-title {
-    font-size: 18px;
-    font-weight: 800;
-    color: var(--ink);
-    margin: 0;
-  }
-  .mp-cause-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 10px;
-  }
-  .mp-cause-card {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 6px;
-    padding: 16px;
-    border: 1px solid var(--line);
-    border-left: 4px solid var(--mp-hue);
-    border-radius: var(--r-md);
-    background: var(--card);
-    font-family: inherit;
-    cursor: pointer;
-    transition: background 0.15s ease;
-    &:hover { background: var(--mp-soft); }
-    .mp-cause-name { font-size: 15px; font-weight: 800; color: var(--ink); }
-    .mp-cause-count { font-size: 13px; color: var(--ink-mute); }
-  }
-  .mp-note {
-    font-size: 13px;
-    color: var(--ink-mute);
-    margin: 16px 0 0;
-  }
+  // ---------- 空态 / 结算 ----------
   .mp-empty {
     text-align: center;
     padding: 48px 20px;
     color: var(--ink-soft);
     .mp-empty-emoji { font-size: 44px; display: block; margin-bottom: 12px; }
-    p { margin: 6px 0; font-size: 16px; }
-    .mp-empty-hint { font-size: 13px; color: var(--ink-mute); margin-bottom: 20px; }
+    p { margin: 6px 0 20px; font-size: 16px; }
   }
-
-  // ---------- 结算 ----------
   .mp-result {
     text-align: center;
     padding: 32px 20px;
@@ -362,8 +333,8 @@
 
 @media (max-width: 620px) {
   .math-practice {
-    .mp-question { padding: 16px; }
-    .mp-stem { font-size: 24px; }
-    .mp-word { font-size: 15px; padding: 5px 8px; }
+    .mp-stem-text { font-size: 17px; }
+    .mp-choice { font-size: 15px; padding: 12px; }
+    .mp-step-panel { padding: 16px; }
   }
 }

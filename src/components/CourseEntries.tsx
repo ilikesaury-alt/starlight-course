@@ -231,7 +231,7 @@ export default function CourseEntries() {
               <span className="hall-tool-emoji" aria-hidden="true">🧮</span>
               <span className="hall-tool-body">
                 <span className="ma-home-title">专项练习</span>
-                <span className="ma-home-sub">计算 · 读题圈关键词 · 错因复盘</span>
+                <span className="ma-home-sub">应用题 · 读题三步走</span>
               </span>
             </Link>
 
