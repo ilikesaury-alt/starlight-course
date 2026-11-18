@@ -6,22 +6,24 @@
 //
 // 新结构（三档）：
 //   ① 主课区（大卡，2 列）：Starlight 主课 / 语文 / 英语 —— 真正要"学"的三门
-//   ② 阅读区（中卡，3 列）：阅读小故事 / Rocket Girl / Fly Guy —— 自选拓展
+//   ② 阅读区（中卡，恒定 2 卡）：阅读小故事 / 绘本桥梁书馆 —— 后者收录所有 IP 书单，
+//      新增书单只加 bookWall.ts 数据，这里永不增卡（2026-11-17 聚合书墙）
 //   ③ 练习区（紧凑条，横排）：听写 / 字母积木 / 字母表 —— 工具性质，不该占大块
 //
 // ⚠️ **所有 e2e class 锚点一个都不能改名**（tests/*.spec.ts 靠它们定位）：
-//    .cn-home-entry .en3-home-entry .sl-home-entry .rg-home-entry .fg-home-entry
-//    .dt-home-entry .ab-home-entry .rd-home-entry .rd1-home-entry
+//    .cn-home-entry .en3-home-entry .sl-home-entry .rd-home-entry .rd1-home-entry
+//    .bw-home-entry .dt-home-entry .ab-home-entry
 // 改动只调**结构与尺寸**，不动 class 名。旧的 `.home-entries` 保留为外层容器
 // （e2e 与样式仍引用），内部改为分区。
 //
-// 故事类数据体积大（~600KB 源码）→ 仍走 import() 动态获取，不进首屏 chunk。
+// 阅读卡的数字一律静态取数据文件（bookWallStats 等），不再 import() 动态取数 ——
+// 那会在 vitest 环境 teardown 后 resolve，偶发 EnvironmentTeardownError。
 
-import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Type, ChartColumn } from 'lucide-react'
 import { totalEngLessons, eng3aWordCount, eng3aUnits } from '@/data/eng3a'
 import { chineseUnits } from '@/data/chinese'
+import { bookWallStats } from '@/data/bookWall'
 import { useCourseStore } from '@/store/useCourseStore'
 import type { ModuleId } from '@/data/modules'
 import StarlightLevelSwitch from './StarlightLevelSwitch'
@@ -37,24 +39,6 @@ export default function CourseEntries() {
   const [level, changeLevel] = useHomeLevel()
   const meta = STARLIGHT_LEVELS[level]
   const readingPath = level === 'starlight1' ? '/reading1' : '/reading'
-
-  const [fgStats, setFgStats] = useState<{ stories: number; chapters: number } | null>(null)
-  const [rgStats, setRgStats] = useState<{ arcs: number; stories: number } | null>(null)
-
-  useEffect(() => {
-    let alive = true
-    void import('@/data/flyguyReading').then((m) => {
-      if (!alive) return
-      setFgStats({ stories: m.fgReadingStats.books, chapters: m.fgReadingStats.chapters })
-    })
-    void import('@/data/rocketgirlReading').then((m) => {
-      if (!alive) return
-      setRgStats({ arcs: m.rgArcCount, stories: m.rgStoryCount })
-    })
-    return () => {
-      alive = false
-    }
-  }, [])
 
   const pct = (done: number, total?: number) =>
     total && total > 0 ? Math.round((done / total) * 100) : undefined
@@ -182,7 +166,9 @@ export default function CourseEntries() {
           </div>
         </div>
 
-        {/* ② 阅读区 —— 自选拓展，中卡三列 */}
+        {/* ② 阅读区 —— 恒定 2 卡：教材配套 + 所有 IP 书单的书馆。
+            ⚠️ 新增书单只加 bookWall.ts 的数据，这里永远是 2 张卡（e2e 锚点稳定）。
+            .rd-home-entry 是重契约（href 随册次切换 + "阅读小故事" 文案），一个字不动。 */}
         <div className="hall-section">
           <h2 className="hall-heading">
             <span className="hall-heading-emoji" aria-hidden="true">📖</span>
@@ -199,32 +185,16 @@ export default function CourseEntries() {
               </div>
             </Link>
 
-            <Link to="/rocketgirl" className="rg-home-entry hall-card hall-card--read">
-              <span className="hall-card-glyph" aria-hidden="true">🚀</span>
-              <div className="rg-home-body hall-card-body">
-                {/* ⚠️ 必须含「Rocket Girl 阅读」整串 —— tests/rocketgirl-reading.spec.ts:45
-                用 toContainText('Rocket Girl 阅读') 断言。缩到「Rocket Girl」会红。 */}
-                <div className="rg-home-title">Rocket Girl 阅读</div>
-                <div className="rg-home-sub">
-                  {rgStats ? `${rgStats.arcs} 个故事 / ${rgStats.stories} 段` : '故事阅读'}
-                </div>
-                <div className="hall-card-foot">
-                  <Due id="rocketgirl" />
-                </div>
-              </div>
-            </Link>
-
-            <Link to="/flyguy" className="fg-home-entry hall-card hall-card--read">
-              <span className="hall-card-glyph" aria-hidden="true">🐝</span>
-              <div className="fg-home-body hall-card-body">
-                <div className="fg-home-title">Fly Guy 绘本</div>
-                <div className="fg-home-sub">
-                  {fgStats
-                    ? `${fgStats.stories} 本真实绘本 · ${fgStats.chapters} 章原文`
-                    : '真实绘本阅读'}
+            <Link to="/books" className="bw-home-entry hall-card hall-card--read">
+              <span className="hall-card-glyph" aria-hidden="true">📚</span>
+              <div className="bw-home-body hall-card-body">
+                <div className="bw-home-title">绘本桥梁书馆</div>
+                <div className="bw-home-sub">
+                  {bookWallStats.total} 套书 · {bookWallStats.available} 套可读 · 按蓝思选
                 </div>
                 <div className="hall-card-foot">
                   <Due id="flyguy" />
+                  <Due id="rocketgirl" />
                 </div>
               </div>
             </Link>

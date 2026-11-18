@@ -10,3 +10,9 @@ export const RG_THEME = {
   color: '#7c3aed',
   colorSoft: '#ede9fe',
 } as const
+
+/** 绘本桥梁书馆（/books）：琥珀橙，区别于阅读靛蓝、FG 绿、RG 紫。 */
+export const BOOK_WALL_THEME = {
+  color: '#d97706',
+  colorSoft: '#fef3c7',
+} as const

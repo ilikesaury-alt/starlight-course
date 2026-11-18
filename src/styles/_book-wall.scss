@@ -1,0 +1,118 @@
+// 绘本桥梁书馆（/books）—— 复用 .module-grid / .module-card 骨架后的局部修正。
+// ⚠️ 只在 .book-wall 作用域内生效，不改共享的 .module-card / .chip 全局规则。
+
+.book-wall {
+  .bw-hero {
+    margin-bottom: 4px;
+  }
+  .bw-sub {
+    font-size: var(--fs-sm);
+    color: var(--ink-soft);
+    line-height: 1.6;
+    max-width: 720px;
+  }
+
+  .bw-filters {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    .filter-chips { margin: 10px 0 4px; }
+  }
+  .bw-chip-note {
+    font-size: var(--fs-xs);
+    color: var(--ink-mute);
+    font-weight: 400;
+    margin-left: 2px;
+  }
+
+  .bw-count {
+    font-size: var(--fs-sm);
+    font-weight: 500;
+    color: var(--ink-mute);
+    margin-left: 6px;
+  }
+
+  // 宽屏 3 列：14 套书排 5 行，比共享的 2 列（7 行）更紧凑
+  .bw-grid.bw-grid {
+    @media (min-width: 900px) {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  .bw-card {
+    align-items: flex-start;
+    gap: 10px;
+    min-height: 106px;
+    flex-direction: column; // 卡片内部竖排：书名行 + 主题
+  }
+  .bw-card .module-emoji {
+    width: auto;
+    height: auto;
+    font-size: 26px;
+  }
+  .bw-card .module-info {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+  .bw-title-en {
+    font-size: var(--fs-md);
+    font-weight: 800;
+    color: var(--ink);
+    line-height: 1.25;
+  }
+  .bw-card .module-zh {
+    font-size: var(--fs-xs);
+    color: var(--ink-soft);
+    margin: 2px 0;
+  }
+  .bw-meta {
+    font-size: var(--fs-xs);
+    color: var(--mc, var(--brand));
+    font-weight: 700;
+  }
+  .bw-themes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 6px;
+  }
+  .bw-theme {
+    font-size: 11px;
+    color: var(--ink-soft);
+    background: var(--mc-soft, var(--brand-soft));
+    border-radius: var(--r-pill);
+    padding: 2px 8px;
+  }
+  .bw-card .module-arrow {
+    position: absolute;
+    right: 14px;
+    top: 12px;
+  }
+  .bw-soon {
+    position: absolute;
+    right: 12px;
+    top: 12px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--ink-mute);
+    background: var(--line);
+    border-radius: var(--r-pill);
+    padding: 3px 9px;
+  }
+
+  // 准备中：灰态 + 不可点指针 + 轻微降饱和（仍要看清书名，不藏起来）
+  .bw-card--soon {
+    cursor: default;
+    opacity: 0.72;
+    &::before { background: var(--ink-mute); }
+  }
+
+  .bw-footnote {
+    font-size: var(--fs-xs);
+    color: var(--ink-mute);
+    line-height: 1.6;
+    max-width: 780px;
+    margin-top: 18px;
+  }
+}

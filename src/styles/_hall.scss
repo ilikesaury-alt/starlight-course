@@ -3,7 +3,7 @@
 //  ------------------------------------------------------------
 //  三档层次，解决「8 张等高卡平铺、分不出主次」：
 //    ① .hall-main    主课大卡（2 列）—— 真正要「学」的三门
-//    ② .hall-reading 阅读中卡（3 列）—— 自选拓展
+//    ② .hall-reading 阅读中卡（恒定 2 卡：教材配套 + 绘本桥梁书馆）—— 自选拓展
 //    ③ .hall-tools   练习紧凑条（4 列）—— 工具性质，不占大块
 //
 //  视觉规则沿用项目既有的 tasteskill · pastel-consumer：
@@ -284,7 +284,7 @@
   gap: 12px;
 }
 @media (min-width: 620px) {
-  .hall-reading { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .hall-reading { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 .hall-card--read {
@@ -294,16 +294,14 @@
   padding: 16px 16px 14px 20px;
   .hall-card-glyph { width: 40px; height: 40px; font-size: 22px; }
   .rd-home-title,
-  .rg-home-title,
-  .fg-home-title {
+  .bw-home-title {
     font-size: var(--fs-md);
     font-weight: 800;
     margin: 0 0 2px;
     color: var(--hall-ink, var(--ink));
   }
   .rd-home-sub,
-  .rg-home-sub,
-  .fg-home-sub {
+  .bw-home-sub {
     font-size: var(--fs-xs);
     line-height: 1.45;
     color: var(--hall-ink, var(--ink));

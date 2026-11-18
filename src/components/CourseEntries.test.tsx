@@ -5,27 +5,13 @@
 //  ① 切换条默认预备级、两个册次都在、当前册高亮；
 //  ② 点「第一册」后主课卡与阅读卡的链接/文案/徽章一起换册（不再各摆一张卡）；
 //  ③ 偏好写进 localStorage，重新挂载后仍在第一册；野值回落预备级。
-//
-// ⚠️ mock 掉两张阅读卡的动态取数（flyguyReading / rocketgirlReading）：
-//    本文件只测册次切换的链接/文案/锚点，用不到真实规模数字。不 mock 的话，
-//    组件的 import() 会在 vitest 环境 teardown 之后才 resolve，偶发
-//    EnvironmentTeardownError（红错误但不红测试），且引入越重的数据链
-//    越容易撞上 —— 把竞态关在门外，测试只测它要测的东西。
 
-import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import CourseEntries from './CourseEntries'
 import { HOME_LEVEL_KEY } from '@/data/homeLevel'
 import { useCourseStore } from '@/store/useCourseStore'
-
-vi.mock('@/data/flyguyReading', () => ({
-  fgReadingStats: { books: 22, chapters: 58, withBookText: 15 },
-}))
-vi.mock('@/data/rocketgirlReading', () => ({
-  rgArcCount: 27,
-  rgStoryCount: 108,
-}))
 
 beforeAll(() => {
   ;(globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true

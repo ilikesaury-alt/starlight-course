@@ -144,6 +144,12 @@ npm run electron:build  # 打包 Windows NSIS 安装包（产物在 release/）
     - `flyguy.ts` 保留 22 本故事数据（modules.ts 的 SRS 动态加载 + 适配层共用）；`flyGuyBooks` / `getStory` / `flyGuyStoryCount` / `flyGuyWordCount` 已随闯关形态删除。`fgPassageOf` 同样**必须返回稳定引用**（PASSAGE_CACHE），`fgReadingStats` 是 Progress / 首页卡的静态规模数字
     - `completedStories` 对 FG 同 RG：字段保留不读写，历史 `fg-*` 通关记录不算阅读进度；Fly Guy 的 SRS 卡 / 错题**保留**在复习池（SmartReview 的 flyguy 筛选与 Due 徽章照常工作）
     - FG 页级样式在 `_flyguy-reading.scss`（`.fg-reading-sheet` 作用域，两行书名栅格 + 版权口径小字），不碰 `.reading-sheet` 全局规则
+  - ⚠️ **绘本桥梁书馆（`/books`，`src/pages/BookWall.tsx` + `src/data/bookWall.ts`）是所有 IP 书单的唯一目录与入口**（2026-11-17 定，Lichun 选「聚合书墙」）：首页阅读区**恒定 2 卡**（阅读小故事 + 书馆），Fly Guy / RG 等具体书不再占首页卡，全部收进书馆。
+    - **上架一本新书 = 只改 `bookWall.ts` 的一条数据**（把 `available` 改 true、填 `linkTo`），首页与其它代码零改动。`BOOK_SERIES` 是书单唯一真源：中英书名/作者/蓝思区间/年级/主题/emoji/主题色；蓝思按用户书单原样展示（联网核实有 5 套实际区间与书单有出入，差异只在 docs 说明，UI 不改用户数据）
+    - 书馆是**纯目录页**：不注册 `modules.ts`、不做 SRS/测验、不升 store、不持久化进度。可读卡（`<Link>`）跳已有阅读模块，准备中卡（灰态 `<div>` + `aria-disabled`）不可点。有正文才可标可读——没有自有版权文件就不要把 `available` 置 true
+    - 排序规则写在**页面渲染时**（`filtered.sort`：可读优先 + 蓝思下界升序），不依赖 `bookWall.ts` 的数据顺序——将来新书随便插哪都行。搜索/难度 chip（起步<400 / 进阶 400–550 / 挑战 550+）/状态 chip 全在页面内 `useState`，零持久化
+    - 可读的两套是 Fly Guy（`/flyguy`）与 Rocket Girl（`/rocketgirl`）。书馆数据 14 套 = 用户书单 13 套 + 已有 RG；`bookWallStats` 给首页卡提供静态数字（不用动态 import，避免 vitest teardown race）
+    - `.bw-home-entry` 是首页新锚点（book-wall.spec 钉死）；RG/FG spec 的首条「首页入口」用例已改为走书馆路径
 
 - Phonics: `src/data/phonics.ts` 的音素切分口径**对齐《字母积木》(Alphablocks / BBC CBeebies) 的教学分级** —— 孩子正在看的动画是这套片，app 必须跟动画对得上号，否则提示反而干扰：
   - L1-2 单字母 / L3 字母小队（两三个字母合成一个音：`ch`/`ai`/`igh`/`ar`/`er`…）/ L4 手拉手（辅音簇各发各的音：`st`/`bl`/`-nd`）/ L5 魔法E（`e` **单独成格**、自己不发声、但让前面元音发长音）/ 特别篇双写（`ll`/`ss`/`ff` 合成一个音）
@@ -170,13 +176,16 @@ npm run electron:build  # 打包 Windows NSIS 安装包（产物在 release/）
 | 分区 | 版式 | 实测尺寸 |
 |---|---|---|
 | `.hall-main` 主课 | Starlight 全宽 + 语文/英语并排 | 961 / 474px 宽，135px 高 |
-| `.hall-reading` 阅读 | 3 列 | 312px 宽，132px 高 |
+| `.hall-reading` 阅读 | **恒定 2 卡**：阅读小故事 + 绘本桥梁书馆 | 474px 宽，132px 高 |
 | `.hall-tools` 练习 | 4 列紧凑条 | 233px 宽，95px 高 |
+
+> 阅读区 2026-11-17 收敛：原 3 卡（阅读小故事 / Rocket Girl / Fly Guy）中后两张撤下，
+> 统一收进「绘本桥梁书馆」。**新增任何书单都只加 `bookWall.ts` 数据，首页永远 2 卡。**
 
 ### ⚠️ 三个必须知道的坑（都实测踩过）
 
 1. **`@mixin home-entry` 是 `flex-direction: column`**。只写 `.hall-card { display:flex }` 不覆盖方向 ⇒ emoji 和文字纵向堆叠，卡片从 116px 撑到 **245px**。必须用 `.home-entries.hall .hall-card`（0,3,0）压过单类选择器
-2. **文案是 e2e 契约，排版调整不能顺手改**。我一度把「Starlight 主课 · 预备级」改成「Starlight · 预备级」、把「Rocket Girl 阅读」缩成「Rocket Girl」⇒ 3 条 e2e 立刻红。现有断言：`Starlight 主课`(home.spec×2, eng3a.spec)、`Rocket Girl 阅读`(rocketgirl-reading.spec)、`听写练习`、`字母积木`、`阅读小故事`(reading.spec×2)
+2. **文案是 e2e 契约，排版调整不能顺手改**。我一度把「Starlight 主课 · 预备级」改成「Starlight · 预备级」⇒ e2e 立刻红。首页现有被断言的文案：`Starlight 主课`(home.spec×2, eng3a.spec)、`听写练习`、`字母积木`、`阅读小故事`(reading.spec×2, home.spec)、`绘本桥梁书馆`(book-wall.spec)；RG/FG 卡撤下后它们的首页文案断言已移到书馆页
 3. **`.home-entries > a:last-child:nth-child(odd)` 等旧选择器仍被引用**，`.home-entries` 容器本身保留，内部改分区
 
 ### 其它口径

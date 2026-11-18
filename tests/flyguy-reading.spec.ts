@@ -38,11 +38,16 @@ async function openFirst(page: Page) {
 }
 
 test.describe('Fly Guy 阅读 · 入口与结构', () => {
-  test('首页入口可达，进来就是阅读模块的白纸页', async ({ page }) => {
+  test('书馆入口可达，进来就是阅读模块的白纸页', async ({ page }) => {
+    // 首页阅读区已收敛为 2 卡：书单统一走「绘本桥梁书馆」
     await page.goto('/')
-    const entry = page.locator('.fg-home-entry')
+    const hall = page.locator('.bw-home-entry')
+    await expect(hall).toBeVisible({ timeout: 15000 })
+    await hall.click()
+    await expect(page).toHaveURL(/#\/books$/)
+    const entry = page.getByTestId('bw-series-fly-guy')
     await expect(entry).toBeVisible({ timeout: 15000 })
-    await expect(entry).toContainText('Fly Guy 绘本')
+    await expect(entry).toContainText('Fly Guy')
     await expect(entry).toHaveAttribute('href', /#\/flyguy$/)
     await entry.click()
 

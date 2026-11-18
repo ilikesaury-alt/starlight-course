@@ -10,6 +10,7 @@ import { warmupKokoro } from '@/utils/engine/kokoro'
 // 数据文件(如 starlight-book/绘本原文)只被对应页面引用,会随页面 chunk 一起懒加载。
 const Home = lazy(() => import('@/pages/Home'))
 const Courses = lazy(() => import('@/pages/Courses'))
+const BookWall = lazy(() => import('@/pages/BookWall'))
 const LessonList = lazy(() => import('@/pages/LessonList'))
 const LessonPreview = lazy(() => import('@/pages/LessonPreview'))
 const UnitQuiz = lazy(() => import('@/pages/UnitQuiz'))
@@ -71,6 +72,7 @@ function AppRoutes() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/courses" element={<Courses />} />
+          <Route path="/books" element={<BookWall />} />
           <Route path="/preview" element={<Navigate to="/starlight" replace />} />
           <Route path="/preview/:unitId" element={<LessonList />} />
           <Route path="/preview/:unitId/:lessonId" element={<LessonPreview />} />
