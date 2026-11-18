@@ -343,18 +343,21 @@
 
   // 带主题色的工具（听写/积木）用浅底 + 左细条，与纯工具（字母表/进度）区分
   &.dt-home-entry,
-  &.ab-home-entry {
+  &.ab-home-entry,
+  &.ma-home-entry {
     background: var(--hall-tool-bg, var(--card));
     border-left: 4px solid var(--hall-tool-hue, var(--line));
   }
 }
 .dt-home-entry { --hall-tool-bg: #ccfbf1; --hall-tool-hue: #0d9488; }
 .ab-home-entry { --hall-tool-bg: #ffedd5; --hall-tool-hue: #ea580c; }
+.ma-home-entry { --hall-tool-bg: #e0e7ff; --hall-tool-hue: #4f46e5; }
 
 .hall-tool-emoji { font-size: 20px; line-height: 1; flex-shrink: 0; }
 .hall-tool-body { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
 .dt-home-title,
 .ab-home-title,
+.ma-home-title,
 .hall-tool-title {
   font-size: var(--fs-sm);
   font-weight: 800;
@@ -362,6 +365,7 @@
 }
 .dt-home-sub,
 .ab-home-sub,
+.ma-home-sub,
 .hall-tool-sub {
   font-size: 11px;
   line-height: 1.35;

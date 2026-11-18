@@ -48,3 +48,5 @@
 @use 'styles/backup';
 // 孩子档案卡（进度页顶部；平台化 P0 的「身份」地基）。
 @use 'styles/profile';
+// 数学专项练习（/math）：首页「专项练习」入口，self-contained 白纸页。
+@use 'styles/math-practice';

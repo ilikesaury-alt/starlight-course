@@ -225,6 +225,16 @@ export default function CourseEntries() {
               </span>
             </Link>
 
+            {/* 数学专项（北师大三上）：针对计算出错 / 读题不细 / 不圈关键词，
+                self-contained 模块，anchor .ma-home-entry 是 e2e 新契约，别改名。 */}
+            <Link to="/math" className="ma-home-entry hall-tool">
+              <span className="hall-tool-emoji" aria-hidden="true">🧮</span>
+              <span className="hall-tool-body">
+                <span className="ma-home-title">专项练习</span>
+                <span className="ma-home-sub">计算 · 读题圈关键词 · 错因复盘</span>
+              </span>
+            </Link>
+
             <Link to="/alphabet" className="hall-tool hall-tool--plain">
               <Type size={20} strokeWidth={1.9} aria-hidden="true" />
               <span className="hall-tool-body">
