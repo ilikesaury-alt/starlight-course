@@ -189,6 +189,41 @@ test.describe('M4 全流程与错题', () => {
   })
 })
 
+test.describe('M6 打印本轮（纸质迁移检验）', () => {
+  test('打印按钮触发打印；试卷含整轮 5 题题干，但不泄露算式 / 答案 / 解析', async ({ page }) => {
+    await gotoMath(page)
+    await page.evaluate(() => {
+      ;(window as unknown as { __printCalls: number; print: () => void }).__printCalls = 0
+      window.print = () => { ;(window as unknown as { __printCalls: number }).__printCalls++ }
+    })
+    await page.getByRole('button', { name: /打印本轮/ }).click()
+    expect(await page.evaluate(() => (window as unknown as { __printCalls: number }).__printCalls)).toBe(1)
+
+    const stems = await page.locator('.mp-print-sheet .ps-stem').allTextContents()
+    expect(stems).toHaveLength(5)
+    const sheet = (await page.locator('.mp-print-sheet').textContent()) ?? ''
+    for (const stem of stems) {
+      const p = problemOf(stem)
+      for (const step of p.steps) expect(sheet, `${p.id} 分步算式不应出现在试卷上`).not.toContain(step)
+      expect(sheet, `${p.id} 解析不应出现在试卷上`).not.toContain(p.explain)
+    }
+    // 圈画提示（mp-seg--rel / num）和选项都不能出现在纸上 —— 否则不用自己读题
+    expect(await page.locator('.mp-print-sheet .mp-seg').count()).toBe(0)
+    expect(await page.locator('.mp-print-sheet .mp-choice').count()).toBe(0)
+    // 留够写分步算式的横线
+    expect(await page.locator('.mp-print-sheet .ps-line').count()).toBeGreaterThanOrEqual(10)
+  })
+
+  test('打印媒体下只显示空白试卷，隐藏四步交互界面和导航', async ({ page }) => {
+    await gotoMath(page)
+    await page.emulateMedia({ media: 'print' })
+    await expect(page.locator('.mp-print-sheet')).toBeVisible()
+    await expect(page.locator('.mp-quiz')).toBeHidden()
+    await expect(page.locator('.app-header')).toBeHidden()
+    await expect(page.getByRole('heading', { name: '应用题专项练习' })).toBeHidden()
+  })
+})
+
 test.describe('M5 不提前泄露答案', () => {
   test('点下一步后，题干仍然可见（不消失），且不显示反馈', async ({ page }) => {
     await gotoMath(page)

@@ -19,7 +19,7 @@
 // ============================================================
 import { useMemo, useState, useSyncExternalStore } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowLeft, RotateCcw, Check, X, Lightbulb } from 'lucide-react'
+import { ArrowLeft, RotateCcw, Check, X, Lightbulb, Printer } from 'lucide-react'
 import {
   TOPIC_LABEL,
   WORD_PROBLEMS,
@@ -189,7 +189,35 @@ export default function MathPractice() {
         </Link>
         <h1 className="mp-title">应用题专项练习</h1>
         <p className="mp-sub">审题三步法：圈关系词 → 划数字 → 说求什么，笔到了脑子才到</p>
+        <button type="button" className="mp-print-btn" onClick={() => window.print()}>
+          <Printer size={16} aria-hidden="true" /> 打印本轮（纸笔检验）
+        </button>
       </header>
+
+      {/* ---------- 打印专用空白试卷（屏幕隐藏，@media print 才出现）----------
+          用于每周一次的「纸质迁移检验」：看孩子在纸上还会不会主动圈画、列式。
+          只输出题干纯文本 + 空白横线，不输出 topic 标签 / 选项 / 分步算式 /
+          答案 / 解析 —— 打印出来必须自己读题、圈画、列式，才叫迁移检验。
+          整轮 5 题一次性输出（屏幕上只渲染当前题，所以另起一段 DOM）。 */}
+      <section className="mp-print-sheet" aria-hidden="true">
+        <div className="ps-head">
+          <h1>应用题审题练习 · 纸质检验</h1>
+          <p className="ps-meta">姓名：________________　　日期：________________</p>
+          <p className="ps-tip">读题时圈出关系词、给数字划线，再把分步算式写在横线上，最后写出得数。</p>
+        </div>
+        {questions.map((p, i) => (
+          <div className="ps-problem" key={p.id}>
+            <div className="ps-no">第 {i + 1} 题</div>
+            <p className="ps-stem">{p.text}</p>
+            <div className="ps-lines">
+              <div className="ps-line" />
+              <div className="ps-line" />
+              <div className="ps-line" />
+            </div>
+            <p className="ps-answer">得数：________________</p>
+          </div>
+        ))}
+      </section>
 
       {/* ---------- 结算卡 ---------- */}
       {finished ? (

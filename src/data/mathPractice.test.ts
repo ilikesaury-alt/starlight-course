@@ -6,12 +6,12 @@ import { describe, it, expect } from 'vitest'
 import { TOPIC_LABEL, WORD_PROBLEMS, wordProblemRound } from './mathPractice'
 
 describe('应用题数据', () => {
-  it('题量 ≥ 28，id 唯一', () => {
-    expect(WORD_PROBLEMS.length).toBeGreaterThanOrEqual(28)
+  it('题量 ≥ 50（含经典提优题型），id 唯一', () => {
+    expect(WORD_PROBLEMS.length).toBeGreaterThanOrEqual(50)
     expect(new Set(WORD_PROBLEMS.map((p) => p.id)).size).toBe(WORD_PROBLEMS.length)
   })
 
-  it('每题的 topic 合法，且 7 个板块都有题', () => {
+  it('每题的 topic 合法，且所有板块都有题', () => {
     for (const p of WORD_PROBLEMS) {
       expect(TOPIC_LABEL[p.topic], `${p.id} topic ${p.topic}`).toBeTruthy()
     }
@@ -42,6 +42,35 @@ describe('应用题数据', () => {
       expect(new Set(p.ask.options.map((o) => o.label)).size).toBe(p.ask.options.length)
       expect(new Set(p.first.options.map((o) => o.label)).size).toBe(p.first.options.length)
     }
+  })
+
+  it('正确项不固定在 A：按题号打散到多个位置（防「闭眼选 A」）', () => {
+    // 2026-11-18 用户实测：原来 30 题 × 2 步共 60 组选项，正确项全在 index 0。
+    // q() 现在按 id 确定性洗牌，这里钉死打散效果，别再有人「简化」回全 0。
+    for (const which of ['ask', 'first'] as const) {
+      const positions = WORD_PROBLEMS.map((p) => p[which].options.findIndex((o) => o.correct))
+      expect(positions.every((i) => i >= 0), `${which} 每题都要有正确项`).toBe(true)
+      expect(new Set(positions).size, `${which} 正确项应散布在 A/B/C`).toBeGreaterThanOrEqual(3)
+      expect(
+        positions.filter((i) => i === 0).length / positions.length,
+        `${which} 不能总是 A`,
+      ).toBeLessThan(0.6)
+    }
+    // 标记选项仍按原顺序（A/B/C 字母标签由渲染层按 index 生成）
+    for (const p of WORD_PROBLEMS) {
+      expect(p.ask.options.length).toBe(3)
+      expect(p.first.options.length).toBe(3)
+    }
+  })
+
+  it('同一题的选项顺序稳定：同 seed 两次抽题，选项逐项一致', () => {
+    const a = wordProblemRound(5, 42)
+    const b = wordProblemRound(5, 42)
+    expect(
+      a.map((p) => [p.ask.options.map((o) => o.label), p.first.options.map((o) => o.label)]),
+    ).toEqual(
+      b.map((p) => [p.ask.options.map((o) => o.label), p.first.options.map((o) => o.label)]),
+    )
   })
 
   it('分步算式 ≥2 步，末步结果 === answer', () => {

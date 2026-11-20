@@ -298,13 +298,23 @@ npm run electron:build  # 打包 Windows NSIS 安装包（产物在 release/）
 - 接受两种输入格式：本应用的备份信封（`{kind, schema, storeVersion, data}`）与 zustand persist 原始落盘格式（`{state, version}`）
 - **已有自动落盘托底**（见上节「数据落盘」）：桌面版进度写在 `userData/starlight-data.json`，导出/导入是「跨机器迁移 / 归档」的手段。但**卸载重装仍会清空 userData**，所以导出备份在换机/重装前依然必要
 
+## 数学专项训练（`src/data/mathPractice.ts` + `pages/MathPractice.tsx`，2026-11-18）
+
+**应用题**，不接 SRS / store / ModuleId：错题单独存 localStorage（`mathWrong.ts`），不升 persist 版本号。流程固定四步 = 标记（圈关系词/划数字）→ 求什么 → 先算什么 → 得数；星数用统一口径 `quizStars`，只在本页结算卡展示。
+
+- 题库 **50 题 / 15 板块**：原 30 题基础 + 20 道经典提优题（归一归总、和差倍、植树间隔、爬楼梯、周期、时间计算、单位换算、平均数、移多补少、搭配、容斥、正方形/拼图周长）。题型清单参考了三年级常考易错应用题的经典分类（ixuehai.cn/html/4768.html、xuebawang.net/t/811、keyalg.com/xes/三年级/understanding）—— 用户明确要求「不能太简单」。
+- ⚠️ **选项正确项不能写死在 index 0**（用户实测「闭眼选 A」）：原 30 题 × 2 步共 60 组选项全是 A 对。`q()` 现在用 **题号 hash 作种子的确定性洗牌**（`hashSeed` + `shuffleChoices`）打散到 A/B/C，写题时仍把正确项放 index 0 即可。**别删掉这个打散**；e2e 从数据 `findIndex(o => o.correct)` 取位置跟着走，所以打散不破坏契约。`mathPractice.test.ts` 钉死「正确项散落在 ≥3 个位置且 A 占比 <60%」。
+- 出题按 topic 轮转抽样（`wordProblemRound`，seed 可复现）；新增题目必须满足单测不变量：segments 拼接 === text、rel/num 各 ≥1、标记点 ≤6、每题两个选择步各恰一正确项、steps ≥2 且末步数字 === answer、**第一步算式不含 answer**（否则「得数」步提前泄露）。
+- **打印本轮**（`math-practice.scss` 的 `@media print`）：页头「打印本轮（纸笔检验）」按钮 → `window.print()`。打印视图 `.mp-print-sheet` 是**另起的一段 DOM**（屏幕上只渲染当前题，不能靠它打印整轮），输出 5 题纯文本题干 + 空白横线，**不含 topic 标签 / 圈画提示 / 选项 / 分步算式 / 答案 / 解析** —— 用于每周一次的纸质迁移检验（看孩子在纸上还会不会主动圈画、列式）。打印时靠少量非作用域 reset 隐藏 `.app-header`/`.bottom-nav`/`.mp-head`/`.mp-quiz` 等共享类。改这块必须跑 M6 的两条 e2e（emulateMedia print + 答案不泄露）。
+- e2e：`tests/math-practice.spec.ts`（M1~M6），题干锚点 `[data-testid="problem-text"]`、选项 `.mp-choice`、四步 chip `.mp-step-chip` 都不能改名。
+
 ## File Structure
 ```
 src/
 ├── components/     # Layout, SpeakButton, SafeBoundary + 跟读/框架卡/点读/拓展词录入 + BackupPanel(备份恢复) + ProfileCard(孩子档案)
 ├── pages/         # page components (Home, LessonPreview, SmartReview, etc.)
 ├── hooks/         # useSettleQuiz(结算) / useSpeechRecognition(STT) / useSentenceReader(跟读编排) / useViewMode(孩子·家长模式)
-├── data/          # 课程内容(starlight.ts, lessons.ts) + sentenceFrame.ts(句型框架) + extensionTopics.ts(拓展词主题库) + srs.ts / fsrsScheduler.ts + dailyPlan.ts(每日节律) + viewMode.ts(孩子·家长模式)
+├── data/          # 课程内容(starlight.ts, lessons.ts) + sentenceFrame.ts(句型框架) + extensionTopics.ts(拓展词主题库) + srs.ts / fsrsScheduler.ts + dailyPlan.ts(每日节律) + viewMode.ts(孩子·家长模式) + mathPractice.ts(应用题题库) / mathWrong.ts(数学错题本)
 ├── utils/         # stars.ts(星规) / similarity.ts(跟读评分) / reviewQueue.ts(复习配额) / backup.ts(备份恢复) / storage.ts(桌面版落盘) / speakService + engine/(youdao·baidu·webSpeech·kokoro·edgeTts·edgeNeural·msGecV2·segmentedSpeak)
 └── store/         # Zustand state management (含 starlightExtensions 拓展词 + extensionRound 填充轮次)
 ```
