@@ -225,6 +225,17 @@ export default function CourseEntries() {
               </span>
             </Link>
 
+            {/* 读词训练：补"听得懂 → 看得懂"那座桥。
+                与字母积木同族（都用 phonemeSegments），挨着放。
+                class 用新前缀 .rw-home-entry，不动任何既有 e2e 锚点。 */}
+            <Link to="/read" className="rw-home-entry hall-tool">
+              <span className="hall-tool-emoji" aria-hidden="true">🔤</span>
+              <span className="hall-tool-body">
+                <span className="rw-home-title">读词训练</span>
+                <span className="rw-home-sub">自己拼 · 快速认</span>
+              </span>
+            </Link>
+
             {/* 数学专项（北师大三上）：针对计算出错 / 读题不细 / 不圈关键词，
                 self-contained 模块，anchor .ma-home-entry 是 e2e 新契约，别改名。 */}
             <Link to="/math" className="ma-home-entry hall-tool">

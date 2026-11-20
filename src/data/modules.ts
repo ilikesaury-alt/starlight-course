@@ -21,6 +21,9 @@ export type ModuleId =
   | 'chinese'
   | 'eng3a'
   | 'alphablocks'
+  // 读词训练的两个子轨：练习型模块（无课程单元，仅 SRS/错题归属用）
+  | 'decoding'
+  | 'sightwords'
 
 export interface ReviewItem {
   /** 单元 slug（Starlight）或故事 slug（故事类） */
@@ -265,6 +268,31 @@ export const MODULES: Record<ModuleId, ModuleMeta> = {
     labelZh: '字母积木',
     color: '#ea580c',
     colorSoft: '#ffedd5',
+    kind: 'unit',
+    items: [],
+    getWords: () => [],
+    load: async () => ({ items: [], getWords: () => [] }),
+  },
+  // 读词训练：与 alphablocks 同构的练习型壳。
+  // ⚠️ 不进 MODULE_LIST —— 那会让智能复习/错题本的筛选 chips 多出两项，
+  //    而这两个模块的词只在读词训练页内自循环，不需要跨模块复习筛选。
+  decoding: {
+    id: 'decoding',
+    label: 'Decoding',
+    labelZh: '读词·拼一拼',
+    color: '#0d9488',
+    colorSoft: '#ccfbf1',
+    kind: 'unit',
+    items: [],
+    getWords: () => [],
+    load: async () => ({ items: [], getWords: () => [] }),
+  },
+  sightwords: {
+    id: 'sightwords',
+    label: 'Sight words',
+    labelZh: '读词·快速认',
+    color: '#0891b2',
+    colorSoft: '#cffafe',
     kind: 'unit',
     items: [],
     getWords: () => [],

@@ -361,6 +361,7 @@ export default function AlphablocksPage() {
 
             <div className="ab-foot-links">
               <Link to="/dictation" className="back-link">去听写练习</Link>
+              <Link to="/read" className="back-link">下一步：读词训练 →</Link>
             </div>
           </>
         )}

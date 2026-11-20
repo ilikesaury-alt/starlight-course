@@ -33,6 +33,7 @@ const Eng3aPlay = lazy(() => import('@/pages/Eng3aPlay'))
 const Eng3aPlayScript = lazy(() => import('@/pages/Eng3aPlayScript'))
 const DictationPage = lazy(() => import('@/pages/DictationPage'))
 const AlphablocksPage = lazy(() => import('@/pages/AlphablocksPage'))
+const ReadWordsPage = lazy(() => import('@/pages/ReadWordsPage'))
 const MathPractice = lazy(() => import('@/pages/MathPractice'))
 const ReadingPage = lazy(() => import('@/pages/ReadingPage'))
 // Starlight 是一个系列：阅读模块也分两册，共用 ReadingBook 组件
@@ -112,6 +113,7 @@ function AppRoutes() {
           <Route path="/eng3a/:unitId/:lessonId" element={<Eng3aLesson />} />
           <Route path="/dictation" element={<DictationPage />} />
           <Route path="/alphablocks" element={<AlphablocksPage />} />
+          <Route path="/read" element={<ReadWordsPage />} />
           <Route path="/math" element={<MathPractice />} />
           <Route path="/reading" element={<ReadingPage />} />
           <Route path="/reading1" element={<ReadingPage1 />} />
