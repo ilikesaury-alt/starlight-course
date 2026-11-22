@@ -1,0 +1,5277 @@
+{
+  "meta": {
+    "title": "Starlight 预备级 · 前三单元复习",
+    "generatedAt": "2026-11-22T01:03:57.145Z"
+  },
+  "alphabet": [
+    {
+      "upper": "A",
+      "lower": "a",
+      "word": "apple",
+      "emoji": "🍎",
+      "ipa": "/eɪ/"
+    },
+    {
+      "upper": "B",
+      "lower": "b",
+      "word": "ball",
+      "emoji": "⚽",
+      "ipa": "/biː/"
+    },
+    {
+      "upper": "C",
+      "lower": "c",
+      "word": "cat",
+      "emoji": "🐱",
+      "ipa": "/siː/"
+    },
+    {
+      "upper": "D",
+      "lower": "d",
+      "word": "dog",
+      "emoji": "🐶",
+      "ipa": "/diː/"
+    },
+    {
+      "upper": "E",
+      "lower": "e",
+      "word": "egg",
+      "emoji": "🥚",
+      "ipa": "/iː/"
+    },
+    {
+      "upper": "F",
+      "lower": "f",
+      "word": "fish",
+      "emoji": "🐟",
+      "ipa": "/ef/"
+    },
+    {
+      "upper": "G",
+      "lower": "g",
+      "word": "green",
+      "emoji": "🟢",
+      "ipa": "/dʒiː/"
+    },
+    {
+      "upper": "H",
+      "lower": "h",
+      "word": "hat",
+      "emoji": "🎩",
+      "ipa": "/eɪtʃ/"
+    },
+    {
+      "upper": "I",
+      "lower": "i",
+      "word": "ice cream",
+      "emoji": "🍦",
+      "ipa": "/aɪ/"
+    },
+    {
+      "upper": "J",
+      "lower": "j",
+      "word": "juice",
+      "emoji": "🧃",
+      "ipa": "/dʒeɪ/"
+    },
+    {
+      "upper": "K",
+      "lower": "k",
+      "word": "kite",
+      "emoji": "🪁",
+      "ipa": "/keɪ/"
+    },
+    {
+      "upper": "L",
+      "lower": "l",
+      "word": "lion",
+      "emoji": "🦁",
+      "ipa": "/el/"
+    },
+    {
+      "upper": "M",
+      "lower": "m",
+      "word": "milk",
+      "emoji": "🥛",
+      "ipa": "/em/"
+    },
+    {
+      "upper": "N",
+      "lower": "n",
+      "word": "nose",
+      "emoji": "👃",
+      "ipa": "/en/"
+    },
+    {
+      "upper": "O",
+      "lower": "o",
+      "word": "orange",
+      "emoji": "🟠",
+      "ipa": "/əʊ/"
+    },
+    {
+      "upper": "P",
+      "lower": "p",
+      "word": "pen",
+      "emoji": "🖊️",
+      "ipa": "/piː/"
+    },
+    {
+      "upper": "Q",
+      "lower": "q",
+      "word": "queen",
+      "emoji": "👑",
+      "ipa": "/kjuː/"
+    },
+    {
+      "upper": "R",
+      "lower": "r",
+      "word": "rabbit",
+      "emoji": "🐰",
+      "ipa": "/ɑː/"
+    },
+    {
+      "upper": "S",
+      "lower": "s",
+      "word": "sun",
+      "emoji": "☀️",
+      "ipa": "/es/"
+    },
+    {
+      "upper": "T",
+      "lower": "t",
+      "word": "train",
+      "emoji": "🚂",
+      "ipa": "/tiː/"
+    },
+    {
+      "upper": "U",
+      "lower": "u",
+      "word": "umbrella",
+      "emoji": "☂️",
+      "ipa": "/juː/"
+    },
+    {
+      "upper": "V",
+      "lower": "v",
+      "word": "van",
+      "emoji": "🚐",
+      "ipa": "/viː/"
+    },
+    {
+      "upper": "W",
+      "lower": "w",
+      "word": "water",
+      "emoji": "💧",
+      "ipa": "/ˈdʌbljuː/"
+    },
+    {
+      "upper": "X",
+      "lower": "x",
+      "word": "box",
+      "emoji": "📦",
+      "ipa": "/eks/"
+    },
+    {
+      "upper": "Y",
+      "lower": "y",
+      "word": "yellow",
+      "emoji": "🟡",
+      "ipa": "/waɪ/"
+    },
+    {
+      "upper": "Z",
+      "lower": "z",
+      "word": "zebra",
+      "emoji": "🦓",
+      "ipa": "/zed/"
+    }
+  ],
+  "units": [
+    {
+      "id": 1,
+      "title": "Hello!",
+      "titleZh": "打招呼与颜色",
+      "emoji": "👋",
+      "lessons": [
+        {
+          "id": 1,
+          "title": "Say Hello",
+          "titleZh": "说你好",
+          "words": [
+            {
+              "en": "hello",
+              "zh": "你好",
+              "emoji": "👋",
+              "ipa": "/həˈləʊ/"
+            },
+            {
+              "en": "good",
+              "zh": "好的",
+              "emoji": "👍",
+              "ipa": "/ɡʊd/"
+            },
+            {
+              "en": "great",
+              "zh": "很好",
+              "emoji": "🌟",
+              "ipa": "/ɡreɪt/"
+            },
+            {
+              "en": "name",
+              "zh": "名字",
+              "emoji": "🏷️",
+              "ipa": "/neɪm/"
+            },
+            {
+              "en": "friend",
+              "zh": "朋友",
+              "emoji": "🤝",
+              "ipa": "/frend/"
+            }
+          ],
+          "sentences": [
+            {
+              "en": "Hello! How are you?",
+              "zh": "你好！你好吗？",
+              "hint": "打招呼问好"
+            },
+            {
+              "en": "I'm good.",
+              "zh": "我很好。",
+              "hint": "回答自己状态"
+            },
+            {
+              "en": "Hello, what's your name?",
+              "zh": "你好，你叫什么名字？",
+              "hint": "询问对方名字"
+            },
+            {
+              "en": "My name is Abby.",
+              "zh": "我叫Abby。",
+              "hint": "介绍自己名字"
+            },
+            {
+              "en": "How are you, my friend?",
+              "zh": "你好吗，我的朋友？",
+              "hint": "问候朋友"
+            }
+          ],
+          "frames": [
+            {
+              "pattern": "I'm ___.",
+              "zh": "我很好。",
+              "hint": "别人问 How are you?，你怎么回答？",
+              "blanks": [
+                {
+                  "options": [
+                    "good",
+                    "great",
+                    "fine",
+                    "sad"
+                  ],
+                  "answer": 0
+                }
+              ]
+            }
+          ],
+          "reading": {
+            "title": "Hello, My Friend",
+            "titleZh": "你好，我的朋友",
+            "sentences": [
+              {
+                "en": "Hello! I'm Sam, a little cat.",
+                "zh": "你好！我是小猫咪 Sam。"
+              },
+              {
+                "en": "It's a new day and the sun is up.",
+                "zh": "新的一天，太阳公公起来啦。"
+              },
+              {
+                "en": "I walk out to play.",
+                "zh": "我出门玩喽。"
+              },
+              {
+                "en": "Hello! My name is Sam. Can I play with you?",
+                "zh": "你好！我叫 Sam，我可以和你一起玩吗？"
+              },
+              {
+                "en": "\"Hello, Sam! Great! You can play with me,\" says the bird.",
+                "zh": "“你好呀，Sam！太好了！跟我一起玩吧。”小鸟说。"
+              },
+              {
+                "en": "The bird is small and red.",
+                "zh": "这只小鸟小小的、红红的。"
+              },
+              {
+                "en": "We are happy friends now.",
+                "zh": "现在我们是一对好朋友啦。"
+              },
+              {
+                "en": "We play and play all day.",
+                "zh": "我们玩呀玩，玩了一整天。"
+              },
+              {
+                "en": "We run and jump and sing, too.",
+                "zh": "还一起跑、一起跳、一起唱歌。"
+              },
+              {
+                "en": "The sun goes down. It is evening.",
+                "zh": "太阳落山了，到傍晚啦。"
+              },
+              {
+                "en": "\"Good bye, my friend!\" I say.",
+                "zh": "“再见啦，我的朋友！”我说。"
+              },
+              {
+                "en": "Hello, tomorrow! We will play again.",
+                "zh": "你好呀，明天！我们还要一起玩哦。"
+              }
+            ]
+          },
+          "dialogue": [
+            {
+              "speaker": "T",
+              "en": "Hello, Leo!",
+              "zh": "你好，Leo！"
+            },
+            {
+              "speaker": "S",
+              "en": "Hello!",
+              "zh": "你好！"
+            },
+            {
+              "speaker": "T",
+              "en": "Great! You say \"hello\"!",
+              "zh": "太棒了！你说了「你好」！"
+            },
+            {
+              "speaker": "T",
+              "en": "Hello! How are you?",
+              "zh": "你好！你好吗？"
+            },
+            {
+              "speaker": "S",
+              "en": "I'm good.",
+              "zh": "我很好。"
+            },
+            {
+              "speaker": "T",
+              "en": "I'm great!",
+              "zh": "我很好！"
+            },
+            {
+              "speaker": "T",
+              "en": "Hello, what's your name?",
+              "zh": "你好，你叫什么名字？"
+            },
+            {
+              "speaker": "S",
+              "en": "My name is Leo.",
+              "zh": "我叫 Leo。"
+            },
+            {
+              "speaker": "T",
+              "en": "Nice to meet you, my friend!",
+              "zh": "很高兴认识你，我的朋友！"
+            },
+            {
+              "speaker": "T",
+              "en": "How are you, my friend?",
+              "zh": "你好吗，我的朋友？"
+            },
+            {
+              "speaker": "S",
+              "en": "I'm good!",
+              "zh": "我很好！"
+            },
+            {
+              "speaker": "T",
+              "en": "Perfect! Let us say hello to everybody!",
+              "zh": "太棒了！我们跟每个人都说声你好吧！"
+            }
+          ],
+          "songs": [
+            {
+              "en": "Let’s sing a song!",
+              "zh": "我们来唱首歌吧！"
+            },
+            {
+              "en": "Tra la la la la la la.",
+              "zh": "啦啦啦，啦啦啦。"
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "title": "Good Morning",
+          "titleZh": "早上好",
+          "words": [
+            {
+              "en": "morning",
+              "zh": "早上",
+              "emoji": "🌅",
+              "ipa": "/ˈmɔːnɪŋ/"
+            },
+            {
+              "en": "afternoon",
+              "zh": "下午",
+              "emoji": "☀️",
+              "ipa": "/ˌɑːftəˈnuːn/"
+            },
+            {
+              "en": "evening",
+              "zh": "晚上",
+              "emoji": "🌙",
+              "ipa": "/ˈiːvnɪŋ/"
+            },
+            {
+              "en": "hello",
+              "zh": "你好",
+              "emoji": "👋",
+              "ipa": "/həˈləʊ/"
+            }
+          ],
+          "sentences": [
+            {
+              "en": "Good morning!",
+              "zh": "早上好！",
+              "hint": "早上打招呼"
+            },
+            {
+              "en": "Good afternoon!",
+              "zh": "下午好！",
+              "hint": "下午打招呼"
+            },
+            {
+              "en": "Good evening!",
+              "zh": "晚上好！",
+              "hint": "晚上打招呼"
+            },
+            {
+              "en": "How are you?",
+              "zh": "你好吗？",
+              "hint": "问候对方"
+            },
+            {
+              "en": "I'm great!",
+              "zh": "我很好！",
+              "hint": "回答自己状态"
+            }
+          ],
+          "frames": [
+            {
+              "pattern": "Good ___.",
+              "zh": "早上好。",
+              "hint": "一天里有三个时段",
+              "blanks": [
+                {
+                  "options": [
+                    "morning",
+                    "afternoon",
+                    "evening",
+                    "night"
+                  ],
+                  "answer": 0
+                }
+              ]
+            }
+          ],
+          "reading": {
+            "title": "Good Morning",
+            "titleZh": "早上好",
+            "sentences": [
+              {
+                "en": "Good morning! The sun is up.",
+                "zh": "早上好！太阳公公起来啦。"
+              },
+              {
+                "en": "Good morning, Mom! Hello, new day!",
+                "zh": "早上好，妈妈！你好呀，新的一天！"
+              },
+              {
+                "en": "My mom smiles and says hello to me.",
+                "zh": "妈妈笑着对我说了声你好。"
+              },
+              {
+                "en": "We eat breakfast with my little cat.",
+                "zh": "我们和小猫咪一起吃早饭。"
+              },
+              {
+                "en": "Good afternoon! The sun is high.",
+                "zh": "下午好！太阳爬得高高的。"
+              },
+              {
+                "en": "We play with my cat and my dog.",
+                "zh": "我们和小猫小狗一起玩。"
+              },
+              {
+                "en": "We run and jump in the sun.",
+                "zh": "我们在太阳底下跑呀跳呀。"
+              },
+              {
+                "en": "What a happy day!",
+                "zh": "多么开心的一天呀！"
+              },
+              {
+                "en": "Good evening! The moon is out.",
+                "zh": "晚上好！月亮悄悄爬出来了。"
+              },
+              {
+                "en": "The little stars say hello too.",
+                "zh": "小星星们也在对我说你好呢。"
+              },
+              {
+                "en": "\"Good night, moon. Good night, stars.\"",
+                "zh": "“晚安，月亮。晚安，星星。”"
+              },
+              {
+                "en": "Hello, tomorrow! I can not wait.",
+                "zh": "你好呀，明天！我已经等不及啦。"
+              }
+            ]
+          },
+          "dialogue": [
+            {
+              "speaker": "T",
+              "en": "Good morning, Leo!",
+              "zh": "早上好，Leo！"
+            },
+            {
+              "speaker": "S",
+              "en": "Good morning!",
+              "zh": "早上好！"
+            },
+            {
+              "speaker": "T",
+              "en": "It is morning now. The sun is up!",
+              "zh": "现在是早上，太阳升起啦！"
+            },
+            {
+              "speaker": "T",
+              "en": "Good afternoon!",
+              "zh": "下午好！"
+            },
+            {
+              "speaker": "S",
+              "en": "Good afternoon!",
+              "zh": "下午好！"
+            },
+            {
+              "speaker": "T",
+              "en": "And in the evening... Good evening!",
+              "zh": "到了晚上……晚上好！"
+            },
+            {
+              "speaker": "S",
+              "en": "Good evening!",
+              "zh": "晚上好！"
+            },
+            {
+              "speaker": "T",
+              "en": "How are you?",
+              "zh": "你好吗？"
+            },
+            {
+              "speaker": "S",
+              "en": "I'm great!",
+              "zh": "我很好！"
+            },
+            {
+              "speaker": "T",
+              "en": "Morning! Afternoon! Evening! Fast!",
+              "zh": "早上！下午！晚上！加快速度！"
+            },
+            {
+              "speaker": "S",
+              "en": "Morning! Afternoon! Evening!",
+              "zh": "早上！下午！晚上！"
+            },
+            {
+              "speaker": "T",
+              "en": "Wonderful job, Leo!",
+              "zh": "干得漂亮，Leo！"
+            }
+          ],
+          "songs": [
+            {
+              "en": "Morning!",
+              "zh": "早上"
+            },
+            {
+              "en": "Afternoon!",
+              "zh": "下午"
+            },
+            {
+              "en": "Evening!",
+              "zh": "晚上"
+            },
+            {
+              "en": "Let’s sing a song.",
+              "zh": "我们来唱首歌吧！"
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "title": "Look At Me",
+          "titleZh": "看看我",
+          "words": [
+            {
+              "en": "boy",
+              "zh": "男孩",
+              "emoji": "👦",
+              "ipa": "/bɔɪ/"
+            },
+            {
+              "en": "girl",
+              "zh": "女孩",
+              "emoji": "👧",
+              "ipa": "/ɡɜːl/"
+            },
+            {
+              "en": "mirror",
+              "zh": "镜子",
+              "emoji": "🪞",
+              "ipa": "/ˈmɪrə/"
+            },
+            {
+              "en": "missing",
+              "zh": "不见了",
+              "emoji": "🤔",
+              "ipa": "/ˈmɪsɪŋ/"
+            }
+          ],
+          "sentences": [
+            {
+              "en": "Who's missing?",
+              "zh": "谁不见了？",
+              "hint": "找找谁不见了"
+            },
+            {
+              "en": "Boy or girl?",
+              "zh": "男孩还是女孩？",
+              "hint": "辨别男孩女孩"
+            },
+            {
+              "en": "How many boys?",
+              "zh": "有几个男孩？",
+              "hint": "询问数量"
+            },
+            {
+              "en": "Two boys!",
+              "zh": "两个男孩！",
+              "hint": "回答数量"
+            },
+            {
+              "en": "Look at the mirror.",
+              "zh": "看镜子。",
+              "hint": "看镜子"
+            }
+          ],
+          "frames": [
+            {
+              "pattern": "Look at the ___.",
+              "zh": "看镜子。",
+              "hint": "指着一样东西，说出它的名字",
+              "blanks": [
+                {
+                  "options": [
+                    "mirror",
+                    "boy",
+                    "girl"
+                  ],
+                  "answer": 0
+                }
+              ]
+            }
+          ],
+          "reading": {
+            "title": "Look at Me",
+            "titleZh": "看看我",
+            "sentences": [
+              {
+                "en": "Look at me! I am Ben, a boy.",
+                "zh": "看看我！我是男孩 Ben。"
+              },
+              {
+                "en": "My friend and I play a mirror game.",
+                "zh": "我和好朋友玩照镜子的游戏。"
+              },
+              {
+                "en": "This morning I stand before my mirror.",
+                "zh": "今天早上，我站到了镜子前面。"
+              },
+              {
+                "en": "The mirror is clean. I see one boy.",
+                "zh": "镜子擦得干干净净。我看见一个男孩。"
+              },
+              {
+                "en": "\"Who's missing?\" I ask my mom.",
+                "zh": "“谁不见了？”我问妈妈。"
+              },
+              {
+                "en": "\"Look at the mirror,\" says Mom.",
+                "zh": "“自己照照镜子。”妈妈说。"
+              },
+              {
+                "en": "\"I see one boy,\" I say. \"Where is the girl?\"",
+                "zh": "“我只看到一个男孩。”我说，“女孩在哪儿呢？”"
+              },
+              {
+                "en": "Then I hear a laugh near the door.",
+                "zh": "这时候，我听见门边传来笑声。"
+              },
+              {
+                "en": "A girl comes out. \"My name is Lily!\"",
+                "zh": "一个女孩跳了出来。“我叫 Lily！”"
+              },
+              {
+                "en": "Now we look in the mirror. One boy, one girl.",
+                "zh": "现在我们一起照镜子。一个男孩，一个女孩。"
+              },
+              {
+                "en": "\"No one is missing,\" we say. \"Look at me!\"",
+                "zh": "“谁也不见啦，”我们说。“快看我们！”"
+              }
+            ]
+          },
+          "dialogue": [
+            {
+              "speaker": "T",
+              "en": "Look at me!",
+              "zh": "看着我！"
+            },
+            {
+              "speaker": "T",
+              "en": "Boy or girl?",
+              "zh": "男孩还是女孩？"
+            },
+            {
+              "speaker": "S",
+              "en": "Boy!",
+              "zh": "男孩！"
+            },
+            {
+              "speaker": "T",
+              "en": "Yes! I am a boy. And you?",
+              "zh": "对！我是男孩。你呢？"
+            },
+            {
+              "speaker": "S",
+              "en": "I'm a boy!",
+              "zh": "我是男孩！"
+            },
+            {
+              "speaker": "T",
+              "en": "Now look at the mirror.",
+              "zh": "现在看镜子。"
+            },
+            {
+              "speaker": "T",
+              "en": "Who is in the mirror?",
+              "zh": "镜子里是谁？"
+            },
+            {
+              "speaker": "S",
+              "en": "Me! Leo!",
+              "zh": "是我！Leo！"
+            },
+            {
+              "speaker": "T",
+              "en": "One, two... Who is missing?",
+              "zh": "一、二……谁不见了？"
+            },
+            {
+              "speaker": "S",
+              "en": "The girl is missing!",
+              "zh": "那个女孩不见了！"
+            },
+            {
+              "speaker": "T",
+              "en": "How many boys?",
+              "zh": "有几个男孩？"
+            },
+            {
+              "speaker": "S",
+              "en": "Two boys!",
+              "zh": "两个男孩！"
+            },
+            {
+              "speaker": "T",
+              "en": "Two boys and one girl. Well done!",
+              "zh": "两个男孩和一个女孩。真棒！"
+            }
+          ],
+          "songs": [
+            {
+              "en": "Let’s sing a song.",
+              "zh": "我们来唱首歌吧！"
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "title": "I Love Colors",
+          "titleZh": "我爱颜色",
+          "words": [
+            {
+              "en": "color",
+              "zh": "颜色",
+              "emoji": "🎨",
+              "ipa": "/ˈkʌlə/"
+            },
+            {
+              "en": "red",
+              "zh": "红色",
+              "emoji": "🔴",
+              "ipa": "/red/"
+            },
+            {
+              "en": "yellow",
+              "zh": "黄色",
+              "emoji": "🟡",
+              "ipa": "/ˈjeləʊ/"
+            },
+            {
+              "en": "blue",
+              "zh": "蓝色",
+              "emoji": "🔵",
+              "ipa": "/bluː/"
+            },
+            {
+              "en": "balloon",
+              "zh": "气球",
+              "emoji": "🎈",
+              "ipa": "/bəˈluːn/"
+            }
+          ],
+          "sentences": [
+            {
+              "en": "What color is the balloon?",
+              "zh": "气球是什么颜色？",
+              "hint": "询问颜色"
+            },
+            {
+              "en": "It's red.",
+              "zh": "是红色的。",
+              "hint": "回答颜色"
+            },
+            {
+              "en": "Let's spell the word.",
+              "zh": "我们来拼单词。",
+              "hint": "拼写单词"
+            },
+            {
+              "en": "Which color do you like?",
+              "zh": "你喜欢哪种颜色？",
+              "hint": "询问喜好"
+            },
+            {
+              "en": "Hello, colors!",
+              "zh": "你好，颜色！",
+              "hint": "跟颜色打招呼"
+            }
+          ],
+          "frames": [
+            {
+              "pattern": "It's ___.",
+              "zh": "是红色的。",
+              "hint": "指着一样东西，说出它的颜色",
+              "blanks": [
+                {
+                  "options": [
+                    "red",
+                    "yellow",
+                    "blue",
+                    "green"
+                  ],
+                  "answer": 0
+                }
+              ]
+            }
+          ],
+          "reading": {
+            "title": "I Love Colors",
+            "titleZh": "我爱颜色",
+            "sentences": [
+              {
+                "en": "Look! I have three balloons.",
+                "zh": "瞧！我有三个气球。"
+              },
+              {
+                "en": "One is red. One is yellow. One is blue.",
+                "zh": "一个是红的，一个是黄的，一个是蓝的。"
+              },
+              {
+                "en": "\"What color do you like?\" I ask Ben.",
+                "zh": "“你喜欢什么颜色？”我问 Ben。"
+              },
+              {
+                "en": "\"I like blue,\" says Ben. \"Can I have it?\"",
+                "zh": "“我喜欢蓝色，”Ben 说，“能给我吗？”"
+              },
+              {
+                "en": "Ben runs with the blue balloon, and it goes up.",
+                "zh": "Ben 抱着蓝气球跑起来，气球却飞上了天。"
+              },
+              {
+                "en": "It is in the tree now. I can not get it.",
+                "zh": "气球挂到树上了，我怎么也够不着。"
+              },
+              {
+                "en": "\"Get it down, please!\" I ask a bird.",
+                "zh": "“帮我拿下来好不好？”我问一只小鸟。"
+              },
+              {
+                "en": "The bird flies up and pushes the balloon.",
+                "zh": "小鸟飞上去，用力一推。"
+              },
+              {
+                "en": "The balloon comes down on my head!",
+                "zh": "气球“啪”地落到我头上！"
+              },
+              {
+                "en": "\"Thank you!\" I say. \"I love blue!\"",
+                "zh": "“谢谢你！”我说，“蓝色真好！”"
+              },
+              {
+                "en": "Hello, colors! I love you all!",
+                "zh": "你好呀，颜色们！我爱你们！"
+              }
+            ]
+          },
+          "dialogue": [
+            {
+              "speaker": "T",
+              "en": "Hello, colors!",
+              "zh": "你好，颜色们！"
+            },
+            {
+              "speaker": "T",
+              "en": "What color is the balloon?",
+              "zh": "气球是什么颜色？"
+            },
+            {
+              "speaker": "S",
+              "en": "It's red.",
+              "zh": "是红色的。"
+            },
+            {
+              "speaker": "T",
+              "en": "Red, red, red!",
+              "zh": "红色，红色，红色！"
+            },
+            {
+              "speaker": "T",
+              "en": "And this one? Yellow or blue?",
+              "zh": "这个呢？黄色还是蓝色？"
+            },
+            {
+              "speaker": "S",
+              "en": "Yellow!",
+              "zh": "黄色！"
+            },
+            {
+              "speaker": "T",
+              "en": "It is yellow. Let us spell the word. Y-E-L-L-O-W.",
+              "zh": "它是黄色。我们来拼单词。Y-E-L-L-O-W。"
+            },
+            {
+              "speaker": "S",
+              "en": "Y-E-L-L-O-W, yellow!",
+              "zh": "Y-E-L-L-O-W，黄色！"
+            },
+            {
+              "speaker": "T",
+              "en": "Which color do you like?",
+              "zh": "你喜欢哪种颜色？"
+            },
+            {
+              "speaker": "S",
+              "en": "I like blue.",
+              "zh": "我喜欢蓝色。"
+            },
+            {
+              "speaker": "T",
+              "en": "I like blue too! Find something blue!",
+              "zh": "我也喜欢蓝色！找个蓝色的东西！"
+            },
+            {
+              "speaker": "S",
+              "en": "My bag is blue!",
+              "zh": "我的书包是蓝色的！"
+            },
+            {
+              "speaker": "T",
+              "en": "Blue, blue, blue! Excellent!",
+              "zh": "蓝色，蓝色，蓝色！太棒了！"
+            }
+          ],
+          "songs": [
+            {
+              "en": "Let’s sing a song!",
+              "zh": "我们来唱首歌吧！"
+            }
+          ]
+        },
+        {
+          "id": 5,
+          "title": "Mix it Up",
+          "titleZh": "混合起来",
+          "words": [
+            {
+              "en": "green",
+              "zh": "绿色",
+              "emoji": "🟢",
+              "ipa": "/ɡriːn/"
+            },
+            {
+              "en": "orange",
+              "zh": "橙色",
+              "emoji": "🟠",
+              "ipa": "/ˈɒrɪndʒ/"
+            },
+            {
+              "en": "purple",
+              "zh": "紫色",
+              "emoji": "🟣",
+              "ipa": "/ˈpɜːpl/"
+            },
+            {
+              "en": "rainbow",
+              "zh": "彩虹",
+              "emoji": "🌈",
+              "ipa": "/ˈreɪnbəʊ/"
+            },
+            {
+              "en": "make",
+              "zh": "变成",
+              "emoji": "✨",
+              "ipa": "/meɪk/"
+            }
+          ],
+          "sentences": [
+            {
+              "en": "What color do blue and yellow make?",
+              "zh": "蓝色和黄色变成什么颜色？",
+              "hint": "颜色混合提问"
+            },
+            {
+              "en": "Blue and yellow make green.",
+              "zh": "蓝色加黄色变成绿色。",
+              "hint": "颜色混合结果"
+            },
+            {
+              "en": "What color is it?",
+              "zh": "它是什么颜色？",
+              "hint": "询问颜色"
+            },
+            {
+              "en": "It's green.",
+              "zh": "是绿色的。",
+              "hint": "回答颜色"
+            },
+            {
+              "en": "I like orange.",
+              "zh": "我喜欢橙色。",
+              "hint": "表达喜好"
+            }
+          ],
+          "frames": [
+            {
+              "pattern": "Blue and yellow make ___.",
+              "zh": "蓝色加黄色变成绿色。",
+              "hint": "两种颜色混在一起，会变成什么？",
+              "blanks": [
+                {
+                  "options": [
+                    "green",
+                    "orange",
+                    "purple",
+                    "red"
+                  ],
+                  "answer": 0
+                }
+              ]
+            }
+          ],
+          "reading": {
+            "title": "Mix It Up",
+            "titleZh": "把颜色混起来",
+            "sentences": [
+              {
+                "en": "The rain stops. A rainbow is in the sky.",
+                "zh": "雨停了，天上挂着一道彩虹。"
+              },
+              {
+                "en": "\"Look at that rainbow!\" says Mia.",
+                "zh": "“快看那道彩虹！”Mia 说。"
+              },
+              {
+                "en": "\"I want a rainbow too,\" I say.",
+                "zh": "“我也想要一道彩虹。”我说。"
+              },
+              {
+                "en": "But I have only red, yellow and blue.",
+                "zh": "可我手里只有红、黄、蓝三种颜色。"
+              },
+              {
+                "en": "\"What color do blue and yellow make?\" asks Mia.",
+                "zh": "“蓝色和黄色能变成什么颜色？”Mia 问。"
+              },
+              {
+                "en": "\"Blue and yellow make green,\" I say.",
+                "zh": "“蓝色加黄色就变成绿色。”我说。"
+              },
+              {
+                "en": "\"Red and blue make purple!\" Mia says.",
+                "zh": "“红色加蓝色会变成紫色！”Mia 说。"
+              },
+              {
+                "en": "\"Red and yellow make orange,\" I say.",
+                "zh": "“红色加黄色就变成橙色。”我说。"
+              },
+              {
+                "en": "Now I can make every color I want.",
+                "zh": "现在我想变出什么颜色都行。"
+              },
+              {
+                "en": "I draw a big rainbow for Mia.",
+                "zh": "我给 Mia 画了一道大大的彩虹。"
+              },
+              {
+                "en": "\"Hello, rainbow!\" Mia says. \"You are big!\"",
+                "zh": "“你好呀，彩虹！”Mia 说，“你好大呀！”"
+              },
+              {
+                "en": "\"Hello, rainbow!\" we say, and laugh.",
+                "zh": "“你好呀，彩虹！”我们一起喊，然后都笑了。"
+              }
+            ]
+          },
+          "dialogue": [
+            {
+              "speaker": "T",
+              "en": "What colors can you see in the rainbow?",
+              "zh": "你在彩虹里能看到哪些颜色？"
+            },
+            {
+              "speaker": "S",
+              "en": "Red, yellow, blue...",
+              "zh": "红色、黄色、蓝色……"
+            },
+            {
+              "speaker": "T",
+              "en": "Yes! Now let us meet some new colors.",
+              "zh": "对！现在我们来认识一些新颜色。"
+            },
+            {
+              "speaker": "T",
+              "en": "Look! Blue and yellow... What color do blue and yellow make?",
+              "zh": "看！蓝色和黄色……蓝色和黄色变成什么颜色？"
+            },
+            {
+              "speaker": "S",
+              "en": "Green!",
+              "zh": "绿色！"
+            },
+            {
+              "speaker": "T",
+              "en": "Yes! Blue and yellow make green.",
+              "zh": "对！蓝色加黄色变成绿色。"
+            },
+            {
+              "speaker": "T",
+              "en": "What color do yellow and red make?",
+              "zh": "黄色和红色变成什么颜色？"
+            },
+            {
+              "speaker": "S",
+              "en": "Orange!",
+              "zh": "橙色！"
+            },
+            {
+              "speaker": "T",
+              "en": "Yellow and red make orange.",
+              "zh": "黄色加红色变成橙色。"
+            },
+            {
+              "speaker": "T",
+              "en": "Now red and blue make...?",
+              "zh": "现在红色和蓝色变成……？"
+            },
+            {
+              "speaker": "S",
+              "en": "Purple!",
+              "zh": "紫色！"
+            },
+            {
+              "speaker": "T",
+              "en": "What color is it? It is purple! Which color do you like?",
+              "zh": "它是什么颜色？是紫色！你喜欢哪种颜色？"
+            },
+            {
+              "speaker": "S",
+              "en": "I like purple!",
+              "zh": "我喜欢紫色！"
+            },
+            {
+              "speaker": "T",
+              "en": "Me too! You are a color master!",
+              "zh": "我也是！你是颜色小达人！"
+            }
+          ],
+          "songs": [
+            {
+              "en": "Let’s sing a song.",
+              "zh": "我们来唱首歌吧！"
+            }
+          ]
+        },
+        {
+          "id": 6,
+          "title": "Quiz 1",
+          "titleZh": "小测验1",
+          "words": [
+            {
+              "en": "hello",
+              "zh": "你好",
+              "emoji": "👋",
+              "ipa": "/həˈləʊ/"
+            },
+            {
+              "en": "name",
+              "zh": "名字",
+              "emoji": "🏷️",
+              "ipa": "/neɪm/"
+            },
+            {
+              "en": "boy",
+              "zh": "男孩",
+              "emoji": "👦",
+              "ipa": "/bɔɪ/"
+            },
+            {
+              "en": "girl",
+              "zh": "女孩",
+              "emoji": "👧",
+              "ipa": "/ɡɜːl/"
+            },
+            {
+              "en": "color",
+              "zh": "颜色",
+              "emoji": "🎨",
+              "ipa": "/ˈkʌlə/"
+            }
+          ],
+          "sentences": [
+            {
+              "en": "Can you say hello to our friends?",
+              "zh": "你能跟朋友们打招呼吗？",
+              "hint": "打招呼复习"
+            },
+            {
+              "en": "Hello! My name is …",
+              "zh": "你好！我叫……",
+              "hint": "自我介绍"
+            },
+            {
+              "en": "What's your name?",
+              "zh": "你叫什么名字？",
+              "hint": "询问名字"
+            },
+            {
+              "en": "Are you a boy or a girl?",
+              "zh": "你是男孩还是女孩？",
+              "hint": "询问性别"
+            },
+            {
+              "en": "What color is number …?",
+              "zh": "数字几是什么颜色？",
+              "hint": "询问颜色"
+            }
+          ],
+          "frames": [
+            {
+              "pattern": "What's your ___?",
+              "zh": "你叫什么名字？",
+              "hint": "问问新朋友的名字",
+              "blanks": [
+                {
+                  "options": [
+                    "name",
+                    "color",
+                    "number"
+                  ],
+                  "answer": 0
+                }
+              ]
+            }
+          ],
+          "reading": {
+            "title": "Hello, What Is Your Name?",
+            "titleZh": "你好，你叫什么名字",
+            "sentences": [
+              {
+                "en": "Today I go to a new school.",
+                "zh": "今天我来到一所新学校。"
+              },
+              {
+                "en": "I can not find my room.",
+                "zh": "我找不到自己的教室啦。"
+              },
+              {
+                "en": "My hands are cold, but I walk in.",
+                "zh": "我的手心凉凉的，可我还是走了进去。"
+              },
+              {
+                "en": "\"Hello! My name is Emma,\" I say.",
+                "zh": "“你好！我叫 Emma。”我说。"
+              },
+              {
+                "en": "\"Hello, Emma! My name is Tom.\"",
+                "zh": "“你好，Emma！我叫 Tom。”"
+              },
+              {
+                "en": "\"Are you a boy or a girl?\" he asks.",
+                "zh": "“你是男孩还是女孩？”他问。"
+              },
+              {
+                "en": "\"I am a girl,\" I say, and smile.",
+                "zh": "“我是女孩。”我笑着说。"
+              },
+              {
+                "en": "\"What color is your bag?\" he asks.",
+                "zh": "“你的书包是什么颜色？”他问。"
+              },
+              {
+                "en": "\"It is blue,\" I say, and show my bag.",
+                "zh": "“是蓝色的。”我举起书包给他看。"
+              },
+              {
+                "en": "\"Come with me,\" says Tom. \"Your room is here.\"",
+                "zh": "“跟我来，”Tom 说，“你的教室在这儿。”"
+              },
+              {
+                "en": "\"Hello, Emma!\" says a girl named Lily.",
+                "zh": "“你好，Emma！”一个叫 Lily 的女孩说。"
+              },
+              {
+                "en": "\"I am Lily. We are friends now!\"",
+                "zh": "“我叫 Lily。我们现在是朋友啦！”"
+              }
+            ]
+          },
+          "dialogue": [
+            {
+              "speaker": "T",
+              "en": "Hello, Leo! Are you ready?",
+              "zh": "你好，Leo！准备好了吗？"
+            },
+            {
+              "speaker": "S",
+              "en": "Yes!",
+              "zh": "准备好了！"
+            },
+            {
+              "speaker": "T",
+              "en": "Can you say hello to our friends?",
+              "zh": "你能跟朋友们打招呼吗？"
+            },
+            {
+              "speaker": "S",
+              "en": "Hello!",
+              "zh": "你好！"
+            },
+            {
+              "speaker": "T",
+              "en": "Can you ask their names?",
+              "zh": "你能问问他们的名字吗？"
+            },
+            {
+              "speaker": "S",
+              "en": "Hello! My name is Leo. What's your name?",
+              "zh": "你好！我叫 Leo。你叫什么名字？"
+            },
+            {
+              "speaker": "T",
+              "en": "Are you a boy or a girl?",
+              "zh": "你是男孩还是女孩？"
+            },
+            {
+              "speaker": "S",
+              "en": "I'm a boy.",
+              "zh": "我是男孩。"
+            },
+            {
+              "speaker": "T",
+              "en": "What color is number one?",
+              "zh": "一号是什么颜色？"
+            },
+            {
+              "speaker": "S",
+              "en": "It's red!",
+              "zh": "是红色的！"
+            },
+            {
+              "speaker": "T",
+              "en": "And number two?",
+              "zh": "那二号呢？"
+            },
+            {
+              "speaker": "S",
+              "en": "It's blue.",
+              "zh": "是蓝色的。"
+            },
+            {
+              "speaker": "T",
+              "en": "All correct! You passed the quiz!",
+              "zh": "全对！你通过测验啦！"
+            }
+          ],
+          "songs": []
+        },
+        {
+          "id": 7,
+          "title": "Let's Count",
+          "titleZh": "一起来数数",
+          "words": [
+            {
+              "en": "one",
+              "zh": "一",
+              "emoji": "1️⃣",
+              "ipa": "/wʌn/"
+            },
+            {
+              "en": "two",
+              "zh": "二",
+              "emoji": "2️⃣",
+              "ipa": "/tuː/"
+            },
+            {
+              "en": "three",
+              "zh": "三",
+              "emoji": "3️⃣",
+              "ipa": "/θriː/"
+            },
+            {
+              "en": "four",
+              "zh": "四",
+              "emoji": "4️⃣",
+              "ipa": "/fɔː/"
+            },
+            {
+              "en": "five",
+              "zh": "五",
+              "emoji": "5️⃣",
+              "ipa": "/faɪv/"
+            }
+          ],
+          "sentences": [
+            {
+              "en": "Let's count.",
+              "zh": "我们来数数。",
+              "hint": "数数"
+            },
+            {
+              "en": "What number is missing?",
+              "zh": "哪个数字不见了？",
+              "hint": "找缺失数字"
+            },
+            {
+              "en": "Five is missing.",
+              "zh": "五不见了。",
+              "hint": "回答缺失数字"
+            },
+            {
+              "en": "Count and Match.",
+              "zh": "数一数，连一连。",
+              "hint": "数数配对"
+            },
+            {
+              "en": "Put the numbers in order.",
+              "zh": "把数字排好顺序。",
+              "hint": "数字排序"
+            }
+          ],
+          "frames": [
+            {
+              "pattern": "___ is missing.",
+              "zh": "五不见了。",
+              "hint": "看看哪个数字不见了",
+              "blanks": [
+                {
+                  "options": [
+                    "Five",
+                    "Three",
+                    "Two",
+                    "Four"
+                  ],
+                  "answer": 0
+                }
+              ]
+            }
+          ],
+          "reading": {
+            "title": "Let Us Count",
+            "titleZh": "我们来数数",
+            "sentences": [
+              {
+                "en": "\"Let's count!\" says Mom.",
+                "zh": "“我们来数数！”妈妈说。"
+              },
+              {
+                "en": "We put apples in a big box.",
+                "zh": "我们把苹果放进一个大盒子里。"
+              },
+              {
+                "en": "\"One apple, two apples, three apples,\" I say.",
+                "zh": "“一个苹果、两个苹果、三个苹果。”我说。"
+              },
+              {
+                "en": "\"And four, and five,\" says Mom.",
+                "zh": "“还有四个、五个。”妈妈说。"
+              },
+              {
+                "en": "We look in the box, but one is missing.",
+                "zh": "我们往盒子里一看，少了一个。"
+              },
+              {
+                "en": "\"What number is missing?\" I ask.",
+                "zh": "“少的是哪个数呢？”我问。"
+              },
+              {
+                "en": "\"Five,\" says Mom. \"One apple is not here.\"",
+                "zh": "“五，”妈妈说，“少了一个苹果。”"
+              },
+              {
+                "en": "Then Mom points to the table.",
+                "zh": "这时妈妈指了指桌子。"
+              },
+              {
+                "en": "The cat is under the table with it!",
+                "zh": "原来小猫就在桌子底下，嘴里还叼着它！"
+              },
+              {
+                "en": "Now I count one, two, three, four, five!",
+                "zh": "现在我数：一个、两个、三个、四个、五个！"
+              },
+              {
+                "en": "\"Good cat! Give me the apple,\" I say.",
+                "zh": "“好猫咪！把苹果给我。”我说。"
+              },
+              {
+                "en": "We count the apples again and eat them all.",
+                "zh": "我们又数了一遍苹果，然后一起吃掉了。"
+              }
+            ]
+          },
+          "dialogue": [
+            {
+              "speaker": "T",
+              "en": "Let's count!",
+              "zh": "我们来数数！"
+            },
+            {
+              "speaker": "S",
+              "en": "One!",
+              "zh": "一！"
+            },
+            {
+              "speaker": "T",
+              "en": "Two!",
+              "zh": "二！"
+            },
+            {
+              "speaker": "S",
+              "en": "Two!",
+              "zh": "二！"
+            },
+            {
+              "speaker": "T",
+              "en": "Three! Four! Five!",
+              "zh": "三！四！五！"
+            },
+            {
+              "speaker": "T",
+              "en": "Now... What number is missing?",
+              "zh": "现在……哪个数字不见了？"
+            },
+            {
+              "speaker": "S",
+              "en": "Five is missing!",
+              "zh": "五不见了！"
+            },
+            {
+              "speaker": "T",
+              "en": "Yes! Five is missing. Show me five fingers!",
+              "zh": "对！五不见了。给我看五根手指！"
+            },
+            {
+              "speaker": "T",
+              "en": "Put the numbers in order.",
+              "zh": "把数字排好顺序。"
+            },
+            {
+              "speaker": "S",
+              "en": "One, two, three, four, five!",
+              "zh": "一、二、三、四、五！"
+            },
+            {
+              "speaker": "T",
+              "en": "Count and match. Two apples for number two!",
+              "zh": "数一数，连一连。两个苹果连二号！"
+            },
+            {
+              "speaker": "S",
+              "en": "One apple, two apples!",
+              "zh": "一个苹果，两个苹果！"
+            },
+            {
+              "speaker": "T",
+              "en": "You can count to five. Amazing!",
+              "zh": "你能数到五了。太厉害了！"
+            }
+          ],
+          "songs": [
+            {
+              "en": "What number is missing?",
+              "zh": "哪个数字不见了？"
+            },
+            {
+              "en": "Five is missing.",
+              "zh": "五不见了。"
+            },
+            {
+              "en": "1 is missing.",
+              "zh": "找不到％1。"
+            },
+            {
+              "en": "one two three four five",
+              "zh": "一 二 三 四 五"
+            },
+            {
+              "en": "I Say, You Jump",
+              "zh": "我说，你跳"
+            },
+            {
+              "en": "Let’s sing a song.",
+              "zh": "我们来唱首歌吧！"
+            }
+          ]
+        },
+        {
+          "id": 8,
+          "title": "I Know My Numbers",
+          "titleZh": "我认识数字",
+          "words": [
+            {
+              "en": "six",
+              "zh": "六",
+              "emoji": "6️⃣",
+              "ipa": "/sɪks/"
+            },
+            {
+              "en": "seven",
+              "zh": "七",
+              "emoji": "7️⃣",
+              "ipa": "/ˈsevn/"
+            },
+            {
+              "en": "eight",
+              "zh": "八",
+              "emoji": "8️⃣",
+              "ipa": "/eɪt/"
+            },
+            {
+              "en": "nine",
+              "zh": "九",
+              "emoji": "9️⃣",
+              "ipa": "/naɪn/"
+            },
+            {
+              "en": "ten",
+              "zh": "十",
+              "emoji": "🔟",
+              "ipa": "/ten/"
+            }
+          ],
+          "sentences": [
+            {
+              "en": "How many frogs are there?",
+              "zh": "有几只青蛙？",
+              "hint": "询问数量"
+            },
+            {
+              "en": "Fill in the missing numbers.",
+              "zh": "填上缺少的数字。",
+              "hint": "填数字"
+            },
+            {
+              "en": "How many animals are there?",
+              "zh": "有几只动物？",
+              "hint": "询问动物数量"
+            },
+            {
+              "en": "1 comes before it.",
+              "zh": "1在它前面。",
+              "hint": "数字前后顺序"
+            },
+            {
+              "en": "3 comes after it.",
+              "zh": "3在它后面。",
+              "hint": "数字前后顺序"
+            }
+          ],
+          "frames": [
+            {
+              "pattern": "___ comes after it.",
+              "zh": "3在它后面。",
+              "hint": "排好顺序，说说谁排在后面",
+              "blanks": [
+                {
+                  "options": [
+                    "3",
+                    "5",
+                    "7",
+                    "10"
+                  ],
+                  "answer": 0
+                }
+              ]
+            }
+          ],
+          "reading": {
+            "title": "I Know My Numbers",
+            "titleZh": "我认识数字",
+            "sentences": [
+              {
+                "en": "We go to the zoo today.",
+                "zh": "今天我们去了动物园。"
+              },
+              {
+                "en": "\"How many frogs are there?\" I ask.",
+                "zh": "“那里有多少只青蛙？”我问。"
+              },
+              {
+                "en": "\"Six frogs,\" says Tom. \"Look at the water!\"",
+                "zh": "“六只青蛙，”Tom 说，“快看水里！”"
+              },
+              {
+                "en": "Seven birds sit in the tree.",
+                "zh": "七只小鸟坐在树上。"
+              },
+              {
+                "en": "Eight fish swim in the water.",
+                "zh": "八条鱼在水里游来游去。"
+              },
+              {
+                "en": "I count nine cats near the door.",
+                "zh": "我数到门边有九只猫。"
+              },
+              {
+                "en": "Ten ducks walk on the road.",
+                "zh": "十只小鸭子在路上走。"
+              },
+              {
+                "en": "\"Count them all again!\" says Mom.",
+                "zh": "“再数一遍！”妈妈说。"
+              },
+              {
+                "en": "\"What number is missing?\" I ask Mom.",
+                "zh": "“少了哪个数呢？”我问妈妈。"
+              },
+              {
+                "en": "\"Ten,\" says Mom. \"One duck walked away.\"",
+                "zh": "“十，”妈妈说，“有一只鸭子走远了。”"
+              },
+              {
+                "en": "We look down the road. One duck comes back!",
+                "zh": "我们顺着路看过去，那只鸭子又回来了！"
+              },
+              {
+                "en": "Now I know my numbers from six to ten!",
+                "zh": "现在我从六到十的数字全都认识啦！"
+              }
+            ]
+          },
+          "dialogue": [
+            {
+              "speaker": "T",
+              "en": "You know one to five. Now let us learn more!",
+              "zh": "你已经会一到五了。现在学更多！"
+            },
+            {
+              "speaker": "T",
+              "en": "Six!",
+              "zh": "六！"
+            },
+            {
+              "speaker": "S",
+              "en": "Six!",
+              "zh": "六！"
+            },
+            {
+              "speaker": "T",
+              "en": "Seven, eight, nine, ten!",
+              "zh": "七、八、九、十！"
+            },
+            {
+              "speaker": "S",
+              "en": "Six, seven, eight, nine, ten!",
+              "zh": "六、七、八、九、十！"
+            },
+            {
+              "speaker": "T",
+              "en": "How many frogs are there?",
+              "zh": "有几只青蛙？"
+            },
+            {
+              "speaker": "S",
+              "en": "Seven frogs!",
+              "zh": "七只青蛙！"
+            },
+            {
+              "speaker": "T",
+              "en": "How many mushrooms are there?",
+              "zh": "有多少个蘑菇？"
+            },
+            {
+              "speaker": "S",
+              "en": "Eight mushrooms!",
+              "zh": "八个蘑菇！"
+            },
+            {
+              "speaker": "T",
+              "en": "Fill in the missing numbers.",
+              "zh": "填上缺少的数字。"
+            },
+            {
+              "speaker": "S",
+              "en": "Six and nine!",
+              "zh": "六和九！"
+            },
+            {
+              "speaker": "T",
+              "en": "Can you count one more time?",
+              "zh": "你能再数一遍吗？"
+            },
+            {
+              "speaker": "S",
+              "en": "Six, seven, eight, nine and ten!",
+              "zh": "六、七、八、九和十！"
+            },
+            {
+              "speaker": "T",
+              "en": "Perfect! You know all the numbers!",
+              "zh": "太棒了！你认识所有数字了！"
+            }
+          ],
+          "songs": [
+            {
+              "en": "one",
+              "zh": "一"
+            },
+            {
+              "en": "one two",
+              "zh": "一 二"
+            },
+            {
+              "en": "one two three",
+              "zh": "一位、两位、三位"
+            },
+            {
+              "en": "one two three four",
+              "zh": "一二三四"
+            },
+            {
+              "en": "one two three four five",
+              "zh": "一 二 三 四 五"
+            },
+            {
+              "en": "one two three four six five",
+              "zh": "一二三四六五"
+            },
+            {
+              "en": "one two three four six seven five",
+              "zh": "一二三四六七五"
+            },
+            {
+              "en": "one two three four six seven eight five",
+              "zh": "一二三四五六七八九是"
+            },
+            {
+              "en": "one two three four six seven nine five eight",
+              "zh": "一二三四六七九五八"
+            },
+            {
+              "en": "I Say, You Tick ten one two three four six seven nine five eight",
+              "zh": "我说，你勾十一二三四六七九五八"
+            },
+            {
+              "en": "Before and After",
+              "zh": "前后对比"
+            },
+            {
+              "en": "For example, if you see this",
+              "zh": "例如，如果你看到"
+            },
+            {
+              "en": ", 1 comes before it,",
+              "zh": "， 1在它之前，"
+            },
+            {
+              "en": "3 comes after it.",
+              "zh": "3在它后面。"
+            },
+            {
+              "en": "Six, seven, eight, nine and ten.",
+              "zh": "六、七、八、九和十。"
+            },
+            {
+              "en": "Can you count one more time?",
+              "zh": "你能再数一遍吗？"
+            },
+            {
+              "en": "Let’s sing a song.",
+              "zh": "我们来唱首歌吧！"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Animals",
+      "titleZh": "动物",
+      "emoji": "🐾",
+      "lessons": [
+        {
+          "id": 1,
+          "title": "Have a Pet",
+          "titleZh": "养宠物",
+          "words": [
+            {
+              "en": "pet",
+              "zh": "宠物",
+              "emoji": "🐾",
+              "ipa": "/pet/"
+            },
+            {
+              "en": "dog",
+              "zh": "狗",
+              "emoji": "🐶",
+              "ipa": "/dɒɡ/"
+            },
+            {
+              "en": "cat",
+              "zh": "猫",
+              "emoji": "🐱",
+              "ipa": "/kæt/"
+            },
+            {
+              "en": "rabbit",
+              "zh": "兔子",
+              "emoji": "🐰",
+              "ipa": "/ˈræbɪt/"
+            },
+            {
+              "en": "hamster",
+              "zh": "仓鼠",
+              "emoji": "🐹",
+              "ipa": "/ˈhæmstə/"
+            }
+          ],
+          "sentences": [
+            {
+              "en": "Hello, dog!",
+              "zh": "你好，小狗！",
+              "hint": "跟宠物打招呼"
+            },
+            {
+              "en": "Mom, it's a dog!",
+              "zh": "妈妈，这是一只狗！",
+              "hint": "告诉妈妈"
+            },
+            {
+              "en": "Yes, it's so cute.",
+              "zh": "是的，它真可爱。",
+              "hint": "夸宠物可爱"
+            },
+            {
+              "en": "Which pet do you like?",
+              "zh": "你喜欢哪个宠物？",
+              "hint": "询问喜欢的宠物"
+            },
+            {
+              "en": "I like the cat.",
+              "zh": "我喜欢猫。",
+              "hint": "表达喜好"
+            }
+          ],
+          "frames": [
+            {
+              "pattern": "I like the ___.",
+              "zh": "我喜欢猫。",
+              "hint": "说说你喜欢哪个宠物",
+              "blanks": [
+                {
+                  "options": [
+                    "cat",
+                    "dog",
+                    "rabbit",
+                    "hamster"
+                  ],
+                  "answer": 0
+                }
+              ]
+            }
+          ],
+          "reading": {
+            "title": "Five New Pets",
+            "titleZh": "五个新宠物",
+            "sentences": [
+              {
+                "en": "The cat sits in the yard and waits.",
+                "zh": "小猫咪坐在院子里，静静等着。"
+              },
+              {
+                "en": "A small white dog comes and stops.",
+                "zh": "一只白色小狗走了过来，停下脚步。"
+              },
+              {
+                "en": "\"Hello! I am a new pet,\" says the dog.",
+                "zh": "“你好！我是一只新来的小宠物。”小狗说。"
+              },
+              {
+                "en": "\"Can I live with you?\" asks Lily.",
+                "zh": "“你能和我们一起住吗？”Lily 问。"
+              },
+              {
+                "en": "\"Yes! But I am very hungry,\" says the dog.",
+                "zh": "“好呀！不过我的肚子好饿。”小狗说。"
+              },
+              {
+                "en": "Lily puts her food down and opens a big box.",
+                "zh": "Lily 放下食物，又打开一个大盒子。"
+              },
+              {
+                "en": "A rabbit hops out and says, \"Hello!\"",
+                "zh": "一只小兔子蹦了出来：“你好！”"
+              },
+              {
+                "en": "Then a little hamster runs out too.",
+                "zh": "接着，一只小仓鼠也跑了出来。"
+              },
+              {
+                "en": "A bird flies down and eats with them.",
+                "zh": "一只小鸟飞下来，和大家一起吃。"
+              },
+              {
+                "en": "\"Come and eat with me,\" says the cat.",
+                "zh": "“快来和我一起吃吧。”小猫说。"
+              },
+              {
+                "en": "Now the dog has four new friends.",
+                "zh": "现在小狗多了四个新朋友。"
+              },
+              {
+                "en": "\"Hello, new pets! We are five pets now.\"",
+                "zh": "“你好呀，新伙伴们！我们现在有五只宠物啦。”"
+              }
+            ]
+          },
+          "dialogue": [
+            {
+              "speaker": "T",
+              "en": "Hello, dog!",
+              "zh": "你好，小狗！"
+            },
+            {
+              "speaker": "S",
+              "en": "Hello, dog!",
+              "zh": "你好，小狗！"
+            },
+            {
+              "speaker": "T",
+              "en": "Hello, cat!",
+              "zh": "你好，小猫！"
+            },
+            {
+              "speaker": "S",
+              "en": "Hello, cat!",
+              "zh": "你好，小猫！"
+            },
+            {
+              "speaker": "T",
+              "en": "Hello, rabbit! Hello, hamster!",
+              "zh": "你好，兔子！你好，仓鼠！"
+            },
+            {
+              "speaker": "T",
+              "en": "Mom, it is a dog!",
+              "zh": "妈妈，这是一只狗！"
+            },
+            {
+              "speaker": "S",
+              "en": "Yes, it's so cute.",
+              "zh": "是的，它真可爱。"
+            },
+            {
+              "speaker": "T",
+              "en": "Which pet do you like?",
+              "zh": "你喜欢哪个宠物？"
+            },
+            {
+              "speaker": "S",
+              "en": "I like the rabbit.",
+              "zh": "我喜欢兔子。"
+            },
+            {
+              "speaker": "T",
+              "en": "Do you have a pet?",
+              "zh": "你有宠物吗？"
+            },
+            {
+              "speaker": "S",
+              "en": "Yes! I have a cat.",
+              "zh": "有！我有一只猫。"
+            },
+            {
+              "speaker": "T",
+              "en": "A cat! I like cats too. They are so cute!",
+              "zh": "一只猫！我也喜欢猫。它们真可爱！"
+            }
+          ],
+          "songs": [
+            {
+              "en": "Let’s sing a song.",
+              "zh": "我们来唱首歌吧！"
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "title": "Farm Animals",
+          "titleZh": "农场动物",
+          "words": [
+            {
+              "en": "cow",
+              "zh": "奶牛",
+              "emoji": "🐮",
+              "ipa": "/kaʊ/"
+            },
+            {
+              "en": "pig",
+              "zh": "猪",
+              "emoji": "🐷",
+              "ipa": "/pɪɡ/"
+            },
+            {
+              "en": "duck",
+              "zh": "鸭子",
+              "emoji": "🦆",
+              "ipa": "/dʌk/"
+            },
+            {
+              "en": "chicken",
+              "zh": "鸡",
+              "emoji": "🐔",
+              "ipa": "/ˈtʃɪkɪn/"
+            },
+            {
+              "en": "farm",
+              "zh": "农场",
+              "emoji": "🏡",
+              "ipa": "/fɑːm/"
+            }
+          ],
+          "sentences": [
+            {
+              "en": "What's this animal?",
+              "zh": "这是什么动物？",
+              "hint": "询问动物"
+            },
+            {
+              "en": "This is a cow.",
+              "zh": "这是一头奶牛。",
+              "hint": "介绍动物"
+            },
+            {
+              "en": "What does the cow say?",
+              "zh": "奶牛怎么叫？",
+              "hint": "问动物叫声"
+            },
+            {
+              "en": "Moo, moo!",
+              "zh": "哞，哞！",
+              "hint": "奶牛叫声"
+            },
+            {
+              "en": "Hello, pig!",
+              "zh": "你好，小猪！",
+              "hint": "跟动物打招呼"
+            }
+          ],
+          "frames": [
+            {
+              "pattern": "This is a ___.",
+              "zh": "这是一头牛。",
+              "hint": "",
+              "blanks": [
+                {
+                  "options": [
+                    "cow",
+                    "pig",
+                    "duck",
+                    "elephant"
+                  ],
+                  "answer": 0
+                }
+              ]
+            }
+          ],
+          "reading": {
+            "title": "A Day at the Farm",
+            "titleZh": "农场里的一天",
+            "sentences": [
+              {
+                "en": "A little duck walks on the farm today.",
+                "zh": "今天，小鸭子一个人在农场上走着。"
+              },
+              {
+                "en": "She can not find her family.",
+                "zh": "它找不到自己的家人了。"
+              },
+              {
+                "en": "\"Hello, duck! Where is your family?\" asks the cow.",
+                "zh": "“你好呀，小鸭子！你的家人在哪儿？”奶牛问。"
+              },
+              {
+                "en": "\"I do not know,\" says the duck.",
+                "zh": "“我不知道……”小鸭子说。"
+              },
+              {
+                "en": "The big pig does not help. It eats an apple.",
+                "zh": "大猪也帮不上忙，它正忙着啃苹果。"
+              },
+              {
+                "en": "Then a white chicken comes to the duck.",
+                "zh": "这时，一只白母鸡走到小鸭子身边。"
+              },
+              {
+                "en": "\"I saw them near the old tree,\" says the chicken.",
+                "zh": "“我在老树那边看见它们了。”母鸡说。"
+              },
+              {
+                "en": "The duck runs and looks behind it.",
+                "zh": "小鸭子跑过去，往树后一看。"
+              },
+              {
+                "en": "Her family is there! They all say, \"Hello!\"",
+                "zh": "家人都到齐了！它们一起喊：“你好！”"
+              },
+              {
+                "en": "The cow, the pig and the chicken come too.",
+                "zh": "奶牛、大猪和母鸡也赶来了。"
+              },
+              {
+                "en": "The animals stand together in the sun.",
+                "zh": "动物们站在太阳底下，挤成一团。"
+              },
+              {
+                "en": "\"Hello, family! Here you are,\" says the duck.",
+                "zh": "“你好呀，家人！我找到你们啦。”小鸭子说。"
+              }
+            ]
+          },
+          "dialogue": [
+            {
+              "speaker": "T",
+              "en": "What's this animal?",
+              "zh": "这是什么动物？"
+            },
+            {
+              "speaker": "S",
+              "en": "This is a cow.",
+              "zh": "这是一头奶牛。"
+            },
+            {
+              "speaker": "T",
+              "en": "A cow! What does the cow say?",
+              "zh": "一头奶牛！奶牛怎么叫？"
+            },
+            {
+              "speaker": "S",
+              "en": "Moo, moo!",
+              "zh": "哞，哞！"
+            },
+            {
+              "speaker": "T",
+              "en": "Hello, pig! What does the pig say?",
+              "zh": "你好，小猪！猪怎么叫？"
+            },
+            {
+              "speaker": "S",
+              "en": "Oink, oink!",
+              "zh": "哼，哼！"
+            },
+            {
+              "speaker": "T",
+              "en": "Hello, duck! And the duck?",
+              "zh": "你好，鸭子！那鸭子呢？"
+            },
+            {
+              "speaker": "S",
+              "en": "Quack, quack!",
+              "zh": "嘎，嘎！"
+            },
+            {
+              "speaker": "T",
+              "en": "Hello, chicken!",
+              "zh": "你好，小鸡！"
+            },
+            {
+              "speaker": "S",
+              "en": "Cluck, cluck!",
+              "zh": "咯咯咯！"
+            },
+            {
+              "speaker": "T",
+              "en": "Now I say the animal, you make the sound!",
+              "zh": "现在我说动物，你来叫！"
+            },
+            {
+              "speaker": "T",
+              "en": "Cow!",
+              "zh": "奶牛！"
+            },
+            {
+              "speaker": "S",
+              "en": "Moo, moo!",
+              "zh": "哞，哞！"
+            },
+            {
+              "speaker": "T",
+              "en": "Chicken!",
+              "zh": "小鸡！"
+            },
+            {
+              "speaker": "S",
+              "en": "Cluck, cluck! You are so loud!",
+              "zh": "咯咯咯！你真大声！"
+            }
+          ],
+          "songs": [
+            {
+              "en": "Let’s sing a song.",
+              "zh": "我们来唱首歌吧！"
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "title": "Zoo Animals",
+          "titleZh": "动物园动物",
+          "words": [
+            {
+              "en": "zoo",
+              "zh": "动物园",
+              "emoji": "🦁",
+              "ipa": "/zuː/"
+            },
+            {
+              "en": "parrot",
+              "zh": "鹦鹉",
+              "emoji": "🦜",
+              "ipa": "/ˈpærət/"
+            },
+            {
+              "en": "bear",
+              "zh": "熊",
+              "emoji": "🐻",
+              "ipa": "/beə/"
+            },
+            {
+              "en": "monkey",
+              "zh": "猴子",
+              "emoji": "🐵",
+              "ipa": "/ˈmʌŋki/"
+            },
+            {
+              "en": "panda",
+              "zh": "熊猫",
+              "emoji": "🐼",
+              "ipa": "/ˈpændə/"
+            }
+          ],
+          "sentences": [
+            {
+              "en": "Let's go to the zoo!",
+              "zh": "我们去动物园吧！",
+              "hint": "去动物园"
+            },
+            {
+              "en": "What animal do you see?",
+              "zh": "你看到什么动物？",
+              "hint": "询问看到的动物"
+            },
+            {
+              "en": "I see a panda.",
+              "zh": "我看到一只熊猫。",
+              "hint": "描述看到的动物"
+            },
+            {
+              "en": "What animals do you see?",
+              "zh": "你看到哪些动物？",
+              "hint": "询问看到的动物"
+            },
+            {
+              "en": "Name the animals.",
+              "zh": "说出动物的名字。",
+              "hint": "命名动物"
+            }
+          ],
+          "frames": [
+            {
+              "pattern": "I see a ___.",
+              "zh": "我看见一只熊猫。",
+              "hint": "",
+              "blanks": [
+                {
+                  "options": [
+                    "panda",
+                    "tiger",
+                    "monkey",
+                    "lion"
+                  ],
+                  "answer": 0
+                }
+              ]
+            }
+          ],
+          "reading": {
+            "title": "Let's Go to the Zoo",
+            "titleZh": "我们去动物园吧",
+            "sentences": [
+              {
+                "en": "A new panda comes to the zoo.",
+                "zh": "一只新来的熊猫走进动物园。"
+              },
+              {
+                "en": "He is big, but he does not come out.",
+                "zh": "它很大，却总是不肯出来。"
+              },
+              {
+                "en": "He sits in his house and waits.",
+                "zh": "它坐在自己的小屋里，等着谁叫它。"
+              },
+              {
+                "en": "\"Come out and play, panda!\" says the monkey.",
+                "zh": "“出来一起玩吧，熊猫！”猴子说。"
+              },
+              {
+                "en": "\"No! I am not ready,\" says the panda.",
+                "zh": "“不要！我还没准备好。”熊猫说。"
+              },
+              {
+                "en": "The monkey climbs a tall tree and looks for him.",
+                "zh": "猴子爬上一棵高高的树，帮它找。"
+              },
+              {
+                "en": "Then a big bear comes and calls him.",
+                "zh": "后来，大熊走过来喊它。"
+              },
+              {
+                "en": "\"I am big, but I am kind,\" says the bear.",
+                "zh": "“我虽然大，可是我很善良。”熊说。"
+              },
+              {
+                "en": "A parrot flies down and says, \"Hello! I can sing!\"",
+                "zh": "一只鹦鹉飞下来：“你好！我会唱歌！”"
+              },
+              {
+                "en": "The panda laughs and comes out of his house.",
+                "zh": "熊猫笑了，从小屋里走了出来。"
+              },
+              {
+                "en": "He jumps and plays with the monkey.",
+                "zh": "它跳呀跳，和猴子玩在一起。"
+              },
+              {
+                "en": "\"Hello, new friend! Let's play again!\"",
+                "zh": "“你好呀，新朋友！我们下次再玩！”"
+              }
+            ]
+          },
+          "dialogue": [
+            {
+              "speaker": "T",
+              "en": "Let's go to the zoo!",
+              "zh": "我们去动物园吧！"
+            },
+            {
+              "speaker": "S",
+              "en": "Yay!",
+              "zh": "好耶！"
+            },
+            {
+              "speaker": "T",
+              "en": "What animal do you see?",
+              "zh": "你看到什么动物？"
+            },
+            {
+              "speaker": "S",
+              "en": "I see a panda.",
+              "zh": "我看到一只熊猫。"
+            },
+            {
+              "speaker": "T",
+              "en": "A panda! Black and white!",
+              "zh": "一只熊猫！黑白相间的！"
+            },
+            {
+              "speaker": "T",
+              "en": "What animals do you see?",
+              "zh": "你看到哪些动物？"
+            },
+            {
+              "speaker": "S",
+              "en": "I see a bear and a monkey.",
+              "zh": "我看到一只熊和一只猴子。"
+            },
+            {
+              "speaker": "T",
+              "en": "Name the animals!",
+              "zh": "说出动物的名字！"
+            },
+            {
+              "speaker": "S",
+              "en": "Parrot! Bear! Monkey! Panda!",
+              "zh": "鹦鹉！熊！猴子！熊猫！"
+            },
+            {
+              "speaker": "T",
+              "en": "Which animal do you like?",
+              "zh": "你喜欢哪个动物？"
+            },
+            {
+              "speaker": "S",
+              "en": "I like the monkey.",
+              "zh": "我喜欢猴子。"
+            },
+            {
+              "speaker": "T",
+              "en": "The monkey is very clever. Me too!",
+              "zh": "猴子很聪明。我也是！"
+            }
+          ],
+          "songs": [
+            {
+              "en": "Let’s sing a song.",
+              "zh": "我们来唱首歌吧！"
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "title": "Ocean Animals",
+          "titleZh": "海洋动物",
+          "words": [
+            {
+              "en": "ocean",
+              "zh": "海洋",
+              "emoji": "🌊",
+              "ipa": "/ˈəʊʃn/"
+            },
+            {
+              "en": "fish",
+              "zh": "鱼",
+              "emoji": "🐟",
+              "ipa": "/fɪʃ/"
+            },
+            {
+              "en": "dolphin",
+              "zh": "海豚",
+              "emoji": "🐬",
+              "ipa": "/ˈdɒlfɪn/"
+            },
+            {
+              "en": "seahorse",
+              "zh": "海马",
+              "emoji": "🐴",
+              "ipa": "/ˈsiːhɔːs/"
+            },
+            {
+              "en": "turtle",
+              "zh": "海龟",
+              "emoji": "🐢",
+              "ipa": "/ˈtɜːtl/"
+            }
+          ],
+          "sentences": [
+            {
+              "en": "Let's go to the ocean.",
+              "zh": "我们去海洋吧。",
+              "hint": "去海洋"
+            },
+            {
+              "en": "What's this animal?",
+              "zh": "这是什么动物？",
+              "hint": "询问动物"
+            },
+            {
+              "en": "This is a turtle.",
+              "zh": "这是一只海龟。",
+              "hint": "介绍动物"
+            },
+            {
+              "en": "Swim like a fish.",
+              "zh": "像鱼一样游泳。",
+              "hint": "模仿动物动作"
+            },
+            {
+              "en": "Dive like a dolphin.",
+              "zh": "像海豚一样潜水。",
+              "hint": "模仿动物动作"
+            }
+          ],
+          "frames": [
+            {
+              "pattern": "This is a ___.",
+              "zh": "这是一只海龟。",
+              "hint": "海洋里有什么动物？",
+              "blanks": [
+                {
+                  "options": [
+                    "turtle",
+                    "fish",
+                    "dolphin",
+                    "seahorse"
+                  ],
+                  "answer": 0
+                }
+              ]
+            }
+          ],
+          "reading": {
+            "title": "A Day in the Ocean",
+            "titleZh": "海洋里的一天",
+            "sentences": [
+              {
+                "en": "A little turtle swims in the big ocean.",
+                "zh": "小海龟在大海里慢慢地游着。"
+              },
+              {
+                "en": "She is slow and can not keep up.",
+                "zh": "它游得慢，怎么也跟不上。"
+              },
+              {
+                "en": "A dolphin jumps and laughs at her.",
+                "zh": "一只海豚跳起来，笑她。"
+              },
+              {
+                "en": "\"You are too slow, turtle!\" says the dolphin.",
+                "zh": "“你太慢啦，小海龟！”海豚说。"
+              },
+              {
+                "en": "The turtle goes away. She feels sad.",
+                "zh": "小海龟游开了，心里有点难过。"
+              },
+              {
+                "en": "Then a small fish comes and says, \"Hello!\"",
+                "zh": "这时，一条小鱼游过来：“你好！”"
+              },
+              {
+                "en": "A little seahorse is there. \"I am lost.\"",
+                "zh": "那边有一只小海马。“我迷路了。”"
+              },
+              {
+                "en": "\"We will take you home,\" says the turtle.",
+                "zh": "“我们送你回家。”小海龟说。"
+              },
+              {
+                "en": "The turtle and the fish help him.",
+                "zh": "小海龟和小鱼一起帮他。"
+              },
+              {
+                "en": "Then the fish shows the turtle how to swim.",
+                "zh": "后来，小鱼教小海龟怎么游泳。"
+              },
+              {
+                "en": "The turtle swims fast now, like a fish.",
+                "zh": "现在小海龟游得可快了，像鱼一样。"
+              },
+              {
+                "en": "The dolphin comes back. \"Hello! We can swim together!\"",
+                "zh": "海豚又游回来了：“你好！我们一起游吧！”"
+              }
+            ]
+          },
+          "dialogue": [
+            {
+              "speaker": "T",
+              "en": "Let's go to the ocean.",
+              "zh": "我们去海洋吧。"
+            },
+            {
+              "speaker": "T",
+              "en": "What's this animal?",
+              "zh": "这是什么动物？"
+            },
+            {
+              "speaker": "S",
+              "en": "This is a turtle.",
+              "zh": "这是一只海龟。"
+            },
+            {
+              "speaker": "T",
+              "en": "A turtle! Swim like a fish!",
+              "zh": "一只海龟！像鱼一样游泳！"
+            },
+            {
+              "speaker": "S",
+              "en": "Swim, swim, swim!",
+              "zh": "游啊游！"
+            },
+            {
+              "speaker": "T",
+              "en": "Dive like a dolphin!",
+              "zh": "像海豚一样潜水！"
+            },
+            {
+              "speaker": "S",
+              "en": "Dive!",
+              "zh": "潜！"
+            },
+            {
+              "speaker": "T",
+              "en": "What's this animal?",
+              "zh": "这是什么动物？"
+            },
+            {
+              "speaker": "S",
+              "en": "This is a seahorse!",
+              "zh": "这是海马！"
+            },
+            {
+              "speaker": "T",
+              "en": "A seahorse! It is very small. Do you like fish?",
+              "zh": "海马！它很小。你喜欢鱼吗？"
+            },
+            {
+              "speaker": "S",
+              "en": "Yes! Fish can swim.",
+              "zh": "喜欢！鱼会游泳。"
+            },
+            {
+              "speaker": "T",
+              "en": "And you can swim too! Excellent!",
+              "zh": "你也会游泳！太棒了！"
+            }
+          ],
+          "songs": [
+            {
+              "en": "Let’s sing a song.",
+              "zh": "我们来唱首歌吧！"
+            }
+          ]
+        },
+        {
+          "id": 5,
+          "title": "Bugs! Bugs! Bugs!",
+          "titleZh": "虫虫虫",
+          "words": [
+            {
+              "en": "bug",
+              "zh": "虫子",
+              "emoji": "🐛",
+              "ipa": "/bʌɡ/"
+            },
+            {
+              "en": "butterfly",
+              "zh": "蝴蝶",
+              "emoji": "🦋",
+              "ipa": "/ˈbʌtəflaɪ/"
+            },
+            {
+              "en": "spider",
+              "zh": "蜘蛛",
+              "emoji": "🕷️",
+              "ipa": "/ˈspaɪdə/"
+            },
+            {
+              "en": "bee",
+              "zh": "蜜蜂",
+              "emoji": "🐝",
+              "ipa": "/biː/"
+            },
+            {
+              "en": "caterpillar",
+              "zh": "毛毛虫",
+              "emoji": "🐛",
+              "ipa": "/ˈkætəpɪlə/"
+            }
+          ],
+          "sentences": [
+            {
+              "en": "They're bugs.",
+              "zh": "它们是虫子。",
+              "hint": "介绍虫子"
+            },
+            {
+              "en": "How many butterflies do you see?",
+              "zh": "你看到几只蝴蝶？",
+              "hint": "询问数量"
+            },
+            {
+              "en": "I see 3 butterflies.",
+              "zh": "我看到3只蝴蝶。",
+              "hint": "回答数量"
+            },
+            {
+              "en": "How many bees do you see?",
+              "zh": "你看到几只蜜蜂？",
+              "hint": "询问数量"
+            },
+            {
+              "en": "I see four bees.",
+              "zh": "我看到四只蜜蜂。",
+              "hint": "回答数量"
+            }
+          ],
+          "frames": [
+            {
+              "pattern": "I see 3 ___.",
+              "zh": "我看到3只蝴蝶。",
+              "hint": "先数一数，再说出整句",
+              "blanks": [
+                {
+                  "options": [
+                    "butterflies",
+                    "bees",
+                    "spiders",
+                    "caterpillars"
+                  ],
+                  "answer": 0
+                }
+              ]
+            }
+          ],
+          "reading": {
+            "title": "Bugs! Bugs! Bugs!",
+            "titleZh": "虫子！虫子！虫子！",
+            "sentences": [
+              {
+                "en": "A little caterpillar eats a green leaf.",
+                "zh": "一条小毛毛虫在绿叶上吃着东西。"
+              },
+              {
+                "en": "It is small, but it eats and eats.",
+                "zh": "它很小，却一直吃呀吃。"
+              },
+              {
+                "en": "It wants to fly, like a butterfly.",
+                "zh": "它想像蝴蝶一样飞起来。"
+              },
+              {
+                "en": "Kate watches it every day in the yard.",
+                "zh": "Kate 每天都在院子里看它。"
+              },
+              {
+                "en": "\"Hello! Do you want to fly?\" says a bee.",
+                "zh": "“你好！你想飞吗？”一只蜜蜂说。"
+              },
+              {
+                "en": "\"Eat and get big,\" says the bee. The caterpillar eats.",
+                "zh": "“多吃一点，快快长大。”蜜蜂说。小毛毛虫吃呀吃。"
+              },
+              {
+                "en": "Then a spider comes down from the tree.",
+                "zh": "这时，一只蜘蛛从树上下来了。"
+              },
+              {
+                "en": "\"Go behind the leaf!\" says the bee. The caterpillar waits.",
+                "zh": "“快到叶子后面去！”蜜蜂说。小毛毛虫乖乖等着。"
+              },
+              {
+                "en": "Now the caterpillar comes out and eats and gets big.",
+                "zh": "小毛毛虫又出来啦，一边吃一边长大。"
+              },
+              {
+                "en": "One day it is not on the leaf.",
+                "zh": "有一天，它不在叶子上了。"
+              },
+              {
+                "en": "Kate looks behind the leaf.",
+                "zh": "Kate 往叶子后面一看。"
+              },
+              {
+                "en": "\"Hello! I am your little bug,\" says the butterfly.",
+                "zh": "“你好！我就是你那条小虫子。”蝴蝶说。"
+              }
+            ]
+          },
+          "dialogue": [
+            {
+              "speaker": "T",
+              "en": "Can you find the bugs?",
+              "zh": "你能找到虫子吗？"
+            },
+            {
+              "speaker": "S",
+              "en": "Yes! Here!",
+              "zh": "能！在这里！"
+            },
+            {
+              "speaker": "T",
+              "en": "They're bugs.",
+              "zh": "它们是虫子。"
+            },
+            {
+              "speaker": "T",
+              "en": "How many butterflies do you see?",
+              "zh": "你看到几只蝴蝶？"
+            },
+            {
+              "speaker": "S",
+              "en": "I see 3 butterflies.",
+              "zh": "我看到 3 只蝴蝶。"
+            },
+            {
+              "speaker": "T",
+              "en": "Three butterflies! How many spiders do you see?",
+              "zh": "三只蝴蝶！你看到几只蜘蛛？"
+            },
+            {
+              "speaker": "S",
+              "en": "I see 2 spiders.",
+              "zh": "我看到 2 只蜘蛛。"
+            },
+            {
+              "speaker": "T",
+              "en": "Two spiders! How many bees do you see?",
+              "zh": "两只蜘蛛！你看到几只蜜蜂？"
+            },
+            {
+              "speaker": "S",
+              "en": "I see four bees.",
+              "zh": "我看到四只蜜蜂。"
+            },
+            {
+              "speaker": "T",
+              "en": "How many caterpillars?",
+              "zh": "几只毛毛虫？"
+            },
+            {
+              "speaker": "S",
+              "en": "I see one caterpillar.",
+              "zh": "我看到一只毛毛虫。"
+            },
+            {
+              "speaker": "T",
+              "en": "Buzz, buzz, buzz! You are a bug expert!",
+              "zh": "嗡嗡嗡！你是虫子小专家！"
+            }
+          ],
+          "songs": [
+            {
+              "en": "Let’s sing a song.",
+              "zh": "我们来唱首歌吧！"
+            }
+          ]
+        },
+        {
+          "id": 6,
+          "title": "Quiz 2",
+          "titleZh": "小测验2",
+          "words": [
+            {
+              "en": "animal",
+              "zh": "动物",
+              "emoji": "🐾",
+              "ipa": "/ˈænɪml/"
+            },
+            {
+              "en": "pet",
+              "zh": "宠物",
+              "emoji": "🐶",
+              "ipa": "/pet/"
+            },
+            {
+              "en": "ocean",
+              "zh": "海洋",
+              "emoji": "🌊",
+              "ipa": "/ˈəʊʃn/"
+            },
+            {
+              "en": "cute",
+              "zh": "可爱",
+              "emoji": "😍",
+              "ipa": "/kjuːt/"
+            },
+            {
+              "en": "count",
+              "zh": "数数",
+              "emoji": "🔢",
+              "ipa": "/kaʊnt/"
+            }
+          ],
+          "sentences": [
+            {
+              "en": "How many animals are there?",
+              "zh": "有几只动物？",
+              "hint": "询问数量"
+            },
+            {
+              "en": "What's this animal?",
+              "zh": "这是什么动物？",
+              "hint": "询问动物"
+            },
+            {
+              "en": "It's a dog.",
+              "zh": "这是一只狗。",
+              "hint": "回答动物"
+            },
+            {
+              "en": "What animals can you see in the ocean?",
+              "zh": "你能在海洋里看到什么动物？",
+              "hint": "询问海洋动物"
+            },
+            {
+              "en": "I like cats. It's so cute.",
+              "zh": "我喜欢猫。它真可爱。",
+              "hint": "表达喜好"
+            }
+          ],
+          "frames": [
+            {
+              "pattern": "What animals can you see in the ___?",
+              "zh": "你能在海洋里看到什么动物？",
+              "hint": "",
+              "blanks": [
+                {
+                  "options": [
+                    "ocean",
+                    "zoo",
+                    "farm"
+                  ],
+                  "answer": 0
+                }
+              ]
+            }
+          ],
+          "reading": {
+            "title": "The Animal Quiz",
+            "titleZh": "动物小测验",
+            "sentences": [
+              {
+                "en": "Mom gives Leo a book about animals.",
+                "zh": "妈妈给了 Leo 一本讲动物的书。"
+              },
+              {
+                "en": "He knows every animal in the book.",
+                "zh": "书里的动物他全都认识。"
+              },
+              {
+                "en": "\"How many animals can you see?\" asks Mom.",
+                "zh": "“你看见多少只动物？”妈妈问。"
+              },
+              {
+                "en": "Leo counts them all, but one is hard.",
+                "zh": "Leo 全都数了出来，可有一题很难。"
+              },
+              {
+                "en": "\"What animal lives in the ocean?\" Leo asks.",
+                "zh": "“什么动物住在海洋里？”Leo 问。"
+              },
+              {
+                "en": "They go to the ocean, and the cat comes too.",
+                "zh": "他们去海边看海，小猫也跟着一起来了。"
+              },
+              {
+                "en": "One dolphin jumps in the water.",
+                "zh": "一只海豚跳出水面。"
+              },
+              {
+                "en": "\"One! Now count the fish,\" says Leo.",
+                "zh": "“一只！Leo，现在数数鱼吧。”Leo 说。"
+              },
+              {
+                "en": "Leo counts two, three, four and five.",
+                "zh": "Leo 数着：两条、三条、四条、五条。"
+              },
+              {
+                "en": "The cat counts them too and laughs.",
+                "zh": "小猫也跟着数，笑出了声。"
+              },
+              {
+                "en": "\"Now you know all the answers,\" says Mom.",
+                "zh": "“现在你全都答对啦。”妈妈说。"
+              },
+              {
+                "en": "\"Hello, Mom! The cat is my pet. It is so cute.\"",
+                "zh": "“你好呀，妈妈！小猫是我的宠物，它太可爱啦。”"
+              }
+            ]
+          },
+          "dialogue": [
+            {
+              "speaker": "T",
+              "en": "Are you ready for the quiz?",
+              "zh": "准备好测验了吗？"
+            },
+            {
+              "speaker": "S",
+              "en": "Yes!",
+              "zh": "准备好了！"
+            },
+            {
+              "speaker": "T",
+              "en": "How many animals are there?",
+              "zh": "有几只动物？"
+            },
+            {
+              "speaker": "S",
+              "en": "There are five animals.",
+              "zh": "有五只动物。"
+            },
+            {
+              "speaker": "T",
+              "en": "What's this animal?",
+              "zh": "这是什么动物？"
+            },
+            {
+              "speaker": "S",
+              "en": "It's a dog.",
+              "zh": "这是一只狗。"
+            },
+            {
+              "speaker": "T",
+              "en": "What animals can you see in the ocean?",
+              "zh": "你能在海洋里看到什么动物？"
+            },
+            {
+              "speaker": "S",
+              "en": "I can see fish and turtles.",
+              "zh": "我能看到鱼和海龟。"
+            },
+            {
+              "speaker": "T",
+              "en": "Which animal do you like?",
+              "zh": "你喜欢哪个动物？"
+            },
+            {
+              "speaker": "S",
+              "en": "I like cats. It is so cute.",
+              "zh": "我喜欢猫。它真可爱。"
+            },
+            {
+              "speaker": "T",
+              "en": "Why do you like it?",
+              "zh": "你为什么喜欢它？"
+            },
+            {
+              "speaker": "S",
+              "en": "Because it is cute!",
+              "zh": "因为它很可爱！"
+            },
+            {
+              "speaker": "T",
+              "en": "Great answer! Quiz finished!",
+              "zh": "回答得真好！测验结束！"
+            }
+          ],
+          "songs": []
+        },
+        {
+          "id": 7,
+          "title": "Add It Up",
+          "titleZh": "加起来",
+          "words": [
+            {
+              "en": "leg",
+              "zh": "腿",
+              "emoji": "🦵",
+              "ipa": "/leɡ/"
+            },
+            {
+              "en": "plus",
+              "zh": "加",
+              "emoji": "➕",
+              "ipa": "/plʌs/"
+            },
+            {
+              "en": "equals",
+              "zh": "等于",
+              "emoji": "🟰",
+              "ipa": "/ˈiːkwəlz/"
+            },
+            {
+              "en": "altogether",
+              "zh": "总共",
+              "emoji": "🧮",
+              "ipa": "/ˌɔːltəˈɡeðə/"
+            },
+            {
+              "en": "addition",
+              "zh": "加法",
+              "emoji": "➕",
+              "ipa": "/əˈdɪʃn/"
+            }
+          ],
+          "sentences": [
+            {
+              "en": "How many legs does a dog have?",
+              "zh": "狗有几条腿？",
+              "hint": "询问数量"
+            },
+            {
+              "en": "4 plus 4 equals 8.",
+              "zh": "4加4等于8。",
+              "hint": "加法算式"
+            },
+            {
+              "en": "How many legs do they have altogether?",
+              "zh": "它们总共有几条腿？",
+              "hint": "询问总数"
+            },
+            {
+              "en": "They have 8 legs altogether.",
+              "zh": "它们总共有8条腿。",
+              "hint": "回答总数"
+            },
+            {
+              "en": "Do the addition then say the sentence.",
+              "zh": "算一算再说句子。",
+              "hint": "做加法"
+            }
+          ],
+          "frames": [
+            {
+              "pattern": "4 plus 4 equals ___.",
+              "zh": "4加4等于8。",
+              "hint": "算一算，再把整句读出来",
+              "blanks": [
+                {
+                  "options": [
+                    "8",
+                    "6",
+                    "5",
+                    "10"
+                  ],
+                  "answer": 0
+                }
+              ]
+            }
+          ],
+          "reading": {
+            "title": "Add It Up",
+            "titleZh": "加起来",
+            "sentences": [
+              {
+                "en": "Ben and Anna sit on the grass.",
+                "zh": "Ben 和 Anna 坐在草地上。"
+              },
+              {
+                "en": "A dog comes and looks at them.",
+                "zh": "一只狗走过来，看着他们。"
+              },
+              {
+                "en": "\"How many legs do you have?\" asks Ben.",
+                "zh": "“你有几条腿？”Ben 问。"
+              },
+              {
+                "en": "\"I have four legs,\" says the dog.",
+                "zh": "“我有四条腿。”狗说。"
+              },
+              {
+                "en": "A cat comes too. It has four legs.",
+                "zh": "一只猫也来了，它有四条腿。"
+              },
+              {
+                "en": "Now a bird and a duck come to play.",
+                "zh": "这时，一只鸟和一只鸭子也来玩。"
+              },
+              {
+                "en": "The bird has two legs. The duck has two.",
+                "zh": "鸟有两条腿，鸭子也有两条。"
+              },
+              {
+                "en": "\"4 plus 4 equals 8,\" says Ben.",
+                "zh": "“4 加 4 等于 8。”Ben 说。"
+              },
+              {
+                "en": "\"And 2 plus 2 makes 4,\" says Anna.",
+                "zh": "“那 2 加 2 就是 4。”Anna 说。"
+              },
+              {
+                "en": "\"How many legs do they have altogether?\" asks Anna.",
+                "zh": "“它们一共有多少条腿？”Anna 问。"
+              },
+              {
+                "en": "\"12 legs! That is hard addition,\" says Ben.",
+                "zh": "“12 条腿！这道加法好难。”Ben 说。"
+              },
+              {
+                "en": "The dog jumps. \"Hello! We did it!\"",
+                "zh": "小狗跳了起来：“你好！我们算出来啦！”"
+              }
+            ]
+          },
+          "dialogue": [
+            {
+              "speaker": "T",
+              "en": "How many legs does a dog have?",
+              "zh": "狗有几条腿？"
+            },
+            {
+              "speaker": "S",
+              "en": "Four legs!",
+              "zh": "四条腿！"
+            },
+            {
+              "speaker": "T",
+              "en": "How many legs does a cow have?",
+              "zh": "奶牛有几条腿？"
+            },
+            {
+              "speaker": "S",
+              "en": "Four!",
+              "zh": "四条！"
+            },
+            {
+              "speaker": "T",
+              "en": "So 4 plus 4 equals...?",
+              "zh": "那 4 加 4 等于……？"
+            },
+            {
+              "speaker": "S",
+              "en": "8!",
+              "zh": "8！"
+            },
+            {
+              "speaker": "T",
+              "en": "Yes! 4 plus 4 equals 8. They have 8 legs altogether.",
+              "zh": "对！4 加 4 等于 8。它们总共有 8 条腿。"
+            },
+            {
+              "speaker": "T",
+              "en": "How many eggs are there altogether?",
+              "zh": "总共有多少个鸡蛋？"
+            },
+            {
+              "speaker": "S",
+              "en": "Five eggs altogether!",
+              "zh": "总共五个鸡蛋！"
+            },
+            {
+              "speaker": "T",
+              "en": "Do the addition, then say the sentence.",
+              "zh": "算一算，再说句子。"
+            },
+            {
+              "speaker": "S",
+              "en": "3 plus 2 equals 5!",
+              "zh": "3 加 2 等于 5！"
+            },
+            {
+              "speaker": "T",
+              "en": "You are a math star!",
+              "zh": "你是数学小明星！"
+            }
+          ],
+          "songs": [
+            {
+              "en": "Let’s sing a song.",
+              "zh": "我们来唱首歌吧！"
+            }
+          ]
+        },
+        {
+          "id": 8,
+          "title": "What Comes Next",
+          "titleZh": "下一个是什么",
+          "words": [
+            {
+              "en": "pattern",
+              "zh": "规律",
+              "emoji": "🔁",
+              "ipa": "/ˈpætn/"
+            },
+            {
+              "en": "next",
+              "zh": "下一个",
+              "emoji": "➡️",
+              "ipa": "/nekst/"
+            },
+            {
+              "en": "come",
+              "zh": "来",
+              "emoji": "🚶",
+              "ipa": "/kʌm/"
+            },
+            {
+              "en": "finish",
+              "zh": "完成",
+              "emoji": "✅",
+              "ipa": "/ˈfɪnɪʃ/"
+            },
+            {
+              "en": "missing",
+              "zh": "缺少",
+              "emoji": "❓",
+              "ipa": "/ˈmɪsɪŋ/"
+            }
+          ],
+          "sentences": [
+            {
+              "en": "What comes next?",
+              "zh": "下一个是什么？",
+              "hint": "找规律"
+            },
+            {
+              "en": "The cat comes next.",
+              "zh": "下一个是猫。",
+              "hint": "回答下一个"
+            },
+            {
+              "en": "It's a pattern.",
+              "zh": "这是一个规律。",
+              "hint": "描述规律"
+            },
+            {
+              "en": "Can you read the pattern?",
+              "zh": "你能读出这个规律吗？",
+              "hint": "读规律"
+            },
+            {
+              "en": "Let's finish the patterns.",
+              "zh": "我们来完成规律。",
+              "hint": "完成规律"
+            }
+          ],
+          "frames": [
+            {
+              "pattern": "The ___ comes next.",
+              "zh": "下一个是猫。",
+              "hint": "找出规律，说说下一个是谁",
+              "blanks": [
+                {
+                  "options": [
+                    "cat",
+                    "dog",
+                    "rabbit",
+                    "pig"
+                  ],
+                  "answer": 0
+                }
+              ]
+            }
+          ],
+          "reading": {
+            "title": "What Comes Next",
+            "titleZh": "下一个是什么",
+            "sentences": [
+              {
+                "en": "Jack puts his toy animals on the table.",
+                "zh": "Jack 把玩具动物一个一个摆在桌上。"
+              },
+              {
+                "en": "Cat, dog, cat, dog. It is a pattern.",
+                "zh": "猫、狗、猫、狗——这是一个规律。"
+              },
+              {
+                "en": "\"What comes next?\" asks Jack.",
+                "zh": "“下一个是什么？”Jack 问。"
+              },
+              {
+                "en": "The cat comes next, and then the dog.",
+                "zh": "下一个是猫，然后才是狗。"
+              },
+              {
+                "en": "\"I can finish it,\" says Jack.",
+                "zh": "“我能把它排完。”Jack 说。"
+              },
+              {
+                "en": "But one animal is missing from the table.",
+                "zh": "可是桌上少了一个动物。"
+              },
+              {
+                "en": "Jack looks in the box and under the bed.",
+                "zh": "Jack 在盒子里、床上都找过了。"
+              },
+              {
+                "en": "The little dog is not there.",
+                "zh": "小狗狗不见了。"
+              },
+              {
+                "en": "Then a big dog comes and sits next to the cat.",
+                "zh": "这时，一只大狗走进来，坐在小猫旁边。"
+              },
+              {
+                "en": "\"Now the pattern is here!\" says Jack.",
+                "zh": "“现在规律齐啦！”Jack 说。"
+              },
+              {
+                "en": "The dog comes next. Then the cat comes too.",
+                "zh": "下一个是狗，然后猫也来了。"
+              },
+              {
+                "en": "\"Hello! What comes next?\" asks the dog.",
+                "zh": "“你好！下一个是什么？”小狗问。"
+              }
+            ]
+          },
+          "dialogue": [
+            {
+              "speaker": "T",
+              "en": "Cat, dog, cat, dog... what comes next?",
+              "zh": "猫、狗、猫、狗……下一个是什么？"
+            },
+            {
+              "speaker": "S",
+              "en": "Cat!",
+              "zh": "猫！"
+            },
+            {
+              "speaker": "T",
+              "en": "Yes! The cat comes next. It is a pattern.",
+              "zh": "对！下一个是猫。这是一个规律。"
+            },
+            {
+              "speaker": "T",
+              "en": "Can you read the pattern?",
+              "zh": "你能读出这个规律吗？"
+            },
+            {
+              "speaker": "S",
+              "en": "Yellow leaf, green leaf, yellow leaf, green leaf.",
+              "zh": "黄叶、绿叶、黄叶、绿叶。"
+            },
+            {
+              "speaker": "T",
+              "en": "What comes next? The yellow leaf or the green leaf?",
+              "zh": "下一个是什么？黄叶还是绿叶？"
+            },
+            {
+              "speaker": "S",
+              "en": "The yellow leaf comes next!",
+              "zh": "下一个是黄叶！"
+            },
+            {
+              "speaker": "T",
+              "en": "Let's finish the patterns.",
+              "zh": "我们来完成规律。"
+            },
+            {
+              "speaker": "S",
+              "en": "A boy, a girl, a boy, a girl... it is a pattern!",
+              "zh": "男孩、女孩、男孩、女孩……这是个规律！"
+            },
+            {
+              "speaker": "T",
+              "en": "Excellent! You found the pattern!",
+              "zh": "太棒了！你找到规律了！"
+            }
+          ],
+          "songs": [
+            {
+              "en": "Let’s sing a song.",
+              "zh": "我们来唱首歌吧！"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Food & Drinks",
+      "titleZh": "食物与饮料",
+      "emoji": "🍎",
+      "lessons": [
+        {
+          "id": 1,
+          "title": "Fruit I Like",
+          "titleZh": "我喜欢的水果",
+          "words": [
+            {
+              "en": "fruit",
+              "zh": "水果",
+              "emoji": "🍉",
+              "ipa": "/fruːt/"
+            },
+            {
+              "en": "apple",
+              "zh": "苹果",
+              "emoji": "🍎",
+              "ipa": "/ˈæpl/"
+            },
+            {
+              "en": "watermelon",
+              "zh": "西瓜",
+              "emoji": "🍉",
+              "ipa": "/ˈwɔːtəmelən/"
+            },
+            {
+              "en": "peach",
+              "zh": "桃子",
+              "emoji": "🍑",
+              "ipa": "/piːtʃ/"
+            },
+            {
+              "en": "grapes",
+              "zh": "葡萄",
+              "emoji": "🍇",
+              "ipa": "/ɡreɪps/"
+            }
+          ],
+          "sentences": [
+            {
+              "en": "Hello, apple!",
+              "zh": "你好，苹果！",
+              "hint": "跟水果打招呼"
+            },
+            {
+              "en": "What is it?",
+              "zh": "它是什么？",
+              "hint": "询问水果"
+            },
+            {
+              "en": "It's an apple.",
+              "zh": "它是苹果。",
+              "hint": "回答水果"
+            },
+            {
+              "en": "Which fruit do you like?",
+              "zh": "你喜欢哪种水果？",
+              "hint": "询问喜好"
+            },
+            {
+              "en": "I like grapes.",
+              "zh": "我喜欢葡萄。",
+              "hint": "表达喜好"
+            }
+          ],
+          "frames": [
+            {
+              "pattern": "It's an ___.",
+              "zh": "这是一个苹果。",
+              "hint": "",
+              "blanks": [
+                {
+                  "options": [
+                    "apple",
+                    "orange",
+                    "banana",
+                    "pear"
+                  ],
+                  "answer": 0
+                }
+              ]
+            }
+          ],
+          "reading": {
+            "title": "My Fruit Bag",
+            "titleZh": "我的水果袋",
+            "sentences": [
+              {
+                "en": "Hello! I am Mia. I have a big bag.",
+                "zh": "你好！我是 Mia。我有一个大袋子。"
+              },
+              {
+                "en": "I put an apple, a peach and grapes in it.",
+                "zh": "我把一个苹果、一个桃子和一些葡萄放了进去。"
+              },
+              {
+                "en": "A big watermelon is in it.",
+                "zh": "里面还放着一个大西瓜。"
+              },
+              {
+                "en": "My bag is too big. I can not carry it.",
+                "zh": "我的袋子太大了，我拿不动它。"
+              },
+              {
+                "en": "A little monkey comes and looks at my bag.",
+                "zh": "一只小猴子走过来，盯着我的袋子看。"
+              },
+              {
+                "en": "\"Hello, Mia! Which fruit do you like?\"",
+                "zh": "“你好呀，Mia！你喜欢哪种水果？”"
+              },
+              {
+                "en": "\"I like grapes. Do you like the watermelon?\"",
+                "zh": "“我喜欢葡萄。你喜欢西瓜吗？”"
+              },
+              {
+                "en": "\"Yes! I want that big watermelon,\" says the monkey.",
+                "zh": "“喜欢！我想要那个大西瓜。”猴子说。"
+              },
+              {
+                "en": "We sit down and eat the watermelon together.",
+                "zh": "我们坐下来，一起吃西瓜。"
+              },
+              {
+                "en": "The watermelon is cold and good.",
+                "zh": "西瓜又凉又好吃。"
+              },
+              {
+                "en": "\"Hello, watermelon! You are so good!\"",
+                "zh": "“你好呀，西瓜！你真好吃！”"
+              },
+              {
+                "en": "The bag is small now. I can carry it home.",
+                "zh": "现在袋子变小了，我拎得动它回家了。"
+              }
+            ]
+          },
+          "dialogue": [
+            {
+              "speaker": "T",
+              "en": "Hello, apple!",
+              "zh": "你好，苹果！"
+            },
+            {
+              "speaker": "S",
+              "en": "Hello, apple!",
+              "zh": "你好，苹果！"
+            },
+            {
+              "speaker": "T",
+              "en": "Hello, watermelon! Hello, peach! Hello, grapes!",
+              "zh": "你好，西瓜！你好，桃子！你好，葡萄！"
+            },
+            {
+              "speaker": "T",
+              "en": "What is it?",
+              "zh": "它是什么？"
+            },
+            {
+              "speaker": "S",
+              "en": "It's a watermelon!",
+              "zh": "它是西瓜！"
+            },
+            {
+              "speaker": "T",
+              "en": "Yes! Which fruit do you like?",
+              "zh": "对！你喜欢哪种水果？"
+            },
+            {
+              "speaker": "S",
+              "en": "I like grapes.",
+              "zh": "我喜欢葡萄。"
+            },
+            {
+              "speaker": "T",
+              "en": "Grapes! What color are grapes?",
+              "zh": "葡萄！葡萄是什么颜色？"
+            },
+            {
+              "speaker": "S",
+              "en": "Purple!",
+              "zh": "紫色！"
+            },
+            {
+              "speaker": "T",
+              "en": "Do you like apples?",
+              "zh": "你喜欢苹果吗？"
+            },
+            {
+              "speaker": "S",
+              "en": "Yes! Apples are red.",
+              "zh": "喜欢！苹果是红色的。"
+            },
+            {
+              "speaker": "T",
+              "en": "An apple a day keeps the doctor away!",
+              "zh": "一天一苹果，医生远离我！"
+            }
+          ],
+          "songs": [
+            {
+              "en": "Let’s sing a song.",
+              "zh": "我们来唱首歌吧！"
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "title": "All about Fruit",
+          "titleZh": "水果大探索",
+          "words": [
+            {
+              "en": "cherry",
+              "zh": "樱桃",
+              "emoji": "🍒",
+              "ipa": "/ˈtʃeri/"
+            },
+            {
+              "en": "orange",
+              "zh": "橙子",
+              "emoji": "🍊",
+              "ipa": "/ˈɒrɪndʒ/"
+            },
+            {
+              "en": "strawberry",
+              "zh": "草莓",
+              "emoji": "🍓",
+              "ipa": "/ˈstrɔːbəri/"
+            },
+            {
+              "en": "banana",
+              "zh": "香蕉",
+              "emoji": "🍌",
+              "ipa": "/bəˈnɑːnə/"
+            },
+            {
+              "en": "fruit",
+              "zh": "水果",
+              "emoji": "🍉",
+              "ipa": "/fruːt/"
+            }
+          ],
+          "sentences": [
+            {
+              "en": "What's this fruit?",
+              "zh": "这是什么水果？",
+              "hint": "询问水果"
+            },
+            {
+              "en": "It's a red cherry.",
+              "zh": "它是一颗红樱桃。",
+              "hint": "描述水果"
+            },
+            {
+              "en": "It's a yellow banana.",
+              "zh": "它是一根黄香蕉。",
+              "hint": "描述水果"
+            },
+            {
+              "en": "What color is it?",
+              "zh": "它是什么颜色？",
+              "hint": "询问颜色"
+            },
+            {
+              "en": "I like bananas.",
+              "zh": "我喜欢香蕉。",
+              "hint": "表达喜好"
+            }
+          ],
+          "frames": [
+            {
+              "pattern": "It's a yellow ___.",
+              "zh": "它是一根黄香蕉。",
+              "hint": "说出水果的名字和颜色",
+              "blanks": [
+                {
+                  "options": [
+                    "banana",
+                    "cherry",
+                    "orange",
+                    "strawberry"
+                  ],
+                  "answer": 0
+                }
+              ]
+            }
+          ],
+          "reading": {
+            "title": "A Box of Fruit",
+            "titleZh": "一盒水果",
+            "sentences": [
+              {
+                "en": "Hello! I am Ben. Today I open my box.",
+                "zh": "你好！我是 Ben。今天我打开了我的盒子。"
+              },
+              {
+                "en": "\"What is this? It is a red cherry.\"",
+                "zh": "“这是什么？是一颗红红的樱桃。”"
+              },
+              {
+                "en": "It is small. I eat it and smile.",
+                "zh": "它小小的。我咬一口，笑了。"
+              },
+              {
+                "en": "Then I find a long yellow banana.",
+                "zh": "接着我又摸到一根长长的黄香蕉。"
+              },
+              {
+                "en": "\"Wow! My box has fruit for two!\"",
+                "zh": "“哇！我的盒子里有两人份的水果！”"
+              },
+              {
+                "en": "Leo comes and sits down with me.",
+                "zh": "Leo 走过来，在我身边坐下。"
+              },
+              {
+                "en": "\"Look! A big orange and a red strawberry.\"",
+                "zh": "“快看！一个大橙子，还有一颗红草莓。”"
+              },
+              {
+                "en": "\"Can I have the strawberry?\" asks Leo.",
+                "zh": "“我可以吃那颗草莓吗？”Leo 问。"
+              },
+              {
+                "en": "\"Yes! Here you are,\" I say and give it to him.",
+                "zh": "“当然可以！给你。”我把它递给他。"
+              },
+              {
+                "en": "We eat the fruit and laugh together.",
+                "zh": "我们一起吃水果，一起笑。"
+              },
+              {
+                "en": "Now my box is empty, but I am happy.",
+                "zh": "现在盒子空空的，可我心里美滋滋的。"
+              },
+              {
+                "en": "\"Hello, fruit! I will bring you more.\"",
+                "zh": "“你好呀，水果！明天我还要带更多来。”"
+              }
+            ]
+          },
+          "dialogue": [
+            {
+              "speaker": "T",
+              "en": "What's this fruit?",
+              "zh": "这是什么水果？"
+            },
+            {
+              "speaker": "S",
+              "en": "It's a cherry.",
+              "zh": "它是樱桃。"
+            },
+            {
+              "speaker": "T",
+              "en": "It's a red cherry. What color is it?",
+              "zh": "它是一颗红樱桃。它是什么颜色？"
+            },
+            {
+              "speaker": "S",
+              "en": "It's red.",
+              "zh": "是红色的。"
+            },
+            {
+              "speaker": "T",
+              "en": "What's this fruit?",
+              "zh": "这是什么水果？"
+            },
+            {
+              "speaker": "S",
+              "en": "It's a banana.",
+              "zh": "它是香蕉。"
+            },
+            {
+              "speaker": "T",
+              "en": "It's a yellow banana. Do you like strawberries?",
+              "zh": "它是一根黄香蕉。你喜欢草莓吗？"
+            },
+            {
+              "speaker": "S",
+              "en": "Yes, I do.",
+              "zh": "是的，我喜欢。"
+            },
+            {
+              "speaker": "T",
+              "en": "Red cherries, cute cherries, I like cherries!",
+              "zh": "红樱桃，可爱的樱桃，我喜欢樱桃！"
+            },
+            {
+              "speaker": "S",
+              "en": "I like strawberries too!",
+              "zh": "我也喜欢草莓！"
+            },
+            {
+              "speaker": "T",
+              "en": "What other red fruits do you know?",
+              "zh": "你还知道哪些红色的水果？"
+            },
+            {
+              "speaker": "S",
+              "en": "Apples and watermelons!",
+              "zh": "苹果和西瓜！"
+            },
+            {
+              "speaker": "T",
+              "en": "You know so many fruits!",
+              "zh": "你认识这么多水果！"
+            }
+          ],
+          "songs": [
+            {
+              "en": "Let’s sing a song.",
+              "zh": "我们来唱首歌吧！"
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "title": "My Drinks",
+          "titleZh": "我的饮料",
+          "words": [
+            {
+              "en": "juice",
+              "zh": "果汁",
+              "emoji": "🧃",
+              "ipa": "/dʒuːs/"
+            },
+            {
+              "en": "water",
+              "zh": "水",
+              "emoji": "💧",
+              "ipa": "/ˈwɔːtə/"
+            },
+            {
+              "en": "soda",
+              "zh": "汽水",
+              "emoji": "🥤",
+              "ipa": "/ˈsəʊdə/"
+            },
+            {
+              "en": "milk",
+              "zh": "牛奶",
+              "emoji": "🥛",
+              "ipa": "/mɪlk/"
+            },
+            {
+              "en": "drink",
+              "zh": "饮料",
+              "emoji": "🥤",
+              "ipa": "/drɪŋk/"
+            }
+          ],
+          "sentences": [
+            {
+              "en": "What's this?",
+              "zh": "这是什么？",
+              "hint": "询问饮料"
+            },
+            {
+              "en": "This is milk.",
+              "zh": "这是牛奶。",
+              "hint": "介绍饮料"
+            },
+            {
+              "en": "What would you like to drink?",
+              "zh": "你想喝什么？",
+              "hint": "询问想喝的"
+            },
+            {
+              "en": "I'd like to drink juice.",
+              "zh": "我想喝果汁。",
+              "hint": "表达想喝的"
+            },
+            {
+              "en": "Let's make some fruit juice.",
+              "zh": "我们来做果汁吧。",
+              "hint": "做果汁"
+            }
+          ],
+          "frames": [
+            {
+              "pattern": "This is ___.",
+              "zh": "这是牛奶。",
+              "hint": "",
+              "blanks": [
+                {
+                  "options": [
+                    "milk",
+                    "water",
+                    "juice",
+                    "tea"
+                  ],
+                  "answer": 0
+                }
+              ]
+            }
+          ],
+          "reading": {
+            "title": "What Would You Like to Drink?",
+            "titleZh": "你想喝点什么",
+            "sentences": [
+              {
+                "en": "Hello! I am Lily. I run home from school.",
+                "zh": "你好！我是 Lily。我从学校跑回家。"
+              },
+              {
+                "en": "I am thirsty. My mouth is dry.",
+                "zh": "我好渴，嘴巴干干的。"
+              },
+              {
+                "en": "\"What would you like to drink?\" asks Mom.",
+                "zh": "“你想喝点什么呀？”妈妈问。"
+              },
+              {
+                "en": "\"I would like some juice, please.\"",
+                "zh": "“我想喝点果汁，谢谢。”"
+              },
+              {
+                "en": "\"Let's make four fruit drinks,\" says Dad.",
+                "zh": "“我们来做四杯水果饮料吧。”爸爸说。"
+              },
+              {
+                "en": "We wash apples and put them in a big cup.",
+                "zh": "我们把苹果洗一洗，全放进大杯子里。"
+              },
+              {
+                "en": "Now we have juice, milk, soda and water.",
+                "zh": "现在桌上有果汁、牛奶、汽水，还有水。"
+              },
+              {
+                "en": "I drink the juice. It is cold and good.",
+                "zh": "我喝着果汁，凉凉的，真好喝。"
+              },
+              {
+                "en": "Then my friends come and ask for a drink.",
+                "zh": "这时候朋友们来了，也想喝点什么。"
+              },
+              {
+                "en": "\"We have four,\" I say. \"Take one each!\"",
+                "zh": "“我们有四杯呢，”我说，“一人一杯！”"
+              },
+              {
+                "en": "We all drink and we all smile.",
+                "zh": "大家都喝着，都笑起来了。"
+              },
+              {
+                "en": "\"Now I know what I want to drink!\"",
+                "zh": "“现在我知道自己想喝什么啦！”"
+              }
+            ]
+          },
+          "dialogue": [
+            {
+              "speaker": "T",
+              "en": "What's this?",
+              "zh": "这是什么？"
+            },
+            {
+              "speaker": "S",
+              "en": "This is milk.",
+              "zh": "这是牛奶。"
+            },
+            {
+              "speaker": "T",
+              "en": "Milk! It comes from cows. It is white.",
+              "zh": "牛奶！它来自奶牛。它是白色的。"
+            },
+            {
+              "speaker": "T",
+              "en": "What's this?",
+              "zh": "这是什么？"
+            },
+            {
+              "speaker": "S",
+              "en": "This is water.",
+              "zh": "这是水。"
+            },
+            {
+              "speaker": "T",
+              "en": "And this? Soda or juice?",
+              "zh": "这个呢？汽水还是果汁？"
+            },
+            {
+              "speaker": "S",
+              "en": "It's soda!",
+              "zh": "是汽水！"
+            },
+            {
+              "speaker": "T",
+              "en": "What would you like to drink?",
+              "zh": "你想喝什么？"
+            },
+            {
+              "speaker": "S",
+              "en": "I'd like to drink juice.",
+              "zh": "我想喝果汁。"
+            },
+            {
+              "speaker": "T",
+              "en": "What kind of fruit juice do you like?",
+              "zh": "你喜欢什么果汁？"
+            },
+            {
+              "speaker": "S",
+              "en": "I like orange juice!",
+              "zh": "我喜欢橙汁！"
+            },
+            {
+              "speaker": "T",
+              "en": "Let's make some fruit juice! Cheers!",
+              "zh": "我们来做果汁吧！干杯！"
+            }
+          ],
+          "songs": [
+            {
+              "en": "What’s this letter?",
+              "zh": "这个字母是什么？"
+            },
+            {
+              "en": "M - m - milk m",
+              "zh": "M - m -牛奶m"
+            },
+            {
+              "en": "M",
+              "zh": "M"
+            },
+            {
+              "en": "Milk",
+              "zh": "牛奶"
+            },
+            {
+              "en": "J - j - juice",
+              "zh": "J - j -果汁"
+            },
+            {
+              "en": "J",
+              "zh": "J"
+            },
+            {
+              "en": "Juice j m",
+              "zh": "Juice j m"
+            },
+            {
+              "en": "M - m - milk",
+              "zh": "M - m -牛奶"
+            },
+            {
+              "en": "Let’s sing a song.",
+              "zh": "我们来唱首歌吧！"
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "title": "We Love Vegetables",
+          "titleZh": "我们爱蔬菜",
+          "words": [
+            {
+              "en": "vegetable",
+              "zh": "蔬菜",
+              "emoji": "🥦",
+              "ipa": "/ˈvedʒtəbl/"
+            },
+            {
+              "en": "broccoli",
+              "zh": "西兰花",
+              "emoji": "🥦",
+              "ipa": "/ˈbrɒkəli/"
+            },
+            {
+              "en": "potato",
+              "zh": "土豆",
+              "emoji": "🥔",
+              "ipa": "/pəˈteɪtəʊ/"
+            },
+            {
+              "en": "tomato",
+              "zh": "番茄",
+              "emoji": "🍅",
+              "ipa": "/təˈmɑːtəʊ/"
+            },
+            {
+              "en": "celery",
+              "zh": "芹菜",
+              "emoji": "🥬",
+              "ipa": "/ˈseləri/"
+            }
+          ],
+          "sentences": [
+            {
+              "en": "Do you know these vegetables?",
+              "zh": "你认识这些蔬菜吗？",
+              "hint": "询问蔬菜"
+            },
+            {
+              "en": "What colors are they?",
+              "zh": "它们是什么颜色？",
+              "hint": "询问颜色"
+            },
+            {
+              "en": "Let's go shopping.",
+              "zh": "我们去购物吧。",
+              "hint": "去购物"
+            },
+            {
+              "en": "I want broccoli.",
+              "zh": "我要西兰花。",
+              "hint": "表达想要的"
+            },
+            {
+              "en": "Shopping List: broccoli, potato…",
+              "zh": "购物清单：西兰花、土豆……",
+              "hint": "购物清单"
+            }
+          ],
+          "frames": [
+            {
+              "pattern": "I want ___.",
+              "zh": "我要西兰花。",
+              "hint": "买菜的时候说「我要……」",
+              "blanks": [
+                {
+                  "options": [
+                    "broccoli",
+                    "potatoes",
+                    "tomatoes",
+                    "celery"
+                  ],
+                  "answer": 0
+                }
+              ]
+            }
+          ],
+          "reading": {
+            "title": "A Big Box of Vegetables",
+            "titleZh": "一大箱蔬菜",
+            "sentences": [
+              {
+                "en": "\"Do you know these vegetables?\" asks Mom.",
+                "zh": "“你认识这些蔬菜吗？”妈妈问。"
+              },
+              {
+                "en": "A big box is at our door this morning.",
+                "zh": "今天早上，一个大箱子放在我们家门口。"
+              },
+              {
+                "en": "\"What colors are they?\" I ask Mom.",
+                "zh": "“它们都是什么颜色的？”我问妈妈。"
+              },
+              {
+                "en": "\"Green broccoli and a red tomato!\"",
+                "zh": "“绿色的西兰花，还有一个红番茄！”"
+              },
+              {
+                "en": "\"I do not like vegetables,\" says Tom.",
+                "zh": "“我不爱吃蔬菜。”Tom 说。"
+              },
+              {
+                "en": "I wash all of them very clean.",
+                "zh": "我把这些蔬菜全都洗得干干净净。"
+              },
+              {
+                "en": "Mom puts a potato and celery in the soup.",
+                "zh": "妈妈把土豆和芹菜放进汤里。"
+              },
+              {
+                "en": "The soup is hot and it looks so good.",
+                "zh": "这汤又热腾腾的，看着就好香。"
+              },
+              {
+                "en": "\"Can I try one cup?\" asks Tom.",
+                "zh": "“我能尝一杯吗？”Tom 问。"
+              },
+              {
+                "en": "\"Yes! Take a little,\" says Mom.",
+                "zh": "“行呀！少盛一点。”妈妈说。"
+              },
+              {
+                "en": "Tom eats the soup and the celery.",
+                "zh": "Tom 把汤和芹菜都吃了。"
+              },
+              {
+                "en": "\"Mom, now I like vegetables,\" says Tom.",
+                "zh": "“妈妈，我现在爱吃蔬菜了。”Tom 说。"
+              }
+            ]
+          },
+          "dialogue": [
+            {
+              "speaker": "T",
+              "en": "Do you know these vegetables?",
+              "zh": "你认识这些蔬菜吗？"
+            },
+            {
+              "speaker": "S",
+              "en": "Yes! Broccoli and potato!",
+              "zh": "认识！西兰花和土豆！"
+            },
+            {
+              "speaker": "T",
+              "en": "What colors are they?",
+              "zh": "它们是什么颜色？"
+            },
+            {
+              "speaker": "S",
+              "en": "Broccoli is green. The potato is brown.",
+              "zh": "西兰花是绿色的。土豆是棕色的。"
+            },
+            {
+              "speaker": "T",
+              "en": "Let's go shopping. I want...",
+              "zh": "我们去购物吧。我想要……"
+            },
+            {
+              "speaker": "S",
+              "en": "I want broccoli!",
+              "zh": "我要西兰花！"
+            },
+            {
+              "speaker": "T",
+              "en": "I want a tomato. And you?",
+              "zh": "我要一个番茄。你呢？"
+            },
+            {
+              "speaker": "S",
+              "en": "I want celery!",
+              "zh": "我要芹菜！"
+            },
+            {
+              "speaker": "T",
+              "en": "Shopping list: broccoli, potato, tomato, celery. Anything else?",
+              "zh": "购物清单：西兰花、土豆、番茄、芹菜。还有别的吗？"
+            },
+            {
+              "speaker": "S",
+              "en": "Milk!",
+              "zh": "牛奶！"
+            },
+            {
+              "speaker": "T",
+              "en": "Milk is not a vegetable, but okay!",
+              "zh": "牛奶不是蔬菜，不过也好！"
+            }
+          ],
+          "songs": [
+            {
+              "en": "Let’s sing a song.",
+              "zh": "我们来唱首歌吧！"
+            }
+          ]
+        },
+        {
+          "id": 5,
+          "title": "Vegetables I Eat",
+          "titleZh": "我吃的蔬菜",
+          "words": [
+            {
+              "en": "lettuce",
+              "zh": "生菜",
+              "emoji": "🥬",
+              "ipa": "/ˈletɪs/"
+            },
+            {
+              "en": "cucumber",
+              "zh": "黄瓜",
+              "emoji": "🥒",
+              "ipa": "/ˈkjuːkʌmbə/"
+            },
+            {
+              "en": "bean",
+              "zh": "豆子",
+              "emoji": "🫘",
+              "ipa": "/biːn/"
+            },
+            {
+              "en": "carrot",
+              "zh": "胡萝卜",
+              "emoji": "🥕",
+              "ipa": "/ˈkærət/"
+            },
+            {
+              "en": "salad",
+              "zh": "沙拉",
+              "emoji": "🥗",
+              "ipa": "/ˈsæləd/"
+            }
+          ],
+          "sentences": [
+            {
+              "en": "These are carrots.",
+              "zh": "这些是胡萝卜。",
+              "hint": "介绍蔬菜"
+            },
+            {
+              "en": "Do you like vegetables?",
+              "zh": "你喜欢蔬菜吗？",
+              "hint": "询问喜好"
+            },
+            {
+              "en": "Yes, I do.",
+              "zh": "是的，我喜欢。",
+              "hint": "肯定回答"
+            },
+            {
+              "en": "No, I don't.",
+              "zh": "不，我不喜欢。",
+              "hint": "否定回答"
+            },
+            {
+              "en": "I like carrots.",
+              "zh": "我喜欢胡萝卜。",
+              "hint": "表达喜好"
+            }
+          ],
+          "frames": [
+            {
+              "pattern": "I like ___.",
+              "zh": "我喜欢胡萝卜。",
+              "hint": "说说你喜欢哪种蔬菜",
+              "blanks": [
+                {
+                  "options": [
+                    "carrots",
+                    "cucumbers",
+                    "lettuce",
+                    "beans"
+                  ],
+                  "answer": 0
+                }
+              ]
+            }
+          ],
+          "reading": {
+            "title": "Now I Like Vegetables",
+            "titleZh": "现在我爱吃蔬菜了",
+            "sentences": [
+              {
+                "en": "Hello! I am Anna. I am hungry now.",
+                "zh": "你好！我是 Anna。我现在饿了。"
+              },
+              {
+                "en": "Mom gives me a big green salad.",
+                "zh": "妈妈端给我一大盘绿绿的沙拉。"
+              },
+              {
+                "en": "\"Do you like vegetables?\" she asks.",
+                "zh": "“你喜欢吃蔬菜吗？”她问。"
+              },
+              {
+                "en": "\"No, I don't. I only like fruit.\"",
+                "zh": "“不喜欢。我只爱吃水果。”"
+              },
+              {
+                "en": "I look at the salad. It has lettuce and cucumber.",
+                "zh": "我看着这盘沙拉：里面有生菜，还有黄瓜。"
+              },
+              {
+                "en": "And there is one small bean in it.",
+                "zh": "还有一颗小小的豆子。"
+              },
+              {
+                "en": "\"Just one try,\" says Mom. I try a carrot.",
+                "zh": "“就尝一口嘛。”妈妈说。我咬了一根胡萝卜。"
+              },
+              {
+                "en": "The carrot is cold and good.",
+                "zh": "胡萝卜脆脆的，还挺好吃的。"
+              },
+              {
+                "en": "Then I try a bean and some cucumber.",
+                "zh": "接着我又尝了豆子和黄瓜。"
+              },
+              {
+                "en": "Now I eat all the salad!",
+                "zh": "现在我把整盘沙拉都吃光啦！"
+              },
+              {
+                "en": "\"Yes, I do! I like vegetables,\" I say.",
+                "zh": "“喜欢呀！我爱蔬菜。”我说。"
+              },
+              {
+                "en": "\"Can I have more carrots?\" I ask Mom.",
+                "zh": "“我能再要点胡萝卜吗？”我问妈妈。"
+              }
+            ]
+          },
+          "dialogue": [
+            {
+              "speaker": "T",
+              "en": "These are carrots.",
+              "zh": "这些是胡萝卜。"
+            },
+            {
+              "speaker": "T",
+              "en": "These are cucumbers.",
+              "zh": "这些是黄瓜。"
+            },
+            {
+              "speaker": "S",
+              "en": "Cucumbers are green!",
+              "zh": "黄瓜是绿色的！"
+            },
+            {
+              "speaker": "T",
+              "en": "These are beans. Do you like vegetables?",
+              "zh": "这些是豆子。你喜欢蔬菜吗？"
+            },
+            {
+              "speaker": "S",
+              "en": "Yes, I do.",
+              "zh": "是的，我喜欢。"
+            },
+            {
+              "speaker": "T",
+              "en": "Do you like lettuce?",
+              "zh": "你喜欢生菜吗？"
+            },
+            {
+              "speaker": "S",
+              "en": "No, I don't.",
+              "zh": "不，我不喜欢。"
+            },
+            {
+              "speaker": "T",
+              "en": "What vegetables do you like?",
+              "zh": "你喜欢什么蔬菜？"
+            },
+            {
+              "speaker": "S",
+              "en": "I like carrots.",
+              "zh": "我喜欢胡萝卜。"
+            },
+            {
+              "speaker": "T",
+              "en": "Carrots are good for your eyes!",
+              "zh": "胡萝卜对眼睛好！"
+            },
+            {
+              "speaker": "S",
+              "en": "I want to eat carrots every day!",
+              "zh": "我想每天吃胡萝卜！"
+            },
+            {
+              "speaker": "T",
+              "en": "Great! Vegetables make you strong!",
+              "zh": "太棒了！蔬菜让你强壮！"
+            }
+          ],
+          "songs": [
+            {
+              "en": "What’s this letter?",
+              "zh": "这个字母是什么？"
+            },
+            {
+              "en": "l",
+              "zh": "l"
+            },
+            {
+              "en": "Lettuce",
+              "zh": "生菜"
+            },
+            {
+              "en": "L - l - lettuce",
+              "zh": "L - l -生菜"
+            },
+            {
+              "en": "Let’s sing a song.",
+              "zh": "我们来唱首歌吧！"
+            }
+          ]
+        },
+        {
+          "id": 6,
+          "title": "Quiz 3",
+          "titleZh": "小测验3",
+          "words": [
+            {
+              "en": "fruit",
+              "zh": "水果",
+              "emoji": "🍉",
+              "ipa": "/fruːt/"
+            },
+            {
+              "en": "vegetable",
+              "zh": "蔬菜",
+              "emoji": "🥦",
+              "ipa": "/ˈvedʒtəbl/"
+            },
+            {
+              "en": "drink",
+              "zh": "饮料",
+              "emoji": "🥤",
+              "ipa": "/drɪŋk/"
+            },
+            {
+              "en": "plus",
+              "zh": "加",
+              "emoji": "➕",
+              "ipa": "/plʌs/"
+            },
+            {
+              "en": "equal",
+              "zh": "等于",
+              "emoji": "🟰",
+              "ipa": "/ˈiːkwəl/"
+            }
+          ],
+          "sentences": [
+            {
+              "en": "What fruit do you like?",
+              "zh": "你喜欢什么水果？",
+              "hint": "询问喜欢的水果"
+            },
+            {
+              "en": "I like apples.",
+              "zh": "我喜欢苹果。",
+              "hint": "表达喜好"
+            },
+            {
+              "en": "Do you like vegetables?",
+              "zh": "你喜欢蔬菜吗？",
+              "hint": "询问喜好"
+            },
+            {
+              "en": "Yes, I do. / No, I don't.",
+              "zh": "是的，我喜欢。/ 不，我不喜欢。",
+              "hint": "回答喜好"
+            },
+            {
+              "en": "What drinks would you like to drink?",
+              "zh": "你想喝什么饮料？",
+              "hint": "询问想喝的"
+            }
+          ],
+          "frames": [
+            {
+              "pattern": "What ___ do you like?",
+              "zh": "你喜欢什么水果？",
+              "hint": "",
+              "blanks": [
+                {
+                  "options": [
+                    "fruit",
+                    "vegetable",
+                    "drink",
+                    "color"
+                  ],
+                  "answer": 0
+                }
+              ]
+            }
+          ],
+          "reading": {
+            "title": "The Big Food Quiz",
+            "titleZh": "大食物小测验",
+            "sentences": [
+              {
+                "en": "Hello! Today we play a big food game.",
+                "zh": "你好！今天我们要玩一场食物大问答。"
+              },
+              {
+                "en": "Mom puts a box of food on the table.",
+                "zh": "妈妈把一盒吃的放在桌子上。"
+              },
+              {
+                "en": "\"The one with the most answers takes it,\" says Mom.",
+                "zh": "“答得最多的人，抱走这盒吃的。”妈妈说。"
+              },
+              {
+                "en": "\"What fruit do you like?\" I ask Ben.",
+                "zh": "“你喜欢什么水果？”我问 Ben。"
+              },
+              {
+                "en": "\"I like apples and grapes,\" says Ben.",
+                "zh": "“我喜欢苹果和葡萄。”Ben 说。"
+              },
+              {
+                "en": "\"Do you like every vegetable?\" I ask Tom.",
+                "zh": "“每一种蔬菜你都爱吃吗？”我问 Tom。"
+              },
+              {
+                "en": "\"I like carrots,\" says Tom.",
+                "zh": "“我喜欢胡萝卜。”Tom 说。"
+              },
+              {
+                "en": "\"What is four plus two?\" asks Leo.",
+                "zh": "“四加二等于多少？”Leo 问。"
+              },
+              {
+                "en": "\"Six is equal to four plus two!\"",
+                "zh": "“六就等于四加二！”"
+              },
+              {
+                "en": "Leo knows all the answers. He is so happy.",
+                "zh": "Leo 什么都答得上来，他高兴极了。"
+              },
+              {
+                "en": "\"But we share it, one for you, one for me.\"",
+                "zh": "“可是我们分着吃，一人一份。”"
+              },
+              {
+                "en": "\"Now we all have food and a drink.\"",
+                "zh": "“现在大家都有吃的，还有喝的啦。”"
+              }
+            ]
+          },
+          "dialogue": [
+            {
+              "speaker": "T",
+              "en": "Are you ready?",
+              "zh": "准备好了吗？"
+            },
+            {
+              "speaker": "S",
+              "en": "Yes!",
+              "zh": "准备好了！"
+            },
+            {
+              "speaker": "T",
+              "en": "What fruit do you like?",
+              "zh": "你喜欢什么水果？"
+            },
+            {
+              "speaker": "S",
+              "en": "I like apples.",
+              "zh": "我喜欢苹果。"
+            },
+            {
+              "speaker": "T",
+              "en": "What does 2 plus 3 equal?",
+              "zh": "2 加 3 等于多少？"
+            },
+            {
+              "speaker": "S",
+              "en": "5!",
+              "zh": "5！"
+            },
+            {
+              "speaker": "T",
+              "en": "What comes next?",
+              "zh": "下一个是什么？"
+            },
+            {
+              "speaker": "S",
+              "en": "Apple!",
+              "zh": "苹果！"
+            },
+            {
+              "speaker": "T",
+              "en": "What drinks would you like to drink?",
+              "zh": "你想喝什么饮料？"
+            },
+            {
+              "speaker": "S",
+              "en": "I'd like to drink milk.",
+              "zh": "我想喝牛奶。"
+            },
+            {
+              "speaker": "T",
+              "en": "Do you like fruit?",
+              "zh": "你喜欢水果吗？"
+            },
+            {
+              "speaker": "S",
+              "en": "Yes, I do. I like fruit and vegetables!",
+              "zh": "是的，我喜欢。我喜欢水果和蔬菜！"
+            },
+            {
+              "speaker": "T",
+              "en": "Quiz done! You did very well!",
+              "zh": "测验结束！你做得非常好！"
+            }
+          ],
+          "songs": []
+        },
+        {
+          "id": 7,
+          "title": "Yummy Snacks",
+          "titleZh": "美味零食",
+          "words": [
+            {
+              "en": "snack",
+              "zh": "零食",
+              "emoji": "🍪",
+              "ipa": "/snæk/"
+            },
+            {
+              "en": "chips",
+              "zh": "薯片",
+              "emoji": "🍟",
+              "ipa": "/tʃɪps/"
+            },
+            {
+              "en": "lollipop",
+              "zh": "棒棒糖",
+              "emoji": "🍭",
+              "ipa": "/ˈlɒlipɒp/"
+            },
+            {
+              "en": "gummy bear",
+              "zh": "小熊软糖",
+              "emoji": "🐻",
+              "ipa": "/ˈɡʌmi beə/"
+            },
+            {
+              "en": "marshmallow",
+              "zh": "棉花糖",
+              "emoji": "🍡",
+              "ipa": "/mɑːʃˈmæləʊ/"
+            }
+          ],
+          "sentences": [
+            {
+              "en": "What do you want?",
+              "zh": "你想要什么？",
+              "hint": "询问想要什么"
+            },
+            {
+              "en": "I want chips.",
+              "zh": "我要薯片。",
+              "hint": "表达想要的"
+            },
+            {
+              "en": "What does 4 plus 2 equal?",
+              "zh": "4加2等于多少？",
+              "hint": "加法算式"
+            },
+            {
+              "en": "What is missing?",
+              "zh": "什么不见了？",
+              "hint": "找缺失"
+            },
+            {
+              "en": "Abracadabra!",
+              "zh": "阿布拉卡达布拉！",
+              "hint": "魔法咒语"
+            }
+          ],
+          "frames": [
+            {
+              "pattern": "What do you ___?",
+              "zh": "你想要什么？",
+              "hint": "问小朋友想吃什么零食",
+              "blanks": [
+                {
+                  "options": [
+                    "want",
+                    "like",
+                    "eat",
+                    "see"
+                  ],
+                  "answer": 0
+                }
+              ]
+            }
+          ],
+          "reading": {
+            "title": "Where Is My Snack?",
+            "titleZh": "我的零食去哪儿了",
+            "sentences": [
+              {
+                "en": "Hello! I am Leo. I am hungry now.",
+                "zh": "你好！我是 Leo。我现在饿坏了。"
+              },
+              {
+                "en": "Mom puts five snacks in a big box.",
+                "zh": "妈妈往大盒子里装了五份零食。"
+              },
+              {
+                "en": "I see chips, a lollipop and a marshmallow.",
+                "zh": "我看见薯片、一根棒棒糖，还有一颗棉花糖。"
+              },
+              {
+                "en": "\"What a nice snack box!\" I say.",
+                "zh": "“多好的零食盒子呀！”我说。"
+              },
+              {
+                "en": "Then I look in the box again.",
+                "zh": "接着我又低头看了看盒子。"
+              },
+              {
+                "en": "Where is my gummy bear? It is not here.",
+                "zh": "我的小熊软糖在哪儿？它不在这里。"
+              },
+              {
+                "en": "I look under the table and the chair.",
+                "zh": "我看了桌子底下，也看了椅子底下。"
+              },
+              {
+                "en": "A little mouse runs out with it!",
+                "zh": "一只小老鼠叼着它跑了出来！"
+              },
+              {
+                "en": "\"Hello! Do you want the lollipop?\" I ask.",
+                "zh": "“你好！你想要这根棒棒糖吗？”我问。"
+              },
+              {
+                "en": "The mouse takes it and gives back the bear.",
+                "zh": "小老鼠接过棒棒糖，又把软糖还给我。"
+              },
+              {
+                "en": "Now I have five snacks for my friends.",
+                "zh": "现在我又凑齐五份零食，分给朋友们。"
+              },
+              {
+                "en": "\"Bye bye, little mouse! See you tomorrow.\"",
+                "zh": "“再见啦，小老鼠！明天见。”"
+              }
+            ]
+          },
+          "dialogue": [
+            {
+              "speaker": "T",
+              "en": "What will come out?",
+              "zh": "会出来什么？"
+            },
+            {
+              "speaker": "T",
+              "en": "Abracadabra! Chips!",
+              "zh": "阿布拉卡达布拉！薯片！"
+            },
+            {
+              "speaker": "S",
+              "en": "Chips! I want chips!",
+              "zh": "薯片！我要薯片！"
+            },
+            {
+              "speaker": "T",
+              "en": "What do you want?",
+              "zh": "你想要什么？"
+            },
+            {
+              "speaker": "S",
+              "en": "I want chips.",
+              "zh": "我要薯片。"
+            },
+            {
+              "speaker": "T",
+              "en": "What does 4 plus 2 equal?",
+              "zh": "4 加 2 等于多少？"
+            },
+            {
+              "speaker": "S",
+              "en": "6!",
+              "zh": "6！"
+            },
+            {
+              "speaker": "T",
+              "en": "What is missing?",
+              "zh": "什么不见了？"
+            },
+            {
+              "speaker": "S",
+              "en": "The marshmallow is missing!",
+              "zh": "棉花糖不见了！"
+            },
+            {
+              "speaker": "T",
+              "en": "Do you want lollipops?",
+              "zh": "你想要棒棒糖吗？"
+            },
+            {
+              "speaker": "S",
+              "en": "Yes! I want lollipops and gummy bears!",
+              "zh": "想要！我要棒棒糖和小熊软糖！"
+            },
+            {
+              "speaker": "T",
+              "en": "Yummy! But not too many snacks, okay?",
+              "zh": "美味！但零食不能吃太多，好吗？"
+            }
+          ],
+          "songs": [
+            {
+              "en": "Let’s sing a song.",
+              "zh": "我们来唱首歌吧！"
+            }
+          ]
+        },
+        {
+          "id": 8,
+          "title": "Snack World",
+          "titleZh": "零食世界",
+          "words": [
+            {
+              "en": "jelly bean",
+              "zh": "果冻豆",
+              "emoji": "🍬",
+              "ipa": "/ˈdʒeli biːn/"
+            },
+            {
+              "en": "popcorn",
+              "zh": "爆米花",
+              "emoji": "🍿",
+              "ipa": "/ˈpɒpkɔːn/"
+            },
+            {
+              "en": "nut",
+              "zh": "坚果",
+              "emoji": "🥜",
+              "ipa": "/nʌt/"
+            },
+            {
+              "en": "candy",
+              "zh": "糖果",
+              "emoji": "🍬",
+              "ipa": "/ˈkændi/"
+            },
+            {
+              "en": "want",
+              "zh": "想要",
+              "emoji": "🙋",
+              "ipa": "/wɒnt/"
+            }
+          ],
+          "sentences": [
+            {
+              "en": "What do you want?",
+              "zh": "你想要什么？",
+              "hint": "询问想要什么"
+            },
+            {
+              "en": "I want popcorn.",
+              "zh": "我要爆米花。",
+              "hint": "表达想要的"
+            },
+            {
+              "en": "I want nuts and candies.",
+              "zh": "我要坚果和糖果。",
+              "hint": "表达多个想要"
+            },
+            {
+              "en": "Do you want these?",
+              "zh": "你想要这些吗？",
+              "hint": "询问是否想要"
+            },
+            {
+              "en": "What are they?",
+              "zh": "它们是什么？",
+              "hint": "询问是什么"
+            }
+          ],
+          "frames": [
+            {
+              "pattern": "Do you want ___?",
+              "zh": "你想要这些吗？",
+              "hint": "",
+              "blanks": [
+                {
+                  "options": [
+                    "these",
+                    "those",
+                    "popcorn",
+                    "candy"
+                  ],
+                  "answer": 0
+                }
+              ]
+            }
+          ],
+          "reading": {
+            "title": "Snack Time with My Bunny",
+            "titleZh": "和小兔的零食时间",
+            "sentences": [
+              {
+                "en": "Hello! I am Grace. I want a snack.",
+                "zh": "你好！我是 Grace。我想吃点零食。"
+              },
+              {
+                "en": "Mom makes popcorn. It is hot and good.",
+                "zh": "妈妈做了爆米花，热乎乎的，真香。"
+              },
+              {
+                "en": "She puts candy, a jelly bean and a nut in my bag.",
+                "zh": "她往我包里放糖果、果冻豆，还有一颗坚果。"
+              },
+              {
+                "en": "My bunny comes. \"What do you want?\" she asks.",
+                "zh": "我的小兔子来了。“你想要什么呀？”她问。"
+              },
+              {
+                "en": "\"I want popcorn,\" I say. We sit on the grass.",
+                "zh": "“我想吃爆米花。”我说。我们在草地上坐下。"
+              },
+              {
+                "en": "Then the bunny takes my candy!",
+                "zh": "结果小兔子把我的糖果叼走了！"
+              },
+              {
+                "en": "\"Oh no! I want that candy too,\" I say.",
+                "zh": "“哎呀！那我也想吃糖果呀。”我说。"
+              },
+              {
+                "en": "\"We can share it,\" says the bunny.",
+                "zh": "“我们可以分着吃呀。”小兔子说。"
+              },
+              {
+                "en": "Now we have one candy each.",
+                "zh": "现在我们一人一颗糖果。"
+              },
+              {
+                "en": "The popcorn is hot, and I like it.",
+                "zh": "爆米花热热的，我特别爱吃。"
+              },
+              {
+                "en": "\"What do you want?\" I ask again.",
+                "zh": "“你想要什么呀？”我又问了一遍。"
+              },
+              {
+                "en": "\"I want a friend,\" says the bunny.",
+                "zh": "“我想要一个朋友。”小兔子说。"
+              }
+            ]
+          },
+          "dialogue": [
+            {
+              "speaker": "T",
+              "en": "Do you want these?",
+              "zh": "你想要这些吗？"
+            },
+            {
+              "speaker": "S",
+              "en": "What are they?",
+              "zh": "它们是什么？"
+            },
+            {
+              "speaker": "T",
+              "en": "Guess! They are sweet and colorful.",
+              "zh": "猜猜！它们又甜又彩色。"
+            },
+            {
+              "speaker": "S",
+              "en": "Candies!",
+              "zh": "糖果！"
+            },
+            {
+              "speaker": "T",
+              "en": "Yes! Candy. What do you want?",
+              "zh": "对！糖果。你想要什么？"
+            },
+            {
+              "speaker": "S",
+              "en": "I want popcorn.",
+              "zh": "我要爆米花。"
+            },
+            {
+              "speaker": "T",
+              "en": "I want nuts and candies. And you?",
+              "zh": "我要坚果和糖果。你呢？"
+            },
+            {
+              "speaker": "S",
+              "en": "I want jelly beans!",
+              "zh": "我要果冻豆！"
+            },
+            {
+              "speaker": "T",
+              "en": "I want popcorn and marshmallows!",
+              "zh": "我要爆米花和棉花糖！"
+            },
+            {
+              "speaker": "T",
+              "en": "Say it faster and faster! I want popcorn!",
+              "zh": "说得越来越快！我要爆米花！"
+            },
+            {
+              "speaker": "S",
+              "en": "I want popcorn! I want popcorn!",
+              "zh": "我要爆米花！我要爆米花！"
+            },
+            {
+              "speaker": "T",
+              "en": "Very fast! Well done!",
+              "zh": "非常快！真棒！"
+            }
+          ],
+          "songs": [
+            {
+              "en": "Let’s sing a song.",
+              "zh": "我们来唱首歌吧！"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
