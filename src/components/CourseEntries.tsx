@@ -246,6 +246,17 @@ export default function CourseEntries() {
               </span>
             </Link>
 
+            {/* 前三单元复习测验：独立单文件页面（public/review.html），
+                用原生 <a> 相对路径 + 新标签打开 —— 不能用 <Link>，否则会被 HashRouter 当站内路由。
+                相对路径在 GitHub Pages 子路径 / 本地 / Electron file:// 下都能正确解析。 */}
+            <a href="review.html" target="_blank" rel="noopener noreferrer" className="rv-home-entry hall-tool">
+              <span className="hall-tool-emoji" aria-hidden="true">📝</span>
+              <span className="hall-tool-body">
+                <span className="rv-home-title">前三单元复习</span>
+                <span className="rv-home-sub">单词 · 句型 · 字母 · 测验</span>
+              </span>
+            </a>
+
             <Link to="/alphabet" className="hall-tool hall-tool--plain">
               <Type size={20} strokeWidth={1.9} aria-hidden="true" />
               <span className="hall-tool-body">
