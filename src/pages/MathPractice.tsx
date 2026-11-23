@@ -202,7 +202,7 @@ export default function MathPractice() {
       <section className="mp-print-sheet" aria-hidden="true">
         <div className="ps-head">
           <h1>应用题审题练习 · 纸质检验</h1>
-          <p className="ps-meta">姓名：________________　　日期：________________</p>
+          <p className="ps-meta">姓名：________________{'  '}日期：________________</p>
           <p className="ps-tip">读题时圈出关系词、给数字划线，再把分步算式写在横线上，最后写出得数。</p>
         </div>
         {questions.map((p, i) => (
